@@ -1,0 +1,19 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  structure_id: 
+  user_id: 
+  dwelling_id: 
+  x: 1.5
+  y: 1.5
+  z: 1.5
+  in_use: false
+
+two:
+  structure_id: 
+  user_id: 
+  dwelling_id: 
+  x: 1.5
+  y: 1.5
+  z: 1.5
+  in_use: false

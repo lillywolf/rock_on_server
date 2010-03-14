@@ -1,0 +1,2 @@
+module CreatureHelper
+end

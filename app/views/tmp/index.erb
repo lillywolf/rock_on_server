@@ -1,0 +1,16 @@
+
+<%= render :partial => 'header' %>
+
+<fb:if-is-app-user>
+  <fb:iframe id="my_frame" name="my_frame" src="<%= @swf_iframe_url -%>" ext_send_ss="true" frameborder="0" width="760" height="600" scrolling="no"/>
+  
+
+  <fb:else>
+    <fb:redirect url="<%= @fb_authorization_redirect_url -%>"/>
+  </fb:else>
+</fb:if-is-app-user>
+
+<fb:google-analytics uacct="UA-1637671-41" />
+
+<%= render :partial => 'footer' %>
+

@@ -1,0 +1,17 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  name: MyString
+  swf_url: MyString
+  symbol_name: MyString
+  layer_name: MyString
+  is_default: false
+  editable_color: false
+
+two:
+  name: MyString
+  swf_url: MyString
+  symbol_name: MyString
+  layer_name: MyString
+  is_default: false
+  editable_color: false

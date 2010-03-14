@@ -1,0 +1,17 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  layerable_id: 
+  user_id: 
+  r: 
+  g: 
+  b: 
+  in_use: false
+
+two:
+  layerable_id: 
+  user_id: 
+  r: 
+  g: 
+  b: 
+  in_use: false
