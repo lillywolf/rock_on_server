@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100309025354) do
+ActiveRecord::Schema.define(:version => 20100316230614) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -121,6 +121,9 @@ ActiveRecord::Schema.define(:version => 20100309025354) do
     t.string   "structure_type"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.float    "width"
+    t.float    "height"
+    t.float    "depth"
   end
 
   create_table "thingers", :force => true do |t|
