@@ -15,8 +15,7 @@ class UserController < ApplicationController
     array = Array.new
     hash = Hash.new
     user = User.find(params[:id])
-    credits = user.credits
-    user.credits = credits + 1 # + params[:to_add]
+    user.credits = params[:to_add]
     user.save
     hash["instance"] = user
     hash["model"] = "user"
