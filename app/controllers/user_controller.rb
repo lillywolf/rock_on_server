@@ -11,4 +11,16 @@ class UserController < ApplicationController
     render :json => array.to_json  
   end  
   
+  def add_credits
+    array = Array.new
+    hash = Hash.new
+    user = User.find(params[:id])
+    user.credits += params[:to_add]
+    user.save
+    hash["instance"] = user
+    hash["model"] = "user"
+    array.push hash
+    render :json => array.to_json
+  end  
+  
 end
