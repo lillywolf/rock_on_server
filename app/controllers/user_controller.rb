@@ -15,10 +15,10 @@ class UserController < ApplicationController
     array = Array.new
     hash = Hash.new
     user = User.find(params[:id])
-    c = user.credits.to_i
     user.credits += params[:to_add].to_i
     user.save
     hash["instance"] = user
+    hash["already_loaded"] = true
     hash["model"] = "user"
     array.push hash
     render :json => array.to_json
