@@ -36,10 +36,10 @@ test:
     server_alive_interval: 0
 
 production:
-  api_key: 
-  secret_key: 
-  canvas_page_name: 
-  callback_url: 
+  api_key: eb67822b00a98a91c049e1347be7e657
+  secret_key: 93822524c73ff1b5acc09be6f357a0fa
+  canvas_page_name: rockstardom
+  callback_url: http://glowing-sunrise-33.heroku.com/site/
   set_asset_host_to_callback_url: true   
   tunnel:
     public_host_username: 

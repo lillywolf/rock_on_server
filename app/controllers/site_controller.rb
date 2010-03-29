@@ -7,14 +7,14 @@ class SiteController < ApplicationController
   # def get_static_content
   # end  
   
-  # before_filter :set_facebook_session
-  # helper_method :facebook_session  
+  before_filter :set_facebook_session
+  helper_method :facebook_session  
   
   layout nil
 
   def index
     
-    # ensure_application_is_installed_by_facebook_user
+    ensure_application_is_installed_by_facebook_user
     
     # # attempt to create a facebook session
     # fb_session = create_facebook_session
