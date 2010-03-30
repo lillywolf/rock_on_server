@@ -20,7 +20,7 @@ class SiteController < ApplicationController
       render :text => 'Where are you?'
     else
       friends = user.friends
-      friends.each do |f|
+      friends.each() do |f|
         render :text => 'hi'
       end  
     end    
