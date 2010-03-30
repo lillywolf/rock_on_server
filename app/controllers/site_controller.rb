@@ -68,6 +68,8 @@ class SiteController < ApplicationController
     user = setup_facebook_user  
     # if ( user.name rescue false )
       friends = user.friends
+      render :text => friends[0].name
+      
       # friends.each do |f|
         # hash = Hash.new
         # hash["name"] = f.name
