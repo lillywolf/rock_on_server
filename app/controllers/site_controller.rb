@@ -19,7 +19,7 @@ class SiteController < ApplicationController
     if user.nil?
       render :text => 'Where are you?'
     else
-      for friend in user.friends[0..20]
+      for friend in user.friends
         render :text => 'hi'
       end  
     end    
