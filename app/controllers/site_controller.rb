@@ -65,7 +65,6 @@ class SiteController < ApplicationController
   
   def get_facebook_friend_data
     array = Array.new
-    ensure_application_is_installed_by_facebook_user    
     user = setup_facebook_user
     if user.nil?
       render :text => 'Where are you?'
@@ -75,7 +74,7 @@ class SiteController < ApplicationController
         render :text => user.name
       # end  
     end
-    render :json => array.to_json        
+    # render :json => array.to_json        
   end  
 
 
