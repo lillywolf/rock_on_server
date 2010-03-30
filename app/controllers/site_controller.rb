@@ -57,6 +57,7 @@ class SiteController < ApplicationController
   
   def get_facebook_friend_data
     array = Array.new
+    @current_facebook_user = facebook_session.user    
     if ( @current_facebook_user.name rescue false )
       for friend in @current_facebook_user.friends[0..20]
         hash = Hash.new
