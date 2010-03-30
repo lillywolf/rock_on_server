@@ -19,7 +19,7 @@ class SiteController < ApplicationController
     if user.nil?
       render :text => 'Where are you?'
     else
-      render :text => 'Found you!'
+      render :text => user.name
     end    
     
     # # attempt to create a facebook session
