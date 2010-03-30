@@ -68,11 +68,11 @@ class SiteController < ApplicationController
     user = setup_facebook_user  
     # if ( user.name rescue false )
       friends = user.friends
-      friends.each do |f|
+      # friends.each do |f|
         # hash = Hash.new
         # hash["name"] = f.name
         # array.push hash  
-      end      
+      # end      
     # else
     # end
     render :json => array.to_json        
