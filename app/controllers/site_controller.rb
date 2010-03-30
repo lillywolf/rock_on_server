@@ -10,7 +10,7 @@ class SiteController < ApplicationController
   before_filter :set_facebook_session
   helper_method :facebook_session  
   
-  layout nil
+  # layout nil
 
   def index
     
@@ -61,7 +61,12 @@ class SiteController < ApplicationController
   def setup_facebook_user
     @current_facebook_user = facebook_session.user
     return @current_facebook_user
-  end  
+  end
+  
+  def get_facebook_friends
+    @friends = facebook_session.friends
+    return @friends
+  end    
   
   def get_facebook_friend_data
     array = Array.new
@@ -69,10 +74,7 @@ class SiteController < ApplicationController
     if user.nil?
       # render :text => 'Where are you?'
     else
-      friends = user.friends
-      # friends.each do |f|
-        # render :text => friends[0].name
-      # end  
+      friends = get_facebook_friends 
     end
     render :json => array.to_json        
   end  
