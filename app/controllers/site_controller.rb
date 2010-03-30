@@ -65,15 +65,15 @@ class SiteController < ApplicationController
   
   def get_facebook_friend_data
     array = Array.new
-    user = setup_facebook_user
-    if user.nil?
-      # render :text => 'Where are you?'
-    else
-      friends = user.friends
-      # friends.each do |f|
-        # render :text => friends[0].name
-      # end  
-    end
+    # user = setup_facebook_user
+    # if user.nil?
+    #   # render :text => 'Where are you?'
+    # else
+    #   friends = user.friends
+    #   # friends.each do |f|
+    #     # render :text => friends[0].name
+    #   # end  
+    # end
     render :json => array.to_json        
   end  
 
