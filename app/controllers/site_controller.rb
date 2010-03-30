@@ -16,6 +16,8 @@ class SiteController < ApplicationController
     
     ensure_application_is_installed_by_facebook_user
     
+    setup_facebook_user
+    
     # # attempt to create a facebook session
     # fb_session = create_facebook_session
     # 
@@ -48,6 +50,24 @@ class SiteController < ApplicationController
     # end
 
   end
+  
+  def setup_facebook_user
+      @current_facebook_user = facebook_session.user
+  end  
+  
+  def get_facebook_friend_data
+    array = Array.new
+    if ( @current_facebook_user.name rescue false )
+      for friend in @current_facebook_user.friends[0..20]
+        hash = Hash.new
+        hash["name"] = friend.name
+          # <%= fb_profile_pic(friend)%>
+        array.push hash  
+      end      
+    else
+    end
+    render :json => array.to_json        
+  end  
 
 
   # def uninstall
