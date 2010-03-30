@@ -70,7 +70,7 @@ class SiteController < ApplicationController
       friends = user.friends
       friends.each do |f|
         hash = Hash.new
-        hash["name"] = f.name
+        # hash["name"] = f.name
         array.push hash  
       end      
     else
