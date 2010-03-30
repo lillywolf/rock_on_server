@@ -68,7 +68,7 @@ class SiteController < ApplicationController
     array = Array.new
     user = setup_facebook_user  
     # if ( user.name rescue false )
-      @friends = user.friends
+      # @friends = user.friends
       # friends.each do |f|
         # hash = Hash.new
         # hash["name"] = f.name
