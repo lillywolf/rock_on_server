@@ -15,8 +15,12 @@ class SiteController < ApplicationController
   def index
     
     ensure_application_is_installed_by_facebook_user    
-    setup_facebook_user
-    render :text => 'Hello world'
+    user = setup_facebook_user
+    if user.nil?
+      render :text => 'Where are you?'
+    else
+      render :text => 'Found you!'
+    end    
     
     # # attempt to create a facebook session
     # fb_session = create_facebook_session
@@ -53,6 +57,7 @@ class SiteController < ApplicationController
   
   def setup_facebook_user
       @current_facebook_user = facebook_session.user
+      return @current_facebook_user
   end  
   
   def get_facebook_friend_data
