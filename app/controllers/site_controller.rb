@@ -10,7 +10,7 @@ class SiteController < ApplicationController
   before_filter :set_facebook_session
   helper_method :facebook_session  
   
-  # layout nil
+  layout nil
 
   def index
     
