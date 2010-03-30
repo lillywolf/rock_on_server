@@ -67,10 +67,10 @@ class SiteController < ApplicationController
     array = Array.new
     user = setup_facebook_user  
     if ( user.name rescue false )
-      for friend in user.friends[0..20]
+      friends = user.friends
+      friends.each do |f|
         hash = Hash.new
-        hash["name"] = friend.name
-          # <%= fb_profile_pic(friend)%>
+        hash["name"] = f.name
         array.push hash  
       end      
     else
