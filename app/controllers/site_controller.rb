@@ -71,10 +71,10 @@ class SiteController < ApplicationController
     else
       friends = user.friends
       # friends.each do |f|
-        render :text => friends[0].name
+        # render :text => friends[0].name
       # end  
     end
-    # render :json => array.to_json        
+    render :json => array.to_json        
   end  
 
 
