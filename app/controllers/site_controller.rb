@@ -14,9 +14,9 @@ class SiteController < ApplicationController
 
   def index
     
-    ensure_application_is_installed_by_facebook_user
-    
+    ensure_application_is_installed_by_facebook_user    
     setup_facebook_user
+    render :text => 'Hello world'
     
     # # attempt to create a facebook session
     # fb_session = create_facebook_session
