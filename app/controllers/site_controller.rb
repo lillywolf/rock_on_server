@@ -23,7 +23,7 @@ class SiteController < ApplicationController
     #   # friends.each do |f|
     #     render :text => user.name
     #   # end  
-    end    
+    # end    
     
     # # attempt to create a facebook session
     # fb_session = create_facebook_session
