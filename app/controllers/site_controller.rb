@@ -20,7 +20,9 @@ class SiteController < ApplicationController
       render :text => 'Where are you?'
     else
       friends = user.friends
-      render :text => friends[0].name
+      friends.each do |friend|
+        render :text => friend.name
+      end  
     end    
     
     # # attempt to create a facebook session
