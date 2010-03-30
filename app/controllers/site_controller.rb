@@ -66,15 +66,15 @@ class SiteController < ApplicationController
   def get_facebook_friend_data
     array = Array.new
     user = setup_facebook_user  
-    if ( user.name rescue false )
+    # if ( user.name rescue false )
       friends = user.friends
       friends.each do |f|
-        hash = Hash.new
+        # hash = Hash.new
         # hash["name"] = f.name
-        array.push hash  
+        # array.push hash  
       end      
-    else
-    end
+    # else
+    # end
     render :json => array.to_json        
   end  
 
