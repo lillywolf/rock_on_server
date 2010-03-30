@@ -14,8 +14,8 @@ class SiteController < ApplicationController
 
   def index
     
-    # ensure_application_is_installed_by_facebook_user    
-    # user = setup_facebook_user
+    ensure_application_is_installed_by_facebook_user    
+    user = setup_facebook_user
     # if user.nil?
     #   render :text => 'Where are you?'
     # else
