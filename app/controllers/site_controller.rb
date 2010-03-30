@@ -19,7 +19,9 @@ class SiteController < ApplicationController
     if user.nil?
       render :text => 'Where are you?'
     else
-      render :text => user.name
+      for friend in user.friends[0..20]
+        render :text => friend.name
+      end  
     end    
     
     # # attempt to create a facebook session
@@ -62,9 +64,9 @@ class SiteController < ApplicationController
   
   def get_facebook_friend_data
     array = Array.new
-    setup_facebook_user  
-    if ( @current_facebook_user.name rescue false )
-      for friend in @current_facebook_user.friends[0..20]
+    user = setup_facebook_user  
+    if ( user.name rescue false )
+      for friend in user.friends[0..20]
         hash = Hash.new
         hash["name"] = friend.name
           # <%= fb_profile_pic(friend)%>
