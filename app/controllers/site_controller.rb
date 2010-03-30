@@ -14,15 +14,15 @@ class SiteController < ApplicationController
 
   def index
     
-    ensure_application_is_installed_by_facebook_user    
-    user = setup_facebook_user
-    if user.nil?
-      render :text => 'Where are you?'
-    else
-      friends = user.friends
-      # friends.each do |f|
-        render :text => user.name
-      # end  
+    # ensure_application_is_installed_by_facebook_user    
+    # user = setup_facebook_user
+    # if user.nil?
+    #   render :text => 'Where are you?'
+    # else
+    #   friends = user.friends
+    #   # friends.each do |f|
+    #     render :text => user.name
+    #   # end  
     end    
     
     # # attempt to create a facebook session
