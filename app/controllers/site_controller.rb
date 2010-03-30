@@ -20,7 +20,7 @@ class SiteController < ApplicationController
       render :text => 'Where are you?'
     else
       for friend in user.friends[0..20]
-        render :text => friend.name
+        render :text => 'hi'
       end  
     end    
     
