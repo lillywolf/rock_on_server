@@ -70,9 +70,9 @@ class SiteController < ApplicationController
       render :text => 'Where are you?'
     else
       friends = user.friends
-      # friends.each do |f|
+      friends.each do |f|
         render :text => user.name
-      # end  
+      end  
     end
     # render :json => array.to_json        
   end  
