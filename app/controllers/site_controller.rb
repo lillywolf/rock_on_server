@@ -59,15 +59,15 @@ class SiteController < ApplicationController
   end
   
   def setup_facebook_user
-      @current_facebook_user = facebook_session.user
-      return @current_facebook_user
+    @current_facebook_user = facebook_session.user
+    return @current_facebook_user
   end  
   
   def get_facebook_friend_data
     array = Array.new
     user = setup_facebook_user
     if user.nil?
-      render :text => 'Where are you?'
+      # render :text => 'Where are you?'
     else
       friends = user.friends
       # friends.each do |f|
