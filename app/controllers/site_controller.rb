@@ -64,7 +64,7 @@ class SiteController < ApplicationController
   end  
   
   def get_facebook_friend_data
-    ensure_application_is_installed_by_facebook_user        
+    # ensure_application_is_installed_by_facebook_user        
     array = Array.new
     # user = setup_facebook_user  
     # if ( user.name rescue false )
