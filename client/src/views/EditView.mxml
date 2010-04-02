@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610">
+	<mx:Script>
+		<![CDATA[
+			import controllers.UserManager;
+			import mx.core.Application;
+			import mx.events.FlexEvent;
+			import user.UserEvent;
+			import mx.controls.Text;
+			import rock_on.ConcertStage;
+			import rock_on.Booth;
+			import mx.events.DynamicEvent;
+			import controllers.ThingerManager;
+			import stores.StoreEvent;
+			import models.OwnedLayerable;
+			import models.User;
+			import models.Structure;
+			import controllers.StructureManager;
+			import controllers.CreatureManager;
+			import models.OwnedStructure;
+			import controllers.StoreManager;
+			import mx.core.UIComponent;
+			import models.StoreOwnedThinger;
+			import models.Store;
+			import models.OwnedThinger;
+			import models.Thinger;
+			import world.AssetStack;
+			import models.Creature;
+			import mx.collections.ArrayCollection;
+			import controllers.LayerableManager;
+			import world.Point3D;
+			import world.ActiveAsset;
+			import world.World;
+			import flash.utils.getTimer;	
+
+			public var myWorld:World;
+			[Bindable] public var myUser:User;
+			
+			public var inventoryCanvas:Canvas;
+			public var inventoryIndex:int = 0;
+			public var editMode:EditMode;
+			public var editModeActivated:Boolean = false;
+			public var booths:ArrayCollection;
+			public var stages:ArrayCollection;
+			public var concertStage:ConcertStage;
+			
+			public var creditsBox:Text;
+			
+			[Bindable] public var layerableManager:LayerableManager;
+			[Bindable] public var structureManager:StructureManager;
+			[Bindable] public var storeManager:StoreManager;
+			[Bindable] public var creatureManager:CreatureManager;
+			[Bindable] public var thingerManager:ThingerManager;
+			[Bindable] public var userManager:UserManager;
+			
+			[Bindable] public var myMemory:Number;
+			[Bindable] public var fps:Number;
+			[Bindable] public var aux:Number;	
+			public var lastTime:Number;	
+					
+			private function onCreationComplete():void
+			{
+				addEventListener(Event.ENTER_FRAME, onEnterFrame);
+				myWorld = new World(800, 800, 40);				
+				addChild(myWorld);	
+				
+				myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);
+				
+				createInventoryCanvas();
+			}
+			
+			private function onEnterFrame(evt:Event):void
+			{
+				var time:Number = getTimer();
+				var deltaTime:Number = time - lastTime;
+				var lockedDelta:Number = Math.min(100, deltaTime);
+				fps = 1000/deltaTime;
+				myMemory = System.totalMemory;
+				lastTime = time;
+			}
+			
+			public function onUserLoaded():void
+			{
+				myUser.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);		
+				showUserData();				
+			}
+			
+			private function onStructurePlaced(evt:DynamicEvent):void
+			{
+				thingerManager.saveStructurePlacement(evt.asset, evt.currentPoint);
+			}
+			
+			public function showUserData():void
+			{
+				creditsBox = new Text();
+				creditsBox.id = 'myCredits';
+				creditsBox.text = myUser.credits.toString();
+				creditsBox.setStyle('fontSize', '11');
+				creditsBox.x = 10;
+				creditsBox.y = 50;
+				parentApplication.addChild(creditsBox);
+			}
+			
+			private function onWorldThingerPurchased(evt:UserEvent):void
+			{
+				creditsBox.text = myUser.credits.toString();
+			}
+			
+			public function showBooths():void
+			{
+				booths = new ArrayCollection();
+				var boothStructures:ArrayCollection = structureManager.getStructuresByType("Booth");
+				for each (var os:OwnedStructure in boothStructures)
+				{
+					var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
+					asset.thinger = os;
+					var booth:Booth = new Booth(os);
+					booths.addItem(booth);
+					var addTo:Point3D = new Point3D(os.x, os.y, os.z);
+					addStaticAsset(asset, addTo);
+				}
+			}
+			
+			public function addStage():void
+			{
+				stages = new ArrayCollection();
+				var stageStructures:ArrayCollection = structureManager.getStructuresByType("ConcertStage");
+				concertStage = new ConcertStage(stageStructures[0]);
+				var os:OwnedStructure = stageStructures[0];
+				
+				var asset:ActiveAsset = new ActiveAsset(new MovieClip());
+				asset.thinger = os;
+				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
+				concertStage.worldCoords = addTo;
+				myWorld.addAsset(asset, addTo);				
+			}
+			
+			public function showStore():void
+			{
+				var store:Store = storeManager.getStoreByName('Booth Store');
+				var uic:UIComponent = storeManager.getStoreUIComponent(store);
+				uic.width = 500;
+				uic.height = 400;
+				uic.x = this.width - uic.width/2;
+				uic.y = this.height - uic.height/2;
+				parentApplication.addChild(uic);
+			}
+			
+			private function createInventoryCanvas():void
+			{
+				inventoryCanvas = new Canvas();
+				inventoryCanvas.x = 20;
+				inventoryCanvas.y = 480;
+				inventoryCanvas.width = 760;
+				inventoryCanvas.height = 62;
+				inventoryCanvas.clipContent = false;
+				parentApplication.addChild(inventoryCanvas);
+			}
+			
+			private function addStaticAsset(asset:ActiveAsset, addTo:Point3D):void
+			{
+//				var addTo:Point3D = new Point3D(Math.floor(Math.random()*myWorld.tilesWide), 0, Math.floor(Math.random()*myWorld.tilesDeep));				
+				myWorld.addAsset(asset, addTo);
+				asset.movieClip.gotoAndPlay(1);
+				asset.movieClip.stop();
+			}
+			
+			private function onThingerPurchased(evt:StoreEvent):void
+			{
+				var thingerRenderer:InventoryItemRenderer = new InventoryItemRenderer();
+				thingerRenderer.uic = thingerManager.getMovieClipCopy(evt.thinger, true, 62, 62, 70, 70);
+				var thingerIndex:int = inventoryIndex;
+				thingerRenderer.thingerIndex = thingerIndex;
+				inventoryCanvas.addChild(thingerRenderer);
+				inventoryIndex++;
+			}
+			
+			private function getFriendData():void
+			{
+				userManager.getFacebookFriendData();
+			}
+			
+			private function addEditMode():void
+			{
+				editMode = new EditMode(myWorld);
+				editMode.addEventListener('structurePlaced', onStructurePlaced);
+				addChild(editMode);				
+			}			
+		]]>
+	</mx:Script>	
+</mx:Canvas>

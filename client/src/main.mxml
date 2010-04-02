@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:world="world.*" xmlns:views="views.*" preinitialize="onPreInitialize()" applicationComplete="onApplicationComplete()">
+	<mx:states>
+		<mx:State name="topBar">
+			<mx:AddChild>
+				<views:TopBar id="topBarView"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="worldView" basedOn="topBar">
+			<mx:AddChild>
+				<views:WorldView id="worldView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="editView" basedOn="topBar">
+			<mx:AddChild>
+				<views:EditView id="editView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="twoDimensional">
+			<mx:AddChild>
+				<views:TwoDimensionalView id="twoDimensionalView" />
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	<mx:Script>
+		<![CDATA[
+			import user.UserEvent;
+			import models.Creature;
+			import views.CreatureCustomizer;
+			import server.ServerDataEvent;
+			import game.GameDataInterface;
+			import server.ServerController;
+			
+			[Bindable] public var gdi:GameDataInterface;
+			[Bindable] public var loadedModels:Dictionary;
+			[Bindable] public var xGridCoord:Number;
+			[Bindable] public var yGridCoord:Number;
+			
+			private function onPreInitialize():void
+			{
+				gdi = new GameDataInterface();
+				
+				gdi.addEventListener(ServerDataEvent.USER_LOADED, onUserLoaded);
+				gdi.addEventListener(ServerDataEvent.GAME_CONTENT_LOADED, onGameContentLoaded);
+				gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);
+				
+				gdi.getStaticGameContent();
+				gdi.getUserContent();			
+			}
+			private function onApplicationComplete():void
+			{
+				currentState = 'worldView';
+			}
+			private function onUserLoaded(evt:ServerDataEvent):void
+			{
+				worldView.onUserLoaded();
+			}
+			private function onGameContentLoaded(evt:ServerDataEvent):void
+			{
+			}
+			private function onUserContentLoaded(evt:ServerDataEvent):void
+			{
+				worldView.showBooths();		
+				worldView.addStage();		
+				worldView.myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);
+			}
+			public function onCreatureToCustomize(creature:Creature):void
+			{
+				currentState = 'twoDimensional';
+				twoDimensionalView.removeAllChildren();
+				
+				var creatureCustomizer:CreatureCustomizer = gdi.creatureManager.generateCreatureCustomizer(creature);
+				creatureCustomizer.x = 0;
+				creatureCustomizer.y = 500;
+				twoDimensionalView.addChild(creatureCustomizer);
+			}
+			private function onWorldThingerPurchased(evt:UserEvent):void
+			{
+				gdi.userManager.incrementCredits(evt.creditsToAdd);
+			}
+		]]>
+	</mx:Script>
+</mx:Application>

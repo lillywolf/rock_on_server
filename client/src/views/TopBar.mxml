@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="80">
+	<mx:Script>
+		<![CDATA[
+			import controllers.UserManager;
+			import controllers.ThingerManager;
+			import controllers.CreatureManager;
+			import controllers.StoreManager;
+			import controllers.LayerableManager;
+			import controllers.StructureManager;
+			import mx.controls.Text;
+			import models.User;
+			import world.World;
+			public var myWorld:World;
+			[Bindable] public var myUser:User;
+			
+			public var creditsBox:Text;
+			
+			[Bindable] public var layerableManager:LayerableManager;
+			[Bindable] public var structureManager:StructureManager;
+			[Bindable] public var storeManager:StoreManager;
+			[Bindable] public var creatureManager:CreatureManager;
+			[Bindable] public var thingerManager:ThingerManager;
+			[Bindable] public var userManager:UserManager;
+			
+			[Bindable] public var myMemory:Number;
+			[Bindable] public var fps:Number;
+			[Bindable] public var aux:Number;	
+			public var lastTime:Number;	
+					
+			private function onCreationComplete():void
+			{
+				addEventListener(Event.ENTER_FRAME, onEnterFrame);			
+			}
+			
+			private function onEnterFrame(evt:Event):void
+			{
+				var time:Number = getTimer();
+				var deltaTime:Number = time - lastTime;
+				var lockedDelta:Number = Math.min(100, deltaTime);
+				fps = 1000/deltaTime;
+				myMemory = System.totalMemory;
+				lastTime = time;
+			}
+			
+			public function onUserLoaded():void
+			{
+				showUserData();				
+			}
+			
+			public function showUserData():void
+			{
+				creditsBox = new Text();
+				creditsBox.id = 'myCredits';
+				creditsBox.text = myUser.credits.toString();
+				creditsBox.setStyle('fontSize', '11');
+				creditsBox.x = 10;
+				creditsBox.y = 50;
+				parentApplication.addChild(creditsBox);
+			}			
+		]]>
+	</mx:Script>	
+</mx:Canvas>
