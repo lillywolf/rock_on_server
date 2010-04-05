@@ -19,9 +19,10 @@ class SiteController < ApplicationController
     if user.nil?
       render :text => 'Where are you?'
     else
-      friends = user.friends
+      # friends = user.friends
+      render :text => user.name
       # friends.each do |f|
-        render :text => user.name
+        # render :text => user.name
       # end  
     end    
     
