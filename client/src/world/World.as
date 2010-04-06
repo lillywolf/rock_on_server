@@ -108,6 +108,7 @@ package world
 			activeAsset.isMoving = true;
 			if (fourDirectional)
 			{
+				activeAsset.fourDirectional = true;
 				if (activeAsset.worldDestination.x%1 != 0 || activeAsset.worldDestination.y%1 != 0 || activeAsset.worldDestination.z%1 != 0)
 				{
 					throw new Error('destination must be a whole number');
@@ -130,6 +131,7 @@ package world
 			}
 			else
 			{
+				activeAsset.fourDirectional = false;
 				activeAsset.currentPath = null;
 				var realDestination:Point = worldToActualCoords(destination);
 				activeAsset.realDestination = realDestination;
@@ -171,7 +173,10 @@ package world
 				// Have reached final destination
 				var finalDestinationEvent:WorldEvent = new WorldEvent(WorldEvent.FINAL_DESTINATION_REACHED, asset);
 				dispatchEvent(finalDestinationEvent);
-				pathFinder.remove(asset);
+				if (asset.fourDirectional)
+				{
+					pathFinder.remove(asset);				
+				}
 			}
 		}
 		

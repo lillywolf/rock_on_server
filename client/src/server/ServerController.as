@@ -8,7 +8,6 @@ package server
 	import game.GameDataInterface;
 	
 	import mx.controls.Alert;
-	import mx.controls.TextArea;
 	import mx.events.DynamicEvent;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.events.FaultEvent;
@@ -18,6 +17,9 @@ package server
 	
 	public class ServerController extends EventDispatcher
 	{
+		
+		public static const BASE_URL:String = "http://localhost:3001/";
+		
 		public var _gdi:GameDataInterface;
 		public var httpService:HTTPService;
 		public var httpServiceRequests:Dictionary;
@@ -128,7 +130,7 @@ package server
 		{
 			// This is not secure
 			
-			httpService.url = 'http://glowing-sunrise-33.heroku.com/' + route;
+			httpService.url = ServerController.BASE_URL + route;
 			
 			if (httpService.url.length > 2000)
 			{

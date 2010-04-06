@@ -2,9 +2,11 @@ package views
 {
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.ColorTransform;
 	
 	import models.OwnedStructure;
 	
+	import mx.core.Application;
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
 	
@@ -19,13 +21,19 @@ package views
 		public var _world:World;
 		public var currentAsset:ActiveAsset;
 		public var activated:Boolean = false;
+		public var flexiUIC:FlexibleUIComponent;
+		
+		public static const INVALID_COLOR:ColorTransform = new ColorTransform(1, 0.25, 0.25);
+		public static const NORMAL_COLOR:ColorTransform = new ColorTransform(1, 1, 1);
 		
 		public function EditMode(world:World)
 		{
 			super();
 			_world = world;
 			_world.addEventListener(MouseEvent.CLICK, onWorldClicked);
-			
+
+			enableMouseDetection();
+
 			addEventListener(Event.ADDED, onAdded);
 		}
 		
@@ -34,7 +42,28 @@ package views
 			width = parent.width;
 			height = parent.height;	
 			x = parent.x;
-			y = parent.y;		
+			y = parent.y;
+		}
+		
+		private function enableMouseDetection():void
+		{
+			_world.graphics.beginFill(0x000000, 0.2);
+			_world.graphics.drawRect(_world.x, -(_world.y), Application.application.width, Application.application.height);
+			_world.graphics.endFill();			
+		}
+		
+		private function addFlexibleUIC():void
+		{
+			flexiUIC = new FlexibleUIComponent();
+			addChild(flexiUIC);			
+		}
+		
+		private function updateFlexibleUIC():void
+		{
+			flexiUIC.x = x;
+			flexiUIC.y = y;
+			flexiUIC.width = width;
+			flexiUIC.height = height;
 		}
 		
 		private function onWorldClicked(evt:MouseEvent):void
@@ -92,8 +121,31 @@ package views
 			worldDestination.x = Math.round(worldDestination.x);
 			worldDestination.z = Math.round(worldDestination.z);
 			
-			worldDestination = keepPointInBounds(worldDestination);
+//			worldDestination = keepPointInBounds(worldDestination);
 			_world.moveAssetTo(currentAsset, worldDestination, false);
+			
+			if (isFurnitureOutOfBounds() || isFurnitureOnInvalidPoint())
+			{
+				currentAsset.transform.colorTransform = INVALID_COLOR;
+			}
+			else
+			{
+				currentAsset.transform.colorTransform = NORMAL_COLOR;
+			}
+		}
+		
+		public function isFurnitureOutOfBounds():Boolean
+		{
+			if (currentAsset.worldCoords.x > _world.tilesWide || currentAsset.worldCoords.x < 0 || currentAsset.worldCoords.z > _world.tilesDeep || currentAsset.worldCoords.z < 0)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		public function isFurnitureOnInvalidPoint():Boolean
+		{
+			return false;
 		}
 		
 		public function keepPointInBounds(destination:Point3D):Point3D

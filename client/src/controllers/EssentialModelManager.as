@@ -20,7 +20,9 @@ package controllers
 	import models.User;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.Application;
 	
+	import server.ServerController;
 	import server.ServerDataEvent;
 
 	public class EssentialModelManager extends Manager
@@ -56,7 +58,7 @@ package controllers
 		public var structure:Structure;
 		public var owned_structure:OwnedStructure;
 		
-		public var baseUrl:String = "http://glowing-sunrise-33.heroku.com/";		
+		public var baseUrl:String = ServerController.BASE_URL;		
 		
 		public function EssentialModelManager(target:IEventDispatcher=null)
 		{
@@ -240,7 +242,8 @@ package controllers
 		public function removeFromToLoad(toLoad:Object):void
 		{
 			var index:int = instancesToLoad.getItemIndex(toLoad);
-			instancesToLoad.removeItemAt(index);			
+			instancesToLoad.removeItemAt(index);
+			Application.application.checkIfLoadingAndInstantiationComplete();			
 		}
 		
 		public function createNewClassInstance(um:UnprocessedModel):void

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="80">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="80" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import mx.core.Application;
 			import controllers.UserManager;
 			import controllers.ThingerManager;
 			import controllers.CreatureManager;
@@ -27,6 +28,9 @@
 			[Bindable] public var fps:Number;
 			[Bindable] public var aux:Number;	
 			public var lastTime:Number;	
+			
+			public var worldView:WorldView;
+			public var editView:EditView;
 					
 			private function onCreationComplete():void
 			{
@@ -57,7 +61,39 @@
 				creditsBox.x = 10;
 				creditsBox.y = 50;
 				parentApplication.addChild(creditsBox);
-			}			
+			}
+			
+			public function switchToWorldView():void
+			{
+				Application.application.currentState = 'worldView';
+				worldView.showGroupies();
+				worldView.showBandMembers();
+			}
+			
+			private function switchToWorldViewAndShowStore():void
+			{
+				Application.application.currentState = 'worldView';
+				worldView.showStore();
+			}
+			
+			private function getFriendData():void
+			{
+				userManager.getFacebookFriendData();
+			}
+			
+			private function switchToEditView():void
+			{
+				Application.application.currentState = 'editView';
+			}						
 		]]>
-	</mx:Script>	
+	</mx:Script>
+	<mx:Button click="switchToWorldView()"/>
+	<mx:Button x="30" click="switchToWorldViewAndShowStore()"/>
+	<!--mx:Button x="60" click="showCustomizer()"/-->
+	<mx:Button x="90" click="getFriendData()"/>
+	<mx:Button x="120" click="switchToEditView()"/>
+	<mx:Canvas right="0" width="200">
+		<mx:Label text="MEM: {this.myMemory}"/>
+		<mx:Label y="20" text="FPS: {this.fps}"/>
+	</mx:Canvas>		
 </mx:Canvas>

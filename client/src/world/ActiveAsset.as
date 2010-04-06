@@ -22,6 +22,7 @@ package world
 		public var _lastRealPoint:Point;
 		public var _walkProgress:Number;
 		public var _isMoving:Boolean;
+		public var _fourDirectional:Boolean;
 		
 		public var realCoordY:Number;
 		public var realCoordX:Number;
@@ -209,6 +210,16 @@ package world
 		public function get directionality():Point3D
 		{
 			return _directionality;
+		}
+		
+		public function set fourDirectional(val:Boolean):void
+		{
+			_fourDirectional = val;
+		}
+		
+		public function get fourDirectional():Boolean
+		{
+			return _fourDirectional;
 		}
 		
 	}

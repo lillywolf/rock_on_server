@@ -16,6 +16,7 @@ package game
 	
 	import models.User;
 	
+	import mx.core.Application;
 	import mx.events.CollectionEvent;
 	
 	import server.ServerController;
@@ -154,7 +155,7 @@ package game
 				dispatchEvent(evt);
 			}
 		}
-		
+				
 		public function loadObject(obj:Object, requestType:String):void
 		{
 			var toLoad:UnprocessedModel = new UnprocessedModel(requestType, obj, obj.instance[requestType]);

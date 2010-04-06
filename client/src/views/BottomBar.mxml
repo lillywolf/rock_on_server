@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="100" clipContent="false" creationComplete="onCreationComplete()">
+	<mx:Script>
+		<![CDATA[
+			import facebook.FacebookFunTime;
+			import com.facebook.data.users.FacebookUser;
+			import mx.core.Application;
+			import world.World;
+			import models.User;
+			import controllers.ThingerManager;
+			import controllers.UserManager;
+			import controllers.StoreManager;
+			import stores.StoreEvent;		
+			public var myWorld:World;
+			[Bindable] public var myUser:User;
+			
+			public var inventoryCanvas:Canvas;
+			public var inventoryIndex:int = 0;
+			[Bindable] public var facebookInterface:FacebookFunTime;
+			
+			[Bindable] public var storeManager:StoreManager;
+			[Bindable] public var thingerManager:ThingerManager;
+			[Bindable] public var userManager:UserManager;
+
+			private function onCreationComplete():void
+			{							
+				createInventoryCanvas();
+			}		
+		
+			public function onUserLoaded():void
+			{
+				myUser.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);		
+			}
+			
+			private function createInventoryCanvas():void
+			{
+				inventoryCanvas = new Canvas();
+				inventoryCanvas.x = 20;
+				inventoryCanvas.y = 500;
+				inventoryCanvas.width = 760;
+				inventoryCanvas.height = 62;
+				inventoryCanvas.clipContent = false;
+				addChild(inventoryCanvas);
+			}
+			
+			private function onThingerPurchased(evt:StoreEvent):void
+			{
+				var thingerRenderer:InventoryItemRenderer = new InventoryItemRenderer();
+				thingerRenderer.uic = thingerManager.getMovieClipCopy(evt.thinger, true, 62, 62, 70, 70);
+				var thingerIndex:int = inventoryIndex;
+				thingerRenderer.thingerIndex = thingerIndex;
+				inventoryCanvas.addChild(thingerRenderer);
+				inventoryIndex++;
+			}
+			
+			public function initializeFriends():void
+			{
+				var friends:Array = facebookInterface.getFriendData();
+			}									
+		]]>
+	</mx:Script>
+</mx:Canvas>

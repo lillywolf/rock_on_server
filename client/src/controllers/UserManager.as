@@ -23,7 +23,7 @@ package controllers
 		
 		public function getFacebookFriendData():void
 		{
-			_serverController.sendRequest({id: _user.id}, 'site', 'get_facebook_friend_data');
+			_serverController.sendRequest({id: _user.id}, 'site', 'index');
 		}
 		
 		public function set serverController(val:ServerController):void

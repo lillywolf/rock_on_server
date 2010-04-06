@@ -2,8 +2,11 @@
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" xmlns:world="world.*" xmlns:views="views.*" preinitialize="onPreInitialize()" applicationComplete="onApplicationComplete()">
 	<mx:states>
 		<mx:State name="topBar">
-			<mx:AddChild>
-				<views:TopBar id="topBarView"/>
+			<mx:AddChild position="after">
+				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{this.editView}" worldView="{this.worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}"/>
+			</mx:AddChild>
+			<mx:AddChild position="after">
+				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" userManager="{gdi.userManager}" facebookInterface="{facebookInterface}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
@@ -24,6 +27,7 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import facebook.FacebookFunTime;
 			import user.UserEvent;
 			import models.Creature;
 			import views.CreatureCustomizer;
@@ -35,9 +39,12 @@
 			[Bindable] public var loadedModels:Dictionary;
 			[Bindable] public var xGridCoord:Number;
 			[Bindable] public var yGridCoord:Number;
+			public var facebookInterface:FacebookFunTime;
 			
 			private function onPreInitialize():void
 			{
+				Security.allowDomain("*"); 	
+				
 				gdi = new GameDataInterface();
 				
 				gdi.addEventListener(ServerDataEvent.USER_LOADED, onUserLoaded);
@@ -49,20 +56,36 @@
 			}
 			private function onApplicationComplete():void
 			{
+				facebookInterface = new FacebookFunTime();
 				currentState = 'worldView';
+			}
+			public function checkIfLoadingAndInstantiationComplete():void
+			{
+				if (gdi.essentialModelManager.instancesToLoad.length == 0 && gdi.pendingRequests == gdi.loadCounter)
+				{
+					contentFullyLoaded();
+				}			
+			}
+			private function contentFullyLoaded():void
+			{
+				worldView.showBooths();		
+				worldView.addStage();		
+				worldView.myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);				
+				bottomBarView.initializeFriends();
 			}
 			private function onUserLoaded(evt:ServerDataEvent):void
 			{
 				worldView.onUserLoaded();
+				topBarView.onUserLoaded();
+				bottomBarView.onUserLoaded();				
 			}
 			private function onGameContentLoaded(evt:ServerDataEvent):void
 			{
+
 			}
 			private function onUserContentLoaded(evt:ServerDataEvent):void
 			{
-				worldView.showBooths();		
-				worldView.addStage();		
-				worldView.myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);
+				checkIfLoadingAndInstantiationComplete();				
 			}
 			public function onCreatureToCustomize(creature:Creature):void
 			{

@@ -73,9 +73,7 @@
 				addChild(myWorld);	
 				
 				myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);
-				
-				createInventoryCanvas();
-				
+								
 				customerPersonManager = new CustomerPersonManager();
 				customerPersonManager.myWorld = myWorld;
 												
@@ -97,8 +95,8 @@
 			
 			public function onUserLoaded():void
 			{
-				myUser.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);		
-				showUserData();				
+//				myUser.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);		
+//				showUserData();				
 			}
 			
 			private function onStructurePlaced(evt:DynamicEvent):void
@@ -106,16 +104,16 @@
 				thingerManager.saveStructurePlacement(evt.asset, evt.currentPoint);
 			}
 			
-			public function showUserData():void
-			{
-				creditsBox = new Text();
-				creditsBox.id = 'myCredits';
-				creditsBox.text = myUser.credits.toString();
-				creditsBox.setStyle('fontSize', '11');
-				creditsBox.x = 10;
-				creditsBox.y = 50;
-				parentApplication.addChild(creditsBox);
-			}
+//			public function showUserData():void
+//			{
+//				creditsBox = new Text();
+//				creditsBox.id = 'myCredits';
+//				creditsBox.text = myUser.credits.toString();
+//				creditsBox.setStyle('fontSize', '11');
+//				creditsBox.x = 10;
+//				creditsBox.y = 50;
+//				parentApplication.addChild(creditsBox);
+//			}
 			
 			private function onWorldClicked(evt:MouseEvent):void
 			{
@@ -216,17 +214,6 @@
 				}
 			}
 			
-			private function createInventoryCanvas():void
-			{
-				inventoryCanvas = new Canvas();
-				inventoryCanvas.x = 20;
-				inventoryCanvas.y = 480;
-				inventoryCanvas.width = 760;
-				inventoryCanvas.height = 62;
-				inventoryCanvas.clipContent = false;
-				parentApplication.addChild(inventoryCanvas);
-			}
-			
 			private function addStaticAsset(asset:ActiveAsset, addTo:Point3D):void
 			{
 //				var addTo:Point3D = new Point3D(Math.floor(Math.random()*myWorld.tilesWide), 0, Math.floor(Math.random()*myWorld.tilesDeep));				
@@ -242,36 +229,9 @@
 			
 			private function onThingerPurchased(evt:StoreEvent):void
 			{
-				var thingerRenderer:InventoryItemRenderer = new InventoryItemRenderer();
-//				var uic:UIComponent = thingerManager.getMovieClipCopy(evt.thinger, true, 100, 100);
-				thingerRenderer.uic = thingerManager.getMovieClipCopy(evt.thinger, true, 62, 62, 70, 70);
-				var thingerIndex:int = inventoryIndex;
-				thingerRenderer.thingerIndex = thingerIndex;
-				inventoryCanvas.addChild(thingerRenderer);
-				inventoryIndex++;
-			}
-			
-			private function getFriendData():void
-			{
-				userManager.getFacebookFriendData();
-			}
-			
-			private function addEditMode():void
-			{
-				editMode = new EditMode(myWorld);
-				editMode.addEventListener('structurePlaced', onStructurePlaced);
-				addChild(editMode);				
+
 			}
 			
 		]]>
-	</mx:Script>
-	<mx:Button click="showGroupies(); showBandMembers();"/>
-	<mx:Button x="30" click="showStore()"/>
-	<!--mx:Button x="60" click="showCustomizer()"/-->
-	<mx:Button x="90" click="getFriendData()"/>
-	<mx:Button x="120" click="addEditMode()"/>
-	<mx:Canvas right="0" width="200">
-		<mx:Label text="MEM: {this.myMemory}"/>
-		<mx:Label y="20" text="FPS: {this.fps}"/>
-	</mx:Canvas>	
+	</mx:Script>	
 </mx:Canvas>
