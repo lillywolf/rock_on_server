@@ -123,9 +123,13 @@ package rock_on
 		public function set concertStage(val:ConcertStage):void
 		{
 			if(!_concertStage)
-				_concertStage = val;
+			{
+				_concertStage = val;				
+			}
 			else
-				throw new Error("Don't change this!!");
+			{
+//				throw new Error("Don't change this!!");				
+			}
 		}
 		
 		public function get concertStage():ConcertStage

@@ -1,8 +1,10 @@
 package facebook
 {
 	import com.facebook.Facebook;
+	import com.facebook.commands.friends.GetAppUsers;
 	import com.facebook.commands.friends.GetFriends;
 	import com.facebook.commands.users.GetInfo;
+	import com.facebook.data.friends.GetAppUserData;
 	import com.facebook.data.friends.GetFriendsData;
 	import com.facebook.data.users.FacebookUser;
 	import com.facebook.data.users.GetInfoData;
@@ -15,6 +17,7 @@ package facebook
 	
 	import mx.controls.Alert;
 	import mx.core.Application;
+	import mx.events.DynamicEvent;
 	
 	public class FacebookFunTime
 	{
@@ -22,9 +25,17 @@ package facebook
 		protected var fbook:Facebook;
 		protected const API_KEY:String = "eb67822b00a98a91c049e1347be7e657";
 		protected const SECRET:String = "93822524c73ff1b5acc09be6f357a0fa";
+		
 		[Bindable] protected var facebookUser:FacebookUser;
 		[Bindable] protected var facebookFriends:Array;
 		[Bindable] protected var facebookFriendData:Array;
+		[Bindable] protected var facebookAppUsers:Array;
+		[Bindable] protected var facebookFriendAppUsers:Array;
+		
+		private var facebookAppUsersLoaded:Boolean;
+		private var facebookFriendsLoaded:Boolean;
+		
+		public var snid:int;
 		
 		public function FacebookFunTime()
 		{
@@ -42,8 +53,13 @@ package facebook
 		{
 			if (evt.success)
 			{
+				snid = int(fbook.uid);
+				
 				setUserData(evt);
 				setFriendData(evt);
+				setAppUserData(evt);
+				
+				Application.application.onFacebookUserLoaded(fbook.uid, evt);
 			}
 			else
 			{
@@ -74,6 +90,12 @@ package facebook
 			call.addEventListener(FacebookEvent.COMPLETE, onGetFriends);
 		}
 		
+		protected function setAppUserData(evt:FacebookEvent):void
+		{
+			var call:FacebookCall = fbook.post(new GetAppUsers());
+			call.addEventListener(FacebookEvent.COMPLETE, onGetAppUsers);
+		}
+		
 		protected function onGetInfo(evt:FacebookEvent):void
 		{
 			if (evt.success)
@@ -96,7 +118,7 @@ package facebook
 				{
 					uids.push(facebookFriends[i].uid);
 				}
-				var call:GetInfo = new GetInfo(uids.slice(0, Math.min(uids.length, 20)), [GetInfoFieldValues.FIRST_NAME, GetInfoFieldValues.PIC_SQUARE]);
+				var call:GetInfo = new GetInfo(uids.slice(0, Math.min(uids.length, uids.length)), [GetInfoFieldValues.FIRST_NAME, GetInfoFieldValues.LAST_NAME, GetInfoFieldValues.PIC_SQUARE, GetInfoFieldValues.IS_APP_USER]);
 				call.addEventListener(FacebookEvent.COMPLETE, onFriendsGetInfo);
 				fbook.post(call);
 			}
@@ -106,12 +128,33 @@ package facebook
 			}
 		}
 		
+		protected function onGetAppUsers(evt:FacebookEvent):void
+		{
+			if (evt.success)
+			{
+				facebookAppUsers = (evt.data as GetAppUserData).uids;	
+				facebookAppUsersLoaded = true;		
+				
+				if (facebookFriendsLoaded && facebookAppUsersLoaded)
+				{
+					showFriends();
+				}	
+			}
+			else
+			{
+				Alert.show("Error loading app users", "Error");
+			}
+		}
+		
 		protected function onFriendsGetInfo(evt:FacebookEvent):void
 		{
 			(evt.target as GetInfo).removeEventListener(FacebookEvent.COMPLETE, onFriendsGetInfo);
 			if (evt.success)
 			{
-				facebookFriendData = (evt.data as GetInfoData).userCollection.source;				
+				facebookFriendsLoaded = true;
+				facebookFriendData = (evt.data as GetInfoData).userCollection.source;	
+
+				showFriends();						
 			}
 			else
 			{
@@ -119,9 +162,20 @@ package facebook
 			}
 		}
 		
-		public function getFriendData():Array
+		protected function showFriends():void
 		{
-			return facebookFriendData;
+			facebookFriendAppUsers = new Array();
+			for (var i:int=0; i<facebookFriendData.length; i++)
+			{
+				if ((facebookFriendData[i] as FacebookUser).is_app_user)
+				{
+					facebookFriendAppUsers.push(facebookFriendData[i] as FacebookUser);
+				}
+			}			
+			var evt:DynamicEvent = new DynamicEvent("facebookDataLoaded", true, true);
+			evt.facebookUser = facebookUser;
+			evt.facebookFriends = facebookFriendAppUsers;
+			Application.application.bottomBarView.dispatchEvent(evt);				
 		}
 
 	}

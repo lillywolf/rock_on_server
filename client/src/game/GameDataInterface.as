@@ -18,6 +18,7 @@ package game
 	
 	import mx.core.Application;
 	import mx.events.CollectionEvent;
+	import mx.events.DynamicEvent;
 	
 	import server.ServerController;
 	import server.ServerDataEvent;
@@ -38,17 +39,18 @@ package game
 		public var loadCounter:int = 0;
 		public var pendingRequests:int = 0;
 		
-		public function GameDataInterface()
+		public function GameDataInterface(preLoadedContent:Dictionary=null)
 		{
 			sc = new ServerController(this);
-			createManagers();
+			createManagers(preLoadedContent);
 			essentialModelManager.users.addEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
 			essentialModelManager.addEventListener(ServerDataEvent.INSTANCE_TO_CREATE, onInstanceToCreate);
+			essentialModelManager.addEventListener('instanceLoaded', onInstanceLoaded);	
 		}
 		
-		public function createManagers():void
+		public function createManagers(preLoadedContent:Dictionary):void
 		{
-			essentialModelManager = new EssentialModelManager();			
+			essentialModelManager = new EssentialModelManager();
 			layerableManager = new LayerableManager(essentialModelManager);
 			ownedLayerableManager = new OwnedLayerableManager(essentialModelManager);
 			creatureManager = new CreatureManager(essentialModelManager);
@@ -56,6 +58,10 @@ package game
 			storeManager = new StoreManager(essentialModelManager);
 			structureManager = new StructureManager(essentialModelManager);
 			userManager = new UserManager(essentialModelManager);
+			if (preLoadedContent)
+			{
+				setPreLoadedContent(preLoadedContent);
+			}			
 			
 			creatureManager.serverController = sc;
 			thingerManager.serverController = sc;
@@ -65,6 +71,24 @@ package game
 		public function onInstanceToCreate(evt:ServerDataEvent):void
 		{
 			createInstance(evt.params, evt.model, evt.method);
+		}
+		
+		public function setPreLoadedContent(preLoadedContent:Dictionary):void
+		{
+			if (preLoadedContent["essentialModelReference"])
+			{
+				essentialModelManager.essentialModelReference = preLoadedContent["essentialModelReference"];
+			}
+			if (preLoadedContent["structures"])
+			{
+				essentialModelManager.structures = preLoadedContent["structures"];
+				structureManager.structures = essentialModelManager.structures;
+			}
+			if (preLoadedContent["layerables"])
+			{
+				essentialModelManager.layerables = preLoadedContent["layerables"];
+				layerableManager.layerables = essentialModelManager.layerables;
+			}									
 		}
 		
 		public function setUser(evt:CollectionEvent):void
@@ -77,11 +101,11 @@ package game
 			essentialModelManager.users.removeEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
 		}
 		
-		public function getUserContent():void
+		public function getUserContent(uid:int):void
 		{
-			getDataForModel({id: 1}, "user", "find_by_id");
+			getDataForModel({snid: uid}, "user", "find_by_snid");
 		}
-		
+	
 		public function getStaticGameContent():void
 		{
 			getDataForModel({}, "layerable", "get_all");
@@ -120,6 +144,7 @@ package game
 				loadObject(obj, requestType);
 			}
 			checkIfLoadingComplete();
+//			dispatchLoadEvent(obj, requestType);			
 		}	
 		
 		public function updateProperties(obj:Object, requestType:String):void
@@ -175,6 +200,55 @@ package game
 				getDataForModel(dict as Object, str, methodName);
 			}			
 		}
+		
+		private function onInstanceLoaded(evt:DynamicEvent):void
+		{
+			checkIfLoadingAndInstantiationComplete();
+		}
+		
+		public function checkIfLoadingAndInstantiationComplete():void
+		{
+			if (essentialModelManager.instancesToLoad.length == 0 && pendingRequests == loadCounter)
+			{
+				if (isLoggedInUser())
+				{
+					Application.application.instancesLoadedForGameUser();				
+				}
+				else
+				{
+					Application.application.instancesLoadedForFriend();
+				}
+				checkForLoadedMovieClips();
+			}			
+		}
+		
+		public function checkForLoadedMovieClips():void
+		{
+			// This number is currently adjusted for stages without MCs!! CHANGE LATER!!
+			if (structureManager.ownedStructureMovieClipsLoaded == structureManager.ownedStructuresLoaded - 1)
+			{
+				if (isLoggedInUser())
+				{
+					Application.application.attemptToInitializeVenueForUser();											
+				}
+				else
+				{
+					Application.application.attemptToShowFriendVenue(this);
+				}
+			}
+		}
+		
+		public function isLoggedInUser():Boolean
+		{
+			if (Application.application.facebookInterface.snid == user.snid)
+			{
+				return true;				
+			}
+			else
+			{
+				return false;
+			}			
+		}		
 
 	}
 }

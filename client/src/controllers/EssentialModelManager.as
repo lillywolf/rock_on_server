@@ -20,19 +20,15 @@ package controllers
 	import models.User;
 	
 	import mx.collections.ArrayCollection;
-	import mx.core.Application;
+	import mx.events.DynamicEvent;
 	
 	import server.ServerController;
 	import server.ServerDataEvent;
 
 	public class EssentialModelManager extends Manager
-	{
-		public var swfsToLoad:ArrayCollection;
-		public var loadedSwfs:ArrayCollection;
-		public var classesToLoad:ArrayCollection;
-		public var loadedClasses:ArrayCollection;
+	{	
 		public var instancesToLoad:ArrayCollection;
-		public var instancesLoaded:ArrayCollection;	
+		public var instancesLoaded:ArrayCollection;		
 		
 		public var totalRequests:int = 0;
 		public var instancesFullyLoaded:int = 0;
@@ -68,12 +64,8 @@ package controllers
 		
 		public function initializeArrays():void
 		{
-			swfsToLoad = new ArrayCollection();
-			loadedSwfs = new ArrayCollection();
-			classesToLoad = new ArrayCollection();
-			loadedClasses = new ArrayCollection();
 			instancesToLoad = new ArrayCollection();
-			instancesLoaded = new ArrayCollection();
+			instancesLoaded = new ArrayCollection();			
 			layerables = new ArrayCollection();
 			owned_layerables = new ArrayCollection();
 			creatures = new ArrayCollection();	
@@ -110,9 +102,15 @@ package controllers
 			}
 		}
 		
+		public function checkIfAllLoadingComplete():void
+		{
+			var evt:DynamicEvent = new DynamicEvent('instanceLoaded', true, true);
+			dispatchEvent(evt);
+		}
+		
 		public function doesObjectBelongTo(toLoad:UnprocessedModel, belongsToId:int, belongsToName:String):void
 		{
-			for each (var um:UnprocessedModel in instancesLoaded)
+			for each (var um:UnprocessedModel in essentialModelReference.allInstancesLoaded)
 			{
 				if (um.model == belongsToName && um.instance.id == belongsToId)
 				{
@@ -203,13 +201,20 @@ package controllers
 			var className:String = convertToClassCase(belongsTo.model);			
 			var newClass:Class = getDefinitionByName('models.'+className) as Class;				
 			isChild.instance[belongsTo.model] = new newClass(belongsTo.instance);
+			
+			var evt:EssentialEvent = new EssentialEvent(EssentialEvent.PARENT_ASSIGNED, isChild.instance, isChild.model, true, true);
+			isChild.instance.dispatchEvent(evt);			
+			
+			// Add our copy to list of class copies
+			var classCopiesArray:Array = [belongsTo.instance, isChild.instance[belongsTo.model]];
+			essentialModelReference.classCopies.push(classCopiesArray);
 //			isChild.instance[belongsTo.model] = belongsTo.instance;			
 		}		
 		
 		public function assignParentMovieClipToChild(belongsTo:UnprocessedModel, isChild:UnprocessedModel):void
 		{
 			var swfIsLoaded:Boolean = false;
-			for each (var obj:Object in loadedSwfs)
+			for each (var obj:Object in essentialModelReference.loadedSwfs)
 			{
 				if (baseUrl+belongsTo.instance['swf_url'] == obj.url)
 				{
@@ -220,14 +225,15 @@ package controllers
 			if (swfIsLoaded)
 			{
 				var className:String = belongsTo.instance.symbol_name;
-				var newClass:Class = appDomain.getDefinition(className) as Class;				
+				var newClass:Class = appDomain.getDefinition(className) as Class;	
+//				var newClass:Class = EssentialModelReference.getClassCopy(className);			
 				isChild.instance[belongsTo.model].setMovieClipFromClass(newClass);			
 			}
 			else if (belongsTo.instance['swf_url'])
 			{
 //				throw new Error("Fix me!");
 //				what the hell am I supposed to have here?				
-				classesToLoad.addItem(belongsTo.instance);
+				essentialModelReference.classesToLoad.addItem(belongsTo.instance);
 			}
 		}
 		
@@ -243,7 +249,7 @@ package controllers
 		{
 			var index:int = instancesToLoad.getItemIndex(toLoad);
 			instancesToLoad.removeItemAt(index);
-			Application.application.checkIfLoadingAndInstantiationComplete();			
+			checkIfAllLoadingComplete();
 		}
 		
 		public function createNewClassInstance(um:UnprocessedModel):void
@@ -269,6 +275,7 @@ package controllers
 			}
 			
 			instancesLoaded.addItem(um);
+			essentialModelReference.allInstancesLoaded.addItem(um);
 							
 			(this[um.model+'s'] as ArrayCollection).addItem(um.instance); 
 		}	
@@ -290,7 +297,7 @@ package controllers
 		public function instantiateAndAddSwf(um:UnprocessedModel):void
 		{
 			var isLoaded:Boolean = checkForLoadedSwf(um.instanceData, um.instance);
-			classesToLoad.addItem(um.instance);
+			essentialModelReference.classesToLoad.addItem(um.instance);
 			if (!um.instanceData['symbol_name'] && !um.instanceData['swf_url'])
 			{
 				// Do nothing?
@@ -303,7 +310,7 @@ package controllers
 		
 		public function checkForLoadedSwf(params:Object, parentInstance:Object):Boolean
 		{		
-			for each (var obj:Object in swfsToLoad)
+			for each (var obj:Object in essentialModelReference.swfsToLoad)
 			{
 				if (obj['swf_url'] == params['swf_url'])
 				{
@@ -311,7 +318,7 @@ package controllers
 				}
 			}
 			loadSwf(params['swf_url']);
-			swfsToLoad.addItem(params);
+			essentialModelReference.swfsToLoad.addItem(params);
 			return false;				
 		}		
 		
@@ -326,13 +333,13 @@ package controllers
 		private function onClassesLoaded(evt:Event):void
 		{
 			applicationDomain = evt.currentTarget.applicationDomain as ApplicationDomain;
-			loadedSwfs.addItem({applicationDomain: applicationDomain, url: evt.currentTarget.url});
+			essentialModelReference.loadedSwfs.addItem({applicationDomain: applicationDomain, url: evt.currentTarget.url});
 			loadAssociatedClasses(evt.currentTarget.url, evt.currentTarget.loader, applicationDomain);		
 		}
 		
 		public function loadAssociatedClasses(swfUrl:String, classLoader:Loader, appDomain:ApplicationDomain):void
 		{
-			for each (var obj:Object in classesToLoad)
+			for each (var obj:Object in essentialModelReference.classesToLoad)
 			{
 				if (baseUrl+obj['swf_url'] == swfUrl)
 				{
@@ -345,12 +352,36 @@ package controllers
 		{
 			var className:String = obj['symbol_name'];
 			var loadedClass:Class = appDomain.getDefinition(className) as Class;
-			loadedClasses.addItem(loadedClass);
+			essentialModelReference.loadedClasses.addItem(loadedClass);
 			essentialModelReference.loadedModels[className] = {klass: loadedClass, applicationDomain: appDomain};			
 			obj.setMovieClipFromClass(loadedClass);
+			
+			updateMovieClipForAnyClassCopies(obj, loadedClass);
+			
 			var evt:EssentialEvent = new EssentialEvent(EssentialEvent.INSTANCE_LOADED, obj, null, true, true);
 			dispatchEvent(evt);					
 		}		
 		
+		private function updateMovieClipForAnyClassCopies(obj:Object, loadedClass:Class):void
+		{
+			for each (var classCopiesArray:Array in essentialModelReference.classCopies)
+			{
+				for each (var classCopy:Object in classCopiesArray)
+				{
+					if (classCopy == obj)
+					{
+						updateMovieClipForAllCopies(classCopiesArray, loadedClass);
+					}
+				}
+			}			
+		}
+		
+		private function updateMovieClipForAllCopies(classCopiesArray:Array, loadedClass:Class):void
+		{
+			for each (var classCopy:Object in classCopiesArray)
+			{
+				classCopy.setMovieClipFromClass(loadedClass);
+			}
+		}
 	}
 }

@@ -10,6 +10,7 @@ package views
 		
 		public var _thingerIndex:int;
 		public var _uic:UIComponent;
+		public var _thinger:*;
 				
 		public function InventoryItemRenderer()
 		{
@@ -34,7 +35,7 @@ package views
 		
 		public function set uic(val:UIComponent):void
 		{
-			_uic = val;			
+			_uic = val;		
 			addChild(_uic);
 			if (_thingerIndex)
 			{
@@ -43,17 +44,41 @@ package views
 			addFrame();
 		}
 		
+		public function get uic():UIComponent
+		{
+			return _uic;
+		}
+		
 		public function addFrame():void
 		{
 			var frame:ColorFrameBlue = new ColorFrameBlue();
-			frame.x = (DIMENSION - frame.width)/2;
-			frame.y = (DIMENSION - frame.height)/2;			
-			_uic.addChild(frame);
+			var tempUIC:UIComponent = new UIComponent();
+			tempUIC.x = (DIMENSION - frame.width)/2;
+			tempUIC.y = (DIMENSION - frame.height)/2;	
+			tempUIC.width = frame.width;
+			tempUIC.height = frame.height;		
+			tempUIC.addChild(frame);
+			this.addChild(tempUIC);
 		}
 		
 		public function setX():void
 		{
-			x = _thingerIndex * PADDING + _thingerIndex * _uic.width;			
+			x = _thingerIndex * PADDING + _thingerIndex * DIMENSION;			
+		}
+		
+		public function getDimension():int
+		{
+			return DIMENSION;
+		}
+		
+		public function set thinger(val:*):void
+		{
+			_thinger = val;
+		}
+		
+		public function get thinger():*
+		{
+			return _thinger;
 		}
 		
 	}

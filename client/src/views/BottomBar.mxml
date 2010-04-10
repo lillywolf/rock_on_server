@@ -2,6 +2,9 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="100" clipContent="false" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Image;
+			import mx.core.UIComponent;
+			import mx.events.DynamicEvent;
 			import facebook.FacebookFunTime;
 			import com.facebook.data.users.FacebookUser;
 			import mx.core.Application;
@@ -16,15 +19,19 @@
 			
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
-			[Bindable] public var facebookInterface:FacebookFunTime;
+			[Bindable] public var facebookFriends:Array;
+			[Bindable] public var facebookUser:FacebookUser;
 			
 			[Bindable] public var storeManager:StoreManager;
 			[Bindable] public var thingerManager:ThingerManager;
 			[Bindable] public var userManager:UserManager;
+			
+			public static const FRIEND_PIC_DIMENSION:int = 50;
 
 			private function onCreationComplete():void
 			{							
 				createInventoryCanvas();
+				addEventListener('facebookDataLoaded', onFriendDataLoaded);
 			}		
 		
 			public function onUserLoaded():void
@@ -35,9 +42,9 @@
 			private function createInventoryCanvas():void
 			{
 				inventoryCanvas = new Canvas();
-				inventoryCanvas.x = 20;
+				inventoryCanvas.x = 80;
 				inventoryCanvas.y = 500;
-				inventoryCanvas.width = 760;
+				inventoryCanvas.width = 680;
 				inventoryCanvas.height = 62;
 				inventoryCanvas.clipContent = false;
 				addChild(inventoryCanvas);
@@ -45,18 +52,70 @@
 			
 			private function onThingerPurchased(evt:StoreEvent):void
 			{
-				var thingerRenderer:InventoryItemRenderer = new InventoryItemRenderer();
-				thingerRenderer.uic = thingerManager.getMovieClipCopy(evt.thinger, true, 62, 62, 70, 70);
-				var thingerIndex:int = inventoryIndex;
-				thingerRenderer.thingerIndex = thingerIndex;
-				inventoryCanvas.addChild(thingerRenderer);
-				inventoryIndex++;
+//				var thingerRenderer:InventoryItemRenderer = new InventoryItemRenderer();
+//				thingerRenderer.uic = thingerManager.getMovieClipCopy(evt.thinger, true, 62, 62, 70, 70);
+//				var thingerIndex:int = inventoryIndex;
+//				thingerRenderer.thingerIndex = thingerIndex;
+//				inventoryCanvas.addChild(thingerRenderer);
+//				inventoryIndex++;
 			}
 			
-			public function initializeFriends():void
+			private function onFriendDataLoaded(evt:DynamicEvent):void
 			{
-				var friends:Array = facebookInterface.getFriendData();
-			}									
+				facebookFriends = evt.facebookFriends;
+				facebookUser = evt.facebookUser;
+				
+				showFacebookFriends();				
+				showFacebookUser();
+			}
+			
+			private function showFacebookFriends():void
+			{
+				var index:int = 0;
+				for each (var friend:FacebookUser in facebookFriends)
+				{
+					var friendRenderer:InventoryItemRenderer = new InventoryItemRenderer();
+					friendRenderer.thingerIndex = index;
+					var pic:Image = new Image();
+					pic.x = (friendRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
+					pic.y = (friendRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
+					pic.source = friend.pic_square;
+					friendRenderer.uic = pic;
+					inventoryCanvas.addChild(friendRenderer);
+					index++;
+					
+					friendRenderer.thinger = friend;
+					friendRenderer.addEventListener(MouseEvent.CLICK, onFriendRendererClicked);
+				}				
+			}
+			
+			public function showFacebookUser():void
+			{
+				var userRenderer:InventoryItemRenderer = new InventoryItemRenderer();
+				userRenderer.y = 500;
+				var pic:Image = new Image();
+				pic.x = (userRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
+				pic.y = (userRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
+				pic.source = facebookUser.pic_square;
+				userRenderer.uic = pic;
+				addChild(userRenderer);
+				
+				userRenderer.thinger = facebookUser;
+				userRenderer.addEventListener(MouseEvent.CLICK, onUserRendererClicked);
+			}
+			
+			private function onFriendRendererClicked(evt:MouseEvent):void
+			{
+				var friend:FacebookUser = (evt.currentTarget as InventoryItemRenderer).thinger as FacebookUser;
+				var snid:int = int(friend.uid);
+				Application.application.getFriendData(snid);
+			}
+			
+			private function onUserRendererClicked(evt:MouseEvent):void
+			{
+				Application.application.currentState = "worldView";
+			}
+												
 		]]>
 	</mx:Script>
 </mx:Canvas>

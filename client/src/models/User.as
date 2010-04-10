@@ -39,7 +39,8 @@ package models
 			_id = params.id;
 			_xp = params.xp;
 			_credits = params.credits;
-			_premium_credits = params.premium_credits;			
+			_premium_credits = params.premium_credits;	
+			_snid = params.snid;		
 		}
 		
 		private function onStructureAdded(evt:CollectionEvent):void
@@ -126,6 +127,16 @@ package models
 		public function get credits():int
 		{
 			return _credits;
+		}
+		
+		public function set snid(val:int):void
+		{
+			_snid = val;
+		}
+		
+		public function get snid():int
+		{
+			return _snid;
 		}
 		
 	}

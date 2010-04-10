@@ -18,7 +18,7 @@ package models
 		{
 			super(params, target);
 			_id = params.id;
-			updateProperties(params);			
+			updateProperties(params);
 		}
 		
 		public function updateProperties(params:Object):void
@@ -44,6 +44,23 @@ package models
 			_structure = val;
 			var evt:DynamicEvent = new DynamicEvent('parentLoaded', true, true);
 			evt.thinger = val;
+			dispatchEvent(evt);
+			
+			if (_structure['mc'] != null)
+			{
+				var event:DynamicEvent = new DynamicEvent('parentMovieClipAssigned', true, true);
+				dispatchEvent(event);
+			}
+			else
+			{
+				_structure.addEventListener('movieClipLoaded', onStructureMovieClipAssigned);	
+			}
+		}
+		
+		private function onStructureMovieClipAssigned(evt:DynamicEvent):void
+		{
+			_structure.removeEventListener('movieClipLoaded', onStructureMovieClipAssigned);
+			var evt:DynamicEvent = new DynamicEvent('parentMovieClipAssigned', true, true);
 			dispatchEvent(evt);
 		}
 		

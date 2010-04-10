@@ -4,7 +4,8 @@ package controllers
 
 	public class EssentialEvent extends Event
 	{
-		public static const INSTANCE_LOADED:String = "Essential:InstanceLoaded";	
+		public static const INSTANCE_LOADED:String = "Essential:InstanceLoaded";
+		public static const PARENT_ASSIGNED:String = "Essential:ParentAssigned";	
 		public var _instance:Object;
 		public var _model:String;
 		

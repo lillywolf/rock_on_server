@@ -72,9 +72,7 @@
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
 				myWorld = new World(800, 800, 40);				
 				addChild(myWorld);	
-				
-				myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);
-								
+												
 				customerPersonManager = new CustomerPersonManager();
 				customerPersonManager.myWorld = myWorld;
 												
@@ -98,9 +96,7 @@
 			}
 			
 			public function onUserLoaded():void
-			{
-//				myUser.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);		
-//				showUserData();				
+			{				
 			}
 			
 			private function onStructurePlaced(evt:DynamicEvent):void
@@ -108,22 +104,10 @@
 				thingerManager.saveStructurePlacement(evt.asset, evt.currentPoint);
 			}
 			
-//			public function showUserData():void
-//			{
-//				creditsBox = new Text();
-//				creditsBox.id = 'myCredits';
-//				creditsBox.text = myUser.credits.toString();
-//				creditsBox.setStyle('fontSize', '11');
-//				creditsBox.x = 10;
-//				creditsBox.y = 50;
-//				parentApplication.addChild(creditsBox);
-//			}
-			
 			private function onWorldClicked(evt:MouseEvent):void
 			{
 				if (evt.target is BandMember)
 				{
-					showCustomizer((evt.target as ActiveAsset).thinger as Creature);
 				}
 				else if (evt.target is CustomerPerson)
 				{
@@ -138,11 +122,6 @@
 				}
 			}
 			
-			private function onWorldThingerPurchased(evt:UserEvent):void
-			{
-				creditsBox.text = myUser.credits.toString();
-			}
-			
 			public function showBooths():void
 			{
 				booths = new ArrayCollection();
@@ -150,9 +129,6 @@
 				for each (var os:OwnedStructure in boothStructures)
 				{
 					var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
-//					var asset:AssetStack = new AssetStack(new NavyEyes());
-//					asset.movieClipStack.addChild(new PeachBody());
-//					asset.movieClipStack.addChild(new NavyEyes());
 					asset.thinger = os;
 					var booth:Booth = new Booth(os);
 					booths.addItem(booth);
@@ -175,17 +151,6 @@
 				myWorld.addAsset(asset, addTo);
 				
 				bandMemberManager.concertStage = concertStage;				
-			}
-			
-			public function showStore():void
-			{
-				var store:Store = storeManager.getStoreByName('Booth Store');
-				var uic:UIComponent = storeManager.getStoreUIComponent(store);
-				uic.width = 500;
-				uic.height = 400;
-				uic.x = this.width - uic.width/2;
-				uic.y = this.height - uic.height/2;
-				parentApplication.addChild(uic);
 			}
 			
 			public function showGroupies():void
@@ -220,22 +185,12 @@
 			
 			private function addStaticAsset(asset:ActiveAsset, addTo:Point3D):void
 			{
-//				var addTo:Point3D = new Point3D(Math.floor(Math.random()*myWorld.tilesWide), 0, Math.floor(Math.random()*myWorld.tilesDeep));				
 				myWorld.addAsset(asset, addTo);
 				asset.movieClip.gotoAndPlay(1);
 				asset.movieClip.stop();
 			}
 			
-			public function showCustomizer(creature:Creature):void
-			{
-				parentApplication.onCreatureToCustomize(creature);
-			}
-			
-			private function onThingerPurchased(evt:StoreEvent):void
-			{
-
-			}
-			
 		]]>
 	</mx:Script>	
+	
 </mx:Canvas>

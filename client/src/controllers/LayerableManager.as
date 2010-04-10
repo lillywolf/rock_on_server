@@ -64,6 +64,16 @@ package controllers
 			_layerables.removeItemAt(i);
 		}
 		
+		public function set layerables(val:ArrayCollection):void
+		{
+			_layerables = val;
+		}
+		
+		public function get layerables():ArrayCollection
+		{
+			return _layerables;
+		}
+		
 		public function set owned_layerables(val:ArrayCollection):void
 		{
 			_owned_layerables = val;

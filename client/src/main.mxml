@@ -6,12 +6,17 @@
 				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{this.editView}" worldView="{this.worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}"/>
 			</mx:AddChild>
 			<mx:AddChild position="after">
-				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" userManager="{gdi.userManager}" facebookInterface="{facebookInterface}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
+				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
 			<mx:AddChild>
 				<views:WorldView id="worldView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="friendView" basedOn="topBar">
+			<mx:AddChild>
+				<views:FriendView id="friendView"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="editView" basedOn="topBar">
@@ -27,6 +32,10 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import mx.events.DynamicEvent;
+			import mx.events.FlexEvent;
+			import controllers.FriendManager;
+			import com.facebook.events.FacebookEvent;
 			import facebook.FacebookFunTime;
 			import user.UserEvent;
 			import models.Creature;
@@ -40,6 +49,8 @@
 			[Bindable] public var xGridCoord:Number;
 			[Bindable] public var yGridCoord:Number;
 			public var facebookInterface:FacebookFunTime;
+			public var friendManager:FriendManager;
+			public var gameContent:Dictionary;
 			
 			private function onPreInitialize():void
 			{
@@ -49,29 +60,71 @@
 				
 				gdi.addEventListener(ServerDataEvent.USER_LOADED, onUserLoaded);
 				gdi.addEventListener(ServerDataEvent.GAME_CONTENT_LOADED, onGameContentLoaded);
-				gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);
+				gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	
 				
-				gdi.getStaticGameContent();
-				gdi.getUserContent();			
+				friendManager = new FriendManager();		
 			}
 			private function onApplicationComplete():void
 			{
 				facebookInterface = new FacebookFunTime();
 				currentState = 'worldView';
 			}
-			public function checkIfLoadingAndInstantiationComplete():void
+			public function onFacebookUserLoaded(uid:int, evt:FacebookEvent):void
 			{
-				if (gdi.essentialModelManager.instancesToLoad.length == 0 && gdi.pendingRequests == gdi.loadCounter)
-				{
-					contentFullyLoaded();
-				}			
+				gdi.getStaticGameContent();
+				gdi.getUserContent(uid);
 			}
-			private function contentFullyLoaded():void
+			public function getFriendData(uid:int):void
+			{
+				friendManager.getFriendData(uid);
+			}
+			public function setGameContent():void
+			{
+				gameContent = new Dictionary();
+				gameContent["structures"] = gdi.structureManager.structures;
+				gameContent["layerables"] = gdi.layerableManager.layerables;
+				gameContent["stores"] = gdi.storeManager.stores;
+				gameContent["essentialModelReference"] = gdi.essentialModelManager.essentialModelReference;
+			}
+			public function attemptToInitializeVenueForUser():void
 			{
 				worldView.showBooths();		
-				worldView.addStage();		
+				worldView.addStage();								
+			}
+			public function attemptToShowFriendVenue(friendGDI:GameDataInterface):void
+			{
+				currentState = "friendView";
+				friendView.myUser = friendGDI.user;
+				friendView.userManager = friendGDI.userManager;
+				friendView.structureManager = friendGDI.structureManager;
+				friendView.layerableManager = friendGDI.layerableManager;
+				friendView.creatureManager = friendGDI.creatureManager;				
+				friendView.addEventListener("worldAdded", onFriendViewWorldAdded);
+			}
+			private function onFriendViewWorldAdded(evt:DynamicEvent):void
+			{
+				friendView.removeEventListener("worldAdded", onFriendViewWorldAdded);
+				friendView.showBooths();
+				friendView.addStage();				
+			}
+			public function showFriendVenuePostLoad(friendGDI:GameDataInterface):void
+			{
+				currentState = "friendView";
+				friendView.myUser = friendGDI.user;
+				friendView.userManager = friendGDI.userManager;
+				friendView.structureManager = friendGDI.structureManager;
+				friendView.layerableManager = friendGDI.layerableManager;
+				friendView.creatureManager = friendGDI.creatureManager;					
+				friendView.showBooths();
+				friendView.addStage();				
+			}
+			public function instancesLoadedForGameUser():void
+			{
 				worldView.myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);				
-				bottomBarView.initializeFriends();
+			}
+			public function instancesLoadedForFriend():void
+			{
+				
 			}
 			private function onUserLoaded(evt:ServerDataEvent):void
 			{
@@ -85,7 +138,8 @@
 			}
 			private function onUserContentLoaded(evt:ServerDataEvent):void
 			{
-				checkIfLoadingAndInstantiationComplete();				
+				setGameContent();
+				gdi.checkIfLoadingAndInstantiationComplete();				
 			}
 			public function onCreatureToCustomize(creature:Creature):void
 			{
