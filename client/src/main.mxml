@@ -6,7 +6,7 @@
 				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{this.editView}" worldView="{this.worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}"/>
 			</mx:AddChild>
 			<mx:AddChild position="after">
-				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
+				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">

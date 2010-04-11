@@ -1,0 +1,31 @@
+/* CSS file */
+@font-face {
+	src: url("../libs/Gotham-Bold.otf");
+    font-family: Gotham-Bold;
+	advanced-anti-aliasing: true;
+}
+@font-face {
+	src: url("../libs/Gotham-Book.otf");
+	font-family: Gotham-Book;
+	advanced-anti-aliasing: true;
+}
+@font-face {
+	src: url("../libs/Gotham-Medium.otf");
+	font-family: Gotham-Medium;
+	advanced-anti-aliasing: true;
+}
+
+@font-face {
+	src: url("../libs/romeral.otf");
+	font-family: Romeral;
+}
+
+@font-face {
+	src: url("../libs/Museo_Slab_500.otf");
+	font-family: Museo-Slab-500;
+}
+
+@font-face {
+	src: url("../libs/Museo_Slab_900.otf");
+	font-family: Museo-Slab-900;
+}

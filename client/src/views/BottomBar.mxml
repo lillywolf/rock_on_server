@@ -2,6 +2,9 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="100" clipContent="false" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import mx.containers.HBox;
+			import mx.controls.Button;
+			import mx.controls.Label;
 			import mx.controls.Image;
 			import mx.core.UIComponent;
 			import mx.events.DynamicEvent;
@@ -19,6 +22,9 @@
 			
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
+			public var tabCanvas:HBox;
+			public var worldView:WorldView;
+			public var editView:EditView;			
 			[Bindable] public var facebookFriends:Array;
 			[Bindable] public var facebookUser:FacebookUser;
 			
@@ -26,11 +32,24 @@
 			[Bindable] public var thingerManager:ThingerManager;
 			[Bindable] public var userManager:UserManager;
 			
+			public static const USER_PIC_DIMENSION:int = 92;
 			public static const FRIEND_PIC_DIMENSION:int = 50;
+			
+			[Embed(source="../libs/icons/musicnotes.png")]
+			public var musicBtnClass:Class;
+			[Embed(source="../libs/icons/arrow.png")]
+			public var arrowBtnClass:Class;
+			[Embed(source="../libs/icons/store.png")]
+			public var storeBtnClass:Class;
+			
 
 			private function onCreationComplete():void
-			{							
+			{		
+				createBackCanvas();					
+				createTabCanvas();
 				createInventoryCanvas();
+				addTabs();			
+					
 				addEventListener('facebookDataLoaded', onFriendDataLoaded);
 			}		
 		
@@ -39,16 +58,106 @@
 				myUser.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);		
 			}
 			
+			private function createBackCanvas():void
+			{
+				var backCanvas:Canvas = new Canvas();
+				backCanvas.x = -2;
+				backCanvas.y = 504;
+				backCanvas.width = 764;
+				backCanvas.height = 110;
+				backCanvas.clipContent = false;
+				backCanvas.setStyle("backgroundColor", 0x000000);
+				backCanvas.setStyle("cornerRadius", 16);
+				backCanvas.setStyle("borderStyle", "solid");
+				backCanvas.setStyle("borderColor", 0x000000);
+				this.addChild(backCanvas);
+			}
+			
 			private function createInventoryCanvas():void
 			{
 				inventoryCanvas = new Canvas();
-				inventoryCanvas.x = 80;
-				inventoryCanvas.y = 500;
-				inventoryCanvas.width = 680;
-				inventoryCanvas.height = 62;
+				inventoryCanvas.x = 0;
+				inventoryCanvas.y = 510;
+				inventoryCanvas.width = 760;
+				inventoryCanvas.height = 100;
 				inventoryCanvas.clipContent = false;
+				inventoryCanvas.setStyle("backgroundColor", 0x333333);
+				inventoryCanvas.setStyle("cornerRadius", 12);
+				inventoryCanvas.setStyle("borderStyle", "solid");
+				inventoryCanvas.setStyle("borderColor", 0x000000);
 				addChild(inventoryCanvas);
 			}
+			
+			private function createTabCanvas():void
+			{
+				tabCanvas = new HBox();
+				tabCanvas.setStyle("horizontalGap", 5);
+				tabCanvas.x = 500;
+				tabCanvas.y = 466;
+				tabCanvas.width = 160;
+				tabCanvas.height = 54;
+				tabCanvas.clipContent = false;
+				tabCanvas.setStyle("backgroundColor", 0x000000);
+				tabCanvas.setStyle("cornerRadius", 14);
+				tabCanvas.setStyle("borderStyle", "solid");
+				tabCanvas.setStyle("borderColor", 0x000000);
+				addChild(tabCanvas);
+			}
+			
+			private function addTabs():void
+			{
+				var editBtn:Button = new Button();
+				editBtn.setStyle("skin", arrowBtnClass);
+				editBtn.addEventListener(MouseEvent.CLICK, onEditButtonClicked);
+				editBtn.y = 468;
+				editBtn.x = 502;
+				this.addChild(editBtn);
+				var musicBtn:Button = new Button();
+				musicBtn.setStyle("skin", musicBtnClass);
+				musicBtn.addEventListener(MouseEvent.CLICK, onMusicButtonClicked);
+				musicBtn.y = 468;
+				musicBtn.x = 552;
+				this.addChild(musicBtn);				
+				var storeBtn:Button = new Button();
+				storeBtn.setStyle("skin", storeBtnClass);
+				storeBtn.addEventListener(MouseEvent.CLICK, onStoreButtonClicked);
+				storeBtn.y = 468;
+				storeBtn.x = 606;
+				this.addChild(storeBtn);				
+			}
+			
+			private function onEditButtonClicked(evt:MouseEvent):void
+			{
+				switchToEditView();
+			}
+			
+			private function onMusicButtonClicked(evt:MouseEvent):void
+			{
+				
+			}
+			
+			private function onStoreButtonClicked(evt:MouseEvent):void
+			{
+				switchToWorldViewAndShowStore();
+			}
+			
+			private function switchToEditView():void
+			{
+				Application.application.currentState = "editView";
+			}				
+			
+			public function switchToWorldView():void
+			{
+				Application.application.currentState = "worldView";
+				worldView.showGroupies();
+				worldView.showBandMembers();
+			}
+			
+			private function switchToWorldViewAndShowStore():void
+			{
+				Application.application.currentState = "worldView";
+				worldView.showStore();
+			}			
 			
 			private function onThingerPurchased(evt:StoreEvent):void
 			{
@@ -75,12 +184,16 @@
 				for each (var friend:FacebookUser in facebookFriends)
 				{
 					var friendRenderer:InventoryItemRenderer = new InventoryItemRenderer();
+					addFriendRendererStyle(friendRenderer);
 					friendRenderer.thingerIndex = index;
 					var pic:Image = new Image();
 					pic.x = (friendRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
 					pic.y = (friendRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
 					pic.source = friend.pic_square;
 					friendRenderer.uic = pic;
+					friendRenderer.x += USER_PIC_DIMENSION;
+					friendRenderer.addLevelBox(index);
+					friendRenderer.addName(friend.first_name);
 					inventoryCanvas.addChild(friendRenderer);
 					index++;
 					
@@ -89,16 +202,24 @@
 				}				
 			}
 			
+			public function addFriendRendererStyle(renderer:InventoryItemRenderer):void
+			{	
+				renderer.height = 80;
+				renderer.y = 10;
+			}
+			
 			public function showFacebookUser():void
 			{
 				var userRenderer:InventoryItemRenderer = new InventoryItemRenderer();
-				userRenderer.y = 500;
+				addFriendRendererStyle(userRenderer);
+				userRenderer.x = 10;				
 				var pic:Image = new Image();
 				pic.x = (userRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
 				pic.y = (userRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
 				pic.source = facebookUser.pic_square;
 				userRenderer.uic = pic;
-				addChild(userRenderer);
+				userRenderer.addName("You");
+				inventoryCanvas.addChild(userRenderer);
 				
 				userRenderer.thinger = facebookUser;
 				userRenderer.addEventListener(MouseEvent.CLICK, onUserRendererClicked);
@@ -118,4 +239,5 @@
 												
 		]]>
 	</mx:Script>
+	<mx:Style source="../application.css"/>
 </mx:Canvas>

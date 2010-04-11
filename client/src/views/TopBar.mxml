@@ -63,35 +63,13 @@
 				parentApplication.addChild(creditsBox);
 			}
 			
-			public function switchToWorldView():void
-			{
-				Application.application.currentState = 'worldView';
-				worldView.showGroupies();
-				worldView.showBandMembers();
-			}
-			
-			private function switchToWorldViewAndShowStore():void
-			{
-				Application.application.currentState = 'worldView';
-				worldView.showStore();
-			}
-			
 			private function getFriendData():void
 			{
 				userManager.getFacebookFriendData();
-			}
-			
-			private function switchToEditView():void
-			{
-				Application.application.currentState = 'editView';
-			}						
+			}					
 		]]>
 	</mx:Script>
-	<mx:Button click="switchToWorldView()"/>
-	<mx:Button x="30" click="switchToWorldViewAndShowStore()"/>
 	<!--mx:Button x="60" click="showCustomizer()"/-->
-	<mx:Button x="90" click="getFriendData()"/>
-	<mx:Button x="120" click="switchToEditView()"/>
 	<mx:Canvas right="0" width="200">
 		<mx:Label text="MEM: {this.myMemory}"/>
 		<mx:Label y="20" text="FPS: {this.fps}"/>

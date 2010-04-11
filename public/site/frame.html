@@ -1,0 +1,67 @@
+<html>
+<head>
+</head>
+
+<body>
+<div id="stuff">  
+  My Info:
+<div id="profile_pics"></div>
+<div id="my_fbid"></div> 
+</div> 
+  
+<script src="http://static.ak.connect.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php" type="text/javascript">
+</script>
+<script type="text/javascript">    
+
+var api_key = 'eb67822b00a98a91c049e1347be7e657';
+var channel_path = '';
+FB_RequireFeatures(["Api"], function(){
+    // Create an ApiClient object, passing app's API key and 
+    // a site relative URL to xd_receiver.htm
+    FB.Facebook.init(api_key, channel_path);
+    var api = FB.Facebook.apiClient;
+    
+    // var hi = [1, 2, 3];
+    // document.write(hi[0]);    
+    
+    // require user to login 
+    api.requireLogin(function(exception){
+        // FB.FBDebug.logLevel=1;
+        // FB.FBDebug.dump("Current user id is " + api.get_session().uid);
+        document.write(api.get_session().uid);
+        // Get friends list 
+        
+       //5-14-09: this code below is broken, correct code follows 
+       //api.friends_get(null, function(result){
+       //     Debug.dump(result, 'friendsResult from non-batch execution ');
+       // });
+       
+       
+
+         // api.friends_get(new Array(), function(result, exception){
+         //      FB.FBDebug.dump(result, 'friendsResult from non-batch execution ');
+         // });
+    });
+});
+
+// var widget_div = document.getElementById("profile_pics");
+// FB.ensureInit(function () {
+//   FB.Facebook.apiClient.friends_get(null, function(result) {
+//     var markup = "";
+//     var num_friends = result ? Math.min(2, result.length) : 0;
+//     if (num_friends > 0) {
+//       for (var i=0; i<num_friends; i++) {
+//        markup +=
+//          '<fb:profile-pic size="square" uid="'
+//          + result[i]
+//          + '" facebook-logo="true">'
+//          + ' </fb:profile-pic>';
+//       }
+//     }
+//     widget_div.innerHTML = markup;
+//     FB.XFBML.Host.parseDomElement(widget_div);
+//   });
+// });
+
+</script>
+</body>

@@ -11,20 +11,22 @@ class SiteController < ApplicationController
   helper_method :facebook_session  
   
   layout nil
-
+  
   def index
     
-    ensure_application_is_installed_by_facebook_user    
-    user = setup_facebook_user
-    if user.nil?
-      render :text => 'Where are you?'
-    else
+    # ensure_application_is_installed_by_facebook_user    
+    # user = setup_facebook_user
+    #   
+    # if user.nil?
+    #   render :text => 'Where are you?'
+    # else
+    #   get_facebook_friend_data
       # friends = user.friends
-      render :text => user.name
+      # # render :text => user.name
       # friends.each do |f|
-        # render :text => user.name
+      #   # render :text => user.name
       # end  
-    end    
+    # end    
     
     # # attempt to create a facebook session
     # fb_session = create_facebook_session
@@ -65,21 +67,29 @@ class SiteController < ApplicationController
   end
   
   def get_facebook_friends
-    @friends = facebook_session.friends
+    @friends = user.friends
     return @friends
-  end    
+  end 
   
-  def get_facebook_friend_data
-    # array = Array.new
-    # user = setup_facebook_user
-    # if user.nil?
-    #   # render :text => 'Where are you?'
-    # else
-    #   friends = get_facebook_friends 
-    # end
-    # render :json => array.to_json        
+  def facebook_friend_data
+  end     
+  
+  def get_facebook_friend_data    
+    array = Array.new
+    user = setup_facebook_user
+    
+    if user.nil?
+    else
+      friends = user.friends 
+      # friends.each do |f|
+      # 10.times { |n| array.push(friends[n]) }  
+      for friend in user.friends[0..10]
+        name = friend.name
+        array.push(name)
+      end            
+    end
+    render :json => array.to_json        
   end  
-
 
   # def uninstall
   #   create_facebook_session if RAILS_ENV=='production'
