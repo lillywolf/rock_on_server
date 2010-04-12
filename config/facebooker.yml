@@ -12,7 +12,7 @@ development:
   api_key: eb67822b00a98a91c049e1347be7e657
   secret_key: 93822524c73ff1b5acc09be6f357a0fa
   canvas_page_name: rockstardom
-  callback_url: http://glowing-sunrise-33.heroku.com/site/
+  callback_url: http://ds416-ubun1.blueboxgrid.com:5001/site/
   pretty_errors: true
   set_asset_host_to_callback_url: true
   tunnel:
@@ -26,7 +26,7 @@ test:
   api_key: eb67822b00a98a91c049e1347be7e657
   secret_key: 93822524c73ff1b5acc09be6f357a0fa
   canvas_page_name: rockstardom
-  callback_url: http://glowing-sunrise-33.heroku.com/site/
+  callback_url: http://ds416-ubun1.blueboxgrid.com:5001/site/
   set_asset_host_to_callback_url: true
   tunnel: 
     public_host_username: 
@@ -39,7 +39,7 @@ production:
   api_key: eb67822b00a98a91c049e1347be7e657
   secret_key: 93822524c73ff1b5acc09be6f357a0fa
   canvas_page_name: rockstardom
-  callback_url: http://glowing-sunrise-33.heroku.com/site/
+  callback_url: http://ds416-ubun1.blueboxgrid.com:5001/site/
   set_asset_host_to_callback_url: true   
   tunnel:
     public_host_username: 
