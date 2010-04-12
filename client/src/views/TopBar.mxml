@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="80" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import mx.core.UIComponent;
 			import mx.core.Application;
 			import controllers.UserManager;
 			import controllers.ThingerManager;
@@ -30,7 +31,7 @@
 			public var lastTime:Number;	
 			
 			public var worldView:WorldView;
-			public var editView:EditView;
+			public var editView:EditView;		
 					
 			private function onCreationComplete():void
 			{
@@ -54,13 +55,44 @@
 			
 			public function showUserData():void
 			{
+				var backCanvas:Canvas = new Canvas();
+				backCanvas.setStyle("backgroundColor", 0x000000);
+				backCanvas.setStyle("cornerRadius", 14);
+				backCanvas.setStyle("borderColor", 0x000000);
+				backCanvas.setStyle("borderStyle", "solid");
+				backCanvas.x = 28;
+				backCanvas.y = 16;
+				var creditsCanvas:Canvas = new Canvas();
+				creditsCanvas.setStyle("backgroundColor", 0x333333);
+				creditsCanvas.setStyle("cornerRadius", 10);
+				creditsCanvas.setStyle("borderColor", 0x000000);
+				creditsCanvas.setStyle("borderStyle", "solid");
+				creditsCanvas.x = 4;
+				creditsCanvas.y = 4;
+				creditsCanvas.height = 27;
+				creditsCanvas.clipContent = false;
 				creditsBox = new Text();
 				creditsBox.id = 'myCredits';
 				creditsBox.text = myUser.credits.toString();
 				creditsBox.setStyle('fontSize', '11');
-				creditsBox.x = 10;
-				creditsBox.y = 50;
-				parentApplication.addChild(creditsBox);
+				creditsBox.x = 28;
+				creditsBox.y = 1;
+				creditsBox.setStyle("paddingLeft", 6);
+				creditsBox.setStyle("paddingRight", 6);
+				creditsBox.setStyle("fontFamily", "Museo-Slab-900");
+				creditsBox.setStyle("fontSize", 18);
+				creditsBox.setStyle("color", 0xffffff);
+				var coinIcon:CoinIcon = new CoinIcon();
+				coinIcon.scaleX = 0.4;
+				coinIcon.scaleY = 0.4;
+				var uic:UIComponent = new UIComponent();
+				uic.addChild(coinIcon);
+				uic.x = 6;
+				uic.y = 5;
+				creditsCanvas.addChild(uic);
+				creditsCanvas.addChild(creditsBox);
+				backCanvas.addChild(creditsCanvas);
+				addChild(backCanvas);
 			}
 			
 			private function getFriendData():void
