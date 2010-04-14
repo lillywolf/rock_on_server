@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  promoter_type: MyString
+  x: 
+  y: 
+  z: 
+
+two:
+  promoter_type: MyString
+  x: 
+  y: 
+  z: 
