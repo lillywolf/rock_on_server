@@ -19,6 +19,8 @@ package models
 		public var _owned_layerables:ArrayCollection;
 		public var _owned_structures:ArrayCollection;
 		
+		public var _last_showtime:String;
+		
 		public function User(params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
@@ -41,6 +43,7 @@ package models
 			_credits = params.credits;
 			_premium_credits = params.premium_credits;	
 			_snid = params.snid;		
+			_last_showtime = params.last_showtime;
 		}
 		
 		private function onStructureAdded(evt:CollectionEvent):void
@@ -137,6 +140,16 @@ package models
 		public function get snid():int
 		{
 			return _snid;
+		}
+		
+		public function set last_showtime(val:String):void
+		{
+			_last_showtime = val;
+		}
+		
+		public function get last_showtime():String
+		{
+			return _last_showtime;
 		}
 		
 	}

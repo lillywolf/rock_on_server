@@ -18,10 +18,13 @@ package models
 				
 		public function EssentialModelReference()
 		{
-			loadedModels = new Dictionary();
+			if (!Application.application.loadedModels)
+			{
+				loadedModels = new Dictionary();			
+				Application.application.loadedModels = loadedModels;
+			}
 			classCopies = new Array();
 			initializeArrays();
-			Application.application.loadedModels = loadedModels;
 		}
 		
 		public function initializeArrays():void

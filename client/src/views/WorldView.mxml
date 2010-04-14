@@ -140,7 +140,7 @@
 			
 			private function onWorldThingerPurchased(evt:UserEvent):void
 			{
-				creditsBox.text = myUser.credits.toString();
+//				creditsBox.text = myUser.credits.toString();
 			}
 			
 			public function showBooths():void

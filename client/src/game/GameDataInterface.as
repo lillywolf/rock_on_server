@@ -38,11 +38,13 @@ package game
 		public var sc:ServerController;
 		public var loadCounter:int = 0;
 		public var pendingRequests:int = 0;
+		public var gameClock:GameClock;
 		
 		public function GameDataInterface(preLoadedContent:Dictionary=null)
 		{
 			sc = new ServerController(this);
 			createManagers(preLoadedContent);
+			gameClock = new GameClock();
 			essentialModelManager.users.addEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
 			essentialModelManager.addEventListener(ServerDataEvent.INSTANCE_TO_CREATE, onInstanceToCreate);
 			essentialModelManager.addEventListener('instanceLoaded', onInstanceLoaded);	
@@ -95,6 +97,8 @@ package game
 		{
 			user = essentialModelManager.users[0];
 			userManager.user = user;
+			
+			gameClock.updateLastShowtime(userManager.user.last_showtime);
 			
 			var serverDataEvent:ServerDataEvent = new ServerDataEvent(ServerDataEvent.USER_LOADED, 'user', evt.currentTarget, null, true, true);
 			dispatchEvent(serverDataEvent);

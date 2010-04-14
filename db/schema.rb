@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100412192614) do
+ActiveRecord::Schema.define(:version => 20100414002543) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -96,6 +96,15 @@ ActiveRecord::Schema.define(:version => 20100412192614) do
     t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "usable_id"
+  end
+
+  create_table "promoters", :force => true do |t|
+    t.string   "promoter_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "x"
+    t.integer  "y"
+    t.integer  "z"
   end
 
   create_table "store_owned_thingers", :force => true do |t|

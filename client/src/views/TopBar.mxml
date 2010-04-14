@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="80" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Label;
 			import mx.core.UIComponent;
 			import mx.core.Application;
 			import controllers.UserManager;
@@ -98,7 +99,14 @@
 			private function getFriendData():void
 			{
 				userManager.getFacebookFriendData();
-			}					
+			}	
+			
+			private function showCountdown():void
+			{
+				var counterContainer:Canvas = new Canvas();
+				var hoursLabel:Label = new Label();
+				
+			}				
 		]]>
 	</mx:Script>
 	<!--mx:Button x="60" click="showCustomizer()"/-->

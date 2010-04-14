@@ -89,7 +89,9 @@
 			public function attemptToInitializeVenueForUser():void
 			{
 				worldView.showBooths();		
-				worldView.addStage();								
+				worldView.addStage();
+				worldView.showGroupies();
+				worldView.showBandMembers();								
 			}
 			public function attemptToShowFriendVenue(friendGDI:GameDataInterface):void
 			{
@@ -105,7 +107,9 @@
 			{
 				friendView.removeEventListener("worldAdded", onFriendViewWorldAdded);
 				friendView.showBooths();
-				friendView.addStage();				
+				friendView.addStage();	
+				friendView.showGroupies();
+				friendView.showBandMembers();			
 			}
 			public function showFriendVenuePostLoad(friendGDI:GameDataInterface):void
 			{
