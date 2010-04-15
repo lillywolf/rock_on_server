@@ -13,6 +13,7 @@ package models
 		public var _x:Number;
 		public var _y:Number;
 		public var _z:Number;
+		public var _created_at:String;
 				
 		public function OwnedStructure(params:Object=null, target:IEventDispatcher=null)
 		{
@@ -27,6 +28,7 @@ package models
 			_x = params.x;
 			_y = params.y;
 			_z = params.z;
+			_created_at = params.created_at;
 		}		
 
 		public function set id(val:int):void
@@ -77,6 +79,16 @@ package models
 		public function get structure_id():int
 		{
 			return _structure_id;
+		}	
+			
+		public function set created_at(val:String):void
+		{
+			_created_at = val;
+		}
+		
+		public function get created_at():String
+		{
+			return _created_at;
 		}		
 		
 		public function set user_id(val:int):void

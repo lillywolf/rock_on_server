@@ -7,7 +7,7 @@ package rock_on
 	import world.World;
 	import world.WorldEvent;
 
-	public class BandMemberManager extends ArrayCollection
+	public class PromoterManager extends ArrayCollection
 	{
 		public static const ENTER_STATE:int = 0;
 		public static const ROAM_STATE:int = 1;
@@ -16,19 +16,18 @@ package rock_on
 		public static const GONE_STATE:int = 5;	
 			
 		private var _myWorld:World;		
-		private var _concertStage:ConcertStage;
-		public var spawnLocation:Point3D;				
+		public var spawnLocation:Point3D;			
 		
-		public function BandMemberManager(source:Array=null)
+		public function PromoterManager(source:Array=null)
 		{
 			super(source);
 		}
 		
-		public function add(person:BandMember):void
+		public function add(person:Promoter, addTo:Point3D):void
 		{
 			if(_myWorld)
 			{			
-				setSpawnLocation();
+				setSpawnLocation(addTo);
 				_myWorld.addAsset(person, spawnLocation);				
 				addItem(person);
 				person.myWorld = _myWorld;
@@ -41,32 +40,26 @@ package rock_on
 		
 		private function onFinalDestinationReached(evt:WorldEvent):void
 		{
-			if (evt.activeAsset is BandMember)
+			if (evt.activeAsset is Promoter)
 			{	
-				var bm:BandMember = evt.activeAsset as BandMember;
-				if (bm.state == ROAM_STATE && Math.random() < 0.5)
+				var pr:Promoter = evt.activeAsset as Promoter;
+				if (pr.state == ROAM_STATE)
 				{
-					bm.findNextPath();
-				}
-				else if (bm.state == ROAM_STATE)
-				{
-					bm.advanceState(STOP_STATE);
 				}
 				else
 				{
-					bm.standFacingCrowd();
 				}
 			}
 		}
 		
-		public function setSpawnLocation():void
+		public function setSpawnLocation(addTo:Point3D):void
 		{
-			spawnLocation = new Point3D(Math.floor(_concertStage.width - (Math.random()*_concertStage.width)), 0, Math.floor(_myWorld.tilesDeep - Math.random()*(_concertStage.depth)));	
+			spawnLocation = addTo;
 		}
 		
 		public function update(deltaTime:Number):void
 		{			
-			for each (var person:BandMember in this)
+			for each (var person:Promoter in this)
 			{
 				if (person.update(deltaTime))
 				{		
@@ -78,7 +71,7 @@ package rock_on
 			}			
 		}
 		
-		public function remove(person:BandMember):void
+		public function remove(person:Promoter):void
 		{
 			if(_myWorld)
 			{
@@ -122,24 +115,7 @@ package rock_on
 		public function get myWorld():World
 		{
 			return _myWorld;
-		}	
-		
-		public function set concertStage(val:ConcertStage):void
-		{
-			if(!_concertStage)
-			{
-				_concertStage = val;				
-			}
-			else
-			{
-//				throw new Error("Don't change this!!");				
-			}
 		}
-		
-		public function get concertStage():ConcertStage
-		{
-			return _concertStage;
-		}						
-		
-	}
+			
+	}		
 }

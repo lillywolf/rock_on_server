@@ -69,6 +69,19 @@ package controllers
 			return matchingCreatures;
 		}
 		
+		public function getCreaturesByType(type:String):ArrayCollection
+		{
+			var matchingCreatures:ArrayCollection = new ArrayCollection();
+			for each (var creature:Creature in _creatures)
+			{
+				if (creature.type == type)
+				{
+					matchingCreatures.addItem(creature);
+				}
+			}
+			return matchingCreatures;
+		}
+		
 		public function generateCreatureCustomizer(creature:Creature):CreatureCustomizer
 		{
 			var creatureCustomizer:CreatureCustomizer = new CreatureCustomizer(creature, this);

@@ -7,12 +7,15 @@ package models
 	import mx.collections.ArrayCollection;
 	
 	import world.AssetStack;
+	import world.Point3D;
 
 	public class Creature extends EssentialModel
 	{
 		public var _id:int;
 		public var _type:String;
 		public var _owned_layerables:ArrayCollection;
+		public var _additional_info:String;
+		public var location:Point3D;
 		public var layerableOrder:Array;
 		
 		public function Creature(params:Object, target:IEventDispatcher=null)
@@ -31,7 +34,23 @@ package models
 			if (params.creature_type)
 			{
 				_type = params.creature_type;
-			}			
+			}		
+			if (params.additional_info)
+			{
+				_additional_info = params.additional_info;				
+			}	
+			if (params.x != null)
+			{
+				location = new Point3D(params.x, 0, 0);
+			}
+			if (params.y != null)
+			{
+				location.y = params.y;
+			}
+			if (params.z != null)
+			{
+				location.z = params.z;
+			}
 		}
 		
 		public function initializeLayerableOrder():void
@@ -111,6 +130,16 @@ package models
 		public function get owned_layerables():ArrayCollection
 		{
 			return _owned_layerables;
+		}
+		
+		public function set additional_info(val:String):void
+		{
+			_additional_info = val;
+		}
+		
+		public function get additional_info():String
+		{
+			return _additional_info;
 		}
 				
 	}

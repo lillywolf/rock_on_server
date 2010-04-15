@@ -3,6 +3,7 @@ package world
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.Application;
 
 	public class PathFinder extends ArrayCollection
 	{
@@ -79,6 +80,11 @@ package world
 				
 			}
 			
+			if (currentlyOccupiedSpaces.contains(pathGrid[asset.worldDestination.x][asset.worldDestination.y][asset.worldDestination.z]))
+			{
+				throw new Error("Destination location is currently occupied");
+			}
+			
 			var i:int = 1;
 			while (true)
 			{
@@ -140,6 +146,15 @@ package world
 			}
 			return assetPathFinder;			
 		}	
+		
+		public function establishOwnedStructures():void
+		{
+			occupiedSpaces = new ArrayCollection();
+			for each (var os:OwnedStructure in Application.application.gdi.structureManager.owned_structures)
+			{
+				addToOccupiedSpaces(os);
+			}
+		}
 		
 		private function establishOccupiedSpaces(exemptStructures:ArrayCollection=null):void
 		{

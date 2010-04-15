@@ -1,0 +1,2 @@
+module PromoterHelper
+end

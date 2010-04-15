@@ -64,6 +64,12 @@ package world
 			assetRenderer.unsortedAssets.addItem(activeAsset);
 		}
 		
+		public function removeAsset(activeAsset:ActiveAsset):void
+		{
+			var index:int = assetRenderer.unsortedAssets.getItemIndex(activeAsset);
+			assetRenderer.unsortedAssets.removeItemAt(index);
+		}
+		
 		public static function worldToActualCoords(worldCoords:Point3D):Point
 		{
 			var x:Number = worldCoords.x;

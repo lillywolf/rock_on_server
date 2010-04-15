@@ -27,6 +27,19 @@ package game
 			super(target);
 		}
 		
+		public static function convertStringTimeToUnixTime(val:String):int
+		{
+			var datePart:String = val.split("T")[0];
+			var timePart:String = (val.split("T")[1] as String).split("Z")[0];
+			var hours:Number = Number(timePart.split(":")[0]);
+			var minutes:Number = Number(timePart.split(":")[1]);
+			var seconds:Number = Number(timePart.split(":")[2]);
+			var dateObject:Date = DateField.stringToDate(datePart, "YYYY-MM-DD");
+			var currentHours:Number = dateObject.setHours(hours, minutes, seconds, 0);
+			var unixTime:int = dateObject.getTime()/1000;
+			return unixTime;
+		}	
+		
 		public function updateLastShowtime(val:String):void
 		{
 			var datePart:String = val.split("T")[0];

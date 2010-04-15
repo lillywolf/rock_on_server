@@ -89,7 +89,7 @@ package rock_on
 				{
 					cp.standAtBooth();			
 				}
-				else if (cp.state == ROAM_STATE)
+				else if (cp.state == ROAM_STATE && Math.random())
 				{
 					cp.findNextPath();
 				}

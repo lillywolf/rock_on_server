@@ -2,6 +2,11 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import rock_on.PasserbyManager;
+			import game.GameClock;
+			import rock_on.ListeningStation;
+			import rock_on.Promoter;
+			import rock_on.PromoterManager;
 			import world.WorldEvent;
 			import mx.controls.Alert;
 			import controllers.UserManager;
@@ -49,9 +54,11 @@
 			public var editModeActivated:Boolean = false;
 			public var booths:ArrayCollection;
 			public var stages:ArrayCollection;
+			public var listeningStations:ArrayCollection;
 			public var customerPersonManager:CustomerPersonManager;
 			public var bandMemberManager:BandMemberManager;
 			public var concertStage:ConcertStage;
+			public var passerbyManager:PasserbyManager;
 			
 			public var creditsBox:Text;
 			
@@ -81,6 +88,9 @@
 				bandMemberManager = new BandMemberManager();
 				bandMemberManager.myWorld = myWorld;
 				
+				passerbyManager = new PasserbyManager();
+				passerbyManager.myWorld = myWorld;
+				
 				var evt:DynamicEvent = new DynamicEvent("worldAdded", true, true);
 				dispatchEvent(evt);
 			}
@@ -107,17 +117,6 @@
 			{
 				thingerManager.saveStructurePlacement(evt.asset, evt.currentPoint);
 			}
-			
-//			public function showUserData():void
-//			{
-//				creditsBox = new Text();
-//				creditsBox.id = 'myCredits';
-//				creditsBox.text = myUser.credits.toString();
-//				creditsBox.setStyle('fontSize', '11');
-//				creditsBox.x = 10;
-//				creditsBox.y = 50;
-//				parentApplication.addChild(creditsBox);
-//			}
 			
 			private function onWorldClicked(evt:MouseEvent):void
 			{
@@ -150,15 +149,30 @@
 				for each (var os:OwnedStructure in boothStructures)
 				{
 					var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
-//					var asset:AssetStack = new AssetStack(new NavyEyes());
-//					asset.movieClipStack.addChild(new PeachBody());
-//					asset.movieClipStack.addChild(new NavyEyes());
 					asset.thinger = os;
 					var booth:Booth = new Booth(os);
 					booths.addItem(booth);
 					var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 					addStaticAsset(asset, addTo);
 				}
+			}
+			
+			public function showListeningStations():void
+			{
+				listeningStations = new ArrayCollection();
+				var listeningStructures:ArrayCollection = structureManager.getStructuresByType("ListeningStation");
+				for each (var os:OwnedStructure in listeningStructures)
+				{
+					var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
+					asset.thinger = os;
+					var listeningStation:ListeningStation = new ListeningStation(os);
+					listeningStation.createdAt = GameClock.convertStringTimeToUnixTime(os.created_at);
+					listeningStation.stationType = structureManager.getListeningStationTypeByMovieClip(os.structure.mc);
+					listeningStations.addItem(listeningStation);
+					var addTo:Point3D = new Point3D(os.x, os.y, os.z);
+					addStaticAsset(asset, addTo);
+				}
+				passerbyManager.listeningStations = listeningStations;
 			}
 			
 			public function addStage():void
@@ -202,6 +216,11 @@
 					person.speed = 0.07;
 					customerPersonManager.add(person);
 				}
+			}
+			
+			public function showPassersby():void
+			{
+				passerbyManager.startSpawning();
 			}
 			
 			public function showBandMembers():void

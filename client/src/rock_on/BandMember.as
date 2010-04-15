@@ -30,8 +30,9 @@ package rock_on
 		
 		public function BandMember(movieClipStack:MovieClip, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
 		{
-			super(movieClipStack, layerableOrder, creature, personScale, source);
+			super(movieClipStack, layerableOrder, creature, personScale, source);			
 			addEventListener(MouseEvent.CLICK, showBandMemberPopup);
+			startEnterState();				
 		}
 		
 		public function addExemptStructures():void
@@ -48,10 +49,12 @@ package rock_on
 		override public function startStopState():void
 		{
 			state = STOP_STATE;
-			adjustForPathfinding();
+//			adjustForPathfinding();
+
+			standFacingCrowd();
 			
-			roamTime.stop();
-			roamTime.removeEventListener(TimerEvent.TIMER, stop);
+//			roamTime.stop();
+//			roamTime.removeEventListener(TimerEvent.TIMER, stop);
 						
 			stopTime = new Timer(STOP_TIME);
 			stopTime.addEventListener(TimerEvent.TIMER, roam);
@@ -74,9 +77,9 @@ package rock_on
 			state = ROAM_STATE;
 			adjustForPathfinding();
 			
-			roamTime = new Timer(ROAM_TIME);
-			roamTime.addEventListener(TimerEvent.TIMER, stop);
-			roamTime.start();
+//			roamTime = new Timer(ROAM_TIME);
+//			roamTime.addEventListener(TimerEvent.TIMER, stop);
+//			roamTime.start();
 		}	
 		
 		public function adjustForPathfinding():void

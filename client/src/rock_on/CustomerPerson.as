@@ -46,13 +46,12 @@ package rock_on
 		
 		public var _booths:ArrayCollection = new ArrayCollection();
 		public var destinationLocation:Point3D;
-	
-//		[Bindable] public var _collisionManager:CollisionManager;		
-		
+			
 		public function CustomerPerson(movieClipStack:MovieClip, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
 		{
 			super(movieClipStack, layerableOrder, creature, personScale, source);
 			isQueued = false;
+			startEnterState();				
 		}
 
 		override public function doRoamState(deltaTime:Number):void
@@ -100,7 +99,10 @@ package rock_on
 		override public function startStopState():void
 		{
 			state = STOP_STATE;
-			adjustForPathfinding();
+			if (worldCoords.x != worldDestination.x && worldCoords.y != worldDestination.y && worldCoords.z != worldDestination.z)
+			{
+				adjustForPathfinding();
+			}
 			
 			if (stageCatchTime)
 			{
@@ -111,16 +113,10 @@ package rock_on
 			stopTime = new Timer(STOP_TIME);
 			stopTime.addEventListener(TimerEvent.TIMER, queueUp);
 			stopTime.start();
-			
-//			roamTime = new Timer(ROAM_TIME);					
-//			roamTime.addEventListener(TimerEvent.TIMER, roam);
-//			roamTime.start();
 		}
 		
 		override public function endStopState():void
 		{
-//			roamTime.stop();
-//			roamTime.removeEventListener(TimerEvent.TIMER, roam);
 			if (stopTime)
 			{
 				stopTime.stop();
@@ -227,12 +223,7 @@ package rock_on
 		public function findNextPath():void
 		{
 			var destination:Point3D = attemptDestination();
-			movePerson(destination, true);
-			
-//			betweenQueues = Math.random()*15000;
-//			betweenQueueTime = new Timer(betweenQueues);
-//			betweenQueueTime.addEventListener(TimerEvent.TIMER, queueUp);
-//			betweenQueueTime.start();				
+			movePerson(destination, true);				
 		}
 		
 		public function setPathToCurrentCoords():void
@@ -269,8 +260,6 @@ package rock_on
 		public function startQueuedState():void
 		{
 			state = QUEUED_STATE;
-//			betweenQueueTime.stop();
-//			betweenQueueTime.removeEventListener(TimerEvent.TIMER, queueUp);
 				
 			// If there are no available booths			
 			queueTime = null;
@@ -297,13 +286,6 @@ package rock_on
 				boothFront = new Point3D(Math.floor(booth.structure.width/2 + booth.x + (booth.currentQueue + 1)), 0, Math.floor(booth.structure.depth/4 + booth.z));							
 //			}
 			
-//			var attempt:Collidable = new Collidable(fpFront.x, fpFront.y, fpFront.z, 1, 1, 1);
-//			if (_collisionManager.doesCollide(attempt))
-//			{
-//				advanceState(ROAM_STATE);
-//				return;
-//			}
-			
 			if (!isQueued)
 			{
 				adjustingForPathToQueue = true;
@@ -328,10 +310,7 @@ package rock_on
 			if (adjustingForPathToQueue)
 			{
 				adjustingForPathToQueue = false;
-				isEnRoute = true;
-//				isQueued = true;
-//				currentBooth.currentQueue++;	
-//				currentBooth.hasCustomerEnRoute = true;				
+				isEnRoute = true;			
 			}
 			
 			// Don't let it go out of bounds!
@@ -654,6 +633,8 @@ package rock_on
 		
 		public function setInitialDestination():Point3D
 		{
+			_myWorld.pathFinder.establishOwnedStructures();
+			
 			destinationLocation = tryDestination();			
 			
 			if (_myWorld.pathFinder.occupiedSpaces.length >= _myWorld.tilesDeep*_myWorld.tilesWide)

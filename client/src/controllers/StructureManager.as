@@ -1,5 +1,6 @@
 package controllers
 {
+	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
 	
 	import models.OwnedStructure;
@@ -110,6 +111,15 @@ package controllers
 				ownedStructuresLoaded++;
 			}
 			essentialModelManager.checkIfAllLoadingComplete();
+		}
+		
+		public function getListeningStationTypeByMovieClip(mc:MovieClip):String
+		{
+			if (mc is Ticket_01)
+			{
+				return "Gramophone";
+			}
+			return null;
 		}
 	}
 }

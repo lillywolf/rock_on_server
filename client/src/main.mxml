@@ -91,7 +91,9 @@
 				worldView.showBooths();		
 				worldView.addStage();
 				worldView.showGroupies();
-				worldView.showBandMembers();								
+				worldView.showBandMembers();	
+				worldView.showListeningStations();
+				worldView.showPassersby();
 			}
 			public function attemptToShowFriendVenue(friendGDI:GameDataInterface):void
 			{

@@ -29,19 +29,22 @@ package rock_on
 		public var _myWorld:World;
 		private var _concertStage:ConcertStage;
 		public var state:int;
-//		public var collidable:Collidable;
 		public var currentDirection:Point3D;	
 		public var orientation:Number;			
 		
 		public function Person(movieClipStack:MovieClip, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
 		{
 			super(movieClipStack, source);
-//			collidable = new Collidable(0, 0, 0, this.width, this.height, 1);
-			startEnterState();	
+		
 			orientation = personScale;
 			movieClipStack.scaleX = orientation;
 			movieClipStack.scaleY = orientation;		
 			
+			setOptionalProperties(layerableOrder, creature);
+		}
+		
+		public function setOptionalProperties(layerableOrder:Array=null, creature:Creature=null):void
+		{
 			if (layerableOrder)
 			{
 				_layerableOrder = layerableOrder;
@@ -50,7 +53,7 @@ package rock_on
 			if (creature)
 			{
 				_creature = creature;
-			}			
+			}						
 		}
 		
 		public function setDirection(destination:Point3D):void
@@ -144,11 +147,11 @@ package rock_on
 		public function startStopState():void
 		{
 			state = STOP_STATE;
-			// movieClip.gotoAndPlay('walk_away');
-			for each (movieClip in movieClipStack)
-			{
-				movieClip.gotoAndPlay('stand_still_away');						
-			}
+			doAnimation("stand_still_away");
+//			for each (movieClip in movieClipStack)
+//			{
+//				movieClip.gotoAndPlay('stand_still_away');						
+//			}
 			stopTime = new Timer(STOP_TIME);
 			stopTime.addEventListener(TimerEvent.TIMER, leave);
 			stopTime.start();
@@ -224,9 +227,6 @@ package rock_on
 		
 		public function update(deltaTime:Number):Boolean
 		{
-//			if (collidedWith)
-//			{
-//			}
 			switch (state)
 			{
 				case ENTER_STATE:
