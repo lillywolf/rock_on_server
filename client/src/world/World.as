@@ -186,6 +186,13 @@ package world
 			}
 		}
 		
+		public function addStaticAsset(asset:ActiveAsset, addTo:Point3D):void
+		{
+			addAsset(asset, addTo);
+			asset.movieClip.gotoAndPlay(1);
+			asset.movieClip.stop();
+		}		
+		
 		private function onDirectionChanged(evt:WorldEvent):void
 		{
 			var asset:ActiveAsset = evt.activeAsset;

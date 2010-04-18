@@ -2,6 +2,9 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import rock_on.GroupieManager;
+			import controllers.DwellingManager;
+			import rock_on.ListeningStationManager;
 			import rock_on.PasserbyManager;
 			import game.GameClock;
 			import rock_on.ListeningStation;
@@ -54,12 +57,12 @@
 			public var editModeActivated:Boolean = false;
 			public var booths:ArrayCollection;
 			public var stages:ArrayCollection;
-			public var listeningStations:ArrayCollection;
 			public var customerPersonManager:CustomerPersonManager;
-			public var bandMemberManager:BandMemberManager;
+			public var bandManager:BandManager;
 			public var concertStage:ConcertStage;
-			public var passerbyManager:PasserbyManager;
-			
+			public var listeningStationManager:ListeningStationManager;
+			public var groupieManager:GroupieManager;
+			public var venueManager:VenueManager;
 			public var creditsBox:Text;
 			
 			[Bindable] public var layerableManager:LayerableManager;
@@ -68,6 +71,7 @@
 			[Bindable] public var creatureManager:CreatureManager;
 			[Bindable] public var thingerManager:ThingerManager;
 			[Bindable] public var userManager:UserManager;
+			[Bindable] public var dwellingManager:DwellingManager;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
@@ -85,14 +89,30 @@
 				customerPersonManager = new CustomerPersonManager();
 				customerPersonManager.myWorld = myWorld;
 												
-				bandMemberManager = new BandMemberManager();
-				bandMemberManager.myWorld = myWorld;
-				
-				passerbyManager = new PasserbyManager();
-				passerbyManager.myWorld = myWorld;
-				
 				var evt:DynamicEvent = new DynamicEvent("worldAdded", true, true);
 				dispatchEvent(evt);
+			}
+			
+			public function setInMotion():void
+			{
+				showBooths();		
+				addStage();
+				showGroupies();
+				showBandMembers();
+				showListeningStations();	
+				showVenue();			
+			}
+			
+			private function showVenue():void
+			{
+				venueManager = new VenueManager(dwellingManager, myWorld);	
+				venueManager.setInMotion();
+			}
+			
+			private function showListeningStations():void
+			{
+				listeningStationManager = new ListeningStationManager(structureManager, myWorld);
+				listeningStationManager.setInMotion();				
 			}
 			
 			private function onEnterFrame(evt:Event):void
@@ -104,7 +124,11 @@
 				myMemory = System.totalMemory;
 				lastTime = time;
 				customerPersonManager.update(lockedDelta);
-				bandMemberManager.update(lockedDelta);
+				
+				if (bandManager)
+				{	
+					bandManager.update(lockedDelta);
+				}
 			}
 			
 			public function onUserLoaded():void
@@ -153,26 +177,8 @@
 					var booth:Booth = new Booth(os);
 					booths.addItem(booth);
 					var addTo:Point3D = new Point3D(os.x, os.y, os.z);
-					addStaticAsset(asset, addTo);
+					myWorld.addStaticAsset(asset, addTo);
 				}
-			}
-			
-			public function showListeningStations():void
-			{
-				listeningStations = new ArrayCollection();
-				var listeningStructures:ArrayCollection = structureManager.getStructuresByType("ListeningStation");
-				for each (var os:OwnedStructure in listeningStructures)
-				{
-					var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
-					asset.thinger = os;
-					var listeningStation:ListeningStation = new ListeningStation(os);
-					listeningStation.createdAt = GameClock.convertStringTimeToUnixTime(os.created_at);
-					listeningStation.stationType = structureManager.getListeningStationTypeByMovieClip(os.structure.mc);
-					listeningStations.addItem(listeningStation);
-					var addTo:Point3D = new Point3D(os.x, os.y, os.z);
-					addStaticAsset(asset, addTo);
-				}
-				passerbyManager.listeningStations = listeningStations;
 			}
 			
 			public function addStage():void
@@ -187,8 +193,6 @@
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				concertStage.worldCoords = addTo;
 				myWorld.addAsset(asset, addTo);
-				
-				bandMemberManager.concertStage = concertStage;				
 			}
 			
 			public function showStore():void
@@ -204,45 +208,14 @@
 			
 			public function showGroupies():void
 			{	
-				// Creating ActiveAssets 2x as much as necessary here...
-				
-				var groupies:ArrayCollection = creatureManager.getConstructedCreaturesByType("Groupie", 1, 1);
-				
-				for each (var assetStack:AssetStack in groupies)
-				{
-					var person:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
-					person.booths = booths;
-					person.concertStage = concertStage;
-					person.speed = 0.07;
-					customerPersonManager.add(person);
-				}
-			}
-			
-			public function showPassersby():void
-			{
-				passerbyManager.startSpawning();
+				groupieManager = new GroupieManager(customerPersonManager, booths, concertStage, creatureManager, myWorld);
+				groupieManager.setInMotion();
 			}
 			
 			public function showBandMembers():void
 			{
-				var bandMembers:ArrayCollection = creatureManager.getConstructedCreaturesByType("BandMember", 1, 1);
-				
-				for each (var assetStack:AssetStack in bandMembers)
-				{
-					var bandMember:BandMember = new BandMember(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
-					bandMember.concertStage = concertStage;
-					bandMember.addExemptStructures();
-					bandMember.speed = 0.06;
-					bandMemberManager.add(bandMember);
-				}
-			}
-			
-			private function addStaticAsset(asset:ActiveAsset, addTo:Point3D):void
-			{
-//				var addTo:Point3D = new Point3D(Math.floor(Math.random()*myWorld.tilesWide), 0, Math.floor(Math.random()*myWorld.tilesDeep));				
-				myWorld.addAsset(asset, addTo);
-				asset.movieClip.gotoAndPlay(1);
-				asset.movieClip.stop();
+				bandManager = new BandManager(creatureManager, booths, concertStage, myWorld);
+				bandManager.setInMotion();
 			}
 			
 			public function showCustomizer(creature:Creature):void

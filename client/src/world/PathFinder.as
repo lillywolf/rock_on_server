@@ -4,6 +4,8 @@ package world
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	
+	import rock_on.Person;
 
 	public class PathFinder extends ArrayCollection
 	{
@@ -156,6 +158,19 @@ package world
 			}
 		}
 		
+		public function establishPeopleOccupiedSpaces():ArrayCollection
+		{
+			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
+			for each (var asset:ActiveAsset in _world.assetRenderer.sortedAssets)
+			{
+				if (asset is Person)
+				{
+					peopleOccupiedSpaces.addItem(getPoint3DForPerson(asset));
+				}
+			}
+			return peopleOccupiedSpaces;
+		}
+		
 		private function establishOccupiedSpaces(exemptStructures:ArrayCollection=null):void
 		{
 			occupiedSpaces = new ArrayCollection();
@@ -191,6 +206,18 @@ package world
 					occupiedSpaces.addItem(osPt3D);										
 				}
 			}
+		}
+		
+		private function getPoint3DForPerson(asset:ActiveAsset):Point3D
+		{
+			var osPt3D:Point3D = pathGrid[asset.worldDestination.x][0][asset.worldDestination.z];
+			return osPt3D;
+//			occupiedSpaces.addItem(osPt3D);												
+		}
+				
+		public function mapPointToPathGrid(point3D:Point3D):Point3D
+		{
+			return pathGrid[point3D.x][point3D.y][point3D.z];
 		}
 		
 		private function determinePath(asset:ActiveAsset, pathGrid:ArrayCollection):ArrayCollection

@@ -1,6 +1,7 @@
 package game
 {
 	import controllers.CreatureManager;
+	import controllers.DwellingManager;
 	import controllers.EssentialModelManager;
 	import controllers.LayerableManager;
 	import controllers.OwnedLayerableManager;
@@ -32,6 +33,7 @@ package game
 		[Bindable] public var essentialModelManager:EssentialModelManager;
 		[Bindable] public var storeManager:StoreManager;
 		[Bindable] public var structureManager:StructureManager;
+		[Bindable] public var dwellingManager:DwellingManager;
 		[Bindable] public var userManager:UserManager;
 		[Bindable] public var user:User;
 		
@@ -59,6 +61,7 @@ package game
 			thingerManager = new ThingerManager(essentialModelManager);
 			storeManager = new StoreManager(essentialModelManager);
 			structureManager = new StructureManager(essentialModelManager);
+			dwellingManager = new DwellingManager(essentialModelManager);
 			userManager = new UserManager(essentialModelManager);
 			if (preLoadedContent)
 			{
@@ -91,6 +94,11 @@ package game
 				essentialModelManager.layerables = preLoadedContent["layerables"];
 				layerableManager.layerables = essentialModelManager.layerables;
 			}									
+			if (preLoadedContent["dwellings"])
+			{
+				essentialModelManager.layerables = preLoadedContent["dwellings"];
+				dwellingManager.dwellings = essentialModelManager.dwellings;
+			}									
 		}
 		
 		public function setUser(evt:CollectionEvent):void
@@ -114,6 +122,7 @@ package game
 		{
 			getDataForModel({}, "layerable", "get_all");
 			getDataForModel({}, "structure", "get_all");
+			getDataForModel({}, "dwelling", "get_all");
 			getDataForModel({}, "store", "get_all");
 		}
 		

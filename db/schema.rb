@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100414015243) do
+ActiveRecord::Schema.define(:version => 20100418212130) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -39,6 +39,8 @@ ActiveRecord::Schema.define(:version => 20100414015243) do
     t.string   "swf_url"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "dwelling_type"
+    t.integer  "capacity"
   end
 
   create_table "layerables", :force => true do |t|
@@ -58,6 +60,9 @@ ActiveRecord::Schema.define(:version => 20100414015243) do
     t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "dwelling_id"
+    t.string   "current_city"
+    t.integer  "fancount"
+    t.datetime "last_showtime"
   end
 
   create_table "owned_layerables", :force => true do |t|

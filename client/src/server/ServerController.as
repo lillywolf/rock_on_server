@@ -44,6 +44,7 @@ package server
 			modelToManagerMap['thinger'] = 'thingerManager';
 			modelToManagerMap['owned_thinger'] = 'thingerManager';
 			modelToManagerMap['creature'] = 'creatureManager';
+			modelToManagerMap['dwelling'] = 'dwellingManager';
 		}
 		
 		public function sendRequest(params:Object, controller:String, action:String, method:String = 'GET'):void

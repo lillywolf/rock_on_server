@@ -5,7 +5,7 @@ class UserController < ApplicationController
     hash = Hash.new    
     user = User.first(:conditions => ["snid = ?", params[:snid]])    
     hash["instance"] = user
-    hash["has_many"] = ["owned_structure", "owned_layerable", "creature"]
+    hash["has_many"] = ["owned_structure", "owned_layerable", "creature", "owned_dwelling"]
     hash["model"] = "user"
     array.push hash    
     render :json => array.to_json  
@@ -16,7 +16,7 @@ class UserController < ApplicationController
     hash = Hash.new    
     user = User.find(params[:id])
     hash["instance"] = user
-    hash["has_many"] = ["owned_structure", "owned_layerable", "creature"]
+    hash["has_many"] = ["owned_structure", "owned_layerable", "creature", "owned_dwelling"]
     hash["model"] = "user"
     array.push hash    
     render :json => array.to_json  

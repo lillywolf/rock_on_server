@@ -76,6 +76,22 @@ package game
 			secondsRemainingUntilShow = displayedCountdownTime.getSeconds();
 		}
 		
+		public static function setupCountdownTimers(secondsRemaining:Number):Object
+		{
+			var hourTime:Timer = new Timer(3600000);
+			var minuteTime:Timer = new Timer(60000);
+			var secondTime:Timer = new Timer(1000);
+			
+			var displayedCounter:Date = new Date();
+			var millisecondsRemaining:Number = secondsRemaining*1000;
+			displayedCounter.setTime(millisecondsRemaining);
+			var hoursRemaining:Number = displayedCounter.getHours();
+			var minutesRemaining:Number = displayedCounter.getMinutes();
+			var secondsRemaining:Number = displayedCounter.getSeconds();
+			var timerObject:Object = {hourTimer: hourTime, minuteTimer: minuteTime, secondTimer: secondTime, hoursRemaining: hoursRemaining, minutesRemaining: minutesRemaining, secondsRemaining: secondsRemaining};
+			return timerObject;
+		}
+		
 		private function onHourTimer(evt:TimerEvent):void
 		{
 			hoursRemainingUntilShow--;

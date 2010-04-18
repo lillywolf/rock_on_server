@@ -11,7 +11,7 @@
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
 			<mx:AddChild>
-				<views:WorldView id="worldView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}"/>
+				<views:WorldView id="worldView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="friendView" basedOn="topBar">
@@ -88,12 +88,7 @@
 			}
 			public function attemptToInitializeVenueForUser():void
 			{
-				worldView.showBooths();		
-				worldView.addStage();
-				worldView.showGroupies();
-				worldView.showBandMembers();	
-				worldView.showListeningStations();
-				worldView.showPassersby();
+				worldView.setInMotion();	
 			}
 			public function attemptToShowFriendVenue(friendGDI:GameDataInterface):void
 			{

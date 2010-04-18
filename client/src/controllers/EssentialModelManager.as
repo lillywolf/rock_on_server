@@ -10,8 +10,10 @@ package controllers
 	import helpers.UnprocessedModel;
 	
 	import models.Creature;
+	import models.Dwelling;
 	import models.EssentialModelReference;
 	import models.Layerable;
+	import models.OwnedDwelling;
 	import models.OwnedStructure;
 	import models.OwnedThinger;
 	import models.Store;
@@ -44,6 +46,8 @@ package controllers
 		[Bindable] public var store_owned_thingers:ArrayCollection;
 		[Bindable] public var structures:ArrayCollection;
 		[Bindable] public var owned_structures:ArrayCollection;
+		[Bindable] public var dwellings:ArrayCollection;
+		[Bindable] public var owned_dwellings:ArrayCollection;
 		
 		public var layerable:Layerable;
 		public var creature:Creature;
@@ -53,6 +57,8 @@ package controllers
 		public var store_owned_thinger:StoreOwnedThinger;
 		public var structure:Structure;
 		public var owned_structure:OwnedStructure;
+		public var dwelling:Dwelling;
+		public var owned_dwelling:OwnedDwelling;
 		
 		public var baseUrl:String = ServerController.BASE_URL;		
 		
@@ -76,6 +82,8 @@ package controllers
 			stores = new ArrayCollection();
 			store_owned_thingers = new ArrayCollection();	
 			users = new ArrayCollection();
+			dwellings = new ArrayCollection();
+			owned_dwellings = new ArrayCollection();
 			essentialModelReference = new EssentialModelReference();
 		}
 		

@@ -48,7 +48,7 @@ package rock_on
 			var passerby:*;
 			if (Math.random()*listeningStations.length > 0.7)
 			{
-				passerby = new StationListener(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
+				passerby = new StationListener(assetStack.movieClipStack, this, assetStack.layerableOrder, assetStack.creature, 0.4);
 				
 				var stationIndex:int = Math.floor(Math.random()*_listeningStations.length);	
 				while ((_listeningStations.getItemAt(stationIndex) as ListeningStation).hasCustomerEnRoute)
