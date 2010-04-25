@@ -16,16 +16,16 @@ package rock_on
 		public var _customerPersonManager:CustomerPersonManager;
 		public var _creatureManager:CreatureManager;
 		public var _myWorld:World;
-		public var _booths:ArrayCollection;
+		public var _boothManager:BoothManager;
 		public var _concertStage:ConcertStage;
 		
-		public function GroupieManager(customerPersonManager:CustomerPersonManager, booths:ArrayCollection, concertStage:ConcertStage, creatureManager:CreatureManager, myWorld:World, target:IEventDispatcher=null)
+		public function GroupieManager(customerPersonManager:CustomerPersonManager, boothManager:BoothManager, concertStage:ConcertStage, creatureManager:CreatureManager, myWorld:World, target:IEventDispatcher=null)
 		{
 			super(target);
 			_customerPersonManager = customerPersonManager;
 			_creatureManager = creatureManager;
 			_myWorld = myWorld;
-			_booths = booths;
+			_boothManager = boothManager;
 			_concertStage = concertStage;
 		}
 		
@@ -42,11 +42,9 @@ package rock_on
 			
 			for each (var assetStack:AssetStack in groupies)
 			{
-				var person:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
-				person.booths = _booths;
-				person.concertStage = _concertStage;
-				person.speed = 0.07;
-				_customerPersonManager.add(person);
+				var cp:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, _concertStage, _boothManager, assetStack.layerableOrder, assetStack.creature, 0.4);
+				cp.speed = 0.07;
+				_customerPersonManager.add(cp);
 			}
 		}		
 		

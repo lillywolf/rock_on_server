@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import rock_on.BoothManager;
 			import world.WorldEvent;
 			import mx.controls.Alert;
 			import controllers.UserManager;
@@ -52,6 +53,7 @@
 			public var customerPersonManager:CustomerPersonManager;
 			public var bandMemberManager:BandMemberManager;
 			public var concertStage:ConcertStage;
+			public var boothManager:BoothManager;
 			
 			public var creditsBox:Text;
 			
@@ -124,17 +126,8 @@
 			
 			public function showBooths():void
 			{
-				booths = new ArrayCollection();
-				var boothStructures:ArrayCollection = structureManager.getStructuresByType("Booth");
-				for each (var os:OwnedStructure in boothStructures)
-				{
-					var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
-					asset.thinger = os;
-					var booth:Booth = new Booth(os);
-					booths.addItem(booth);
-					var addTo:Point3D = new Point3D(os.x, os.y, os.z);
-					addStaticAsset(asset, addTo);
-				}
+				boothManager = new BoothManager(structureManager, myWorld);
+				boothManager.setInMotion();
 			}
 			
 			public function addStage():void
@@ -161,11 +154,9 @@
 				
 				for each (var assetStack:AssetStack in groupies)
 				{
-					var person:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
-					person.booths = booths;
-					person.concertStage = concertStage;
-					person.speed = 0.07;
-					customerPersonManager.add(person);
+					var cp:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, concertStage, boothManager, assetStack.layerableOrder, assetStack.creature, 0.4);
+					cp.speed = 0.07;
+					customerPersonManager.add(cp);
 				}
 			}
 			

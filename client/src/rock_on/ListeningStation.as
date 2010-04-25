@@ -9,6 +9,7 @@ package rock_on
 	import mx.containers.Canvas;
 	import mx.controls.Alert;
 	import mx.controls.Label;
+	import mx.events.DynamicEvent;
 	
 	import world.Point;
 	import world.Point3D;
@@ -16,10 +17,19 @@ package rock_on
 
 	public class ListeningStation extends Booth
 	{
-		public var numAttractedFans:int;
+		public static const START_STATE:int = 0;
+		public static const FAN_BUTTON:int = 1;
+		public static const FAN_COLLECTION:int = 2;
+		
+		public var state:int;
+		public var listenerCount:int;
+		public var currentListenerCount:int;
+		public var capacity:int;
 		public var createdAt:int;
 		public var stationType:String;
 		public var radius:Point3D;
+		public var listeningTime:int;
+		public var stationTimer:Timer;
 		
 		public var counterLabel:Label;
 		public var hoursRemaining:Number;
@@ -29,27 +39,35 @@ package rock_on
 		public function ListeningStation(params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
-			setRadius();
+			setProperties();
 		}
+			
+		public function setInMotion():void
+		{
+			updateTimeAndState();
+		}	
 				
-		public function setRadius():void
+		public function setProperties():void
 		{
 			if (_structure.mc is Ticket_01)
 			{
 				stationType = "Gramophone";
 				radius = new Point3D(1, 0, 1);
+				capacity = 2;
+				listeningTime = 172800;				
 			}
 			else if (_structure.mc is Booth_01)
 			{
 				stationType = "RecordPlayer";
 				radius = new Point3D(2, 0, 1);
+				capacity = 3;
+				listeningTime = 86400;
 			}
 		}	
 		
 		public function displayCountdown():Canvas
 		{
-			var secondsLeft:Number = getSecondsRemaining();
-			var counterInfo:Object = GameClock.setupCountdownTimers(secondsLeft);
+			var counterInfo:Object = GameClock.setupCountdownTimers(secondsRemaining);
 			(counterInfo.secondTimer as Timer).addEventListener(TimerEvent.TIMER, onSecondTimer);
 			(counterInfo.secondTimer as Timer).start();
 			
@@ -119,21 +137,107 @@ package rock_on
 			counterLabel.text = hoursRemaining.toString() + ":" + minutesString + ":" + secondsString;
 		}
 		
-		public function getSecondsRemaining():Number
+		private function updateTimeAndState():void
 		{
-			var listeningTime:Number;
-			if (stationType == "Gramophone")
+			updateSecondsRemaining();	
+			
+			updateListenerCount();
+			
+			if (secondsRemaining < 0 && state != FAN_BUTTON)
 			{
-				listeningTime = 172800;
-			}
+				advanceState(FAN_BUTTON);
+			}	
 			else
 			{
-				throw new Error("Listening station type not recognized");
-			}
-			var currentTime:Number = new Date().getTime()/1000;
-			var secondsRemaining:Number = listeningTime - (currentTime - createdAt);
-			return secondsRemaining;
+				advanceState(FAN_COLLECTION);
+			}				
 		}
 		
+		private function updateListenerCount():void
+		{
+			listenerCount = Math.round(capacity * (listeningTime - secondsRemaining) / listeningTime);
+			if (listenerCount > capacity)
+			{
+				listenerCount = capacity;
+			}
+		}
+		
+		private function setupStationTimer():void
+		{
+			stationTimer = new Timer(secondsRemaining*1000);
+			stationTimer.addEventListener(TimerEvent.TIMER, onStationTimerComplete);
+			stationTimer.start();
+		}
+		
+		public function updateSecondsRemaining():void
+		{
+			var currentTime:Number = new Date().getTime()/1000;
+			secondsRemaining = listeningTime - (currentTime - createdAt);
+		}
+		
+		private function onStationTimerComplete(evt:TimerEvent):void
+		{
+			advanceState(FAN_BUTTON);
+		}
+		
+		public function advanceState(destinationState:int):void
+		{
+			switch (state)
+			{	
+				case START_STATE:
+					endStartState();
+					break;
+				case FAN_BUTTON:
+					endFanButtonState();				
+					break;	
+				case FAN_COLLECTION:
+					endFanCollectionState();
+					break;						
+				default: throw new Error('no state to advance from!');
+			}
+			switch (destinationState)
+			{
+				case FAN_BUTTON:
+					startFanButtonState();
+					break;
+				case FAN_COLLECTION:
+					startFanCollectionState();
+					break;
+				default: throw new Error('no state to advance to!');	
+			}
+		}
+		
+		private function startFanButtonState():void
+		{
+			state = FAN_BUTTON;
+			var evt:DynamicEvent = new DynamicEvent("fanButtonState", true, true);
+			dispatchEvent(evt);
+		}		
+		
+		private function startFanCollectionState():void
+		{
+			state = FAN_COLLECTION;
+			updateSecondsRemaining();
+			setupStationTimer();			
+		}
+		
+		private function endStartState():void
+		{
+			
+		}
+		
+		private function endFanButtonState():void
+		{
+		
+		}
+		
+		private function endFanCollectionState():void
+		{
+			if (stationTimer)
+			{
+				stationTimer.stop();
+				stationTimer.removeEventListener(TimerEvent.TIMER, onStationTimerComplete);
+			}
+		}
 	}
 }

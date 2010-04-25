@@ -37,7 +37,7 @@ package world
 		public function drawInitialGrid():void
 		{
 			wg = new WorldGrid(_worldWidth, _worldDepth, _blockSize);
-			addChild(wg);
+//			addChild(wg);
 			tilesWide = _worldWidth/_blockSize;
 			tilesDeep = _worldDepth/_blockSize;
 		}
@@ -101,47 +101,69 @@ package world
 		
 		public function moveAssetTo(activeAsset:ActiveAsset, destination:Point3D, fourDirectional:Boolean = false, exemptStructures:ArrayCollection=null):void
 		{	
-			if (destination.x%1 != 0 || destination.y%1 != 0 || destination.z%1 != 0)
-			{
-				throw new Error('why are you not a whole number?');
-			}
+			validateDestination(destination);
+			updatePointReferences(activeAsset, destination);
 			
-			activeAsset.worldDestination = destination;
-			activeAsset.lastRealPoint = new Point(activeAsset.realCoords.x, activeAsset.realCoords.y);
-			activeAsset.lastWorldPoint = new Point3D(activeAsset.worldCoords.x, activeAsset.worldCoords.y, activeAsset.worldCoords.z);
-			setLastWorldPoint(activeAsset);
-			activeAsset.walkProgress = 0;
-			activeAsset.isMoving = true;
 			if (fourDirectional)
 			{
 				activeAsset.fourDirectional = true;
-				if (activeAsset.worldDestination.x%1 != 0 || activeAsset.worldDestination.y%1 != 0 || activeAsset.worldDestination.z%1 != 0)
+				var arrived:Boolean = checkIfAtDestination(activeAsset);
+				
+				if (arrived)
 				{
-					throw new Error('destination must be a whole number');
-				}
-				if (destination.x == activeAsset.lastWorldPoint.x && destination.y == activeAsset.lastWorldPoint.y && destination.z == activeAsset.lastWorldPoint.z)
-				{
-					var evt:WorldEvent = new WorldEvent(WorldEvent.FINAL_DESTINATION_REACHED, activeAsset, true, true);
-					dispatchEvent(evt);
+					
 				}
 				else
 				{
-					var tilePath:ArrayCollection = pathFinder.add(activeAsset, exemptStructures);		
-					activeAsset.currentPath = tilePath;
-					activeAsset.pathStep = 0;
-					var nextPoint:Point3D = activeAsset.currentPath[activeAsset.pathStep];
-					activeAsset.worldDestination = nextPoint;
-					activeAsset.realDestination = worldToActualCoords(nextPoint);
-					activeAsset.directionality = new Point3D(nextPoint.x - Math.round(activeAsset.worldCoords.x), nextPoint.y - Math.round(activeAsset.worldCoords.y), nextPoint.z - Math.round(activeAsset.worldCoords.z));
+					moveFourDirectional(activeAsset, exemptStructures);
 				}
 			}
 			else
 			{
 				activeAsset.fourDirectional = false;
 				activeAsset.currentPath = null;
-				var realDestination:Point = worldToActualCoords(destination);
-				activeAsset.realDestination = realDestination;
 			}
+			activeAsset.realDestination = worldToActualCoords(activeAsset.worldDestination);
+			activeAsset.isMoving = true;			
+		}
+		
+		private function moveFourDirectional(asset:ActiveAsset, exemptStructures:ArrayCollection):void
+		{
+			var tilePath:ArrayCollection = pathFinder.add(asset, exemptStructures);		
+			asset.currentPath = tilePath;
+			asset.pathStep = 0;
+			var nextPoint:Point3D = asset.currentPath[asset.pathStep];
+			asset.worldDestination = nextPoint;
+			asset.directionality = new Point3D(nextPoint.x - Math.round(asset.worldCoords.x), nextPoint.y - Math.round(asset.worldCoords.y), nextPoint.z - Math.round(asset.worldCoords.z));	
+		}
+		
+		private function checkIfAtDestination(asset:ActiveAsset):Boolean
+		{
+			if (asset.worldDestination.x == asset.lastWorldPoint.x && asset.worldDestination.y == asset.lastWorldPoint.y && asset.worldDestination.z == asset.lastWorldPoint.z)
+			{
+				var evt:WorldEvent = new WorldEvent(WorldEvent.FINAL_DESTINATION_REACHED, asset, true, true);
+				dispatchEvent(evt);
+				return true;
+			}			
+			return false;
+		}
+		
+		private function updatePointReferences(asset:ActiveAsset, destination:Point3D):void
+		{
+			asset.worldDestination = destination;
+			asset.lastRealPoint = new Point(asset.realCoords.x, asset.realCoords.y);
+			asset.lastWorldPoint = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);		
+			setLastWorldPoint(asset);
+			
+			asset.walkProgress = 0;				
+		}
+		
+		private function validateDestination(destination:Point3D):void
+		{
+			if (destination.x%1 != 0 || destination.y%1 != 0 || destination.z%1 != 0)
+			{
+				throw new Error("Destination should be a whole number");
+			}			
 		}
 		
 		private function onDestinationReached(evt:WorldEvent):void
@@ -173,7 +195,6 @@ package world
 				
 				asset.lastRealPoint = new Point(asset.realCoords.x, asset.realCoords.y);
 			}
-//			else if (asset.pathStep == asset.currentPath.length)
 			else
 			{
 				// Have reached final destination

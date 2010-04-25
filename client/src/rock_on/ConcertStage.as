@@ -2,35 +2,26 @@ package rock_on
 {
 	import flash.events.IEventDispatcher;
 	
-	import models.Structure;
+	import models.OwnedStructure;
 	
 	import world.Point3D;
 
-	public class ConcertStage extends Structure
+	public class ConcertStage extends OwnedStructure
 	{
 		public var stageRadiusLeft:Number;
 		public var stageRadiusRight:Number;
 		public var stageRadiusTop:Number;
 		public var stageRadiusBottom:Number;
-		
 		public var _worldCoords:Point3D;		
-		
-		public function ConcertStage(params:Object=null, loadedClass:Class=null, target:IEventDispatcher=null)
+				
+		public function ConcertStage(params:Object=null, target:IEventDispatcher=null)
 		{
-			super(params, loadedClass, target);
-			width = 6;
-			height = 2;
-			depth = 6;
+			super(params, target);
 			
 			stageRadiusLeft = 0;
 			stageRadiusRight = 6;
 			stageRadiusTop = 0;
-			stageRadiusBottom = 6;		
-		}
-		
-		override public function setProperties(params:Object):void
-		{
-			
+			stageRadiusBottom = 6;			
 		}	
 		
 		public function set worldCoords(val:Point3D):void
@@ -41,7 +32,7 @@ package rock_on
 		public function get worldCoords():Point3D
 		{
 			return _worldCoords;
-		}
+		}		
 		
 	}
 }

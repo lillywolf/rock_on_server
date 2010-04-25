@@ -61,7 +61,7 @@ package rock_on
 		
 		public function setSpawnLocation():void
 		{
-			spawnLocation = new Point3D(Math.floor(_concertStage.width - (Math.random()*_concertStage.width)), 0, Math.floor(_myWorld.tilesDeep - Math.random()*(_concertStage.depth)));	
+			spawnLocation = new Point3D(Math.floor(_concertStage.structure.width - (Math.random()*_concertStage.structure.width)), 0, Math.floor(_myWorld.tilesDeep - Math.random()*(_concertStage.structure.depth)));	
 		}
 		
 		public function update(deltaTime:Number):void

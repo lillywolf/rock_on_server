@@ -12,6 +12,7 @@ package rock_on
 	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
 	import mx.core.Application;
+	import mx.events.DynamicEvent;
 	
 	import world.ActiveAsset;
 	import world.Point3D;
@@ -39,6 +40,15 @@ package rock_on
 			showPassersby();			
 		}
 		
+		private function onFanButtonState(evt:DynamicEvent):void
+		{
+			var station:ListeningStation = evt.currentTarget as ListeningStation;
+			if (station.currentListenerCount != station.listenerCount)
+			{
+				passerbyManager.spawnForStation(station);
+			}
+		}
+		
 		public function showPassersby():void
 		{
 			passerbyManager.startSpawning();
@@ -52,9 +62,11 @@ package rock_on
 				var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
 				asset.thinger = os;
 				var listeningStation:ListeningStation = new ListeningStation(os);
+				listeningStation.addEventListener("fanButtonState", onFanButtonState);
 				listeningStation.createdAt = GameClock.convertStringTimeToUnixTime(os.created_at);
 				listeningStation.stationType = _structureManager.getListeningStationTypeByMovieClip(os.structure.mc);
 				listeningStations.addItem(listeningStation);
+				listeningStation.setInMotion();
 				var stationCounter:Canvas = listeningStation.displayCountdown();
 				Application.application.addChild(stationCounter);				
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);

@@ -37,35 +37,74 @@ package rock_on
 			spawnTimer.start();			
 		}
 		
-		private function onSpawnTimer(evt:TimerEvent):void
+		private function generatePasserby():Passerby
 		{
 			var creature:Creature = new Creature({id: -1, creature_type: "Passerby"});
 			var ownedLayerables:ArrayCollection = getStyles(-1);
 			creature.owned_layerables = ownedLayerables;
-			var assetStack:AssetStack = creature.getConstructedCreature("walk_toward", 1, 1);
-			
-			// Criteria for making someone go to stations
-			var passerby:*;
-			if (Math.random()*listeningStations.length > 0.7)
+			var assetStack:AssetStack = creature.getConstructedCreature("walk_toward", 1, 1);	
+			var passerby:Passerby = new Passerby(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);			
+			return passerby;		
+		}
+		
+		private function generateStationListener():StationListener
+		{
+			var creature:Creature = new Creature({id: -1, creature_type: "Passerby"});
+			var ownedLayerables:ArrayCollection = getStyles(-1);
+			creature.owned_layerables = ownedLayerables;
+			var assetStack:AssetStack = creature.getConstructedCreature("walk_toward", 1, 1);	
+			var sl:StationListener = new StationListener(assetStack.movieClipStack, this, assetStack.layerableOrder, assetStack.creature, 0.4);			
+			return sl;		
+		}
+		
+		private function getOpenStation():ListeningStation
+		{
+			var openStations:ArrayCollection = new ArrayCollection();
+			for each (var station:ListeningStation in _listeningStations)
 			{
-				passerby = new StationListener(assetStack.movieClipStack, this, assetStack.layerableOrder, assetStack.creature, 0.4);
-				
-				var stationIndex:int = Math.floor(Math.random()*_listeningStations.length);	
-				while ((_listeningStations.getItemAt(stationIndex) as ListeningStation).hasCustomerEnRoute)
+				if (!station.hasCustomerEnRoute)
 				{
-					stationIndex = Math.floor(Math.random()*_listeningStations.length);				
-				}		
-									
-				(passerby as StationListener).listeningStation = listeningStations[stationIndex];
+					openStations.addItem(station);
+				}
+			}
+			if (openStations.length > 0)
+			{
+				var stationIndex:int = Math.floor(Math.random()*openStations.length);
+				var selectedStation:ListeningStation = openStations.getItemAt(stationIndex) as ListeningStation;
+				return selectedStation;
 			}
 			else
 			{
-				passerby = new Passerby(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);			
+				return null;
 			}
-			
-			passerby.speed = 0.08;
-			add(passerby);
-			
+		}
+		
+		private function onSpawnTimer(evt:TimerEvent):void
+		{			
+			// Criteria for making someone go to stations
+			if (Math.random()*listeningStations.length > 0.7)
+			{
+				var sl:StationListener = generateStationListener();
+				var stationIndex:int = Math.floor(Math.random()*_listeningStations.length);	
+				var ls:ListeningStation = getOpenStation();		
+				if (ls)
+				{
+					sl.listeningStation = ls;
+					sl.speed = 0.08;
+					add(sl);
+				}	
+				else
+				{
+					
+				}				
+			}
+			else
+			{
+				var passerby:Passerby = generatePasserby();				
+				passerby.speed = 0.08;
+				add(passerby);
+			}
+				
 			var spawnTimer:Timer = evt.currentTarget as Timer;
 			spawnTimer.removeEventListener(TimerEvent.TIMER, onSpawnTimer);
 			spawnTimer.stop();
@@ -79,6 +118,7 @@ package rock_on
 				_myWorld.addAsset(person, spawnLocation);				
 				addItem(person);
 				person.myWorld = _myWorld;
+				person.movieClipStack.alpha = 0.5;
 				person.startEnterState();
 			}
 			else
@@ -90,6 +130,35 @@ package rock_on
 			var spawnTimer:Timer = new Timer(spawnInterval);
 			spawnTimer.addEventListener(TimerEvent.TIMER, onSpawnTimer);
 			spawnTimer.start();
+		}
+		
+		public function spawnForStation(station:ListeningStation):void
+		{
+			for (var i:int = 0; i < station.listenerCount; i++)
+			{
+				addByStation(station);
+			}
+		}
+		
+		public function addByStation(station:ListeningStation):void
+		{
+			var stationListener:StationListener = generateStationListener();
+			stationListener.listeningStation = station;
+			stationListener.speed = 0.07;
+			
+			if(_myWorld)
+			{			
+				stationListener.myWorld = _myWorld;
+				setStationSpawnLocation(stationListener);
+				_myWorld.addAsset(stationListener, spawnLocation);
+				stationListener.movieClipStack.alpha = 0.5;				
+				addItem(stationListener);
+				stationListener.fullStop();
+			}
+			else
+			{
+				throw new Error("you have to fill your pool before you dive");
+			}						
 		}
 		
 		private function onFinalDestinationReached(evt:WorldEvent):void
@@ -123,6 +192,11 @@ package rock_on
 			{
 				spawnLocation = new Point3D(Math.floor(VENUE_BOUND_X + Math.random()*(_myWorld.tilesWide - VENUE_BOUND_X)), 0, _myWorld.tilesDeep);							
 			}
+		}
+		
+		public function setStationSpawnLocation(passerby:Passerby):void
+		{
+			spawnLocation = passerby.setInitialDestination();
 		}
 		
 		public function update(deltaTime:Number):void

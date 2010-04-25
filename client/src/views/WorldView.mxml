@@ -2,6 +2,8 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import rock_on.BoothManager;
+			import helpers.CreatureGenerator;
 			import rock_on.GroupieManager;
 			import controllers.DwellingManager;
 			import rock_on.ListeningStationManager;
@@ -63,6 +65,8 @@
 			public var listeningStationManager:ListeningStationManager;
 			public var groupieManager:GroupieManager;
 			public var venueManager:VenueManager;
+			public var boothManager:BoothManager;
+			public var creatureGenerator:CreatureGenerator;
 			public var creditsBox:Text;
 			
 			[Bindable] public var layerableManager:LayerableManager;
@@ -94,9 +98,12 @@
 			}
 			
 			public function setInMotion():void
-			{
+			{	
 				showBooths();		
 				addStage();
+
+				creatureGenerator = new CreatureGenerator(layerableManager, boothManager, concertStage);
+
 				showGroupies();
 				showBandMembers();
 				showListeningStations();	
@@ -105,7 +112,7 @@
 			
 			private function showVenue():void
 			{
-				venueManager = new VenueManager(dwellingManager, myWorld);	
+				venueManager = new VenueManager(creatureGenerator, customerPersonManager, dwellingManager, booths, concertStage, myWorld);	
 				venueManager.setInMotion();
 			}
 			
@@ -168,17 +175,8 @@
 			
 			public function showBooths():void
 			{
-				booths = new ArrayCollection();
-				var boothStructures:ArrayCollection = structureManager.getStructuresByType("Booth");
-				for each (var os:OwnedStructure in boothStructures)
-				{
-					var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
-					asset.thinger = os;
-					var booth:Booth = new Booth(os);
-					booths.addItem(booth);
-					var addTo:Point3D = new Point3D(os.x, os.y, os.z);
-					myWorld.addStaticAsset(asset, addTo);
-				}
+				boothManager = new BoothManager(structureManager, myWorld);
+				boothManager.setInMotion();
 			}
 			
 			public function addStage():void
@@ -186,11 +184,10 @@
 				stages = new ArrayCollection();
 				var stageStructures:ArrayCollection = structureManager.getStructuresByType("ConcertStage");
 				concertStage = new ConcertStage(stageStructures[0]);
-				var os:OwnedStructure = stageStructures[0];
 				
 				var asset:ActiveAsset = new ActiveAsset(new MovieClip());
-				asset.thinger = os;
-				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
+				asset.thinger = stageStructures[0];
+				var addTo:Point3D = new Point3D(concertStage.x, concertStage.y, concertStage.z);
 				concertStage.worldCoords = addTo;
 				myWorld.addAsset(asset, addTo);
 			}
@@ -208,7 +205,7 @@
 			
 			public function showGroupies():void
 			{	
-				groupieManager = new GroupieManager(customerPersonManager, booths, concertStage, creatureManager, myWorld);
+				groupieManager = new GroupieManager(customerPersonManager, boothManager, concertStage, creatureManager, myWorld);
 				groupieManager.setInMotion();
 			}
 			

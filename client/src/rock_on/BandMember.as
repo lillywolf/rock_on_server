@@ -248,7 +248,7 @@ package rock_on
 		
 		public function tryDestination():Point3D
 		{
-			destinationLocation = new Point3D(concertStage.worldCoords.x + Math.floor((concertStage.width - 1) - (Math.random()*(concertStage.width - 1))), 0, concertStage.worldCoords.z + Math.floor((concertStage.depth - 1) - Math.random()*(concertStage.depth - 1)));	
+			destinationLocation = new Point3D(concertStage.worldCoords.x + Math.floor((concertStage.structure.width - 1) - (Math.random()*(concertStage.structure.width - 1))), 0, concertStage.worldCoords.z + Math.floor((concertStage.structure.depth - 1) - Math.random()*(concertStage.structure.depth - 1)));	
 			return destinationLocation;	
 		}												
 		

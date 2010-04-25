@@ -25,7 +25,7 @@ package world
 		public function add(asset:ActiveAsset, exemptStructures:ArrayCollection=null):ArrayCollection
 		{
 			addItem(asset);
-			var assetPathFinder:ArrayCollection = calculatePathGrid(asset, exemptStructures);
+			var assetPathFinder:ArrayCollection = calculatePathGrid(asset, asset.lastWorldPoint, asset.worldDestination, true, exemptStructures);
 			var finalPath:ArrayCollection = determinePath(asset, assetPathFinder);
 			return finalPath;
 		}
@@ -60,14 +60,14 @@ package world
 			}
 		}	
 		
-		public function calculatePathGrid(asset:ActiveAsset, exemptStructures:ArrayCollection=null):ArrayCollection
+		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null):ArrayCollection
 		{
 			var pathGridComplete:Boolean = false;
 			var assetPathFinder:ArrayCollection = new ArrayCollection();
 			var unorganizedPoints:ArrayCollection = new ArrayCollection();
 			var tileArray:Array = new Array();
 			
-			tileArray[0] = pathGrid[asset.worldDestination.x][asset.worldDestination.y][asset.worldDestination.z];
+			tileArray[0] = pathGrid[destination.x][destination.y][destination.z];
 			assetPathFinder.addItemAt(tileArray, 0);
 			unorganizedPoints.addItem(tileArray[0]);
 			
@@ -82,9 +82,12 @@ package world
 				
 			}
 			
-			if (currentlyOccupiedSpaces.contains(pathGrid[asset.worldDestination.x][asset.worldDestination.y][asset.worldDestination.z]))
+			if (asset.worldDestination)
 			{
-				throw new Error("Destination location is currently occupied");
+				if (currentlyOccupiedSpaces.contains(pathGrid[asset.worldDestination.x][asset.worldDestination.y][asset.worldDestination.z]))
+				{
+					throw new Error("Destination location is currently occupied");
+				}
 			}
 			
 			var i:int = 1;
@@ -120,19 +123,32 @@ package world
 						unorganizedPoints.addItem(pt);						
 					}
 				}
-				for (var k:int = 0; k<tileArray.length; k++)
-				{				
-					if (tileArray[k].x == asset.lastWorldPoint.x && tileArray[k].y == asset.lastWorldPoint.y && tileArray[k].z == asset.lastWorldPoint.z)
-					{
-						tileArray = new Array();
-						tileArray[0] = asset.lastWorldPoint;
-						assetPathFinder.addItemAt(tileArray, i);
-						pathGridComplete = true;
-					}
-				}
-				if (asset.lastWorldPoint.x == asset.worldDestination.x && asset.lastWorldPoint.y == asset.worldDestination.y && asset.lastWorldPoint.z == asset.worldDestination.z)
+				if (tileArray.length == 0)
 				{
-					throw new Error('Destination is the same as origin!');
+					tileArray = assetPathFinder[0];
+					assetPathFinder.removeAll();
+					assetPathFinder.addItem(tileArray);				
+					pathGridComplete = true;
+				}	
+				else
+				{
+					for (var k:int = 0; k<tileArray.length; k++)
+					{
+						if (tileArray[k].x == currentPoint.x && tileArray[k].y == currentPoint.y && tileArray[k].z == currentPoint.z)
+						{
+							tileArray = new Array();
+							tileArray[0] = currentPoint;
+							assetPathFinder.addItemAt(tileArray, i);
+							pathGridComplete = true;
+						}
+					}
+				}			
+				if (asset.worldDestination)
+				{
+					if (asset.lastWorldPoint.x == asset.worldDestination.x && asset.lastWorldPoint.y == asset.worldDestination.y && asset.lastWorldPoint.z == asset.worldDestination.z)
+					{
+//						throw new Error('Destination is the same as origin!');
+					}				
 				}
 				if (pathGridComplete)
 				{
@@ -171,7 +187,7 @@ package world
 			return peopleOccupiedSpaces;
 		}
 		
-		private function establishOccupiedSpaces(exemptStructures:ArrayCollection=null):void
+		public function establishOccupiedSpaces(exemptStructures:ArrayCollection=null):void
 		{
 			occupiedSpaces = new ArrayCollection();
 			for each (var asset:ActiveAsset in _world.assetRenderer.sortedAssets)
@@ -210,8 +226,18 @@ package world
 		
 		private function getPoint3DForPerson(asset:ActiveAsset):Point3D
 		{
-			var osPt3D:Point3D = pathGrid[asset.worldDestination.x][0][asset.worldDestination.z];
-			return osPt3D;
+			var osPt3D:Point3D;
+			if (asset.worldDestination)
+			{
+				osPt3D = pathGrid[asset.worldDestination.x][0][asset.worldDestination.z];
+				return osPt3D;
+			}
+			else if (asset.worldCoords)
+			{
+				osPt3D = pathGrid[asset.worldCoords.x][0][asset.worldCoords.z];
+				return osPt3D;
+			}
+			return null;
 //			occupiedSpaces.addItem(osPt3D);												
 		}
 				

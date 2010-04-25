@@ -88,7 +88,7 @@ package rock_on
 			}
 			else
 			{				
-				throw new Error("this is pretty damn weird");
+//				throw new Error("this is pretty damn weird");
 			}
 			currentDirection = destination;
 		}	

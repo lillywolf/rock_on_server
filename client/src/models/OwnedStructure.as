@@ -1,8 +1,11 @@
 package models
 {
 	import flash.events.IEventDispatcher;
+	import flash.utils.Dictionary;
 	
 	import mx.events.DynamicEvent;
+	
+	import world.Point3D;
 
 	public class OwnedStructure extends EssentialModel
 	{
@@ -29,6 +32,11 @@ package models
 			_y = params.y;
 			_z = params.z;
 			_created_at = params.created_at;
+			
+			if (params.structure)
+			{
+				_structure = params.structure;
+			}
 		}		
 
 		public function set id(val:int):void
@@ -126,6 +134,15 @@ package models
 			return _z;
 		}
 		
+		public function getCornerMatrix():Dictionary
+		{
+			var cornerMatrix:Dictionary = new Dictionary();
+			cornerMatrix["topLeft"] = new Point3D(x - structure.width/2, 0, z - structure.depth/2);
+			cornerMatrix["topRight"] = new Point3D(x - structure.width/2, 0, z + structure.depth/2);
+			cornerMatrix["bottomLeft"] = new Point3D(x + structure.width/2, 0, z - structure.depth/2);
+			cornerMatrix["bottomRight"] = new Point3D(x + structure.width/2, 0, z + structure.depth/2);
+			return cornerMatrix;
+		}
 		
 		
 	}

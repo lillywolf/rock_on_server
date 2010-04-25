@@ -118,19 +118,26 @@ package rock_on
 		
 		override public function startStopState():void
 		{
-			state = Person.STOP_STATE;
-			standFacingStation();
 			if (Math.random() > .95)
 			{
-				// Some test based on stationType will happen here		
+				// Some test based on stationType will happen here	
+				fullStop();
 			}
 			else
 			{
+				state = Person.STOP_STATE;
+				standFacingStation();				
 				var listeningTime:int = 2000 + Math.random()*2000;
 				stopTime = new Timer(listeningTime);
 				stopTime.addEventListener(TimerEvent.TIMER, leave);
 				stopTime.start();			
 			}
+		}
+		
+		public function fullStop():void
+		{
+			state = Person.STOP_STATE;
+			standFacingStation();			
 		}
 		
 		override public function startLeavingState():void
@@ -175,6 +182,16 @@ package rock_on
 			else
 				throw new Error("Where's the world?");			
 		}	
+		
+		public function get passerbyManager():PasserbyManager
+		{
+			return _passerbyManager;
+		}
+		
+		public function set passerbyManager(val:PasserbyManager):void
+		{
+			_passerbyManager = val;
+		}
 		
 	}
 }
