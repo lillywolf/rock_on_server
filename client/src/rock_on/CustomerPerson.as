@@ -149,7 +149,14 @@ package rock_on
 		{
 			enthralledTimer.stop();
 			enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
-			advanceState(ROUTE_STATE);
+			if (state == ENTHRALLED_STATE)
+			{
+				advanceState(ROUTE_STATE);			
+			}
+			else
+			{
+				throw new Error("State is not enthralled state");
+			}
 		}
 		
 		public function endEnthralledState():void
@@ -173,12 +180,10 @@ package rock_on
 		
 		public function checkIfFrontOfQueue():void
 		{
-			this.movieClipStack.rotation = 0.5;
-//			var boothFront:Point3D = _boothManager.getBoothFront(currentBooth, -1, true);
-//			if (worldCoords.x == boothFront.x && worldCoords.y == boothFront.y && worldCoords.z == boothFront.z)
-//			{
-//				startQueuedTimer();
-//			}
+			if (!currentBooth)
+			{
+				throw new Error("Should have a current booth");
+			}
 			if (currentBoothPosition == 1)
 			{
 				startQueuedTimer();
@@ -187,15 +192,15 @@ package rock_on
 			{
 				throw new Error("Booth position is 0");
 			}
-			else
-			{
-				this.movieClipStack.rotation = 1;
-			}
-			
 		}
 		
 		public function startQueuedTimer():void
 		{
+			if (state != QUEUED_STATE)
+			{
+				throw new Error("State is not queued state");
+			}
+			
 			queuedTimer = new Timer(CustomerPerson.QUEUED_TIME);
 			queuedTimer.addEventListener(TimerEvent.TIMER, exitQueue);
 			queuedTimer.start();			
@@ -211,12 +216,22 @@ package rock_on
 		
 		private function exitQueue(evt:TimerEvent):void
 		{
-			decrementQueue();
-			worldDestination = null;
+			if (state == QUEUED_STATE)
+			{
+				decrementQueue();
+				worldDestination = null;
+				
+				queuedTimer.stop();
+				queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);
+				advanceState(HEADTOSTAGE_STATE);
+			}
+			else
+			{
+				throw new Error("State is not queued state");
+				queuedTimer.stop();
+				queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);				
+			}
 			
-			queuedTimer.stop();
-			queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);
-			advanceState(HEADTOSTAGE_STATE);
 		}
 		
 		private function decrementQueue():void
@@ -458,6 +473,7 @@ package rock_on
 			else
 			{
 				proxiedDestination = newDestination;
+				adjustForPathfinding();
 			}	
 		}
 		
@@ -545,9 +561,9 @@ package rock_on
 			proxiedDestination = null;
 		}
 		
-		public function getPathToBoothLength():int
+		public function getPathToBoothLength(routedCustomer:Boolean=false, queuedCustomer:Boolean=false):int
 		{
-			var boothFront:Point3D = _boothManager.getBoothFront(currentBooth, 0, true);
+			var boothFront:Point3D = _boothManager.getBoothFront(currentBooth, 0, routedCustomer, queuedCustomer);				
 			var currentPoint:Point3D = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
 			var path:ArrayCollection = _myWorld.pathFinder.calculatePathGrid(this, currentPoint, boothFront, false);
 
@@ -564,13 +580,27 @@ package rock_on
 				}
 				else
 				{
-					advanceState(QUEUED_STATE);
+					if (state == ROUTE_STATE)
+					{
+						advanceState(QUEUED_STATE);					
+					}
+					else
+					{
+						throw new Error("Must be in route state");
+					}
 				}
 			}
 			else
 			{
 				this.movieClipStack.alpha = 0.2;
-				advanceState(QUEUED_STATE);
+				if (state == ROUTE_STATE)
+				{
+					advanceState(QUEUED_STATE);				
+				}
+				else
+				{
+					throw new Error("Must be in route state");
+				}
 			}
 		}
 				

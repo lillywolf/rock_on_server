@@ -103,6 +103,7 @@ package world
 		{	
 			validateDestination(destination);
 			updatePointReferences(activeAsset, destination);
+			activeAsset.currentPath = null;
 			
 			if (fourDirectional)
 			{
@@ -120,8 +121,7 @@ package world
 			}
 			else
 			{
-				activeAsset.fourDirectional = false;
-				activeAsset.currentPath = null;
+				
 			}
 			activeAsset.realDestination = worldToActualCoords(activeAsset.worldDestination);
 			activeAsset.isMoving = true;			
@@ -166,41 +166,45 @@ package world
 			}			
 		}
 		
+		private function moveToNextPathStep(asset:ActiveAsset):void
+		{
+			asset.isMoving = true;
+			asset.pathStep++;
+			asset.lastRealPoint = new Point(asset.realCoords.x, asset.realCoords.y);
+			asset.worldDestination = asset.currentPath[asset.pathStep];	
+			asset.realDestination = worldToActualCoords(asset.worldDestination);	
+			updateDirectionality(asset);				
+		}		
+		
+		private function updateDirectionality(asset:ActiveAsset):void
+		{
+			var currentPoint:Point3D = asset.currentPath[asset.pathStep-1];			
+			var newDirectionality:Point3D = new Point3D(asset.worldDestination.x - currentPoint.x, asset.worldDestination.y - currentPoint.y, asset.worldDestination.z - currentPoint.z);
+			if (newDirectionality.x != asset.directionality.x || newDirectionality.y != asset.directionality.y || newDirectionality.z != asset.directionality.z)
+			{
+				asset.directionality = newDirectionality;
+				var evt:WorldEvent = new WorldEvent(WorldEvent.DIRECTION_CHANGED, asset);
+				dispatchEvent(evt);
+			}			
+		}
+		
 		private function onDestinationReached(evt:WorldEvent):void
 		{
 			var asset:ActiveAsset = evt.activeAsset;
+			
 			if (asset.currentPath != null && asset.pathStep < (asset.currentPath.length-1))
-			{
-				asset.isMoving = true;
-				asset.pathStep++;
-				
-				var currentPoint:Point3D = asset.currentPath[asset.pathStep-1];
-				var nextPoint:Point3D = asset.currentPath[asset.pathStep];
-				var newDirectionality:Point3D = new Point3D(nextPoint.x - currentPoint.x, nextPoint.y - currentPoint.y, nextPoint.z - currentPoint.z);
-				
-				asset.worldDestination = nextPoint;
-				asset.realDestination = worldToActualCoords(nextPoint);
-				
-				if (asset.worldDestination.x%1 != 0 || asset.worldDestination.y%1 != 0 || asset.worldDestination.z%1 != 0)
-				{
-					throw new Error('destination must be a whole number');
-				}
-				
-				if (newDirectionality.x != asset.directionality.x || newDirectionality.y != asset.directionality.y || newDirectionality.z != asset.directionality.z)
-				{
-					asset.directionality = newDirectionality;
-					var evt:WorldEvent = new WorldEvent(WorldEvent.DIRECTION_CHANGED, asset);
-					dispatchEvent(evt);
-				}
-				
-				asset.lastRealPoint = new Point(asset.realCoords.x, asset.realCoords.y);
+			{	
+				moveToNextPathStep(asset);		
+				validateDestination(asset.worldDestination);
 			}
 			else
 			{
 				// Have reached final destination
+				
 				var finalDestinationEvent:WorldEvent = new WorldEvent(WorldEvent.FINAL_DESTINATION_REACHED, asset);
 				dispatchEvent(finalDestinationEvent);
-				if (asset.fourDirectional)
+
+				if (asset.fourDirectional && pathFinder.contains(asset))
 				{
 					pathFinder.remove(asset);				
 				}

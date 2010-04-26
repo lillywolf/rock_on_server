@@ -98,7 +98,7 @@ package rock_on
 			{
 				if (cp.currentBooth == booth && cp.state == CustomerPerson.QUEUED_STATE && cp != excludePerson)
 				{
-					var pathLength:int = cp.getPathToBoothLength();
+					var pathLength:int = cp.getPathToBoothLength(false, true);
 					proxiedCustomers.addItem({cp: cp, pathLength: pathLength});
 				}				
 			}
@@ -113,7 +113,7 @@ package rock_on
 			{
 				if (cp.currentBooth == booth && cp.state == CustomerPerson.ROUTE_STATE)
 				{
-					var pathLength:int = cp.getPathToBoothLength();
+					var pathLength:int = cp.getPathToBoothLength(true, false);
 					proxiedCustomers.addItem({cp: cp, pathLength: pathLength});
 				}
 			}			
