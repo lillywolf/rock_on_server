@@ -60,7 +60,7 @@ package rock_on
 			return selectedBooth;	
 		}
 		
-		public function getBoothFront(booth:Booth, index:int=-1, customerless:Boolean=false):Point3D
+		public function getBoothFront(booth:Booth, index:int=0, routedCustomer:Boolean=false, queuedCustomer:Boolean=false, customerless:Boolean=false):Point3D
 		{
 			// Assumes a particular rotation
 			
@@ -69,7 +69,11 @@ package rock_on
 			{
 				boothFront = new Point3D(Math.floor(booth.structure.width/2 + booth.x + 1), 0, Math.floor(booth.structure.depth/4 + booth.z));
 			}
-			else if (index != -1)
+			else if (queuedCustomer)
+			{
+				boothFront = new Point3D(Math.floor(booth.structure.width/2 + booth.x + index + 1), 0, Math.floor(booth.structure.depth/4 + booth.z));				
+			}
+			else if (routedCustomer)
 			{
 				boothFront = new Point3D(Math.floor(booth.structure.width/2 + booth.x + (booth.actualQueue + index + 1)), 0, Math.floor(booth.structure.depth/4 + booth.z));																	
 			}

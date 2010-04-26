@@ -403,13 +403,15 @@ package rock_on
 		public function pickPointNearStructure(structure:*):Point3D
 		{
 			var stagePoint:Point3D;
-			if (availableSpaces())
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			
+			if (availableSpaces(occupiedSpaces))
 			{
 				do 
 				{
 					stagePoint = new Point3D(Math.floor(Math.random()*_myWorld.tilesWide), 0, Math.floor(Math.random()*_myWorld.tilesDeep));				
 				}
-				while (_myWorld.pathFinder.occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)));
+				while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)));
 			}
 			else
 			{
@@ -418,18 +420,27 @@ package rock_on
 			return stagePoint;
 		}
 		
-		private function availableSpaces():Boolean
+		private function availableSpaces(occupiedSpaces:ArrayCollection):Boolean
 		{
-			// For now just assume true
+			if (occupiedSpaces.length > _myWorld.tilesDeep*_myWorld.tilesWide)
+			{
+				return false;
+			}
 			return true;
 		}
 		
 		public function updateBoothFront(index:int):void
 		{
+			var boothFront:Point3D;
 			if (state == ROUTE_STATE)
 			{
-				var boothFront:Point3D = _boothManager.getBoothFront(currentBooth, index);
+				boothFront = _boothManager.getBoothFront(currentBooth, index, true);
 				updateDestination(boothFront);
+			}
+			else if (state == QUEUED_STATE)
+			{
+				boothFront = _boothManager.getBoothFront(currentBooth, index, false, true);
+				moveCustomer(boothFront);
 			}
 			else
 			{
@@ -456,11 +467,12 @@ package rock_on
 			// Don't move into structures
 						
 			var nextPoint:Point3D;
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
 			
 			if (directionality.x > 0)
 			{
 				nextPoint = new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				if (_world.pathFinder.occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				if (occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
 				{
 					nextPoint = new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
 				}
@@ -469,7 +481,7 @@ package rock_on
 			else if (directionality.x < 0)
 			{
 				nextPoint = new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				if (_world.pathFinder.occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				if (occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
 				{
 					nextPoint = new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
 				}					
@@ -478,7 +490,7 @@ package rock_on
 			else if (directionality.z > 0)
 			{
 				nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z));
-				if (_world.pathFinder.occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				if (occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
 				{
 					nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z));
 				}					
@@ -487,7 +499,7 @@ package rock_on
 			else if (directionality.z < 0)
 			{
 				nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z));
-				if (_world.pathFinder.occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				if (occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
 				{
 					nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z));
 				}						
@@ -511,7 +523,8 @@ package rock_on
 			{
 				throw new Error("Height not zero");
 			}
-			if (_myWorld.pathFinder.occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(nextPoint)))
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			if (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(nextPoint)))
 			{
 				throw new Error("Occupied space");
 			}
@@ -534,7 +547,7 @@ package rock_on
 		
 		public function getPathToBoothLength():int
 		{
-			var boothFront:Point3D = _boothManager.getBoothFront(currentBooth, 0);
+			var boothFront:Point3D = _boothManager.getBoothFront(currentBooth, 0, true);
 			var currentPoint:Point3D = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
 			var path:ArrayCollection = _myWorld.pathFinder.calculatePathGrid(this, currentPoint, boothFront, false);
 

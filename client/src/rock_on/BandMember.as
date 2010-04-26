@@ -6,7 +6,6 @@ package rock_on
 	import flash.utils.Timer;
 	
 	import models.Creature;
-	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
 	
@@ -210,7 +209,8 @@ package rock_on
 		{
 			destinationLocation = tryDestination();			
 			
-			if (_world.pathFinder.occupiedSpaces.length >= _world.tilesDeep*_world.tilesWide)
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			if (occupiedSpaces.length >= _world.tilesDeep*_world.tilesWide)
 			{
 				throw new Error("No free spaces! That's crazy pills!");
 			}

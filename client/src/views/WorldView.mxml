@@ -101,12 +101,12 @@
 			{	
 				showBooths();		
 				addStage();
+				showListeningStations();	
 
 				creatureGenerator = new CreatureGenerator(layerableManager, boothManager, concertStage);
 
 				showGroupies();
 				showBandMembers();
-				showListeningStations();	
 				showVenue();			
 			}
 			

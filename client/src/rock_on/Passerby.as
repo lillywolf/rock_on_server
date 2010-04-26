@@ -4,6 +4,8 @@ package rock_on
 	
 	import models.Creature;
 	
+	import mx.collections.ArrayCollection;
+	
 	import world.ActiveAsset;
 	import world.Point3D;
 
@@ -28,14 +30,15 @@ package rock_on
 		public function setInitialDestination():Point3D
 		{
 			_myWorld.pathFinder.establishOwnedStructures();
-			
+
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);			
 			var destinationLocation:Point3D = tryDestination();			
 			
-			if (_myWorld.pathFinder.occupiedSpaces.length >= _myWorld.tilesDeep*_myWorld.tilesWide)
+			if (occupiedSpaces.length >= _myWorld.tilesDeep*_myWorld.tilesWide)
 			{
 				throw new Error("No free spaces! That's crazy pills!");
 			}
-			while (_myWorld.pathFinder.occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[destinationLocation.x][destinationLocation.y][destinationLocation.z])
+			while (occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[destinationLocation.x][destinationLocation.y][destinationLocation.z])
 			|| isAnyoneElseThere(destinationLocation))
 			{
 				destinationLocation = tryDestination();

@@ -46,14 +46,15 @@ package rock_on
 		private function decrementQueue(evt:DynamicEvent):void
 		{
 			var booth:Booth = evt.booth;
-			for each (var cp:CustomerPerson in this)
-			{
-				if (cp.currentBooth == booth && cp.state == CustomerPerson.QUEUED_STATE && cp != evt.person)
-				{
-					updateBoothPosition(cp, cp.currentBoothPosition-1);					
-					cp.moveUpInQueue();
-				}
-			}
+//			for each (var cp:CustomerPerson in this)
+//			{
+//				if (cp.currentBooth == booth && cp.state == CustomerPerson.QUEUED_STATE && cp != evt.person)
+//				{
+//					updateBoothPosition(cp, cp.currentBoothPosition-1);					
+//					cp.moveUpInQueue();
+//				}
+//			}
+			updateQueuedCustomers(booth, evt.person);
 			updateRoutedCustomers(booth);
 			validateBoothPositions(booth);			
 		}
@@ -66,7 +67,14 @@ package rock_on
 		
 		private function updateBoothPosition(customer:CustomerPerson, index:int):void
 		{
-			customer.setQueuedPosition(index);			
+			if (customer.state == CustomerPerson.ROUTE_STATE)
+			{
+				customer.setQueuedPosition(customer.currentBooth.actualQueue + index);			
+			}
+			else if (customer.state == CustomerPerson.QUEUED_STATE)
+			{
+				customer.setQueuedPosition(index);
+			}
 		}
 		
 		private function validateBoothPositions(booth:Booth):void
@@ -81,6 +89,21 @@ package rock_on
 					}
 				}
 			}			
+		}
+		
+		private function updateQueuedCustomers(booth:Booth, excludePerson:CustomerPerson):void
+		{
+			var proxiedCustomers:ArrayCollection = new ArrayCollection();
+			for each (var cp:CustomerPerson in this)
+			{
+				if (cp.currentBooth == booth && cp.state == CustomerPerson.QUEUED_STATE && cp != excludePerson)
+				{
+					var pathLength:int = cp.getPathToBoothLength();
+					proxiedCustomers.addItem({cp: cp, pathLength: pathLength});
+				}				
+			}
+			proxiedCustomers = sortProxiedCustomers(proxiedCustomers);
+			updateProxiedCustomers(proxiedCustomers);			
 		}
 		
 		private function updateRoutedCustomers(booth:Booth):void
@@ -115,7 +138,7 @@ package rock_on
 			for each (var obj:Object in proxiedCustomers)
 			{
 				var cp:CustomerPerson = obj.cp;
-				updateBoothPosition(cp, cp.currentBooth.actualQueue + i + 1);
+				updateBoothPosition(cp, i+1);
 				cp.updateBoothFront(i);
 				i++;				
 			}
@@ -209,7 +232,6 @@ package rock_on
 			if(!_myWorld)
 			{
 				_myWorld = val;
-				_myWorld.pathFinder.establishOccupiedSpaces();
 				_myWorld.addEventListener(WorldEvent.DIRECTION_CHANGED, onDirectionChanged);				
 				_myWorld.addEventListener(WorldEvent.FINAL_DESTINATION_REACHED, onFinalDestinationReached);
 			}
