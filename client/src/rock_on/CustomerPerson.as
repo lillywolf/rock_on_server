@@ -172,7 +172,7 @@ package rock_on
 		public function startQueuedState():void
 		{
 			state = QUEUED_STATE;
-			this.movieClipStack.rotation = 0.3;
+			standFacingObject(currentBooth);
 			currentBooth.actualQueue++;
 			
 			checkIfFrontOfQueue();
@@ -297,9 +297,6 @@ package rock_on
 				currentBooth.currentQueue++;
 							
 				dispatchRouteEvent();
-				
-//				var destination:Point3D = _boothManager.getBoothFront(currentBooth);	
-//				moveCustomer(destination);
 			}			
 		}
 		
@@ -334,85 +331,6 @@ package rock_on
 		public function getEnthralledActivityTime():int
 		{
 			return ENTHRALLED_TIME;
-		}
-		
-		public function standFacingObject(structure:OwnedStructure, frameNumber:int=0, strictFacing:Boolean=true):void
-		{
-			var horizontalRelationship:String;
-			var verticalRelationship:String;
-			
-			var cornerMatrix:Dictionary = structure.getCornerMatrix();
-			if (worldCoords.x < (cornerMatrix["bottomLeft"] as Point3D).x)
-			{
-				verticalRelationship = "bottom";
-			}
-			else if (worldCoords.x > (cornerMatrix["topLeft"] as Point3D).x)
-			{
-				verticalRelationship = "top";
-			}
-			else
-			{
-				verticalRelationship = "center";
-			}
-			if (worldCoords.z < (cornerMatrix["topLeft"] as Point3D).z)
-			{
-				horizontalRelationship = "left";
-			}		
-			else if (worldCoords.z > (cornerMatrix["topRight"] as Point3D).z)
-			{
-				horizontalRelationship = "right";
-			}	
-			else
-			{
-				horizontalRelationship = "center";
-			}
-			
-			evaluateHorizontalAndVerticalRelationship(horizontalRelationship, verticalRelationship, frameNumber, structure, strictFacing);
-			this.movieClipStack.stop();
-		}
-		
-		public function evaluateHorizontalAndVerticalRelationship(horizontalRelationship:String, verticalRelationship:String, frameNumber:int=0, structure:*=null, strictFacing:Boolean=false):void
-		{
-			var rand:Number = Math.random();
-			
-			if (horizontalRelationship == "left")
-			{
-				frameNumber = 37;
-				this.movieClipStack.scaleX = orientation;
-			}
-			else if (horizontalRelationship == "right")
-			{
-				frameNumber = 1;
-				this.movieClipStack.scaleX = orientation;
-			}
-			else if (verticalRelationship == "top")
-			{
-				frameNumber = 1;
-				this.movieClipStack.scaleX = -(orientation);
-			}
-			else if (verticalRelationship == "bottom")
-			{
-				frameNumber = 37;
-				this.movieClipStack.scaleX = -(orientation);
-			}
-			else
-			{
-				throw new Error("You're in the middle of a structure");
-			}
-		}
-		
-		public function moveCustomer(destination:Point3D):void
-		{
-			doAnimation("walk_toward");
-			
-			if (this.worldCoords.x%1 == 0 && this.worldCoords.y%1 == 0 && this.worldCoords.z%1 == 0)
-			{
-				_myWorld.moveAssetTo(this, destination, true);			
-			}
-			else
-			{
-				throw new Error("Cannot move from non whole number coords");
-			}
 		}
 		
 		public function pickPointNearStructure(structure:*):Point3D
@@ -592,7 +510,6 @@ package rock_on
 			}
 			else
 			{
-				this.movieClipStack.alpha = 0.2;
 				if (state == ROUTE_STATE)
 				{
 					advanceState(QUEUED_STATE);				

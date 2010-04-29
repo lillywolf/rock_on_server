@@ -2,9 +2,11 @@ package rock_on
 {
 	import flash.display.MovieClip;
 	import flash.events.TimerEvent;
+	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
 	import models.Creature;
+	import models.OwnedStructure;
 	
 	import world.AssetStack;
 	import world.Point3D;
@@ -56,41 +58,137 @@ package rock_on
 			}						
 		}
 		
-		public function setDirection(destination:Point3D):void
+		public function standFacingObject(structure:OwnedStructure, frameNumber:int=0, strictFacing:Boolean=true):void
 		{
-			var xDiff:int = destination.x - Math.round(worldCoords.x);
-			var yDiff:int = destination.z - Math.round(worldCoords.z);
+			var horizontalRelationship:String;
+			var verticalRelationship:String;
 			
-			if (Math.abs(xDiff) > Math.abs(yDiff))
+			var cornerMatrix:Dictionary = structure.getCornerMatrix();
+			if (worldCoords.x < (cornerMatrix["bottomLeft"] as Point3D).x)
 			{
-				if (xDiff > 0)
-				{
-					doAnimation('walk_toward');
-				}
-				else
-				{
-					doAnimation('walk_away');
-				}
-				movieClipStack.scaleX = -(orientation);				
+				verticalRelationship = "bottom";
 			}
-			
-			else if (Math.abs(xDiff) < Math.abs(yDiff))
+			else if (worldCoords.x > (cornerMatrix["topLeft"] as Point3D).x)
 			{
-				if (yDiff > 0)
-				{
-					doAnimation('walk_away');
-				}
-				else
-				{		
-					doAnimation('walk_toward');	
-				}
-				movieClipStack.scaleX = orientation;
+				verticalRelationship = "top";
 			}
 			else
-			{				
-//				throw new Error("this is pretty damn weird");
+			{
+				verticalRelationship = "center";
 			}
-			currentDirection = destination;
+			if (worldCoords.z < (cornerMatrix["topLeft"] as Point3D).z)
+			{
+				horizontalRelationship = "left";
+			}		
+			else if (worldCoords.z > (cornerMatrix["topRight"] as Point3D).z)
+			{
+				horizontalRelationship = "right";
+			}	
+			else
+			{
+				horizontalRelationship = "center";
+			}
+			
+			frameNumber = evaluateHorizontalAndVerticalRelationship(horizontalRelationship, verticalRelationship, frameNumber, structure, strictFacing);
+			stand(frameNumber);
+		}
+		
+		public function moveCustomer(destination:Point3D):void
+		{			
+			if (this.worldCoords.x%1 == 0 && this.worldCoords.y%1 == 0 && this.worldCoords.z%1 == 0)
+			{
+				_myWorld.moveAssetTo(this, destination, true);			
+			}
+			else
+			{
+				throw new Error("Cannot move from non whole number coords");
+			}
+			
+			if (currentPath)
+			{
+				var nextPoint:Point3D = getNextPointAlongPath();
+				setDirection(nextPoint);			
+			}
+		}
+		
+		public function getNextPointAlongPath():Point3D
+		{
+			if (currentPath.length > pathStep)
+			{			
+				var nextPoint:Point3D = currentPath.getItemAt(pathStep) as Point3D;
+			}
+			return nextPoint;
+		}				
+		
+		public function evaluateHorizontalAndVerticalRelationship(horizontalRelationship:String, verticalRelationship:String, frameNumber:int=0, structure:*=null, strictFacing:Boolean=false):int
+		{
+			var rand:Number = Math.random();
+			
+			if (horizontalRelationship == "left")
+			{
+				frameNumber = 37;
+				this.movieClipStack.scaleX = orientation;
+			}
+			else if (horizontalRelationship == "right")
+			{
+				frameNumber = 39;
+				this.movieClipStack.scaleX = orientation;
+			}
+			else if (verticalRelationship == "top")
+			{
+				frameNumber = 37;
+				this.movieClipStack.scaleX = -(orientation);
+			}
+			else if (verticalRelationship == "bottom")
+			{
+				frameNumber = 39;
+				this.movieClipStack.scaleX = -(orientation);
+			}
+			else
+			{
+				throw new Error("You're in the middle of a structure");
+			}
+			return frameNumber;
+		}				
+		
+		public function setDirection(destination:Point3D):void
+		{
+			if (destination)
+			{	
+				var xDiff:int = destination.x - Math.round(worldCoords.x);
+				var yDiff:int = destination.z - Math.round(worldCoords.z);
+				
+				if (Math.abs(xDiff) > Math.abs(yDiff))
+				{
+					if (xDiff > 0)
+					{
+						doAnimation('walk_toward');
+					}
+					else
+					{
+						doAnimation('walk_away');
+					}
+					movieClipStack.scaleX = -(orientation);				
+				}
+				
+				else if (Math.abs(xDiff) < Math.abs(yDiff))
+				{
+					if (yDiff > 0)
+					{
+						doAnimation('walk_away');
+					}
+					else
+					{		
+						doAnimation('walk_toward');	
+					}
+					movieClipStack.scaleX = orientation;
+				}
+				else
+				{				
+	//				throw new Error("this is pretty damn weird");
+				}
+				currentDirection = destination;
+			}
 		}	
 		
 		public function movePerson(destination:Point3D, fourDirectional:Boolean=false):void

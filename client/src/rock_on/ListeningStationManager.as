@@ -34,8 +34,7 @@ package rock_on
 		public function setInMotion():void
 		{
 			listeningStations = new ArrayCollection();
-			passerbyManager = new PasserbyManager();
-			passerbyManager.myWorld = _myWorld;	
+			passerbyManager = new PasserbyManager(this, _myWorld);
 			showListeningStations();
 			showPassersby();			
 		}
@@ -72,8 +71,35 @@ package rock_on
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				_myWorld.addStaticAsset(asset, addTo);
 			}
-			passerbyManager.listeningStations = listeningStations;
-		}		
+		}	
+		
+		public function getStationFront(station:ListeningStation):Point3D
+		{	
+			// This assumes a particular rotation
+			
+			var stationFront:Point3D;
+				
+			do
+			{
+				stationFront = new Point3D(Math.floor(station.x + station.structure.width/2 + 1 + Math.round(Math.random()*station.radius.x)), 0, Math.floor(station.z - station.structure.depth/2 + Math.round(Math.random()*station.radius.x*2)+1));										
+			}			
+			while (_myWorld.pathFinder.establishPeopleOccupiedSpaces().contains(_myWorld.pathFinder.mapPointToPathGrid(stationFront)));
+			return stationFront;
+		}
+		
+		public function getRandomStation(station:ListeningStation=null):ListeningStation
+		{
+			var selectedStation:ListeningStation = null;
+			if (listeningStations.length && !(listeningStations.length == 1 && station))
+			{
+				do 
+				{
+					selectedStation = listeningStations.getItemAt(Math.floor(Math.random()*listeningStations.length)) as ListeningStation;			
+				}
+				while (selectedStation == station);
+			}
+			return selectedStation;	
+		}					
 		
 	}
 }

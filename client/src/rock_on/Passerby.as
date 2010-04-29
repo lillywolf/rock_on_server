@@ -8,42 +8,127 @@ package rock_on
 	
 	import world.ActiveAsset;
 	import world.Point3D;
+	import world.World;
 
 	public class Passerby extends Person
 	{
-		public function Passerby(movieClipStack:MovieClip, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public static const ROAM_STATE:int = 1;
+		public static const ROUTE_STATE:int = 2;
+		public static const GONE_STATE:int = 3;
+		public static const ENTHRALLED_STATE:int = 4;
+		
+		public var _listeningStationManager:ListeningStationManager;
+		public var _passerbyManager:PasserbyManager;
+				
+		public function Passerby(movieClipStack:MovieClip, listeningStationManager:ListeningStationManager, passerbyManager:PasserbyManager, myWorld:World, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
 		{
 			super(movieClipStack, layerableOrder, creature, personScale, source);
+			_listeningStationManager = listeningStationManager;
+			_passerbyManager = passerbyManager;
+			_myWorld = myWorld;
 		}
 		
-		override public function startEnterState():void
+		override public function update(deltaTime:Number):Boolean
 		{
-			var destination:Point3D = setInitialDestination();
-			movePerson(destination, true);				
+			switch (state)
+			{
+				case ROAM_STATE:
+					doRoamState(deltaTime);
+					break;
+				case ENTHRALLED_STATE:
+					doEnthralledState(deltaTime);
+					break;					
+				case ROUTE_STATE:
+					doRouteState(deltaTime);	
+					break;
+				case GONE_STATE:
+					doGoneState(deltaTime);
+					return true;	
+				default: throw new Error('oh noes!');
+			}
+			return false;
 		}
 		
-		override public function endEnterState():void
+		override public function advanceState(destinationState:int):void
+		{
+			switch (state)
+			{	
+				case ROAM_STATE:
+					endRoamState();
+					break;
+				case ENTHRALLED_STATE:
+					endEnthralledState();				
+					break;	
+				case ROUTE_STATE:
+					endRouteState();
+					break;		
+				case GONE_STATE:
+					break;					
+				default: throw new Error('no state to advance from!');
+			}
+			switch (destinationState)
+			{
+				case ROAM_STATE:
+					startRoamState();
+					break;
+				case ENTHRALLED_STATE:
+					startEnthralledState();
+					break;
+				case ROUTE_STATE:
+					startRouteState();
+					break;					
+				case GONE_STATE:
+					startGoneState();
+					break;	
+				default: throw new Error('no state to advance to!');	
+			}
+		}				
+		
+		public function startRouteState():void
+		{
+			state = ROUTE_STATE;
+			
+			var destination:Point3D = setInitialDestination();
+			moveCustomer(destination);				
+		}
+		
+		public function endRouteState():void
+		{
+			
+		}
+		
+		public function doRouteState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function startEnthralledState():void
+		{
+			
+		}
+		
+		public function endEnthralledState():void
+		{
+			
+		}
+		
+		public function doEnthralledState(deltaTime:Number):void
 		{
 			
 		}
 		
 		public function setInitialDestination():Point3D
 		{
-			_myWorld.pathFinder.establishOwnedStructures();
-
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);			
-			var destinationLocation:Point3D = tryDestination();			
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			var destination:Point3D;
 			
-			if (occupiedSpaces.length >= _myWorld.tilesDeep*_myWorld.tilesWide)
+			do
 			{
-				throw new Error("No free spaces! That's crazy pills!");
-			}
-			while (occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[destinationLocation.x][destinationLocation.y][destinationLocation.z])
-			|| isAnyoneElseThere(destinationLocation))
-			{
-				destinationLocation = tryDestination();
-			}			
-			return destinationLocation;
+				destination = tryDestination();
+			}	
+			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(destination)) || isAnyoneElseThere(destination));		
+				
+			return destination;
 		}		
 
 		public function isAnyoneElseThere(destinationLocation:Point3D):Boolean

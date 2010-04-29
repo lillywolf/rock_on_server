@@ -174,6 +174,7 @@ package rock_on
 				else if (cp.state == CustomerPerson.QUEUED_STATE)
 				{
 					cp.checkIfFrontOfQueue();	
+					cp.standFacingObject(cp.currentBooth);
 				}
 				else if (cp.state == CustomerPerson.HEADTOSTAGE_STATE)
 				{
@@ -222,7 +223,8 @@ package rock_on
 			{
 				if (evt.activeAsset == asset)
 				{
-					(asset as CustomerPerson).setDirection(asset.worldDestination);
+					var nextPoint:Point3D = (asset as CustomerPerson).getNextPointAlongPath();
+					(asset as CustomerPerson).setDirection(nextPoint);
 				}
 			}
 		}	

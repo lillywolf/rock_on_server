@@ -21,12 +21,14 @@ package rock_on
 		private var _myWorld:World;		
 		public var spawnLocation:Point3D;
 		public var spawnInterval:int;
-		public var _listeningStations:ArrayCollection;
+		public var _listeningStationManager:ListeningStationManager;
 		public static const VENUE_BOUND_X:int = 14;	
 				
-		public function PasserbyManager(source:Array=null)
+		public function PasserbyManager(listeningStationManager:ListeningStationManager, myWorld:World, source:Array=null)
 		{
 			super(source);
+			_listeningStationManager = listeningStationManager;
+			_myWorld = myWorld;
 		}
 		
 		public function startSpawning():void
@@ -43,7 +45,7 @@ package rock_on
 			var ownedLayerables:ArrayCollection = getStyles(-1);
 			creature.owned_layerables = ownedLayerables;
 			var assetStack:AssetStack = creature.getConstructedCreature("walk_toward", 1, 1);	
-			var passerby:Passerby = new Passerby(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);			
+			var passerby:Passerby = new Passerby(assetStack.movieClipStack, _listeningStationManager, this, _myWorld, assetStack.layerableOrder, assetStack.creature, 0.4);			
 			return passerby;		
 		}
 		
@@ -53,14 +55,14 @@ package rock_on
 			var ownedLayerables:ArrayCollection = getStyles(-1);
 			creature.owned_layerables = ownedLayerables;
 			var assetStack:AssetStack = creature.getConstructedCreature("walk_toward", 1, 1);	
-			var sl:StationListener = new StationListener(assetStack.movieClipStack, this, assetStack.layerableOrder, assetStack.creature, 0.4);			
+			var sl:StationListener = new StationListener(assetStack.movieClipStack, _listeningStationManager, this, _myWorld, assetStack.layerableOrder, assetStack.creature, 0.4);			
 			return sl;		
 		}
 		
 		private function getOpenStation():ListeningStation
 		{
 			var openStations:ArrayCollection = new ArrayCollection();
-			for each (var station:ListeningStation in _listeningStations)
+			for each (var station:ListeningStation in _listeningStationManager.listeningStations)
 			{
 				if (!station.hasCustomerEnRoute)
 				{
@@ -82,14 +84,14 @@ package rock_on
 		private function onSpawnTimer(evt:TimerEvent):void
 		{			
 			// Criteria for making someone go to stations
-			if (Math.random()*listeningStations.length > 0.7)
+			if (Math.random()*_listeningStationManager.listeningStations.length > 0.7)
 			{
 				var sl:StationListener = generateStationListener();
-				var stationIndex:int = Math.floor(Math.random()*_listeningStations.length);	
+				var stationIndex:int = Math.floor(Math.random()*_listeningStationManager.listeningStations.length);	
 				var ls:ListeningStation = getOpenStation();		
 				if (ls)
 				{
-					sl.listeningStation = ls;
+					sl.currentStation = ls;
 					sl.speed = 0.08;
 					add(sl);
 				}	
@@ -117,9 +119,8 @@ package rock_on
 				setSpawnLocation();
 				_myWorld.addAsset(person, spawnLocation);				
 				addItem(person);
-				person.myWorld = _myWorld;
 				person.movieClipStack.alpha = 0.5;
-				person.startEnterState();
+				person.startRouteState();
 			}
 			else
 			{
@@ -143,17 +144,17 @@ package rock_on
 		public function addByStation(station:ListeningStation):void
 		{
 			var stationListener:StationListener = generateStationListener();
-			stationListener.listeningStation = station;
+			stationListener.currentStation = station;
 			stationListener.speed = 0.07;
 			
 			if(_myWorld)
 			{			
-				stationListener.myWorld = _myWorld;
-				setStationSpawnLocation(stationListener);
+				spawnLocation = stationListener.setInitialDestination();
 				_myWorld.addAsset(stationListener, spawnLocation);
 				stationListener.movieClipStack.alpha = 0.5;				
 				addItem(stationListener);
-				stationListener.fullStop();
+				stationListener.isStatic = true;
+				stationListener.startEnthralledState();
 			}
 			else
 			{
@@ -166,15 +167,11 @@ package rock_on
 			if (evt.activeAsset is Passerby)
 			{	
 				var passerby:Passerby = evt.activeAsset as Passerby;
-				if (passerby is StationListener && passerby.state == Person.ENTER_STATE)
+				if (passerby is StationListener && passerby.state == StationListener.ROUTE_STATE)
 				{
-					passerby.advanceState(Person.STOP_STATE);
+					passerby.advanceState(StationListener.ENTHRALLED_STATE);
 				}
-				else if (passerby.state == Person.ROAM_STATE)
-				{
-					
-				}
-				else if (passerby.state == Person.ENTER_STATE || passerby.state == Person.LEAVING_STATE)
+				else if (passerby.state == Person.ROAM_STATE || passerby.state == Person.LEAVING_STATE)
 				{
 					remove(passerby);
 					passerby.advanceState(Person.GONE_STATE);
@@ -268,23 +265,14 @@ package rock_on
 			{
 				if (layerable.symbol_name == "PeachBody")
 				{
-					bodyLayer.layerable = layerable;
+					bodyLayer.layerable = new Layerable(layerable);
+					bodyLayer.layerable.mc = new PeachBody();
 				}
 			}			
 			myStyles.addItem(bodyLayer);
 //			myStyles.addItem(eyeLayer);
 			return myStyles;
 		}		
-		
-		public function set listeningStations(val:ArrayCollection):void
-		{
-			_listeningStations = val;
-		}					
-		
-		public function get listeningStations():ArrayCollection
-		{
-			return _listeningStations;
-		}
 		
 	}
 }

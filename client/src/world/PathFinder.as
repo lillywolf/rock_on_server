@@ -239,7 +239,16 @@ package world
 					allOccupiedSpaces.addItem(pt);
 				}		
 			}
+			validateOccupiedSpaces(allOccupiedSpaces);
 			return allOccupiedSpaces;
+		}
+		
+		public function validateOccupiedSpaces(occupiedSpaces:ArrayCollection):void
+		{
+			if (occupiedSpaces.length >= _world.tilesDeep*_world.tilesWide)
+			{
+				throw new Error("No free spaces! That's crazy pills!");
+			}			
 		}
 		
 		public function establishStructureOccupiedSpaces(exemptStructures:ArrayCollection=null):ArrayCollection
