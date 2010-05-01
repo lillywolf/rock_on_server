@@ -126,14 +126,14 @@ package rock_on
 		public function findNextPath():void
 		{
 			var destination:Point3D = attemptDestination();
-			_myWorld.moveAssetTo(this, destination, true, exemptStructures);			
+			_myWorld.moveAssetTo(this, destination, true, true, false, exemptStructures);			
 			setDirection(worldDestination);			
 		}
 		
 		public function setPathToCurrentCoords():void
 		{
 			var destination:Point3D = new Point3D(worldCoords.x, worldCoords.y, worldCoords.z);
-			_myWorld.moveAssetTo(this, destination, true, exemptStructures);
+			_myWorld.moveAssetTo(this, destination, true, true, false, exemptStructures);
 			setDirection(worldDestination);
 		}
 		

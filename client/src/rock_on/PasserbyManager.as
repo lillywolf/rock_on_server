@@ -28,7 +28,7 @@ package rock_on
 		{
 			super(source);
 			_listeningStationManager = listeningStationManager;
-			_myWorld = myWorld;
+			setWorld(myWorld);
 		}
 		
 		public function startSpawning():void
@@ -84,21 +84,13 @@ package rock_on
 		private function onSpawnTimer(evt:TimerEvent):void
 		{			
 			// Criteria for making someone go to stations
-			if (Math.random()*_listeningStationManager.listeningStations.length > 0.7)
+			
+			if (Math.random()*_listeningStationManager.listeningStations.length > 0.7 && _listeningStationManager.isAnyStationAvailable())
 			{
 				var sl:StationListener = generateStationListener();
 				var stationIndex:int = Math.floor(Math.random()*_listeningStationManager.listeningStations.length);	
-				var ls:ListeningStation = getOpenStation();		
-				if (ls)
-				{
-					sl.currentStation = ls;
-					sl.speed = 0.08;
-					add(sl);
-				}	
-				else
-				{
-					
-				}				
+				sl.speed = 0.08;
+				add(sl);			
 			}
 			else
 			{
@@ -171,10 +163,13 @@ package rock_on
 				{
 					passerby.advanceState(StationListener.ENTHRALLED_STATE);
 				}
-				else if (passerby.state == Person.ROAM_STATE || passerby.state == Person.LEAVING_STATE)
+				else if (passerby.state == Passerby.ROUTE_STATE || passerby.state == StationListener.LEAVING_STATE)
 				{
 					remove(passerby);
-					passerby.advanceState(Person.GONE_STATE);
+				}
+				else
+				{
+					throw new Error("Which state are you in?");
 				}
 			}
 		}
@@ -232,10 +227,18 @@ package rock_on
 			{
 				if (evt.activeAsset == asset)
 				{
-					(asset as Passerby).setDirection(asset.worldDestination);
+					var nextPoint:Point3D = (asset as Passerby).getNextPointAlongPath();
+					(asset as Passerby).setDirection(nextPoint);
 				}
 			}
 		}	
+		
+		public function setWorld(myWorld:World):void
+		{
+			_myWorld = myWorld;
+			_myWorld.addEventListener(WorldEvent.DIRECTION_CHANGED, onDirectionChanged);				
+			_myWorld.addEventListener(WorldEvent.FINAL_DESTINATION_REACHED, onFinalDestinationReached);
+		}				
 						
 		public function set myWorld(val:World):void
 		{

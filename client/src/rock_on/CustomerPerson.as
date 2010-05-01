@@ -2,11 +2,9 @@ package rock_on
 {
 	import flash.display.MovieClip;
 	import flash.events.TimerEvent;
-	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
 	import models.Creature;
-	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
@@ -22,18 +20,24 @@ package rock_on
 		public static const QUEUED_STATE:int = 4;
 		public static const GONE_STATE:int = 5;
 		public static const HEADTOSTAGE_STATE:int = 6;
+		public static const HEADTODOOR_STATE:int = 7;
 		
 		public static const ENTHRALLED_TIME:int = 10000;
 		public static const QUEUED_TIME:int = 4000;
+		public static const FAN_CONVERSION_DELAY:int = 2000;
 		
 		public var enthralledTimer:Timer;
 		public var queuedTimer:Timer;
+		
+		public var numQueuedTimers:int = 0;
+		public var numEnthralledTimers:int = 0;
 		
 		public var currentBooth:Booth;
 		public var currentBoothPosition:int;
 		public var activityTimer:Timer;
 		public var _concertStage:ConcertStage;
 		public var _boothManager:BoothManager;
+		public var _venue:Venue;
 		public var proxiedDestination:Point3D;
 		
 		public function CustomerPerson(movieClipStack:MovieClip, concertStage:ConcertStage, boothManager:BoothManager, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
@@ -63,6 +67,9 @@ package rock_on
 				case HEADTOSTAGE_STATE:
 					doHeadToStageState(deltaTime);	
 					break;
+				case HEADTODOOR_STATE:
+					doHeadToDoorState(deltaTime);	
+					break;
 				case GONE_STATE:
 					doGoneState(deltaTime);
 					return true;	
@@ -90,6 +97,9 @@ package rock_on
 				case HEADTOSTAGE_STATE:
 					endHeadToStageState();
 					break;	
+				case HEADTODOOR_STATE:
+					endHeadToStageState();
+					break;	
 				case GONE_STATE:
 					break;					
 				default: throw new Error('no state to advance from!');
@@ -111,6 +121,9 @@ package rock_on
 				case HEADTOSTAGE_STATE:
 					startHeadToStageState();
 					break;					
+				case HEADTODOOR_STATE:
+					startHeadToDoorState();
+					break;					
 				case GONE_STATE:
 					startGoneState();
 					break;	
@@ -121,7 +134,40 @@ package rock_on
 		override public function startRoamState():void
 		{
 			state = ROAM_STATE;
+		}
+		
+		public function timedConverstion(fanIndex:int):void
+		{
+			var convertTimer:Timer = new Timer(fanIndex * FAN_CONVERSION_DELAY);
+			convertTimer.addEventListener(TimerEvent.TIMER, onConversionComplete);
+			convertTimer.start();
 		}	
+		
+		private function onConversionComplete(evt:TimerEvent):void
+		{
+			var convertTimer:Timer = evt.currentTarget as Timer;
+			convertTimer.removeEventListener(TimerEvent.TIMER, onConversionComplete);
+			convertTimer.stop();
+			
+			advanceState(HEADTODOOR_STATE);
+		}
+		
+		public function startHeadToDoorState():void
+		{
+			state = HEADTODOOR_STATE;
+			var door:Point3D = _venue.mainEntrance;
+			moveCustomer(door);
+		}
+		
+		public function endHeadToDoorState():void
+		{
+			
+		}
+		
+		public function doHeadToDoorState(deltaTime:Number):void
+		{
+			
+		}
 		
 		override public function endRoamState():void
 		{
@@ -143,12 +189,14 @@ package rock_on
 			enthralledTimer = new Timer(CustomerPerson.ENTHRALLED_TIME);
 			enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
 			enthralledTimer.start();
+			numEnthralledTimers++;
 		}
 		
 		private function routeToQueue(evt:TimerEvent):void
 		{
 			enthralledTimer.stop();
 			enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
+			numEnthralledTimers--;
 			if (state == ENTHRALLED_STATE)
 			{
 				advanceState(ROUTE_STATE);			
@@ -184,7 +232,11 @@ package rock_on
 			{
 				throw new Error("Should have a current booth");
 			}
-			if (currentBoothPosition == 1)
+			if (queuedTimer)
+			{
+				throw new Error("Queued timer already exists");
+			}
+			if (currentBoothPosition == 1 && !queuedTimer)
 			{
 				startQueuedTimer();
 			}
@@ -198,12 +250,17 @@ package rock_on
 		{
 			if (state != QUEUED_STATE)
 			{
+				trace("Queued Timers: " + numQueuedTimers.toString());		
+				trace("Enthralled Timers: " + numEnthralledTimers.toString());						
 				throw new Error("State is not queued state");
 			}
 			
 			queuedTimer = new Timer(CustomerPerson.QUEUED_TIME);
 			queuedTimer.addEventListener(TimerEvent.TIMER, exitQueue);
-			queuedTimer.start();			
+			queuedTimer.start();	
+			numQueuedTimers++;
+			trace("Queued Timers: " + numQueuedTimers.toString());		
+			trace("Enthralled Timers: " + numEnthralledTimers.toString());		
 		}
 		
 		public function moveUpInQueue():void
@@ -223,15 +280,24 @@ package rock_on
 				
 				queuedTimer.stop();
 				queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);
+				queuedTimer = null;
+				trace("Queued Timers: " + numQueuedTimers.toString());		
+				trace("Enthralled Timers: " + numEnthralledTimers.toString());				
+				
 				advanceState(HEADTOSTAGE_STATE);
 			}
 			else
 			{
+				trace("Queued Timers: " + numQueuedTimers.toString());		
+				trace("Enthralled Timers: " + numEnthralledTimers.toString());				
 				throw new Error("State is not queued state");
 				queuedTimer.stop();
-				queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);				
+				queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);
+				queuedTimer = null;				
 			}
 			
+			numQueuedTimers--;
+			trace(numQueuedTimers.toString());			
 		}
 		
 		private function decrementQueue():void
@@ -336,7 +402,7 @@ package rock_on
 		public function pickPointNearStructure(structure:*):Point3D
 		{
 			var stagePoint:Point3D;
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
 			
 			if (availableSpaces(occupiedSpaces))
 			{
@@ -519,6 +585,11 @@ package rock_on
 					throw new Error("Must be in route state");
 				}
 			}
+		}
+		
+		public function set venue(val:Venue):void
+		{
+			_venue = val;
 		}
 				
 	}

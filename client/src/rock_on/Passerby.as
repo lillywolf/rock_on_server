@@ -119,7 +119,7 @@ package rock_on
 		
 		public function setInitialDestination():Point3D
 		{
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
 			var destination:Point3D;
 			
 			do

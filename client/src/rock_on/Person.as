@@ -93,11 +93,11 @@ package rock_on
 			stand(frameNumber);
 		}
 		
-		public function moveCustomer(destination:Point3D):void
+		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
 		{			
 			if (this.worldCoords.x%1 == 0 && this.worldCoords.y%1 == 0 && this.worldCoords.z%1 == 0)
 			{
-				_myWorld.moveAssetTo(this, destination, true);			
+				_myWorld.moveAssetTo(this, destination, true, avoidStructures, avoidPeople);			
 			}
 			else
 			{

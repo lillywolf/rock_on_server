@@ -6,6 +6,7 @@ package rock_on
 	
 	import game.GameClock;
 	
+	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
 	import mx.controls.Alert;
 	import mx.controls.Label;
@@ -18,12 +19,13 @@ package rock_on
 	public class ListeningStation extends Booth
 	{
 		public static const START_STATE:int = 0;
-		public static const FAN_BUTTON:int = 1;
-		public static const FAN_COLLECTION:int = 2;
+		public static const FAN_BUTTON_STATE:int = 1;
+		public static const FAN_COLLECTION_STATE:int = 2;
 		
 		public var state:int;
 		public var listenerCount:int;
 		public var currentListenerCount:int;
+		public var currentListeners:ArrayCollection;
 		public var capacity:int;
 		public var createdAt:int;
 		public var stationType:String;
@@ -40,6 +42,7 @@ package rock_on
 		{
 			super(params, target);
 			setProperties();
+			currentListeners = new ArrayCollection();
 		}
 			
 		public function setInMotion():void
@@ -143,13 +146,13 @@ package rock_on
 			
 			updateListenerCount();
 			
-			if (secondsRemaining < 0 && state != FAN_BUTTON)
+			if (secondsRemaining < 0 && state != FAN_BUTTON_STATE)
 			{
-				advanceState(FAN_BUTTON);
+				advanceState(FAN_BUTTON_STATE);
 			}	
 			else
 			{
-				advanceState(FAN_COLLECTION);
+				advanceState(FAN_COLLECTION_STATE);
 			}				
 		}
 		
@@ -177,7 +180,7 @@ package rock_on
 		
 		private function onStationTimerComplete(evt:TimerEvent):void
 		{
-			advanceState(FAN_BUTTON);
+			advanceState(FAN_BUTTON_STATE);
 		}
 		
 		public function advanceState(destinationState:int):void
@@ -187,20 +190,20 @@ package rock_on
 				case START_STATE:
 					endStartState();
 					break;
-				case FAN_BUTTON:
+				case FAN_BUTTON_STATE:
 					endFanButtonState();				
 					break;	
-				case FAN_COLLECTION:
+				case FAN_COLLECTION_STATE:
 					endFanCollectionState();
 					break;						
 				default: throw new Error('no state to advance from!');
 			}
 			switch (destinationState)
 			{
-				case FAN_BUTTON:
+				case FAN_BUTTON_STATE:
 					startFanButtonState();
 					break;
-				case FAN_COLLECTION:
+				case FAN_COLLECTION_STATE:
 					startFanCollectionState();
 					break;
 				default: throw new Error('no state to advance to!');	
@@ -209,18 +212,18 @@ package rock_on
 		
 		private function startFanButtonState():void
 		{
-			state = FAN_BUTTON;
+			state = FAN_BUTTON_STATE;
 			var evt:DynamicEvent = new DynamicEvent("fanButtonState", true, true);
 			dispatchEvent(evt);
 		}		
 		
 		private function startFanCollectionState():void
 		{
-			state = FAN_COLLECTION;
+			state = FAN_COLLECTION_STATE;
 			updateSecondsRemaining();
-			setupStationTimer();			
+//			setupStationTimer();			
 		}
-		
+			
 		private function endStartState():void
 		{
 			
@@ -239,5 +242,16 @@ package rock_on
 				stationTimer.removeEventListener(TimerEvent.TIMER, onStationTimerComplete);
 			}
 		}
+		
+		public function isStationAvailable():Boolean
+		{
+			var isFree:Boolean = true;
+			if (capacity == currentListeners.length)
+			{
+				isFree = false;
+			}
+			return isFree;
+		}		
+		
 	}
 }

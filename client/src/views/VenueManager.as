@@ -22,6 +22,8 @@ package views
 
 	public class VenueManager extends EventDispatcher
 	{
+		public static const PERSON_SCALE:Number = 0.4;		
+		
 		public var venue:Venue;
 		public var _dwellingManager:DwellingManager;
 		public var _customerPersonManager:CustomerPersonManager;
@@ -64,13 +66,6 @@ package views
 				_customerPersonManager.add(cp);
 			}
 		}
-		
-//		private function setCustomerVariables(cp:CustomerPerson):void
-//		{
-//			cp.roamLength = int(Math.floor(Math.random()*2000 + 1000));
-//			cp.stopLength = int(Math.floor(Math.random()*40000)); 
-//			cp.stopLengthConstant = 50000;
-//		}
 		
 	}
 }

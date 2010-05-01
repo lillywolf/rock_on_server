@@ -14,10 +14,25 @@ package rock_on
 	{	
 		private var _myWorld:World;
 		private var _concertStage:ConcertStage;
+		private var _venue:Venue;
 		
 		public function CustomerPersonManager(source:Array=null)
 		{
 			super(source);
+		}
+		
+		public function addConvertedFan(cp:CustomerPerson, startPoint:Point3D, fanIndex:int):void
+		{
+			if (_myWorld)
+			{
+				cp.myWorld = _myWorld;
+				cp.venue = _venue;
+				cp.speed = 0.07;
+				addEventListeners(cp);
+				addItem(cp);
+				_myWorld.addStaticAsset(cp, startPoint);
+				cp.timedConverstion(fanIndex);
+			}
 		}
 		
 		public function add(cp:CustomerPerson):void
@@ -25,7 +40,8 @@ package rock_on
 			if(_myWorld)
 			{			
 				cp.myWorld = _myWorld;
-				addWithEventListeners(cp);
+				addToWorld(cp);
+				addEventListeners(cp);
 				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
 			}
 			else
@@ -34,26 +50,22 @@ package rock_on
 			}
 		}
 		
-		private function addWithEventListeners(cp:CustomerPerson):void
+		private function addToWorld(cp:CustomerPerson):void
 		{
 			var destination:Point3D = cp.pickPointNearStructure(_concertStage);
 			_myWorld.addAsset(cp, destination);
 			this.addItem(cp);
-			cp.addEventListener("customerRouted", onCustomerRouted);
-			cp.addEventListener("queueDecremented", decrementQueue);
 		}	
+		
+		private function addEventListeners(cp:CustomerPerson):void
+		{
+			cp.addEventListener("customerRouted", onCustomerRouted);
+			cp.addEventListener("queueDecremented", decrementQueue);			
+		}
 		
 		private function decrementQueue(evt:DynamicEvent):void
 		{
 			var booth:Booth = evt.booth;
-//			for each (var cp:CustomerPerson in this)
-//			{
-//				if (cp.currentBooth == booth && cp.state == CustomerPerson.QUEUED_STATE && cp != evt.person)
-//				{
-//					updateBoothPosition(cp, cp.currentBoothPosition-1);					
-//					cp.moveUpInQueue();
-//				}
-//			}
 			updateQueuedCustomers(booth, evt.person);
 			updateRoutedCustomers(booth);
 			validateBoothPositions(booth);			
@@ -180,6 +192,14 @@ package rock_on
 				{
 					cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
 				}
+				else if (cp.state == CustomerPerson.ENTHRALLED_STATE)
+				{
+					
+				}
+				else if (cp.state == CustomerPerson.HEADTODOOR_STATE)
+				{
+					cp.advanceState(CustomerPerson.HEADTOSTAGE_STATE);
+				}
 				else
 				{
 					throw new Error("This doesn't really make sense");
@@ -259,7 +279,12 @@ package rock_on
 		public function get concertStage():ConcertStage
 		{
 			return _concertStage;
-		}			
+		}		
+		
+		public function set venue(val:Venue):void
+		{
+			_venue = val;
+		}	
 		
 	}
 }

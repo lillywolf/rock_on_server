@@ -19,10 +19,10 @@ package world
 			createPathGrid();
 		}
 		
-		public function add(asset:ActiveAsset, exemptStructures:ArrayCollection=null):ArrayCollection
+		public function add(asset:ActiveAsset, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null):ArrayCollection
 		{
 			addItem(asset);
-			var assetPathFinder:ArrayCollection = calculatePathGrid(asset, asset.lastWorldPoint, asset.worldDestination, false, exemptStructures);
+			var assetPathFinder:ArrayCollection = calculatePathGrid(asset, asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures);
 			var finalPath:ArrayCollection = determinePath(asset, assetPathFinder);
 			return finalPath;
 		}
@@ -150,14 +150,14 @@ package world
 			return false;
 		}
 		
-		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null):ArrayCollection
+		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutStructureOccupiedSpaces:Boolean=true, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null):ArrayCollection
 		{
 			var pathGridComplete:Boolean = false;
 			
 			var assetPathFinder:ArrayCollection = initializePath(destination);
 			var unorganizedPoints:ArrayCollection = initializeUnorganizedPoints(destination);
 			
-			var occupiedSpaces:ArrayCollection = updateOccupiedSpaces(careAboutPeopleOccupiedSpaces, true, exemptStructures);
+			var occupiedSpaces:ArrayCollection = updateOccupiedSpaces(careAboutPeopleOccupiedSpaces, careAboutStructureOccupiedSpaces, exemptStructures);
 			validateDestination(asset, destination, occupiedSpaces);		
 			
 			var startPoint:Point3D = mapPointToPathGrid(currentPoint);

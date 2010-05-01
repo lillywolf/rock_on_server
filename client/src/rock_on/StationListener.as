@@ -20,6 +20,7 @@ package rock_on
 		public static const ROUTE_STATE:int = 3;
 		public static const QUEUED_STATE:int = 4;
 		public static const GONE_STATE:int = 5;
+		public static const LEAVING_STATE:int = 6;
 		
 		public var enthralledTimer:Timer;
 		public var isStatic:Boolean;
@@ -31,6 +32,8 @@ package rock_on
 		
 		override public function startRouteState():void
 		{
+			state = ROUTE_STATE;
+			
 			var station:ListeningStation = _listeningStationManager.getRandomStation(currentStation);
 			if (station == null)
 			{
@@ -49,11 +52,77 @@ package rock_on
 		{
 			var stationFront:Point3D = _listeningStationManager.getStationFront(currentStation);
 			return stationFront;				
-		}  
+		} 
+		
+		override public function update(deltaTime:Number):Boolean
+		{
+			switch (state)
+			{
+				case ROAM_STATE:
+					doRoamState(deltaTime);
+					break;
+				case ENTHRALLED_STATE:
+					doEnthralledState(deltaTime);
+					break;					
+				case ROUTE_STATE:
+					doRouteState(deltaTime);	
+					break;
+				case LEAVING_STATE:
+					doLeavingState(deltaTime);	
+					break;
+				case GONE_STATE:
+					doGoneState(deltaTime);
+					return true;	
+				default: throw new Error('oh noes!');
+			}
+			return false;
+		}		 
+
+		override public function advanceState(destinationState:int):void
+		{
+			switch (state)
+			{	
+				case ROAM_STATE:
+					endRoamState();
+					break;
+				case ENTHRALLED_STATE:
+					endEnthralledState();				
+					break;	
+				case ROUTE_STATE:
+					endRouteState();
+					break;		
+				case LEAVING_STATE:
+					endLeavingState();
+					break;		
+				case GONE_STATE:
+					break;					
+				default: throw new Error('no state to advance from!');
+			}
+			switch (destinationState)
+			{
+				case ROAM_STATE:
+					startRoamState();
+					break;
+				case ENTHRALLED_STATE:
+					startEnthralledState();
+					break;
+				case ROUTE_STATE:
+					startRouteState();
+					break;					
+				case LEAVING_STATE:
+					startLeavingState();
+					break;					
+				case GONE_STATE:
+					startGoneState();
+					break;	
+				default: throw new Error('no state to advance to!');	
+			}
+		}				
 		
 		override public function startEnthralledState():void
 		{
 			state = ENTHRALLED_STATE;
+			currentStation.currentListeners.addItem(this);
 			currentStation.hasCustomerEnRoute = false;
 			standFacingObject(currentStation);
 			
@@ -70,9 +139,22 @@ package rock_on
 			}
 		}
 		
+		override public function endEnthralledState():void
+		{
+			var index:int = currentStation.currentListeners.getItemIndex(this);
+			currentStation.currentListeners.removeItemAt(index);
+		}
+		
+		override public function leave(evt:TimerEvent):void
+		{
+			advanceState(LEAVING_STATE);
+			enthralledTimer.stop();
+			enthralledTimer.removeEventListener(TimerEvent.TIMER, leave);
+		}
+		
 		override public function startLeavingState():void
 		{
-			state = Person.LEAVING_STATE;
+			state = LEAVING_STATE;
 			var destination:Point3D = setLeaveDestination();
 			moveCustomer(destination);			
 		}

@@ -43,7 +43,7 @@
 			import server.ServerDataEvent;
 			import game.GameDataInterface;
 			import server.ServerController;
-			
+						
 			[Bindable] public var gdi:GameDataInterface;
 			[Bindable] public var loadedModels:Dictionary;
 			[Bindable] public var xGridCoord:Number;
