@@ -323,6 +323,7 @@ package rock_on
 			evt.person = this;
 			evt.booth = currentBooth;
 			dispatchEvent(evt);
+			_boothManager.dispatchEvent(evt);
 		}
 		
 		public function doQueuedState(deltaTime:Number):void

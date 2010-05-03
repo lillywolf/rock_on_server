@@ -40,6 +40,19 @@ class OwnedStructureController < ApplicationController
     hash["belongs_to_id"] = [os.user_id, os.structure_id]
     @array.push hash
     render :json => @array.to_json
-  end  
+  end 
+  
+  def decrement_inventory
+    array = Array.new
+    hash = Hash.new
+    os = OwnedStructure.find(params[:id])
+    os.inventory_count = os.inventory_count - 1;
+    os.save
+    hash["instance"] = os
+    hash["already_loaded"] = true
+    hash["model"] = "owned_structured"
+    array.push hash
+    render :json => array.to_json
+  end   
 
 end

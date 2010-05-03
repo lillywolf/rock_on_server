@@ -22,7 +22,6 @@ package rock_on
 		public static const FAN_BUTTON_STATE:int = 1;
 		public static const FAN_COLLECTION_STATE:int = 2;
 		
-		public var state:int;
 		public var listenerCount:int;
 		public var currentListenerCount:int;
 		public var currentListeners:ArrayCollection;
@@ -183,7 +182,7 @@ package rock_on
 			advanceState(FAN_BUTTON_STATE);
 		}
 		
-		public function advanceState(destinationState:int):void
+		override public function advanceState(destinationState:int):void
 		{
 			switch (state)
 			{	

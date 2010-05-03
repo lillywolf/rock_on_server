@@ -17,6 +17,8 @@ package models
 		public var _y:Number;
 		public var _z:Number;
 		public var _created_at:String;
+		
+		public var _inventory_count:int;
 				
 		public function OwnedStructure(params:Object=null, target:IEventDispatcher=null)
 		{
@@ -37,7 +39,17 @@ package models
 			{
 				_structure = params.structure;
 			}
+			
+			setOptionalProperties(params);
 		}		
+		
+		public function setOptionalProperties(params:Object):void
+		{
+			if (params.inventory_count)
+			{
+				_inventory_count = params.inventory_count;
+			}
+		}
 
 		public function set id(val:int):void
 		{
@@ -132,6 +144,16 @@ package models
 		public function get z():Number
 		{
 			return _z;
+		}
+		
+		public function set inventory_count(val:int):void
+		{
+			_inventory_count = val;
+		}
+		
+		public function get inventory_count():int
+		{
+			return _inventory_count;
 		}
 		
 		public function getCornerMatrix():Dictionary

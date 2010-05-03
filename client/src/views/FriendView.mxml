@@ -2,6 +2,8 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import game.GameMagicManager;
+			import rock_on.ContentIndex;
 			import rock_on.BoothManager;
 			import world.WorldEvent;
 			import mx.controls.Alert;

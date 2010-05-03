@@ -11,7 +11,7 @@
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
 			<mx:AddChild>
-				<views:WorldView id="worldView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}"/>
+				<views:WorldView id="worldView" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="friendView" basedOn="topBar">
@@ -32,6 +32,8 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import rock_on.ContentIndex;
+			import game.GameMagicManager;
 			import mx.events.DynamicEvent;
 			import mx.events.FlexEvent;
 			import controllers.FriendManager;
@@ -48,6 +50,8 @@
 			[Bindable] public var loadedModels:Dictionary;
 			[Bindable] public var xGridCoord:Number;
 			[Bindable] public var yGridCoord:Number;
+			[Bindable] public var gameMagicManager:GameMagicManager;
+			
 			public var facebookInterface:FacebookFunTime;
 			public var friendManager:FriendManager;
 			public var gameContent:Dictionary;
@@ -62,7 +66,8 @@
 				gdi.addEventListener(ServerDataEvent.GAME_CONTENT_LOADED, onGameContentLoaded);
 				gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	
 				
-				friendManager = new FriendManager();		
+				friendManager = new FriendManager();	
+				gameMagicManager = new GameMagicManager(gdi.levelManager, gdi.userManager);	
 			}
 			private function onApplicationComplete():void
 			{

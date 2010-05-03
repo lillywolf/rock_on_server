@@ -10,6 +10,7 @@ package views
 	import rock_on.BandMember;
 	import rock_on.BandMemberManager;
 	import rock_on.ConcertStage;
+	import rock_on.Venue;
 	
 	import world.AssetStack;
 	import world.World;
@@ -22,6 +23,7 @@ package views
 		public var _booths:ArrayCollection;
 		public var _concertStage:ConcertStage;
 		public var _myWorld:World;
+		public var _venue:Venue;
 		
 		public function BandManager(creatureManager:CreatureManager, booths:ArrayCollection, concertStage:ConcertStage, myWorld:World, target:IEventDispatcher=null)
 		{
@@ -60,6 +62,11 @@ package views
 			{
 				bandMemberManager.update(lockedDelta);							
 			}
+		}
+		
+		public function set venue(val:Venue):void
+		{
+			_venue = val;
 		}		
 		
 	}

@@ -5,8 +5,6 @@ package rock_on
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
-	import flash.events.TimerEvent;
-	import flash.utils.Timer;
 	
 	import game.GameClock;
 	
@@ -62,7 +60,7 @@ package rock_on
 		
 		public function addFanButton(station:ListeningStation):void
 		{
-			var btn:FanButton = new FanButton();
+			var btn:SpecialButton = new SpecialButton();
 			btn.station = station;
 			btn.addEventListener(MouseEvent.CLICK, onFanButtonClicked);
 			var actualCoords:Point = World.worldToActualCoords(new Point3D(station.x, station.y, station.z));
@@ -73,8 +71,8 @@ package rock_on
 		
 		private function onFanButtonClicked(evt:MouseEvent):void
 		{
-			var fanButton:FanButton = evt.currentTarget as FanButton;
-			letInNewFans(fanButton.station);
+			var button:SpecialButton = evt.currentTarget as SpecialButton;
+			letInNewFans(button.station);
 		}
 		
 		private function letInNewFans(station:ListeningStation):void

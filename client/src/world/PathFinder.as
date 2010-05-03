@@ -209,7 +209,7 @@ package world
 		public function establishPeopleOccupiedSpaces():ArrayCollection
 		{
 			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
-			for each (var asset:ActiveAsset in _world.assetRenderer.sortedAssets)
+			for each (var asset:ActiveAsset in _world.assetRenderer.unsortedAssets)
 			{
 				if (asset is Person)
 				{

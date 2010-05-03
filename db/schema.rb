@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100418212130) do
+ActiveRecord::Schema.define(:version => 20100503181935) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -55,6 +55,17 @@ ActiveRecord::Schema.define(:version => 20100418212130) do
     t.boolean  "is_store_owned"
   end
 
+  create_table "levels", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "order"
+    t.integer  "xp_diff"
+    t.text     "items_unlocked"
+    t.integer  "dwelling_expansion_x"
+    t.integer  "dwelling_expansion_y"
+    t.integer  "dwelling_expansion_z"
+  end
+
   create_table "owned_dwellings", :force => true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -87,6 +98,7 @@ ActiveRecord::Schema.define(:version => 20100418212130) do
     t.integer  "user_id"
     t.integer  "structure_id"
     t.integer  "dwelling_id"
+    t.integer  "inventory_count"
   end
 
   create_table "owned_thingers", :force => true do |t|
@@ -172,6 +184,7 @@ ActiveRecord::Schema.define(:version => 20100418212130) do
     t.integer  "credits"
     t.integer  "premium_credits"
     t.datetime "last_showtime"
+    t.integer  "level_id"
   end
 
 end

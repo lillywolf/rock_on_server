@@ -13,6 +13,7 @@ package controllers
 	import models.Dwelling;
 	import models.EssentialModelReference;
 	import models.Layerable;
+	import models.Level;
 	import models.OwnedDwelling;
 	import models.OwnedStructure;
 	import models.OwnedThinger;
@@ -42,6 +43,7 @@ package controllers
 		[Bindable] public var thingers:ArrayCollection;
 		[Bindable] public var owned_thingers:ArrayCollection;
 		[Bindable] public var users:ArrayCollection;
+		[Bindable] public var levels:ArrayCollection;
 		[Bindable] public var stores:ArrayCollection;
 		[Bindable] public var store_owned_thingers:ArrayCollection;
 		[Bindable] public var structures:ArrayCollection;
@@ -59,6 +61,7 @@ package controllers
 		public var owned_structure:OwnedStructure;
 		public var dwelling:Dwelling;
 		public var owned_dwelling:OwnedDwelling;
+		public var level:Level;
 		
 		public var baseUrl:String = ServerController.BASE_URL;		
 		
@@ -82,6 +85,7 @@ package controllers
 			stores = new ArrayCollection();
 			store_owned_thingers = new ArrayCollection();	
 			users = new ArrayCollection();
+			levels = new ArrayCollection();
 			dwellings = new ArrayCollection();
 			owned_dwellings = new ArrayCollection();
 			essentialModelReference = new EssentialModelReference();

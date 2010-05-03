@@ -9,6 +9,8 @@ package controllers
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
+	
+	import server.ServerController;
 
 	public class StructureManager extends Manager
 	{
@@ -17,6 +19,7 @@ package controllers
 		public var ownedStructureMovieClipsLoaded:int;
 		public var ownedStructuresLoaded:int;
 		public var structuresLoaded:int;
+		public var _serverController:ServerController;
 		
 		public function StructureManager(essentialModelManager:EssentialModelManager, target:IEventDispatcher=null)
 		{
@@ -120,6 +123,16 @@ package controllers
 				return "Gramophone";
 			}
 			return null;
+		}
+		
+		public function decrementInventoryCount(id:int):void
+		{
+			_serverController.sendRequest({id: id}, 'owned_structure', 'decrement_inventory');										
+		}
+		
+		public function set serverController(val:ServerController):void
+		{
+			_serverController = val;
 		}
 	}
 }

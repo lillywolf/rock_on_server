@@ -15,6 +15,8 @@ package models
 		public var _xp:int;
 		public var _credits:int;
 		public var _premium_credits:int;
+		public var _level_id:int;
+		public var _level:Level;
 		
 		public var _owned_layerables:ArrayCollection;
 		public var _owned_structures:ArrayCollection;
@@ -44,6 +46,19 @@ package models
 			_premium_credits = params.premium_credits;	
 			_snid = params.snid;		
 			_last_showtime = params.last_showtime;
+			_level_id = params.level_id;			
+		}
+		
+		public function increaseXp(xpToAdd:int):void
+		{
+			// Ping server and add on response(?)
+			
+			_xp = _xp + xpToAdd;
+		}
+		
+		public function incrementLevel(newLevel:int):void
+		{
+			// Ping server and add on response
 		}
 		
 		private function onStructureAdded(evt:CollectionEvent):void
@@ -150,6 +165,36 @@ package models
 		public function get last_showtime():String
 		{
 			return _last_showtime;
+		}
+		
+		public function set level(val:Level):void
+		{
+			_level = val;
+		}
+		
+		public function get level():Level
+		{
+			return _level;
+		}
+		
+		public function set level_id(val:int):void
+		{
+			_level_id = val;
+		}
+		
+		public function get level_id():int
+		{
+			return _level_id;
+		}
+		
+		public function set xp(val:int):void
+		{
+			_xp = val;
+		}
+		
+		public function get xp():int
+		{
+			return _xp;
 		}
 		
 	}

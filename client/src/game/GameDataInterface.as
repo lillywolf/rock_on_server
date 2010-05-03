@@ -4,6 +4,7 @@ package game
 	import controllers.DwellingManager;
 	import controllers.EssentialModelManager;
 	import controllers.LayerableManager;
+	import controllers.LevelManager;
 	import controllers.OwnedLayerableManager;
 	import controllers.StoreManager;
 	import controllers.StructureManager;
@@ -15,6 +16,7 @@ package game
 	
 	import helpers.UnprocessedModel;
 	
+	import models.Level;
 	import models.User;
 	
 	import mx.core.Application;
@@ -34,6 +36,7 @@ package game
 		[Bindable] public var storeManager:StoreManager;
 		[Bindable] public var structureManager:StructureManager;
 		[Bindable] public var dwellingManager:DwellingManager;
+		[Bindable] public var levelManager:LevelManager;
 		[Bindable] public var userManager:UserManager;
 		[Bindable] public var user:User;
 		
@@ -63,14 +66,17 @@ package game
 			structureManager = new StructureManager(essentialModelManager);
 			dwellingManager = new DwellingManager(essentialModelManager);
 			userManager = new UserManager(essentialModelManager);
+			levelManager = new LevelManager(essentialModelManager);
 			if (preLoadedContent)
 			{
 				setPreLoadedContent(preLoadedContent);
 			}			
 			
+			structureManager.serverController = sc;
 			creatureManager.serverController = sc;
 			thingerManager.serverController = sc;
 			userManager.serverController = sc;
+			levelManager.serverController = sc;
 		}
 		
 		public function onInstanceToCreate(evt:ServerDataEvent):void
@@ -98,6 +104,11 @@ package game
 			{
 				essentialModelManager.layerables = preLoadedContent["dwellings"];
 				dwellingManager.dwellings = essentialModelManager.dwellings;
+			}
+			if (preLoadedContent["levels"])
+			{
+				essentialModelManager.levels = preLoadedContent["levels"];
+				levelManager.levels = essentialModelManager.levels;
 			}									
 		}
 		
@@ -120,6 +131,7 @@ package game
 	
 		public function getStaticGameContent():void
 		{
+			getDataForModel({}, "level", "get_all");
 			getDataForModel({}, "layerable", "get_all");
 			getDataForModel({}, "structure", "get_all");
 			getDataForModel({}, "dwelling", "get_all");

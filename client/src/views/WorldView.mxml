@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import game.GameMagicManager;
 			import rock_on.StageManager;
 			import rock_on.BoothManager;
 			import helpers.CreatureGenerator;
@@ -71,6 +72,8 @@
 			public var creatureGenerator:CreatureGenerator;
 			public var creditsBox:Text;
 			
+			[Bindable] public var gameMagicManager:GameMagicManager;
+			
 			[Bindable] public var layerableManager:LayerableManager;
 			[Bindable] public var structureManager:StructureManager;
 			[Bindable] public var storeManager:StoreManager;
@@ -118,6 +121,7 @@
 				venueManager.setInMotion();
 				listeningStationManager.venue = venueManager.venue;
 				customerPersonManager.venue = venueManager.venue;
+				bandManager.venue = venueManager.venue;
 			}
 			
 			private function showListeningStations():void

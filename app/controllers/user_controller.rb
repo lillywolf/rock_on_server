@@ -3,9 +3,12 @@ class UserController < ApplicationController
   def find_by_snid
     array = Array.new    
     hash = Hash.new    
-    user = User.first(:conditions => ["snid = ?", params[:snid]])    
+    user = User.first(:conditions => ["snid = ?", params[:snid]]) 
+    level_reference = user.level_id   
     hash["instance"] = user
     hash["has_many"] = ["owned_structure", "owned_layerable", "creature", "owned_dwelling"]
+    hash["belongs_to"] = ["level"]
+    hash["belongs_to_id"] = [level_reference]
     hash["model"] = "user"
     array.push hash    
     render :json => array.to_json  
