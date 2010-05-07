@@ -55,6 +55,8 @@
 			public var myWorld:World;
 			[Bindable] public var myUser:User;
 			
+			public static const PERSON_SPEED:Number = 0.07;
+			
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
 			public var editMode:EditMode;
@@ -66,8 +68,8 @@
 			public var concertStage:ConcertStage;
 			public var listeningStationManager:ListeningStationManager;
 			public var groupieManager:GroupieManager;
-			public var venueManager:VenueManager;
-			public var boothManager:BoothManager;
+			[Bindable] public var venueManager:VenueManager;
+			[Bindable] public var boothManager:BoothManager;
 			public var stageManager:StageManager;
 			public var creatureGenerator:CreatureGenerator;
 			public var creditsBox:Text;
@@ -104,21 +106,33 @@
 			
 			public function setInMotion():void
 			{	
-				showBooths();		
 				addStage();
-				showListeningStations();	
-
+				
+				boothManager = new BoothManager(structureManager, myWorld);
 				creatureGenerator = new CreatureGenerator(layerableManager, boothManager, concertStage);
 
-				showGroupies();
-				showBandMembers();
+				generateManagers();
+				
 				showVenue();			
+				showBooths();		
+				showListeningStations();
+				showGroupies();
+//				showBandMembers();
+			}
+			
+			public function generateManagers():void
+			{
+				listeningStationManager = new ListeningStationManager(structureManager, myWorld);
+				groupieManager = new GroupieManager(customerPersonManager, boothManager, concertStage, creatureManager, myWorld);
+				bandManager = new BandManager(creatureManager, booths, concertStage, myWorld);
+				venueManager = new VenueManager(creatureGenerator, customerPersonManager, dwellingManager, bandManager, booths, concertStage, myWorld);
 			}
 			
 			private function showVenue():void
 			{
-				venueManager = new VenueManager(creatureGenerator, customerPersonManager, dwellingManager, booths, concertStage, myWorld);	
 				venueManager.setInMotion();
+				
+				boothManager.venue = venueManager.venue;
 				listeningStationManager.venue = venueManager.venue;
 				customerPersonManager.venue = venueManager.venue;
 				bandManager.venue = venueManager.venue;
@@ -126,8 +140,8 @@
 			
 			private function showListeningStations():void
 			{
-				listeningStationManager = new ListeningStationManager(structureManager, myWorld);
 				listeningStationManager.setInMotion();	
+				
 				listeningStationManager.boothManager = boothManager;
 				listeningStationManager.stageManager = stageManager;				
 				listeningStationManager.customerPersonManager = customerPersonManager;			
@@ -186,7 +200,6 @@
 			
 			public function showBooths():void
 			{
-				boothManager = new BoothManager(structureManager, myWorld);
 				boothManager.setInMotion();
 			}
 			
@@ -210,13 +223,11 @@
 			
 			public function showGroupies():void
 			{	
-				groupieManager = new GroupieManager(customerPersonManager, boothManager, concertStage, creatureManager, myWorld);
 				groupieManager.setInMotion();
 			}
 			
 			public function showBandMembers():void
 			{
-				bandManager = new BandManager(creatureManager, booths, concertStage, myWorld);
 				bandManager.setInMotion();
 			}
 			

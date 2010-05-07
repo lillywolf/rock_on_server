@@ -17,6 +17,7 @@ package models
 		public var _y:Number;
 		public var _z:Number;
 		public var _created_at:String;
+		public var _updated_at:String;
 		
 		public var _inventory_count:int;
 				
@@ -48,6 +49,10 @@ package models
 			if (params.inventory_count)
 			{
 				_inventory_count = params.inventory_count;
+			}
+			if (params.updated_at)
+			{
+				_updated_at = params.updated_at;
 			}
 		}
 
@@ -109,6 +114,16 @@ package models
 		public function get created_at():String
 		{
 			return _created_at;
+		}	
+			
+		public function set updated_at(val:String):void
+		{
+			_updated_at = val;
+		}
+		
+		public function get updated_at():String
+		{
+			return _updated_at;
 		}		
 		
 		public function set user_id(val:int):void

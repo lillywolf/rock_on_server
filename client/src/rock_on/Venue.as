@@ -1,30 +1,244 @@
 package rock_on
 {
 	import flash.events.IEventDispatcher;
+	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
+	
+	import game.Counter;
+	import game.CounterEvent;
+	import game.GameClock;
 	
 	import models.OwnedDwelling;
 	
 	import mx.collections.ArrayCollection;
+	import mx.controls.Button;
+	import mx.core.Application;
+	
+	import views.VenueManager;
 	
 	import world.Point3D;
+	import world.World;
 
 	public class Venue extends OwnedDwelling
-	{
+	{	
+		public static const UNINITIALIZED_STATE:int = 0;	
+		public static const SHOW_STATE:int = 1;
+		public static const ENCORE_STATE:int = 2;
+		public static const CROWDED_STATE:int = 3;
+		public static const EMPTY_STATE:int = 4;
+		public static const ENCORE_WAIT_STATE:int = 5;
+		public static const SHOW_WAIT_STATE:int = 6;
+		
+		public static const SHOW_TIME:int = 3600000;
+		public static const ENCORE_TIME:int = 360000;
+		public static const ENCORE_WAIT_TIME:int = 1800000;
+		public static const VENUE_FILL_FRACTION:Number = 0.5;
+		
+		public var state:int;
 		public var lastShowTime:int;
 		public var mainEntrance:Point3D;
 		public var entryPoints:ArrayCollection;
+		public var _venueManager:VenueManager;
 		
-		public function Venue(params:Object=null, target:IEventDispatcher=null)
+		public var _myWorld:World;
+		
+		public function Venue(venueManager:VenueManager, myWorld:World, params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
 			
+			_myWorld = myWorld;
+			_venueManager = venueManager;
 			entryPoints = new ArrayCollection();
 			setEntrance(params);
+			setAdditionalProperties(params);
 			
+			updateState();		
+		}
+		
+		public function setAdditionalProperties(params:Object):void
+		{
 			if (params['dwelling'])
 			{
 				dwelling = params.dwelling;
+			}				
+		}
+		
+		public function updateState():void
+		{
+			updateStateOnServer();
+		}
+		
+		public function updateStateOnServer():void
+		{
+			_venueManager.dwellingManager.serverController.sendRequest({id: id}, "owned_dwelling", "update_state");
+		}
+		
+		public function getUpdatedTimeElapsed():int
+		{
+			var currentDate:Date = new Date();
+			var timeSinceStateChanged:int = currentDate.getTime()/1000 + (currentDate.timezoneOffset * 60) - GameClock.convertStringTimeToUnixTime(_state_updated_at);
+			return timeSinceStateChanged;
+		}
+		
+		public function stateTranslate():void
+		{
+			switch (_last_state)
+			{
+				case "empty_state":
+					advanceState(EMPTY_STATE);
+					break;
+				case "show_state":
+					advanceState(SHOW_STATE);
+					break;
+				case "encore_state":
+					advanceState(ENCORE_STATE);
+					break;
+				case "show_wait_state":
+					advanceState(SHOW_WAIT_STATE);
+					break;
+				case "encore_wait_state":
+					advanceState(ENCORE_WAIT_STATE);
+					break;
+				default: throw new Error("Unrecognized state name");					
+			}
+		}
+		
+		public function advanceState(destinationState:int):void
+		{
+			switch (state)
+			{
+				case UNINITIALIZED_STATE:
+					break;
+				case SHOW_STATE:
+					endShowState();
+					break;				
+				case ENCORE_STATE:
+					endEncoreState();				
+					break;	
+				case CROWDED_STATE:
+					endCrowdedState();
+					break;						
+				case EMPTY_STATE:
+					endEmptyState();
+					break;						
+				case ENCORE_WAIT_STATE:
+					endEncoreWaitState();
+					break;						
+				case SHOW_WAIT_STATE:
+					endShowWaitState();
+					break;						
+				default: throw new Error('no state to advance from!');
+			}
+			switch (destinationState)
+			{
+				case SHOW_STATE:
+					_venueManager.updateState("show_state", this);				
+					startShowState();
+					break;
+				case ENCORE_STATE:
+					_venueManager.updateState("encore_state", this);				
+					startEncoreState();
+					break;
+				case CROWDED_STATE:
+					_venueManager.updateState("crowded_state", this);				
+					startCrowdedState();
+					break;
+				case EMPTY_STATE:
+					_venueManager.updateState("empty_state", this);				
+					startEmptyState();
+					break;
+				case ENCORE_WAIT_STATE:
+					_venueManager.updateState("encore_wait_state", this);				
+					startEncoreWaitState();
+					break;
+				case SHOW_WAIT_STATE:
+					_venueManager.updateState("show_wait_state", this);				
+					startShowWaitState();
+					break;
+				default: throw new Error('no state to advance to!');	
+			}
+		}	
+		
+		public function startShowState():void
+		{
+			state = SHOW_STATE;
+			updateStateTimer(SHOW_TIME);
+		}		
+		
+		public function updateStateTimer(stateTime:int):void
+		{
+			var millisecondsElapsed:int = getUpdatedTimeElapsed() * 1000;
+			var millisecondsRemaining:int = (stateTime - millisecondsElapsed);
+			
+			var counter:Counter = new Counter(millisecondsRemaining);
+			counter.addEventListener(CounterEvent.COUNTER_COMPLETE, onCounterComplete);
+			counter.displayCounter();
+			counter.counterCanvas.x = 400;
+			counter.counterCanvas.y = 0;
+			counter.counterCanvas.setStyle("fontSize", "20");
+			counter.counterCanvas.setStyle("fontFamily", "Museo-Slab-900");
+			counter.counterCanvas.setStyle("color", 0xffffff);
+			Application.application.addChild(counter.counterCanvas);
+		}
+		
+		private function onCounterComplete():void
+		{
+			updateState();
+		}
+		
+		public function onShowTimer(evt:TimerEvent):void
+		{
+			var showTimer:Timer = evt.currentTarget as Timer;
+			showTimer.removeEventListener(TimerEvent.TIMER, onShowTimer);
+			showTimer.stop();
+			showTimer = null;
+		}
+		
+		public function checkForMinimumFancount():Boolean
+		{
+			if (state == EMPTY_STATE && fancount > dwelling.capacity * VENUE_FILL_FRACTION)
+			{
+				advanceState(SHOW_WAIT_STATE);
+				return true;
 			}			
+			return false;
+		}
+		
+		public function endShowState():void
+		{
+			
+		}
+		
+		public function startEncoreState():void
+		{
+			state = ENCORE_STATE;
+			updateStateTimer(ENCORE_TIME);			
+		}
+		
+		public function endEncoreState():void
+		{
+			
+		}
+		
+		public function startCrowdedState():void
+		{
+			state = CROWDED_STATE;
+		}
+		
+		public function endCrowdedState():void
+		{
+			
+		}
+		
+		public function startEmptyState():void
+		{
+			state = EMPTY_STATE;
+		}
+		
+		public function endEmptyState():void
+		{
+			
 		}
 		
 		private function setEntrance(params:Object=null):void
@@ -32,9 +246,51 @@ package rock_on
 			mainEntrance = new Point3D(14, 0, 10);
 		}
 		
-		public function updateFanCount(fansToAdd:int):void
+		public function updateFanCount(fansToAdd:int, venue:Venue):void
+		{
+			_venueManager.dwellingManager.serverController.sendRequest({id: venue.id, to_add: fansToAdd}, "owned_dwelling", "update_fancount");
+		}
+		
+		public function startEncoreWaitState():void
+		{
+			state = ENCORE_WAIT_STATE;
+		}
+		
+		public function endEncoreWaitState():void
 		{
 			
+		}
+		
+		public function startShowWaitState():void
+		{
+			state = SHOW_WAIT_STATE;
+			displayStartShowButton();
+		}
+		
+		public function displayStartShowButton():void
+		{
+			var button:Button = new Button();
+			button.width = 50;
+			button.height = 50;
+			button.x = 400;
+			button.y = 0;
+			button.addEventListener(MouseEvent.CLICK, onStartShowButtonClicked);
+			Application.application.addChild(button);
+		}
+		
+		private function onStartShowButtonClicked():void
+		{
+			advanceState(SHOW_STATE);
+		}
+		
+		public function endShowWaitState():void
+		{
+			
+		}
+		
+		public function get myWorld():World
+		{
+			return _myWorld;
 		}
 		
 	}

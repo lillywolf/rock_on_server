@@ -9,6 +9,7 @@ package server
 		public static const USER_CONTENT_LOADED:String = "Server:UserContentLoaded";	
 		public static const GAME_CONTENT_LOADED:String = "Server:GameContentLoaded";
 		public static const INSTANCE_TO_CREATE:String = "Server:InstanceToCreate";	
+		public static const UPDATE_COMPLETE:String = "Server:UpdateComplete";
 		public var _model:String;
 		public var _params:Object;
 		public var _method:String;

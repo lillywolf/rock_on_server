@@ -8,6 +8,8 @@ package controllers
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
+	
+	import server.ServerController;
 
 	public class DwellingManager extends Manager
 	{
@@ -16,6 +18,7 @@ package controllers
 		public var dwellingsLoaded:int;
 		public var ownedDwellingsLoaded:int;
 		public var ownedDwellingMovieClipsLoaded:int;
+		public var _serverController:ServerController;
 		
 		public function DwellingManager(essentialModelManager:EssentialModelManager, target:IEventDispatcher=null)
 		{
@@ -80,6 +83,11 @@ package controllers
 			}		
 		}
 		
+		public function updateOwnedDwellingState(stateName:String, venueId:int):void
+		{
+			_serverController.sendRequest({id: venueId, state_name: stateName}, 'owned_dwelling', 'update_state');										
+		}
+		
 		public function add(dwelling:Dwelling):void
 		{
 			dwellings.addItem(dwelling);
@@ -109,6 +117,16 @@ package controllers
 				ownedDwellingsLoaded++;
 			}
 			essentialModelManager.checkIfAllLoadingComplete();
+		}	
+		
+		public function set serverController(val:ServerController):void
+		{
+			_serverController = val;
+		}	
+
+		public function get serverController():ServerController
+		{
+			return _serverController;
 		}		
 		
 	}

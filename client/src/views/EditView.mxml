@@ -2,6 +2,8 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import rock_on.BoothManager;
+			import rock_on.Venue;
 			import flash.utils.getQualifiedClassName;
 			import models.EssentialModelReference;
 			import controllers.UserManager;
@@ -45,6 +47,7 @@
 			public var booths:ArrayCollection;
 			public var stages:ArrayCollection;
 			public var concertStage:ConcertStage;
+			[Bindable] public var boothManager:BoothManager;
 			
 			public var creditsBox:Text;
 			
@@ -54,6 +57,7 @@
 			[Bindable] public var creatureManager:CreatureManager;
 			[Bindable] public var thingerManager:ThingerManager;
 			[Bindable] public var userManager:UserManager;
+			[Bindable] public var venueManager:VenueManager;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
@@ -106,7 +110,7 @@
 					var mc:MovieClip = new klass() as MovieClip;
 					var asset:ActiveAsset = new ActiveAsset(mc);
 					asset.thinger = os;
-					var booth:Booth = new Booth(os);
+					var booth:Booth = new Booth(boothManager, venueManager.venue, os);
 					booths.addItem(booth);
 					var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 					addStaticAsset(asset, addTo);

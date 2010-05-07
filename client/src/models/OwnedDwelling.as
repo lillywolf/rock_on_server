@@ -14,6 +14,8 @@ package models
 		public var _dwelling:Dwelling;
 		public var _dwelling_id:int;
 		public var _created_at:String;
+		public var _last_state:String;
+		public var _state_updated_at:String;
 				
 		public function OwnedDwelling(params:Object=null, target:IEventDispatcher=null)
 		{
@@ -26,7 +28,11 @@ package models
 		{
 			_dwelling_id = params.dwelling_id;
 			_created_at = params.created_at;
-			
+			setOptionalProperties(params);
+		}		
+		
+		public function setOptionalProperties(params:Object):void
+		{
 			if (params.last_showtime)
 			{
 				_last_showtime = params.last_showtime;
@@ -34,10 +40,17 @@ package models
 			else
 			{
 				throw new Error("No previous show time in listing");
+			}	
+			if (params.fancount)
+			{
+				_fancount = params.fancount;
 			}
-			
-			setExtraProperties(params);
-		}		
+			if (params.last_state)
+			{
+				_last_state = params.last_state;
+				_state_updated_at = params.state_updated_at;
+			}					
+		}
 
 		public function set id(val:int):void
 		{
@@ -64,14 +77,6 @@ package models
 			else
 			{
 				_dwelling.addEventListener('movieClipLoaded', onDwellingMovieClipAssigned);	
-			}
-		}
-		
-		private function setExtraProperties(params:Object):void
-		{		
-			if (params.fancount)
-			{
-				_fancount = params.fancount;
 			}
 		}
 		
@@ -130,6 +135,16 @@ package models
 		public function set user_id(val:int):void
 		{
 			_user_id = val;
+		}
+		
+		public function get last_state():String
+		{
+			return _last_state;
+		}		
+		
+		public function get state_updated_at():String
+		{
+			return _state_updated_at;
 		}		
 		
 	}

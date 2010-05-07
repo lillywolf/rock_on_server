@@ -11,9 +11,7 @@ package rock_on
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
-	import mx.containers.Canvas;
 	import mx.core.Application;
-	import mx.events.DynamicEvent;
 	
 	import views.VenueManager;
 	
@@ -48,9 +46,8 @@ package rock_on
 			showPassersby();			
 		}
 		
-		private function onFanButtonState(evt:DynamicEvent):void
+		public function onFanButtonState(station:ListeningStation):void
 		{
-			var station:ListeningStation = evt.currentTarget as ListeningStation;
 			if (station.currentListeners.length != station.listenerCount)
 			{
 				passerbyManager.spawnForStation(station);
@@ -85,7 +82,8 @@ package rock_on
 				convertStationListenerToCustomer(sl, fanCount);
 				fanCount++;
 			}
-			_venue.updateFanCount(fanCount);
+			_venue.updateFanCount(fanCount, _venue);
+			_venue.checkForMinimumFancount();
 		}
 		
 		private function convertStationListenerToCustomer(sl:StationListener, fanIndex:int):void
@@ -106,14 +104,13 @@ package rock_on
 			{
 				var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
 				asset.thinger = os;
-				var listeningStation:ListeningStation = new ListeningStation(os);
-				listeningStation.addEventListener("fanButtonState", onFanButtonState);
+				var listeningStation:ListeningStation = new ListeningStation(this, _boothManager, _venue, os);
+				listeningStation.activeAsset = asset;
 				listeningStation.createdAt = GameClock.convertStringTimeToUnixTime(os.created_at);
 				listeningStation.stationType = _structureManager.getListeningStationTypeByMovieClip(os.structure.mc);
 				listeningStations.addItem(listeningStation);
 				listeningStation.setInMotion();
-				var stationCounter:Canvas = listeningStation.displayCountdown();
-				Application.application.addChild(stationCounter);				
+				listeningStation.displayCountdown();
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				_myWorld.addStaticAsset(asset, addTo);
 			}
@@ -162,6 +159,24 @@ package rock_on
 			}
 			return selectedStation;	
 		}	
+		
+		public function remove(station:ListeningStation):void
+		{
+			if(_myWorld)
+			{
+				// Why not unsorted assets removal?
+				
+				_myWorld.removeChild(station.activeAsset);
+				var index:Number = _myWorld.assetRenderer.sortedAssets.getItemIndex(station.activeAsset);
+				_myWorld.assetRenderer.sortedAssets.removeItemAt(index);
+				var stationIndex:Number = listeningStations.getItemIndex(station);
+				listeningStations.removeItemAt(stationIndex);
+			}
+			else 
+			{
+				throw new Error("how the hell did this happen?");
+			}
+		}		
 		
 		public function set venue(val:Venue):void
 		{

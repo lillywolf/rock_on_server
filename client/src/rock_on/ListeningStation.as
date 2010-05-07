@@ -4,14 +4,12 @@ package rock_on
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	
-	import game.GameClock;
+	import game.Counter;
 	
 	import mx.collections.ArrayCollection;
-	import mx.containers.Canvas;
-	import mx.controls.Alert;
-	import mx.controls.Label;
-	import mx.events.DynamicEvent;
+	import mx.core.Application;
 	
+	import world.ActiveAsset;
 	import world.Point;
 	import world.Point3D;
 	import world.World;
@@ -21,7 +19,9 @@ package rock_on
 		public static const START_STATE:int = 0;
 		public static const FAN_BUTTON_STATE:int = 1;
 		public static const FAN_COLLECTION_STATE:int = 2;
+		public static const FAN_ENTRY_STATE:int = 3;
 		
+		public var activeAsset:ActiveAsset;
 		public var listenerCount:int;
 		public var currentListenerCount:int;
 		public var currentListeners:ArrayCollection;
@@ -31,15 +31,16 @@ package rock_on
 		public var radius:Point3D;
 		public var listeningTime:int;
 		public var stationTimer:Timer;
-		
-		public var counterLabel:Label;
-		public var hoursRemaining:Number;
-		public var minutesRemaining:Number;
+		public var counter:Counter;
 		public var secondsRemaining:Number;
 		
-		public function ListeningStation(params:Object=null, target:IEventDispatcher=null)
+		public var _listeningStationManager:ListeningStationManager;
+		
+		public function ListeningStation(listeningStationManager:ListeningStationManager, boothManager:BoothManager, venue:Venue, params:Object=null, target:IEventDispatcher=null)
 		{
-			super(params, target);
+			super(boothManager, venue, params, target);
+			
+			_listeningStationManager = listeningStationManager;
 			setProperties();
 			currentListeners = new ArrayCollection();
 		}
@@ -67,76 +68,14 @@ package rock_on
 			}
 		}	
 		
-		public function displayCountdown():Canvas
+		public function displayCountdown():void
 		{
-			var counterInfo:Object = GameClock.setupCountdownTimers(secondsRemaining);
-			(counterInfo.secondTimer as Timer).addEventListener(TimerEvent.TIMER, onSecondTimer);
-			(counterInfo.secondTimer as Timer).start();
-			
-			var canvas:Canvas = new Canvas();
-			counterLabel = new Label();
-			hoursRemaining = counterInfo.hoursRemaining;
-			minutesRemaining = counterInfo.minutesRemaining;
-			secondsRemaining = counterInfo.secondsRemaining;
-			updateCounterLabel();
-			canvas.addChild(counterLabel);
+			counter = new Counter(secondsRemaining*1000);
+			counter.displayCounter();
 			var uiCoordinates:Point = World.worldToActualCoords(new Point3D(x, y, z));
-			canvas.x = uiCoordinates.x;
-			canvas.y = uiCoordinates.y;
-			return canvas;
-		}
-		
-		private function checkIfComplete():void
-		{
-			if (hoursRemaining == 0 && minutesRemaining == 0 && secondsRemaining == 0)		
-			{
-				Alert.show("Time's up!");
-			}	
-		}
-		
-		private function onSecondTimer(evt:TimerEvent):void
-		{
-			if (secondsRemaining%60 > 0)
-			{
-				secondsRemaining = secondsRemaining - 1;			
-			}
-			else if (secondsRemaining%60 == 0 && minutesRemaining%60 > 0)
-			{
-				minutesRemaining = minutesRemaining - 1;
-				secondsRemaining = 59;
-			}
-			else if (secondsRemaining%60 == 0 && minutesRemaining%60 == 0 && hoursRemaining > 0)
-			{
-				hoursRemaining = hoursRemaining - 1;
-				minutesRemaining = 59;
-				secondsRemaining = 59;
-			}
-			else
-			{
-				checkIfComplete();
-			}
-			updateCounterLabel();
-		}
-		
-		private function updateCounterLabel():void
-		{
-			if (minutesRemaining < 10)
-			{
-				var minutesString:String = "0" + minutesRemaining.toString();
-			}
-			else
-			{
-				minutesString = minutesRemaining.toString();
-			}
-			if (secondsRemaining < 10)
-			{
-				var secondsString:String = "0" + secondsRemaining.toString();
-			}
-			else
-			{
-				secondsString = secondsRemaining.toString();
-			}
-			counterLabel.text = hoursRemaining.toString() + ":" + minutesString + ":" + secondsString;
+			counter.counterCanvas.x = uiCoordinates.x;
+			counter.counterCanvas.y = uiCoordinates.y;
+			Application.application.addChild(counter.counterCanvas);
 		}
 		
 		private function updateTimeAndState():void
@@ -173,7 +112,8 @@ package rock_on
 		
 		public function updateSecondsRemaining():void
 		{
-			var currentTime:Number = new Date().getTime()/1000;
+			var currentDate:Date = new Date();
+			var currentTime:Number = currentDate.getTime()/1000 + (currentDate.timezoneOffset * 60);
 			secondsRemaining = listeningTime - (currentTime - createdAt);
 		}
 		
@@ -195,6 +135,9 @@ package rock_on
 				case FAN_COLLECTION_STATE:
 					endFanCollectionState();
 					break;						
+				case FAN_ENTRY_STATE:
+					endFanEntryState();
+					break;						
 				default: throw new Error('no state to advance from!');
 			}
 			switch (destinationState)
@@ -205,22 +148,43 @@ package rock_on
 				case FAN_COLLECTION_STATE:
 					startFanCollectionState();
 					break;
+				case FAN_ENTRY_STATE:
+					startFanEntryState();
+					break;
 				default: throw new Error('no state to advance to!');	
 			}
+		}
+		
+		private function startFanEntryState():void
+		{
+			state = FAN_ENTRY_STATE;
+			playListeningStationDestruction();
+		}
+		
+		private function endFanEntryState():void
+		{
+			
+		}
+		
+		private function playListeningStationDestruction():void
+		{
+			// Play animation on movie clip
+			
+			// Remove from server and client
+			
+			_listeningStationManager.remove(this);
 		}
 		
 		private function startFanButtonState():void
 		{
 			state = FAN_BUTTON_STATE;
-			var evt:DynamicEvent = new DynamicEvent("fanButtonState", true, true);
-			dispatchEvent(evt);
+			_listeningStationManager.onFanButtonState(this);
 		}		
 		
 		private function startFanCollectionState():void
 		{
 			state = FAN_COLLECTION_STATE;
 			updateSecondsRemaining();
-//			setupStationTimer();			
 		}
 			
 		private function endStartState():void
@@ -250,7 +214,7 @@ package rock_on
 				isFree = false;
 			}
 			return isFree;
-		}		
+		}	
 		
 	}
 }

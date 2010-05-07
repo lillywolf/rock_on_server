@@ -3,7 +3,7 @@
 	<mx:states>
 		<mx:State name="topBar">
 			<mx:AddChild position="after">
-				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{this.editView}" worldView="{this.worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}"/>
+				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}"/>
 			</mx:AddChild>
 			<mx:AddChild position="after">
 				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
@@ -21,7 +21,7 @@
 		</mx:State>
 		<mx:State name="editView" basedOn="topBar">
 			<mx:AddChild>
-				<views:EditView id="editView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}"/>
+				<views:EditView id="editView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}" venueManager="{worldView.venueManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="twoDimensional">
@@ -32,6 +32,7 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import models.OwnedDwelling;
 			import rock_on.ContentIndex;
 			import game.GameMagicManager;
 			import mx.events.DynamicEvent;
@@ -65,6 +66,7 @@
 				gdi.addEventListener(ServerDataEvent.USER_LOADED, onUserLoaded);
 				gdi.addEventListener(ServerDataEvent.GAME_CONTENT_LOADED, onGameContentLoaded);
 				gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	
+				gdi.addEventListener(ServerDataEvent.UPDATE_COMPLETE, onUpdateComplete);
 				
 				friendManager = new FriendManager();	
 				gameMagicManager = new GameMagicManager(gdi.levelManager, gdi.userManager);	
@@ -160,6 +162,23 @@
 			private function onWorldThingerPurchased(evt:UserEvent):void
 			{
 				gdi.userManager.incrementCredits(evt.creditsToAdd);
+			}
+			private function onUpdateComplete(evt:ServerDataEvent):void
+			{
+				var instance:Object = evt.params;
+				if (evt.model == "owned_dwelling")
+				{
+					checkForUpdatedVenue(instance as OwnedDwelling);				
+				}
+			}
+			private function checkForUpdatedVenue(instance:OwnedDwelling):void
+			{
+				if (instance.id == worldView.venueManager.venue.id)
+				{
+					worldView.venueManager.venue.updateProperties(instance);
+					worldView.venueManager.venue.stateTranslate();
+					worldView.showBandMembers();
+				}
 			}
 		]]>
 	</mx:Script>

@@ -39,6 +39,14 @@ package rock_on
 			}
 		}
 		
+		public function updateAllBandMemberStates(state:int):void
+		{
+			for each (var bm:BandMember in this)
+			{
+				bm.advanceState(state);		
+			}
+		}
+		
 		private function onFinalDestinationReached(evt:WorldEvent):void
 		{
 			if (evt.activeAsset is BandMember)

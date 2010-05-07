@@ -128,6 +128,8 @@ package world
 			}
 			if (!hasAvailableNextPoint)
 			{
+				// This needs decent handling
+				
 				throw new Error("No available next point");
 			}
 			return coordsArray;			

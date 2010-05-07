@@ -42,6 +42,34 @@ package views
 			showBandMembers();		
 		}
 		
+		public function mapVenueStateToBandMemberState():int
+		{
+			if (_venue.state == Venue.EMPTY_STATE)
+			{
+				return BandMember.WAIT_STATE;
+			}
+			else if (_venue.state == Venue.ENCORE_STATE)
+			{
+				return BandMember.ENTER_STATE;
+			}
+			else if (_venue.state == Venue.ENCORE_WAIT_STATE)
+			{
+				return BandMember.WAIT_STATE;
+			}
+			else if (_venue.state == Venue.SHOW_STATE)
+			{
+				return BandMember.ENTER_STATE;
+			}
+			else if (_venue.state == Venue.SHOW_WAIT_STATE)
+			{
+				return BandMember.WAIT_STATE;
+			}
+			else
+			{
+				throw new Error("Not a legitimate state");
+			}
+		}
+		
 		private function showBandMembers():void
 		{
 			var bandMembers:ArrayCollection = _creatureManager.getConstructedCreaturesByType("BandMember", 1, 1);
@@ -53,6 +81,9 @@ package views
 				bandMember.addExemptStructures();
 				bandMember.speed = 0.06;
 				bandMemberManager.add(bandMember);
+				
+				var newState:int = mapVenueStateToBandMemberState();
+				bandMember.advanceState(newState);
 			}
 		}
 		

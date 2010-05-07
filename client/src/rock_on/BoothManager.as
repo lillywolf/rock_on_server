@@ -23,6 +23,7 @@ package rock_on
 		
 		public var booths:ArrayCollection;
 		public var _myWorld:World;
+		[Bindable] public var _venue:Venue;
 		public var _structureManager:StructureManager;
 		
 		public function BoothManager(structureManager:StructureManager, myWorld:World, target:IEventDispatcher=null)
@@ -30,7 +31,6 @@ package rock_on
 			super(target);
 			_myWorld = myWorld;
 			_structureManager = structureManager;
-			addEventListener("queueDecremented", onQueueDecremented);
 		}
 				
 		public function setInMotion():void
@@ -39,16 +39,15 @@ package rock_on
 			showBooths();
 		}
 		
-		private function onQueueDecremented(evt:DynamicEvent):void
+		public function decreaseInventoryCount(booth:Booth, toDecrease:int):void
 		{
-			var booth:Booth = evt.booth as Booth;
 			var id:int = booth.id;
-			_structureManager.decrementInventoryCount(id);
+			_structureManager.decreaseInventoryCount(booth.id, toDecrease);
 			
-			if (booth.inventory_count - 1 == 0)
+			if (booth.inventory_count - toDecrease == 0)
 			{
 				booth.advanceState(Booth.UNSTOCKED_STATE);
-			}
+			}			
 		}
 		
 		public function showBooths():void
@@ -58,7 +57,7 @@ package rock_on
 			{
 				var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
 				asset.thinger = os;
-				var booth:Booth = new Booth(os);
+				var booth:Booth = new Booth(this, _venue, os);
 				addBoothListeners(booth);
 				booths.addItem(booth);
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
@@ -133,6 +132,11 @@ package rock_on
 				boothFront = new Point3D(Math.floor(booth.structure.width/2 + booth.x + (booth.currentQueue + 1)), 0, Math.floor(booth.structure.depth/4 + booth.z));													
 			}
 			return boothFront;
+		}
+		
+		public function set venue(val:Venue):void
+		{
+			_venue = val;
 		}
 		
 	}

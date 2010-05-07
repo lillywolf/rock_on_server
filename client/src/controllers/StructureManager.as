@@ -125,9 +125,9 @@ package controllers
 			return null;
 		}
 		
-		public function decrementInventoryCount(id:int):void
+		public function decreaseInventoryCount(id:int, toDecrease:int):void
 		{
-			_serverController.sendRequest({id: id}, 'owned_structure', 'decrement_inventory');										
+			_serverController.sendRequest({id: id, to_decrease: toDecrease}, 'owned_structure', 'decrement_inventory');										
 		}
 		
 		public function set serverController(val:ServerController):void

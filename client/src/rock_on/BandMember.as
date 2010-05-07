@@ -19,6 +19,7 @@ package rock_on
 		public static const ROAM_STATE:int = 1;
 		public static const STOP_STATE:int = 3;
 		public static const LEAVING_STATE:int = 2;
+		public static const WAIT_STATE:int = 4;
 		public static const GONE_STATE:int = 5;		
 		
 		private static const ROAM_TIME:int = Math.random()*5000 + 500;
@@ -48,12 +49,8 @@ package rock_on
 		override public function startStopState():void
 		{
 			state = STOP_STATE;
-//			adjustForPathfinding();
 
 			standFacingCrowd();
-			
-//			roamTime.stop();
-//			roamTime.removeEventListener(TimerEvent.TIMER, stop);
 						
 			stopTime = new Timer(STOP_TIME);
 			stopTime.addEventListener(TimerEvent.TIMER, roam);
@@ -75,10 +72,6 @@ package rock_on
 		{
 			state = ROAM_STATE;
 			adjustForPathfinding();
-			
-//			roamTime = new Timer(ROAM_TIME);
-//			roamTime.addEventListener(TimerEvent.TIMER, stop);
-//			roamTime.start();
 		}	
 		
 		public function adjustForPathfinding():void
@@ -199,6 +192,22 @@ package rock_on
 			stand(frameNumber);
 		}
 		
+		public function startWaitState():void
+		{
+			state = WAIT_STATE;
+			standFacingCrowd();			
+		}
+		
+		public function endWaitState():void
+		{
+			
+		}
+		
+		public function doWaitState(deltaTime:Number):void
+		{
+			
+		}
+		
 		public function attemptDestination():Point3D
 		{
 			var attempt:Point3D = setInitialDestination();
@@ -250,7 +259,81 @@ package rock_on
 		{
 			destinationLocation = new Point3D(concertStage.worldCoords.x + Math.floor((concertStage.structure.width - 1) - (Math.random()*(concertStage.structure.width - 1))), 0, concertStage.worldCoords.z + Math.floor((concertStage.structure.depth - 1) - Math.random()*(concertStage.structure.depth - 1)));	
 			return destinationLocation;	
-		}												
+		}
+		
+		override public function update(deltaTime:Number):Boolean
+		{
+			switch (state)
+			{
+				case ENTER_STATE:
+					doEnterState(deltaTime);
+					break;
+				case ROAM_STATE:
+					doRoamState(deltaTime);
+					break;
+				case STOP_STATE:
+					doStopState(deltaTime);
+					break;					
+				case LEAVING_STATE:
+					doLeavingState(deltaTime);
+					break;
+				case WAIT_STATE:
+					doWaitState(deltaTime);
+					break;
+				case GONE_STATE:
+					doGoneState(deltaTime);	
+					return true;
+				default: throw new Error('oh noes!');
+			}
+			return false;
+		}		
+		
+		override public function advanceState(destinationState:int):void
+		{
+			switch (state)
+			{	
+				case ENTER_STATE:
+					endEnterState();
+					break;
+				case ROAM_STATE:
+					endRoamState();				
+					break;	
+				case STOP_STATE:
+					endStopState();
+					break;	
+				case LEAVING_STATE:
+					endLeavingState();
+					break;	
+				case WAIT_STATE:
+					endWaitState();
+					break;	
+				case GONE_STATE:
+					break;					
+				default: throw new Error('no state to advance from!');
+			}
+			switch (destinationState)
+			{
+				case ENTER_STATE:
+					startEnterState();
+					break;				
+				case ROAM_STATE:
+					startRoamState();
+					break;
+				case STOP_STATE:
+					startStopState();
+					break;
+				case LEAVING_STATE:
+					startLeavingState();
+					break;
+				case GONE_STATE:
+					startGoneState();
+					break;	
+				case WAIT_STATE:
+					startWaitState();
+					break;	
+				default: throw new Error('no state to advance to!');	
+			}
+		}														
 		
 	}
 }

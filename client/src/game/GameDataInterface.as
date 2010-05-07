@@ -16,7 +16,6 @@ package game
 	
 	import helpers.UnprocessedModel;
 	
-	import models.Level;
 	import models.User;
 	
 	import mx.core.Application;
@@ -77,6 +76,7 @@ package game
 			thingerManager.serverController = sc;
 			userManager.serverController = sc;
 			levelManager.serverController = sc;
+			dwellingManager.serverController = sc;
 		}
 		
 		public function onInstanceToCreate(evt:ServerDataEvent):void
@@ -169,8 +169,14 @@ package game
 				loadObject(obj, requestType);
 			}
 			checkIfLoadingComplete();
-//			dispatchLoadEvent(obj, requestType);			
+			// Dispatch load event?
 		}	
+		
+		public function dispatchServerUpdateEvent(instance:Object, requestType:String):void
+		{
+			var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.UPDATE_COMPLETE, requestType, instance);
+			dispatchEvent(evt); 
+		}
 		
 		public function updateProperties(obj:Object, requestType:String):void
 		{
@@ -182,6 +188,7 @@ package game
 				if (instance.id == obj.instance[requestType].id)
 				{
 					instance.updateProperties(obj.instance[requestType]);
+					dispatchServerUpdateEvent(instance, requestType);
 				}
 			}
 			

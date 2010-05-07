@@ -31,13 +31,15 @@ package views
 		public var _creatureGenerator:CreatureGenerator;
 		public var _booths:ArrayCollection;
 		public var _concertStage:ConcertStage;
+		public var _bandManager:BandManager;
 		
-		public function VenueManager(creatureGenerator:CreatureGenerator, customerPersonManager:CustomerPersonManager, dwellingManager:DwellingManager, booths:ArrayCollection, concertStage:ConcertStage, myWorld:World, target:IEventDispatcher=null)
+		public function VenueManager(creatureGenerator:CreatureGenerator, customerPersonManager:CustomerPersonManager, dwellingManager:DwellingManager, bandManager:BandManager, booths:ArrayCollection, concertStage:ConcertStage, myWorld:World, target:IEventDispatcher=null)
 		{
 			super(target);
 			_creatureGenerator = creatureGenerator;
 			_customerPersonManager = customerPersonManager;
 			_dwellingManager = dwellingManager;
+			_bandManager = bandManager;
 			_booths = booths;
 			_concertStage = concertStage;
 			_myWorld = myWorld;
@@ -52,10 +54,14 @@ package views
 		private function getVenue():void
 		{
 			var venues:ArrayCollection = _dwellingManager.getDwellingsByType("Venue");
-			venue = new Venue(venues[0] as OwnedDwelling);		
+			venue = new Venue(this, _myWorld, venues[0] as OwnedDwelling);		
 			venue.lastShowTime = GameClock.convertStringTimeToUnixTime((venues[0] as OwnedDwelling).last_showtime);
 		}
 
+		public function updateState(stateName:String, venue:Venue):void
+		{
+			_dwellingManager.updateOwnedDwellingState(stateName, venue.id);
+		}
 		
 		private function addCustomersToVenue():void
 		{
@@ -65,6 +71,16 @@ package views
 				cp.speed = 0.07;
 				_customerPersonManager.add(cp);
 			}
+		}
+		
+		public function get bandManager():BandManager
+		{
+			return _bandManager;
+		}
+		
+		public function get dwellingManager():DwellingManager
+		{
+			return _dwellingManager;
 		}
 		
 	}

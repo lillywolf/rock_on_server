@@ -22,10 +22,10 @@ package rock_on
 		public static const HEADTOSTAGE_STATE:int = 6;
 		public static const HEADTODOOR_STATE:int = 7;
 		
-		public static const ENTHRALLED_TIME:int = 10000;
+		public static const ENTHRALLED_TIME:int = 30000;
 		public static const QUEUED_TIME:int = 4000;
 		public static const FAN_CONVERSION_DELAY:int = 2000;
-		
+				
 		public var enthralledTimer:Timer;
 		public var queuedTimer:Timer;
 		
@@ -302,6 +302,7 @@ package rock_on
 		
 		private function decrementQueue():void
 		{
+			currentBooth.boothManager.decreaseInventoryCount(currentBooth, 1);
 			currentBooth.currentQueue--;
 			currentBooth.actualQueue--;			
 		}
@@ -323,7 +324,6 @@ package rock_on
 			evt.person = this;
 			evt.booth = currentBooth;
 			dispatchEvent(evt);
-			_boothManager.dispatchEvent(evt);
 		}
 		
 		public function doQueuedState(deltaTime:Number):void
