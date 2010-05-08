@@ -5,8 +5,6 @@ package views
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	
-	import game.GameClock;
-	
 	import helpers.CreatureGenerator;
 	
 	import models.OwnedDwelling;
@@ -45,25 +43,19 @@ package views
 			_myWorld = myWorld;
 		}
 		
-		public function setInMotion():void
-		{
-			getVenue();
-			addCustomersToVenue();
-		}
+//		public function setInMotion():void
+//		{
+//			getVenue();
+//			addCustomersToVenue();
+//		}
 		
-		private function getVenue():void
+		public function getVenue():void
 		{
 			var venues:ArrayCollection = _dwellingManager.getDwellingsByType("Venue");
 			venue = new Venue(this, _myWorld, venues[0] as OwnedDwelling);		
-			venue.lastShowTime = GameClock.convertStringTimeToUnixTime((venues[0] as OwnedDwelling).last_showtime);
-		}
-
-		public function updateState(stateName:String, venue:Venue):void
-		{
-			_dwellingManager.updateOwnedDwellingState(stateName, venue.id);
 		}
 		
-		private function addCustomersToVenue():void
+		public function addCustomersToVenue():void
 		{
 			for (var i:int = 0; i < venue.fancount; i++)
 			{
@@ -72,6 +64,34 @@ package views
 				_customerPersonManager.add(cp);
 			}
 		}
+		
+		public function onVenueUpdated(method:String, newInstance:OwnedDwelling):void
+		{
+			venue.updateProperties(newInstance);
+			var destinationState:int;
+			
+			if (method == "update_state")
+			{
+				destinationState = venue.stateTranslateString();
+				if (venue.state == 0)
+				{
+					venue.advanceState(destinationState);
+					_bandManager.setInMotion();				
+				}
+				else if (venue.state != destinationState)
+				{
+					venue.advanceState(destinationState);
+				}
+			}
+			else if (method == "update_fancount")
+			{
+				destinationState = venue.stateTranslateString();
+				if (venue.state != destinationState)
+				{
+					venue.advanceState(destinationState);				
+				}
+			}				
+		}		
 		
 		public function get bandManager():BandManager
 		{

@@ -32,6 +32,7 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import models.OwnedStructure;
 			import models.OwnedDwelling;
 			import rock_on.ContentIndex;
 			import game.GameMagicManager;
@@ -166,18 +167,42 @@
 			private function onUpdateComplete(evt:ServerDataEvent):void
 			{
 				var instance:Object = evt.params;
+				
 				if (evt.model == "owned_dwelling")
 				{
-					checkForUpdatedVenue(instance as OwnedDwelling);				
+					checkForUpdatedVenue(instance as OwnedDwelling, evt.method);				
+				}
+				if (evt.model == "owned_structure")
+				{
+					checkForUpdatedBooth(instance as OwnedStructure, evt.method);
+					checkForUpdatedStation(instance as OwnedStructure, evt.method);
 				}
 			}
-			private function checkForUpdatedVenue(instance:OwnedDwelling):void
+			private function checkForUpdatedVenue(instance:OwnedDwelling, method:String):void
 			{
 				if (instance.id == worldView.venueManager.venue.id)
 				{
-					worldView.venueManager.venue.updateProperties(instance);
-					worldView.venueManager.venue.stateTranslate();
-					worldView.showBandMembers();
+					worldView.venueManager.onVenueUpdated(method, instance);
+				}
+			}
+			private function checkForUpdatedBooth(instance:OwnedStructure, method:String):void
+			{
+				if (instance.structure.structure_type == "Booth")
+				{
+					if (method == "update_boothcount")
+					{
+						
+					}
+				}
+			}
+			private function checkForUpdatedStation(instance:OwnedStructure, method:String):void
+			{
+				if (instance.structure.structure_type == "ListeningStation")
+				{
+					if (method == "validate_usage_complete")
+					{
+						worldView.listeningStationManager.removeStationWhenFinished(instance.id);
+					}
 				}
 			}
 		]]>

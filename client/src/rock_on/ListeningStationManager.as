@@ -46,12 +46,16 @@ package rock_on
 			showPassersby();			
 		}
 		
-		public function onFanButtonState(station:ListeningStation):void
+		public function addListeners(station:ListeningStation):void
 		{
-			if (station.currentListeners.length != station.listenerCount)
+			if (station.currentListeners.length < station.listenerCount)
 			{
 				passerbyManager.spawnForStation(station);
-			}
+			}			
+		}
+		
+		public function onFanButtonState(station:ListeningStation):void
+		{
 			addFanButton(station);
 		}
 		
@@ -82,7 +86,7 @@ package rock_on
 				convertStationListenerToCustomer(sl, fanCount);
 				fanCount++;
 			}
-			_venue.updateFanCount(fanCount, _venue);
+			_venue.updateFanCount(fanCount, _venue, station);
 			_venue.checkForMinimumFancount();
 		}
 		
@@ -110,7 +114,6 @@ package rock_on
 				listeningStation.stationType = _structureManager.getListeningStationTypeByMovieClip(os.structure.mc);
 				listeningStations.addItem(listeningStation);
 				listeningStation.setInMotion();
-				listeningStation.displayCountdown();
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				_myWorld.addStaticAsset(asset, addTo);
 			}
@@ -137,7 +140,7 @@ package rock_on
 			var freeStation:Boolean = false;
 			for each (var ls:ListeningStation in listeningStations)
 			{
-				if (ls.currentListeners.length != ls.capacity)
+				if (ls.currentListeners.length != ls.structure.capacity)
 				{
 					freeStation = true;
 				}
@@ -166,9 +169,8 @@ package rock_on
 			{
 				// Why not unsorted assets removal?
 				
-				_myWorld.removeChild(station.activeAsset);
-				var index:Number = _myWorld.assetRenderer.sortedAssets.getItemIndex(station.activeAsset);
-				_myWorld.assetRenderer.sortedAssets.removeItemAt(index);
+				var index:Number = _myWorld.assetRenderer.unsortedAssets.getItemIndex(station.activeAsset);
+				_myWorld.assetRenderer.unsortedAssets.removeItemAt(index);
 				var stationIndex:Number = listeningStations.getItemIndex(station);
 				listeningStations.removeItemAt(stationIndex);
 			}
@@ -177,6 +179,17 @@ package rock_on
 				throw new Error("how the hell did this happen?");
 			}
 		}		
+		
+		public function removeStationWhenFinished(id:int):void
+		{
+			for each (var station:ListeningStation in listeningStations)
+			{
+				if (id == station.id)
+				{
+					remove(station);
+				}
+			}
+		}
 		
 		public function set venue(val:Venue):void
 		{

@@ -46,11 +46,11 @@ class OwnedStructureController < ApplicationController
     array = Array.new
     hash = Hash.new
     os = OwnedStructure.find(params[:id])
-    os.inventory_count = os.inventory_count - 1;
+    os.inventory_count = os.inventory_count - params[:to_decrease].to_i
     os.save
     hash["instance"] = os
     hash["already_loaded"] = true
-    hash["model"] = "owned_structured"
+    hash["model"] = "owned_structure"
     array.push hash
     render :json => array.to_json
   end   

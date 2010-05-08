@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import models.OwnedDwelling;
 			import game.GameMagicManager;
 			import rock_on.StageManager;
 			import rock_on.BoothManager;
@@ -113,9 +114,11 @@
 
 				generateManagers();
 				
-				showVenue();			
-				showBooths();		
+				initializeVenue();	
+						
+				showBooths();
 				showListeningStations();
+				showVenue();		
 				showGroupies();
 //				showBandMembers();
 			}
@@ -128,14 +131,19 @@
 				venueManager = new VenueManager(creatureGenerator, customerPersonManager, dwellingManager, bandManager, booths, concertStage, myWorld);
 			}
 			
-			private function showVenue():void
+			private function initializeVenue():void
 			{
-				venueManager.setInMotion();
+				venueManager.getVenue();
 				
 				boothManager.venue = venueManager.venue;
 				listeningStationManager.venue = venueManager.venue;
 				customerPersonManager.venue = venueManager.venue;
-				bandManager.venue = venueManager.venue;
+				bandManager.venue = venueManager.venue;				
+			}
+			
+			private function showVenue():void
+			{
+				venueManager.addCustomersToVenue();
 			}
 			
 			private function showListeningStations():void

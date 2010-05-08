@@ -83,10 +83,10 @@ package controllers
 			}		
 		}
 		
-		public function updateOwnedDwellingState(stateName:String, venueId:int):void
-		{
-			_serverController.sendRequest({id: venueId, state_name: stateName}, 'owned_dwelling', 'update_state');										
-		}
+//		public function updateOwnedDwellingState(stateName:String, venueId:int):void
+//		{
+//			_serverController.sendRequest({id: venueId, state_name: stateName}, 'owned_dwelling', 'update_state');										
+//		}
 		
 		public function add(dwelling:Dwelling):void
 		{

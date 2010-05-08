@@ -14,4 +14,44 @@ class OwnedDwellingController < ApplicationController
     render :json => @array.to_json         
   end  
   
+  def update_state
+    array = Array.new
+    hash = Hash.new
+
+    owned_dwelling = OwnedDwelling.find(params[:id])    
+    owned_dwelling.validate_state_change(params[:time_elapsed_client], params[:show_button_clicked])
+    owned_dwelling.save
+    
+    hash["instance"] = owned_dwelling
+    hash["already_loaded"] = true
+    hash["model"] = "owned_dwelling"
+    hash["method"] = "update_state"
+    array.push hash
+    render :json => array.to_json    
+  end
+    
+  def update_fancount
+    array = Array.new
+    hash = Hash.new
+    
+    owned_dwelling = OwnedDwelling.find(params[:id])
+    owned_structure = OwnedStructure.find(params[:owned_structure_id])
+
+    if owned_structure.validate_usage_complete(array)
+      owned_dwelling.update_boothcount(params[:to_add].to_i, array)
+      owned_dwelling.update_fancount(params[:to_add].to_i)
+      owned_dwelling.validate_state_change(nil, false)
+    end  
+    owned_dwelling.save
+
+    hash["instance"] = owned_dwelling
+    hash["already_loaded"] = true
+    hash["model"] = "owned_dwelling"
+    hash["method"] = "update_fancount"
+    array.push hash
+    render :json => array.to_json    
+  end  
+  
+  
+  
 end

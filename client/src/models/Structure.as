@@ -14,6 +14,8 @@ package models
 		public var _name:String;
 		public var _id:int;
 		public var _structure_type:String;
+		public var _collection_time:int;
+		public var _capacity:int;
 		
 		public var _width:Number;
 		public var _height:Number;
@@ -41,6 +43,19 @@ package models
 			_name = params['name'];
 			_structure_type = params['structure_type'];
 			
+			setOptionalProperties(params);
+		}
+
+		private function setOptionalProperties(params:Object):void
+		{
+			if (params["collection_time"])
+			{
+				_collection_time = params["collection_time"];
+			}
+			if (params["capacity"])
+			{
+				_capacity = params["capacity"];
+			}
 			if (params['width'])
 			{
 				_width = params['width'];
@@ -52,7 +67,7 @@ package models
 			if (params['depth'])
 			{
 				_depth = params['depth'];
-			}
+			}			
 		}
 		
 		public function set id(val:int):void
@@ -156,6 +171,26 @@ package models
 		public function get depth():Number
 		{
 			return _depth;
+		}
+		
+		public function set collection_time(val:int):void
+		{
+			_collection_time = val;
+		}	
+		
+		public function get collection_time():int
+		{
+			return _collection_time;
+		}
+		
+		public function set capacity(val:int):void
+		{
+			_capacity = val;
+		}	
+		
+		public function get capacity():int
+		{
+			return _capacity;
 		}
 		
 	}

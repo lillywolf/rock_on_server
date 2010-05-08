@@ -25,11 +25,11 @@ package rock_on
 		public var listenerCount:int;
 		public var currentListenerCount:int;
 		public var currentListeners:ArrayCollection;
-		public var capacity:int;
+//		public var capacity:int;
 		public var createdAt:int;
 		public var stationType:String;
 		public var radius:Point3D;
-		public var listeningTime:int;
+//		public var listeningTime:int;
 		public var stationTimer:Timer;
 		public var counter:Counter;
 		public var secondsRemaining:Number;
@@ -56,15 +56,15 @@ package rock_on
 			{
 				stationType = "Gramophone";
 				radius = new Point3D(1, 0, 1);
-				capacity = 2;
-				listeningTime = 172800;				
+//				capacity = 2;
+//				listeningTime = 172800;				
 			}
 			else if (_structure.mc is Booth_01)
 			{
 				stationType = "RecordPlayer";
 				radius = new Point3D(2, 0, 1);
-				capacity = 3;
-				listeningTime = 86400;
+//				capacity = 3;
+//				listeningTime = 86400;
 			}
 		}	
 		
@@ -96,10 +96,10 @@ package rock_on
 		
 		private function updateListenerCount():void
 		{
-			listenerCount = Math.round(capacity * (listeningTime - secondsRemaining) / listeningTime);
-			if (listenerCount > capacity)
+			listenerCount = Math.floor((structure.capacity * structure.collection_time - secondsRemaining) / structure.collection_time);
+			if (listenerCount > structure.capacity)
 			{
-				listenerCount = capacity;
+				listenerCount = structure.capacity;
 			}
 		}
 		
@@ -114,7 +114,7 @@ package rock_on
 		{
 			var currentDate:Date = new Date();
 			var currentTime:Number = currentDate.getTime()/1000 + (currentDate.timezoneOffset * 60);
-			secondsRemaining = listeningTime - (currentTime - createdAt);
+			secondsRemaining = (structure.collection_time * structure.capacity) - (currentTime - createdAt);
 		}
 		
 		private function onStationTimerComplete(evt:TimerEvent):void
@@ -178,12 +178,15 @@ package rock_on
 		private function startFanButtonState():void
 		{
 			state = FAN_BUTTON_STATE;
+			_listeningStationManager.addListeners(this);
 			_listeningStationManager.onFanButtonState(this);
 		}		
 		
 		private function startFanCollectionState():void
 		{
 			state = FAN_COLLECTION_STATE;
+			displayCountdown();
+			_listeningStationManager.addListeners(this);
 			updateSecondsRemaining();
 		}
 			
@@ -209,7 +212,7 @@ package rock_on
 		public function isStationAvailable():Boolean
 		{
 			var isFree:Boolean = true;
-			if (capacity == currentListeners.length)
+			if (structure.capacity == currentListeners.length)
 			{
 				isFree = false;
 			}

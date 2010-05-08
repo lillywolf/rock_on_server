@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100503181935) do
+ActiveRecord::Schema.define(:version => 20100507190606) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -73,7 +73,9 @@ ActiveRecord::Schema.define(:version => 20100503181935) do
     t.integer  "dwelling_id"
     t.string   "current_city"
     t.integer  "fancount"
-    t.datetime "last_showtime"
+    t.datetime "fancount_updated_at"
+    t.string   "last_state"
+    t.datetime "state_updated_at"
   end
 
   create_table "owned_layerables", :force => true do |t|
@@ -155,6 +157,8 @@ ActiveRecord::Schema.define(:version => 20100503181935) do
     t.float    "width"
     t.float    "height"
     t.float    "depth"
+    t.integer  "collection_time"
+    t.integer  "capacity"
   end
 
   create_table "thingers", :force => true do |t|

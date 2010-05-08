@@ -66,12 +66,13 @@ package rock_on
 		
 		public function updateState():void
 		{
-			updateStateOnServer();
+			updateStateOnServer(false);
 		}
 		
-		public function updateStateOnServer():void
+		public function updateStateOnServer(showButtonClicked:Boolean):void
 		{
-			_venueManager.dwellingManager.serverController.sendRequest({id: id}, "owned_dwelling", "update_state");
+			var timeElapsed:int = getUpdatedTimeElapsed();
+			_venueManager.dwellingManager.serverController.sendRequest({id: id, time_elapsed_client: timeElapsed, show_button_clicked: showButtonClicked}, "owned_dwelling", "update_state");
 		}
 		
 		public function getUpdatedTimeElapsed():int
@@ -81,28 +82,46 @@ package rock_on
 			return timeSinceStateChanged;
 		}
 		
-		public function stateTranslate():void
+//		public function stateTranslate():void
+//		{
+//			switch (_last_state)
+//			{
+//				case "empty_state":
+//					advanceState(EMPTY_STATE);
+//					break;
+//				case "show_state":
+//					advanceState(SHOW_STATE);
+//					break;
+//				case "encore_state":
+//					advanceState(ENCORE_STATE);
+//					break;
+//				case "show_wait_state":
+//					advanceState(SHOW_WAIT_STATE);
+//					break;
+//				case "encore_wait_state":
+//					advanceState(ENCORE_WAIT_STATE);
+//					break;
+//				default: throw new Error("Unrecognized state name");					
+//			}
+//		}
+		
+		public function stateTranslateString():int
 		{
 			switch (_last_state)
 			{
 				case "empty_state":
-					advanceState(EMPTY_STATE);
-					break;
+					return EMPTY_STATE;
 				case "show_state":
-					advanceState(SHOW_STATE);
-					break;
+					return SHOW_STATE;
 				case "encore_state":
-					advanceState(ENCORE_STATE);
-					break;
+					return ENCORE_STATE;
 				case "show_wait_state":
-					advanceState(SHOW_WAIT_STATE);
-					break;
+					return SHOW_WAIT_STATE;
 				case "encore_wait_state":
-					advanceState(ENCORE_WAIT_STATE);
-					break;
+					return ENCORE_WAIT_STATE;
 				default: throw new Error("Unrecognized state name");					
 			}
-		}
+		}		
 		
 		public function advanceState(destinationState:int):void
 		{
@@ -133,27 +152,21 @@ package rock_on
 			switch (destinationState)
 			{
 				case SHOW_STATE:
-					_venueManager.updateState("show_state", this);				
 					startShowState();
 					break;
 				case ENCORE_STATE:
-					_venueManager.updateState("encore_state", this);				
 					startEncoreState();
 					break;
 				case CROWDED_STATE:
-					_venueManager.updateState("crowded_state", this);				
 					startCrowdedState();
 					break;
 				case EMPTY_STATE:
-					_venueManager.updateState("empty_state", this);				
 					startEmptyState();
 					break;
 				case ENCORE_WAIT_STATE:
-					_venueManager.updateState("encore_wait_state", this);				
 					startEncoreWaitState();
 					break;
 				case SHOW_WAIT_STATE:
-					_venueManager.updateState("show_wait_state", this);				
 					startShowWaitState();
 					break;
 				default: throw new Error('no state to advance to!');	
@@ -246,9 +259,9 @@ package rock_on
 			mainEntrance = new Point3D(14, 0, 10);
 		}
 		
-		public function updateFanCount(fansToAdd:int, venue:Venue):void
+		public function updateFanCount(fansToAdd:int, venue:Venue, station:ListeningStation):void
 		{
-			_venueManager.dwellingManager.serverController.sendRequest({id: venue.id, to_add: fansToAdd}, "owned_dwelling", "update_fancount");
+			_venueManager.dwellingManager.serverController.sendRequest({id: venue.id, to_add: fansToAdd, owned_structure_id: station.id}, "owned_dwelling", "update_fancount");
 		}
 		
 		public function startEncoreWaitState():void
@@ -278,9 +291,9 @@ package rock_on
 			Application.application.addChild(button);
 		}
 		
-		private function onStartShowButtonClicked():void
+		private function onStartShowButtonClicked(evt:MouseEvent):void
 		{
-			advanceState(SHOW_STATE);
+			updateStateOnServer(true);
 		}
 		
 		public function endShowWaitState():void

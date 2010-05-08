@@ -305,6 +305,11 @@ package world
 					structureSpaces.addItem(osPt3D);										
 				}
 			}
+			if (!os.structure.width || !os.structure.depth)
+			{
+				throw new Error("No dimensions specified for structure");
+			} 
+			
 			return structureSpaces;
 		}
 		

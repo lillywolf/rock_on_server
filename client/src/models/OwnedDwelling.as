@@ -33,14 +33,6 @@ package models
 		
 		public function setOptionalProperties(params:Object):void
 		{
-			if (params.last_showtime)
-			{
-				_last_showtime = params.last_showtime;
-			}
-			else
-			{
-				throw new Error("No previous show time in listing");
-			}	
 			if (params.fancount)
 			{
 				_fancount = params.fancount;

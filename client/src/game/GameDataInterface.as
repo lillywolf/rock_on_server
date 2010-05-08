@@ -163,42 +163,54 @@ package game
 				}
 				if (obj.already_loaded)
 				{
-					updateProperties(obj, requestType);
-					return;
+					updateProperties(obj);
 				}
-				loadObject(obj, requestType);
+				else
+				{
+					loadObject(obj, requestType);				
+				}
 			}
 			checkIfLoadingComplete();
 			// Dispatch load event?
 		}	
 		
-		public function dispatchServerUpdateEvent(instance:Object, requestType:String):void
+		public function dispatchServerUpdateEvent(instance:Object, model:String, method:String):void
 		{
-			var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.UPDATE_COMPLETE, requestType, instance);
+			var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.UPDATE_COMPLETE, model, instance, method);
 			dispatchEvent(evt); 
 		}
 		
-		public function updateProperties(obj:Object, requestType:String):void
+		public function updateProperties(obj:Object):void
 		{
-			var className:String = essentialModelManager.convertToClassCase(requestType);
+			var className:String = essentialModelManager.convertToClassCase(obj.model);
 			var klass:Class = essentialModelManager.essentialModelReference.loadedModels[className].klass;
 			
-			for each (var instance:Object in essentialModelManager[requestType+'s'])
-			{
-				if (instance.id == obj.instance[requestType].id)
+			// This should be improved, first way is better
+			
+			var instance:Object;
+			if (obj.model)
+			{			
+				for each (instance in essentialModelManager[obj.model+'s'])
 				{
-					instance.updateProperties(obj.instance[requestType]);
-					dispatchServerUpdateEvent(instance, requestType);
+					if (instance.id == obj.instance[obj.model].id)
+					{
+						instance.updateProperties(obj.instance[obj.model]);
+						dispatchServerUpdateEvent(instance, obj.model, obj.method);
+					}
 				}
+			}	
+			else
+			{
+				throw new Error("No model specified for server response");
 			}
 			
 			// Handles user class case
 			
-			for each (instance in essentialModelManager[requestType])
+			for each (instance in essentialModelManager[obj.model])
 			{
-				if (instance.id == obj.instance[requestType].id)
+				if (instance.id == obj.instance[obj.model].id)
 				{
-					instance.updateProperties(obj.instance[requestType]);
+					instance.updateProperties(obj.instance[obj.model]);
 				}
 			}
 		}

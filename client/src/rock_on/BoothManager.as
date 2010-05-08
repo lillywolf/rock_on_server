@@ -42,7 +42,7 @@ package rock_on
 		public function decreaseInventoryCount(booth:Booth, toDecrease:int):void
 		{
 			var id:int = booth.id;
-			_structureManager.decreaseInventoryCount(booth.id, toDecrease);
+//			_structureManager.decreaseInventoryCount(booth.id, toDecrease);
 			
 			if (booth.inventory_count - toDecrease == 0)
 			{
@@ -113,6 +113,8 @@ package rock_on
 		public function getBoothFront(booth:Booth, index:int=0, routedCustomer:Boolean=false, queuedCustomer:Boolean=false, customerless:Boolean=false):Point3D
 		{
 			// Assumes a particular rotation
+			
+			// Do not allow out of bound points, etc.
 			
 			var boothFront:Point3D;
 			if (customerless)
