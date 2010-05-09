@@ -36,7 +36,7 @@ package rock_on
 		public static const VENUE_FILL_FRACTION:Number = 0.5;
 		
 		public var state:int;
-		public var lastShowTime:int;
+		public var startShowButton:Button;
 		public var mainEntrance:Point3D;
 		public var entryPoints:ArrayCollection;
 		public var _venueManager:VenueManager;
@@ -200,14 +200,6 @@ package rock_on
 			updateState();
 		}
 		
-		public function onShowTimer(evt:TimerEvent):void
-		{
-			var showTimer:Timer = evt.currentTarget as Timer;
-			showTimer.removeEventListener(TimerEvent.TIMER, onShowTimer);
-			showTimer.stop();
-			showTimer = null;
-		}
-		
 		public function checkForMinimumFancount():Boolean
 		{
 			if (state == EMPTY_STATE && fancount > dwelling.capacity * VENUE_FILL_FRACTION)
@@ -282,13 +274,13 @@ package rock_on
 		
 		public function displayStartShowButton():void
 		{
-			var button:Button = new Button();
-			button.width = 50;
-			button.height = 50;
-			button.x = 400;
-			button.y = 0;
-			button.addEventListener(MouseEvent.CLICK, onStartShowButtonClicked);
-			Application.application.addChild(button);
+			startShowButton = new Button();
+			startShowButton.width = 50;
+			startShowButton.height = 50;
+			startShowButton.x = 400;
+			startShowButton.y = 0;
+			startShowButton.addEventListener(MouseEvent.CLICK, onStartShowButtonClicked);
+			Application.application.addChild(startShowButton);
 		}
 		
 		private function onStartShowButtonClicked(evt:MouseEvent):void
@@ -298,7 +290,19 @@ package rock_on
 		
 		public function endShowWaitState():void
 		{
-			
+			removeShowButton();
+		}
+		
+		public function removeShowButton():void
+		{
+			if (Application.application.contains(startShowButton))
+			{
+				Application.application.removeChild(startShowButton);
+			}
+			if (startShowButton)
+			{
+				startShowButton = null;
+			}			
 		}
 		
 		public function get myWorld():World

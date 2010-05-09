@@ -41,12 +41,23 @@ package rock_on
 		
 		public function decreaseInventoryCount(booth:Booth, toDecrease:int):void
 		{
-			var id:int = booth.id;
-//			_structureManager.decreaseInventoryCount(booth.id, toDecrease);
+			booth.inventory_count = booth.inventory_count - toDecrease;
 			
-			if (booth.inventory_count - toDecrease == 0)
+			if (booth.inventory_count - toDecrease <= 0)
 			{
-				booth.advanceState(Booth.UNSTOCKED_STATE);
+				booth.inventory_count = 0;
+				_structureManager.validateBoothCountZero(booth.id);
+			}			
+		}
+		
+		public function updateBoothOnServerResponse(booth:Booth, method:String):void
+		{
+			if (method == "update_inventory_count")
+			{
+				if (booth.inventory_count == 0 && booth.state != Booth.UNSTOCKED_STATE)
+				{
+					booth.advanceState(Booth.UNSTOCKED_STATE);					
+				}				
 			}			
 		}
 		

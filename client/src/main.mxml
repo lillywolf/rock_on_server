@@ -174,8 +174,7 @@
 				}
 				if (evt.model == "owned_structure")
 				{
-					checkForUpdatedBooth(instance as OwnedStructure, evt.method);
-					checkForUpdatedStation(instance as OwnedStructure, evt.method);
+					gdi.structureManager.updateOwnedStructureOnServerResponse(instance as OwnedStructure, evt.method, worldView);
 				}
 			}
 			private function checkForUpdatedVenue(instance:OwnedDwelling, method:String):void
@@ -183,26 +182,6 @@
 				if (instance.id == worldView.venueManager.venue.id)
 				{
 					worldView.venueManager.onVenueUpdated(method, instance);
-				}
-			}
-			private function checkForUpdatedBooth(instance:OwnedStructure, method:String):void
-			{
-				if (instance.structure.structure_type == "Booth")
-				{
-					if (method == "update_boothcount")
-					{
-						
-					}
-				}
-			}
-			private function checkForUpdatedStation(instance:OwnedStructure, method:String):void
-			{
-				if (instance.structure.structure_type == "ListeningStation")
-				{
-					if (method == "validate_usage_complete")
-					{
-						worldView.listeningStationManager.removeStationWhenFinished(instance.id);
-					}
 				}
 			}
 		]]>

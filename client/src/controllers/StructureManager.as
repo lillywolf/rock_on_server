@@ -10,7 +10,14 @@ package controllers
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
+	import rock_on.Booth;
+	import rock_on.BoothManager;
+	import rock_on.ListeningStation;
+	import rock_on.ListeningStationManager;
+	
 	import server.ServerController;
+	
+	import views.WorldView;
 
 	public class StructureManager extends Manager
 	{
@@ -125,9 +132,37 @@ package controllers
 			return null;
 		}
 		
-		public function decreaseInventoryCount(id:int, toDecrease:int):void
+		public function validateBoothCountZero(id:int):void
 		{
-			_serverController.sendRequest({id: id, to_decrease: toDecrease}, 'owned_structure', 'decrement_inventory');										
+			_serverController.sendRequest({id: id, client_validate: "true"}, "owned_structure", "validate_boothcount_zero");
+		}
+		
+		public function updateOwnedStructureOnServerResponse(osCopy:OwnedStructure, method:String, worldView:WorldView):void
+		{
+			for each (var os:OwnedStructure in owned_structures)
+			{
+				if (os.id == osCopy.id)
+				{
+					if (os.structure.structure_type == "Booth")
+					{
+						updateBoothOnServerResponse(os, method, worldView.boothManager);
+					}
+					else if (os.structure.structure_type == "ListeningStation")
+					{
+						updateListeningStationOnServerResponse(os, method, worldView.listeningStationManager);
+					}
+				}
+			}			
+		}
+		
+		private function updateBoothOnServerResponse(os:OwnedStructure, method:String, boothManager:BoothManager):void
+		{
+			boothManager.updateBoothOnServerResponse(os as Booth, method);		
+		}
+		
+		private function updateListeningStationOnServerResponse(os:OwnedStructure, method:String, listeningStationManager:ListeningStationManager):void
+		{
+			listeningStationManager.updateStationOnServerResponse(os as ListeningStation, method);
 		}
 		
 		public function set serverController(val:ServerController):void

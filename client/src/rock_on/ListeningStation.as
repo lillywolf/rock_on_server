@@ -5,6 +5,7 @@ package rock_on
 	import flash.utils.Timer;
 	
 	import game.Counter;
+	import game.CounterEvent;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
@@ -21,15 +22,16 @@ package rock_on
 		public static const FAN_COLLECTION_STATE:int = 2;
 		public static const FAN_ENTRY_STATE:int = 3;
 		
+		public static const PERMANENT_SLOT_PROBABILITY:Number = 0.02;
+		public static const COLLECTION_BUFFER_TIME:int = 30;
+		
 		public var activeAsset:ActiveAsset;
 		public var listenerCount:int;
 		public var currentListenerCount:int;
 		public var currentListeners:ArrayCollection;
-//		public var capacity:int;
 		public var createdAt:int;
 		public var stationType:String;
 		public var radius:Point3D;
-//		public var listeningTime:int;
 		public var stationTimer:Timer;
 		public var counter:Counter;
 		public var secondsRemaining:Number;
@@ -47,7 +49,7 @@ package rock_on
 			
 		public function setInMotion():void
 		{
-			updateTimeAndState();
+			initializeTimeAndState();
 		}	
 				
 		public function setProperties():void
@@ -55,22 +57,19 @@ package rock_on
 			if (_structure.mc is Ticket_01)
 			{
 				stationType = "Gramophone";
-				radius = new Point3D(1, 0, 1);
-//				capacity = 2;
-//				listeningTime = 172800;				
+				radius = new Point3D(1, 0, 1);		
 			}
 			else if (_structure.mc is Booth_01)
 			{
 				stationType = "RecordPlayer";
 				radius = new Point3D(2, 0, 1);
-//				capacity = 3;
-//				listeningTime = 86400;
 			}
 		}	
 		
 		public function displayCountdown():void
 		{
 			counter = new Counter(secondsRemaining*1000);
+			counter.addEventListener(CounterEvent.COUNTER_COMPLETE, onCounterComplete);
 			counter.displayCounter();
 			var uiCoordinates:Point = World.worldToActualCoords(new Point3D(x, y, z));
 			counter.counterCanvas.x = uiCoordinates.x;
@@ -78,28 +77,46 @@ package rock_on
 			Application.application.addChild(counter.counterCanvas);
 		}
 		
-		private function updateTimeAndState():void
+		private function onCounterComplete(evt:CounterEvent):void
+		{
+			updateTimeAndState();
+		}
+		
+		public function initializeTimeAndState():void
 		{
 			updateSecondsRemaining();	
+			initializeListenerCount();
 			
-			updateListenerCount();
-			
-			if (secondsRemaining < 0 && state != FAN_BUTTON_STATE)
+			if (secondsRemaining <= 0 && state != FAN_BUTTON_STATE)
 			{
 				advanceState(FAN_BUTTON_STATE);
 			}	
 			else
 			{
 				advanceState(FAN_COLLECTION_STATE);
-			}				
+			}							
 		}
 		
-		private function updateListenerCount():void
+		private function updateTimeAndState():void
+		{
+			updateSecondsRemaining();				
+			updateListenerCount();			
+		}
+		
+		private function initializeListenerCount():void
 		{
 			listenerCount = Math.floor((structure.capacity * structure.collection_time - secondsRemaining) / structure.collection_time);
 			if (listenerCount > structure.capacity)
 			{
 				listenerCount = structure.capacity;
+			}
+		}
+		
+		private function updateListenerCount():void
+		{
+			if (listenerCount < structure.capacity)
+			{
+				var neededListeners:int = structure.capacity - listenerCount;
 			}
 		}
 		
@@ -115,11 +132,28 @@ package rock_on
 			var currentDate:Date = new Date();
 			var currentTime:Number = currentDate.getTime()/1000 + (currentDate.timezoneOffset * 60);
 			secondsRemaining = (structure.collection_time * structure.capacity) - (currentTime - createdAt);
+			if (secondsRemaining < 0)
+			{
+				secondsRemaining = 0;
+			}
 		}
 		
 		private function onStationTimerComplete(evt:TimerEvent):void
 		{
 			advanceState(FAN_BUTTON_STATE);
+			removeCounter();
+		}
+		
+		public function removeCounter():void
+		{
+			if (Application.application.contains(counter.counterCanvas))
+			{
+				Application.application.removeChild(counter.counterCanvas);
+			}
+			if (counter)
+			{
+				counter = null;
+			}			
 		}
 		
 		override public function advanceState(destinationState:int):void
@@ -180,7 +214,38 @@ package rock_on
 			state = FAN_BUTTON_STATE;
 			_listeningStationManager.addListeners(this);
 			_listeningStationManager.onFanButtonState(this);
-		}		
+		}	
+		
+		public function isSlotAvailable():Boolean
+		{
+			if (structure.capacity > currentListeners.length)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		public function isPermanentSlotAvailable():Boolean
+		{
+			updateSecondsRemaining();
+			var permanentSlotsAvailable:int = Math.ceil(((structure.collection_time * structure.capacity) - secondsRemaining) / structure.collection_time);
+			var permanentConversionProbability:Number = (PasserbyManager.STATIONLISTENER_CONVERSION_PROBABILITY * ((PasserbyManager.SPAWN_INTERVAL_BASE + Math.floor(Math.random()*PasserbyManager.SPAWN_INTERVAL_MULTIPLIER))/1000)) / structure.collection_time;
+			var temp:int = (structure.capacity * structure.collection_time) - (structure.collection_time * listenerCount + secondsRemaining);
+			var secondsUntilCollectionPeriodComplete:int = structure.collection_time - temp;
+			if (permanentSlotsAvailable > listenerCount && Math.random() < permanentConversionProbability)
+			{
+				return true;
+			}
+			else if (permanentSlotsAvailable - listenerCount == 1 && secondsUntilCollectionPeriodComplete < COLLECTION_BUFFER_TIME)
+			{
+				return true;
+			}
+			else if (permanentSlotsAvailable - listenerCount > 1)
+			{
+				return true;
+			}
+			return false;
+		}	
 		
 		private function startFanCollectionState():void
 		{

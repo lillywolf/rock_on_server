@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100507190606) do
+ActiveRecord::Schema.define(:version => 20100509175911) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -101,6 +101,7 @@ ActiveRecord::Schema.define(:version => 20100507190606) do
     t.integer  "structure_id"
     t.integer  "dwelling_id"
     t.integer  "inventory_count"
+    t.datetime "inventory_updated_at"
   end
 
   create_table "owned_thingers", :force => true do |t|

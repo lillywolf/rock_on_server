@@ -23,6 +23,9 @@ package rock_on
 		public var spawnInterval:int;
 		public var _listeningStationManager:ListeningStationManager;
 		public static const VENUE_BOUND_X:int = 14;	
+		public static const STATIONLISTENER_CONVERSION_PROBABILITY:Number = 0.3;
+		public static const SPAWN_INTERVAL_BASE:int = 2000;
+		public static const SPAWN_INTERVAL_MULTIPLIER:int = 5000;
 				
 		public function PasserbyManager(listeningStationManager:ListeningStationManager, myWorld:World, source:Array=null)
 		{
@@ -33,7 +36,7 @@ package rock_on
 		
 		public function startSpawning():void
 		{
-			spawnInterval = 2000 + Math.floor(Math.random()*5000);
+			spawnInterval = SPAWN_INTERVAL_BASE + Math.floor(Math.random()*SPAWN_INTERVAL_MULTIPLIER);
 			var spawnTimer:Timer = new Timer(spawnInterval);
 			spawnTimer.addEventListener(TimerEvent.TIMER, onSpawnTimer);
 			spawnTimer.start();			
@@ -85,10 +88,9 @@ package rock_on
 		{			
 			// Criteria for making someone go to stations
 			
-			if (Math.random()*_listeningStationManager.listeningStations.length > 0.7 && _listeningStationManager.isAnyStationAvailable())
+			if (Math.random()*_listeningStationManager.listeningStations.length > (1 - STATIONLISTENER_CONVERSION_PROBABILITY) && _listeningStationManager.isAnyStationAvailable())
 			{
 				var sl:StationListener = generateStationListener();
-				var stationIndex:int = Math.floor(Math.random()*_listeningStationManager.listeningStations.length);	
 				sl.speed = 0.08;
 				add(sl);			
 			}
@@ -111,8 +113,8 @@ package rock_on
 				setSpawnLocation();
 				_myWorld.addAsset(person, spawnLocation);				
 				addItem(person);
-				person.movieClipStack.alpha = 0.5;
-				person.startRouteState();
+				person.movieClipStack.alpha = 0.5;				
+				determineNextStep(person);
 			}
 			else
 			{
@@ -123,6 +125,19 @@ package rock_on
 			var spawnTimer:Timer = new Timer(spawnInterval);
 			spawnTimer.addEventListener(TimerEvent.TIMER, onSpawnTimer);
 			spawnTimer.start();
+		}
+		
+		public function determineNextStep(person:Passerby):void
+		{
+			if (person is StationListener)
+			{
+//				(person as StationListener).selectStationActivity();
+				person.startRouteState();
+			}
+			else
+			{
+				person.startRouteState();	
+			}			
 		}
 		
 		public function spawnForStation(station:ListeningStation):void

@@ -178,17 +178,19 @@ package rock_on
 			{
 				throw new Error("how the hell did this happen?");
 			}
-		}		
+		}	
 		
-		public function removeStationWhenFinished(id:int):void
+		public function updateStationOnServerResponse(station:ListeningStation, method:String):void
 		{
-			for each (var station:ListeningStation in listeningStations)
+			if (method == "validate_usage_complete")
 			{
-				if (id == station.id)
-				{
-					remove(station);
-				}
-			}
+				removeStationWhenFinished(station);
+			}			
+		}	
+		
+		public function removeStationWhenFinished(station:ListeningStation):void
+		{
+			remove(station);
 		}
 		
 		public function set venue(val:Venue):void

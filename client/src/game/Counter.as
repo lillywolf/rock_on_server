@@ -105,6 +105,7 @@ package game
 			if (hoursRemaining == 0 && minutesRemaining == 0 && secondsRemaining == 0)		
 			{
 				Alert.show("Time's up!");
+				secondTimer.stop();
 				var evt:CounterEvent = new CounterEvent(CounterEvent.COUNTER_COMPLETE, true, true);
 				dispatchEvent(evt);
 			}	

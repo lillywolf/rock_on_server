@@ -46,7 +46,7 @@ class OwnedDwelling < ActiveRecord::Base
       else
       end
     elsif self.last_state == "show_wait_state"
-      if show_button_clicked == true
+      if show_button_clicked == "true"
         self.last_state = "show_state"
         self.state_updated_at = Time.new
       end  
@@ -61,13 +61,16 @@ class OwnedDwelling < ActiveRecord::Base
   
   def update_boothcount(new_fans, array)
     OwnedStructure.find_each(:conditions => ["dwelling_id = ?", self.id]) do |owned_structure|
-      owned_structure.update_inventory_count(self)
-      hash = Hash.new
-      hash["instance"] = owned_structure
-      hash["already_loaded"] = true
-      hash["model"] = "owned_structure"
-      hash["method"] = "update_boothcount"
-      array.push hash
+      structure = Structure.find(owned_structure.structure_id)
+      if structure.structure_type == "Booth"
+        owned_structure.update_inventory_count(self)
+        hash = Hash.new
+        hash["instance"] = owned_structure
+        hash["already_loaded"] = true
+        hash["model"] = "owned_structure"
+        hash["method"] = "update_boothcount"
+        array.push hash
+      end  
     end
   end    
   

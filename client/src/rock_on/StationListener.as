@@ -126,9 +126,9 @@ package rock_on
 			currentStation.hasCustomerEnRoute = false;
 			standFacingObject(currentStation);
 			
-			if (Math.random() > .95 || isStatic)
+			if (currentStation.isPermanentSlotAvailable() || isStatic)
 			{
-				
+				var thinger:int = 0;
 			}
 			else
 			{
@@ -143,6 +143,22 @@ package rock_on
 		{
 			var index:int = currentStation.currentListeners.getItemIndex(this);
 			currentStation.currentListeners.removeItemAt(index);
+		}
+		
+		public function selectStationActivity():void
+		{
+			if (currentStation.isPermanentSlotAvailable())
+			{
+				
+			}
+			else if (currentStation.isSlotAvailable())
+			{
+				
+			}
+			else
+			{
+				startRouteState();
+			}
 		}
 		
 		override public function leave(evt:TimerEvent):void

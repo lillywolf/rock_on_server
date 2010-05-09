@@ -6,6 +6,7 @@ class OwnedStructureController < ApplicationController
       hash = Hash.new
       structure_reference = owned_structure.structure_id 
       user_reference = owned_structure.user_id
+      owned_structure.do_type_specific_updates
       hash["belongs_to"] = ["user", "structure"]
       hash["belongs_to_id"] = [user_reference, structure_reference]
       hash["instance"] = owned_structure
@@ -41,6 +42,24 @@ class OwnedStructureController < ApplicationController
     @array.push hash
     render :json => @array.to_json
   end 
+  
+  def update_inventory_count
+    @array = Array.new
+    os = OwnedStructure.find(params[:id])
+    os.update_inventory_count
+    
+    if params[:client_validate] == "true"
+      os.validate_inventory_count_zero
+    end    
+    
+    hash = Hash.new
+    hash["instance"] = owned_structure
+    hash["already_loaded"] = true
+    hash["model"] = "owned_structure"
+    hash["method"] = "update_inventory_count" 
+    @array.push hash
+    render :json => @array.to_json       
+  end  
   
   def decrement_inventory
     array = Array.new
