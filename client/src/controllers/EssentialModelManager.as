@@ -9,6 +9,7 @@ package controllers
 	
 	import helpers.UnprocessedModel;
 	
+	import models.BoothStructure;
 	import models.Creature;
 	import models.Dwelling;
 	import models.EssentialModelReference;
@@ -50,6 +51,7 @@ package controllers
 		[Bindable] public var owned_structures:ArrayCollection;
 		[Bindable] public var dwellings:ArrayCollection;
 		[Bindable] public var owned_dwellings:ArrayCollection;
+		[Bindable] public var booth_structures:ArrayCollection;
 		
 		public var layerable:Layerable;
 		public var creature:Creature;
@@ -62,6 +64,7 @@ package controllers
 		public var dwelling:Dwelling;
 		public var owned_dwelling:OwnedDwelling;
 		public var level:Level;
+		public var booth_structure:BoothStructure;
 		
 		public var baseUrl:String = ServerController.BASE_URL;		
 		
@@ -88,6 +91,7 @@ package controllers
 			levels = new ArrayCollection();
 			dwellings = new ArrayCollection();
 			owned_dwellings = new ArrayCollection();
+			booth_structures = new ArrayCollection();
 			essentialModelReference = new EssentialModelReference();
 		}
 		

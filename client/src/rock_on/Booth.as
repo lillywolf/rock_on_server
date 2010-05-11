@@ -38,7 +38,6 @@ package rock_on
 			proxiedQueue = new ArrayCollection();
 
 			checkForLoadedStructure(params);
-			updateState();
 		}
 		
 		public function checkForLoadedStructure(params:Object):void
@@ -110,6 +109,7 @@ package rock_on
 		public function startUnstockedState():void
 		{
 			state = UNSTOCKED_STATE;
+			_boothManager.addBoothCollectionButton(this);
 			var evt:DynamicEvent = new DynamicEvent("unStockedState", true, true);
 			dispatchEvent(evt);
 		}

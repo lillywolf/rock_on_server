@@ -1,0 +1,2 @@
+module BoothStructureHelper
+end

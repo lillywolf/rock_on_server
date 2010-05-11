@@ -6,6 +6,7 @@ class StructureController < ApplicationController
       hash = Hash.new
       hash["model"] = "structure"
       hash["instance"] = structure
+      hash["has_many"] = ["booth_structure"]
       array.push hash
     end  
     render :json => array.to_json    

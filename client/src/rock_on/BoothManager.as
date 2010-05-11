@@ -50,13 +50,19 @@ package rock_on
 			}			
 		}
 		
-		public function updateBoothOnServerResponse(booth:Booth, method:String):void
+		public function updateBoothOnServerResponse(os:OwnedStructure, method:String):void
 		{
 			if (method == "update_inventory_count")
 			{
-				if (booth.inventory_count == 0 && booth.state != Booth.UNSTOCKED_STATE)
+				if (os.inventory_count <= 0)
 				{
-					booth.advanceState(Booth.UNSTOCKED_STATE);					
+					for each (var booth:Booth in booths)
+					{
+						if (booth.id == os.id && booth.state != Booth.UNSTOCKED_STATE)
+						{
+							booth.advanceState(Booth.UNSTOCKED_STATE);										
+						}
+					}
 				}				
 			}			
 		}
@@ -69,23 +75,12 @@ package rock_on
 				var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
 				asset.thinger = os;
 				var booth:Booth = new Booth(this, _venue, os);
-				addBoothListeners(booth);
 				booths.addItem(booth);
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				_myWorld.addStaticAsset(asset, addTo);
+				booth.updateState();
 			}
 		}		
-		
-		public function addBoothListeners(booth:Booth):void
-		{
-			booth.addEventListener("unstockedState", onUnstockedState);
-		}
-		
-		private function onUnstockedState(evt:DynamicEvent):void
-		{
-			var booth:Booth = evt.currentTarget as Booth;
-			addBoothCollectionButton(booth);
-		}
 		
 		public function addBoothCollectionButton(booth:Booth):void
 		{	
@@ -104,7 +99,7 @@ package rock_on
 			var booth:Booth = btn.booth;
 			var creditsToAdd:int = booth.getTotalInventory() * BOOTH_CREDITS_MULTIPLIER;
 			
-			// Update credits on the server
+			_structureManager.serverController.sendRequest({id: booth.id}, "owned_structure", "add_booth_credits");
 		}
 		
 		public function getRandomBooth(booth:Booth=null):Booth

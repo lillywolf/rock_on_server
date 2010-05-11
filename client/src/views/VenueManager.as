@@ -1,6 +1,7 @@
 package views
 {
 	import controllers.DwellingManager;
+	import controllers.LevelManager;
 	
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -30,24 +31,20 @@ package views
 		public var _booths:ArrayCollection;
 		public var _concertStage:ConcertStage;
 		public var _bandManager:BandManager;
+		public var _levelManager:LevelManager;
 		
-		public function VenueManager(creatureGenerator:CreatureGenerator, customerPersonManager:CustomerPersonManager, dwellingManager:DwellingManager, bandManager:BandManager, booths:ArrayCollection, concertStage:ConcertStage, myWorld:World, target:IEventDispatcher=null)
+		public function VenueManager(creatureGenerator:CreatureGenerator, customerPersonManager:CustomerPersonManager, dwellingManager:DwellingManager, levelManager:LevelManager, bandManager:BandManager, booths:ArrayCollection, concertStage:ConcertStage, myWorld:World, target:IEventDispatcher=null)
 		{
 			super(target);
 			_creatureGenerator = creatureGenerator;
 			_customerPersonManager = customerPersonManager;
 			_dwellingManager = dwellingManager;
+			_levelManager = levelManager;
 			_bandManager = bandManager;
 			_booths = booths;
 			_concertStage = concertStage;
 			_myWorld = myWorld;
 		}
-		
-//		public function setInMotion():void
-//		{
-//			getVenue();
-//			addCustomersToVenue();
-//		}
 		
 		public function getVenue():void
 		{
@@ -101,6 +98,11 @@ package views
 		public function get dwellingManager():DwellingManager
 		{
 			return _dwellingManager;
+		}
+		
+		public function get levelManager():LevelManager
+		{
+			return _levelManager;
 		}
 		
 	}

@@ -3,7 +3,7 @@
 	<mx:states>
 		<mx:State name="topBar">
 			<mx:AddChild position="after">
-				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}"/>
+				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}" levelManager="{gdi.levelManager}"/>
 			</mx:AddChild>
 			<mx:AddChild position="after">
 				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
@@ -11,7 +11,7 @@
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
 			<mx:AddChild>
-				<views:WorldView id="worldView" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}"/>
+				<views:WorldView id="worldView" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}" levelManager="{gdi.levelManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="friendView" basedOn="topBar">

@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="80" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import controllers.LevelManager;
 			import mx.controls.Label;
 			import mx.core.UIComponent;
 			import mx.core.Application;
@@ -25,6 +26,7 @@
 			[Bindable] public var creatureManager:CreatureManager;
 			[Bindable] public var thingerManager:ThingerManager;
 			[Bindable] public var userManager:UserManager;
+			[Bindable] public var levelManager:LevelManager;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;

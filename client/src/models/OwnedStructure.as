@@ -13,6 +13,7 @@ package models
 		public var _id:int;
 		public var _structure:Structure;
 		public var _user_id:int;
+		public var _owned_dwelling_id:int;
 		public var _x:Number;
 		public var _y:Number;
 		public var _z:Number;
@@ -53,6 +54,10 @@ package models
 			if (params.updated_at)
 			{
 				_updated_at = params.updated_at;
+			}
+			if (params.owned_dwelling_id)
+			{
+				_owned_dwelling_id = params.owned_dwelling_id;
 			}
 		}
 
@@ -169,6 +174,16 @@ package models
 		public function get inventory_count():int
 		{
 			return _inventory_count;
+		}
+		
+		public function set owned_dwelling_id(val:int):void
+		{
+			_owned_dwelling_id = val;
+		}
+		
+		public function get owned_dwelling_id():int
+		{
+			return _owned_dwelling_id;
 		}
 		
 		public function getCornerMatrix():Dictionary

@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  structure_id: 
+  inventory_capacity: 
+  item_price: 
+
+two:
+  structure_id: 
+  inventory_capacity: 
+  item_price: 

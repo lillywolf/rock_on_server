@@ -16,6 +16,7 @@ package models
 		public var _structure_type:String;
 		public var _collection_time:int;
 		public var _capacity:int;
+		public var _booth_structure:BoothStructure;
 		
 		public var _width:Number;
 		public var _height:Number;
@@ -67,7 +68,7 @@ package models
 			if (params['depth'])
 			{
 				_depth = params['depth'];
-			}			
+			}	
 		}
 		
 		public function set id(val:int):void
@@ -191,6 +192,16 @@ package models
 		public function get capacity():int
 		{
 			return _capacity;
+		}
+		
+		public function set booth_structure(val:BoothStructure):void
+		{
+			_booth_structure = val;
+		}
+		
+		public function get booth_structure():BoothStructure
+		{
+			return _booth_structure;
 		}
 		
 	}

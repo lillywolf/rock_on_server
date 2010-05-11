@@ -52,6 +52,19 @@ class OwnedDwellingController < ApplicationController
     render :json => array.to_json    
   end  
   
-  
+  def change_venue
+    array = Array.new
+    hash = Hash.new
+    
+    owned_dwelling = OwnedDwelling.find(params[:id])
+    owned_dwelling.switch_dwelling_id(params[:level])
+    
+    hash["instance"] = owned_dwelling
+    hash["already_loaded"] = true
+    hash["model"] = "owned_dwelling"
+    hash["method"] = "change_venue"
+    array.push hash
+    render :json => array.to_json    
+  end  
   
 end

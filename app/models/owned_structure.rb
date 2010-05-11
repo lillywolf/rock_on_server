@@ -48,7 +48,7 @@ class OwnedStructure < ActiveRecord::Base
   def do_type_specific_updates
     structure = Structure.find(self.structure_id)
     if structure.structure_type == "Booth"
-      owned_dwelling = OwnedDwelling.find(self.dwelling_id)
+      owned_dwelling = OwnedDwelling.find(self.owned_dwelling_id)
       update_inventory_count(owned_dwelling)
     elsif structure.structure_type == "ListeningStation"
       

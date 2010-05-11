@@ -36,12 +36,14 @@ class OwnedDwelling < ActiveRecord::Base
         self.state_updated_at = self.state_updated_at + SHOW_TIME
       elsif @time_elapsed > (SHOW_TIME + ENCORE_WAIT_TIME)  
         self.last_state = "empty_state"
+        switch_dwelling_id(get_level)
         self.state_updated_at = self.state_updated_at + SHOW_TIME + ENCORE_WAIT_TIME
       else
       end      
     elsif self.last_state == "encore_state" 
       if @time_elapsed > ENCORE_TIME
         self.last_state = "empty_state"
+        switch_dwelling_id(get_level)
         self.state_updated_at = self.state_updated_at + ENCORE_TIME
       else
       end
@@ -59,8 +61,39 @@ class OwnedDwelling < ActiveRecord::Base
     self.fancount += new_fans  
   end
   
+  def switch_dwelling_id(level) 
+    array = Array.new     
+    Dwelling.find_each(:conditions => ["unlocks_at = ? and id != ?", level.order, self.dwelling_id], :select => 'id') do |dwelling|
+      array.push dwelling
+    end  
+    
+    rand_id = (rand(array.length - 1)).floor
+    
+    if rand_id >= 0
+      selected_dwelling_id = (array[rand_id]).id
+    else
+      selected_dwelling_id = self.dwelling_id
+    end
+      
+    self.dwelling_id = selected_dwelling_id
+    self.fancount = 0
+    self.save
+  end
+  
+  def get_level
+    user = User.find(self.user_id)
+    level = Level.find(user.level_id)
+    return level
+  end  
+  
+  def get_random
+    if (c = count) != 0
+      find(:first, :offset => rand(c))
+    end
+  end    
+  
   def update_boothcount(new_fans, array)
-    OwnedStructure.find_each(:conditions => ["dwelling_id = ?", self.id]) do |owned_structure|
+    OwnedStructure.find_each(:conditions => ["owned_dwelling_id = ?", self.id]) do |owned_structure|
       structure = Structure.find(owned_structure.structure_id)
       if structure.structure_type == "Booth"
         owned_structure.update_inventory_count(self)

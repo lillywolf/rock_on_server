@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100509175911) do
+ActiveRecord::Schema.define(:version => 20100511003617) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -20,6 +20,14 @@ ActiveRecord::Schema.define(:version => 20100509175911) do
     t.string   "bucket"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "booth_structures", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "structure_id"
+    t.integer  "inventory_capacity"
+    t.integer  "item_price"
   end
 
   create_table "creatures", :force => true do |t|
@@ -41,6 +49,7 @@ ActiveRecord::Schema.define(:version => 20100509175911) do
     t.datetime "updated_at"
     t.string   "dwelling_type"
     t.integer  "capacity"
+    t.integer  "unlocks_at"
   end
 
   create_table "layerables", :force => true do |t|
@@ -99,7 +108,7 @@ ActiveRecord::Schema.define(:version => 20100509175911) do
     t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "structure_id"
-    t.integer  "dwelling_id"
+    t.integer  "owned_dwelling_id"
     t.integer  "inventory_count"
     t.datetime "inventory_updated_at"
   end

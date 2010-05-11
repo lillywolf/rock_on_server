@@ -180,11 +180,17 @@ package rock_on
 			}
 		}	
 		
-		public function updateStationOnServerResponse(station:ListeningStation, method:String):void
+		public function updateStationOnServerResponse(os:OwnedStructure, method:String):void
 		{
 			if (method == "validate_usage_complete")
 			{
-				removeStationWhenFinished(station);
+				for each (var station:ListeningStation in listeningStations)
+				{
+					if (station.id == os.id)
+					{
+						removeStationWhenFinished(station);					
+					}
+				}
 			}			
 		}	
 		

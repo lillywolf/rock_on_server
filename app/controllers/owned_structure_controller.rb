@@ -45,11 +45,12 @@ class OwnedStructureController < ApplicationController
   
   def update_inventory_count
     @array = Array.new
-    os = OwnedStructure.find(params[:id])
-    os.update_inventory_count
+    owned_structure = OwnedStructure.find(params[:id])
+    owned_dwelling = OwnedDwelling.find(owned_structure.owned_dwelling_id)
+    owned_structure.update_inventory_count(owned_dwelling)
     
     if params[:client_validate] == "true"
-      os.validate_inventory_count_zero
+      owned_structure.validate_inventory_count_zero
     end    
     
     hash = Hash.new
@@ -72,6 +73,22 @@ class OwnedStructureController < ApplicationController
     hash["model"] = "owned_structure"
     array.push hash
     render :json => array.to_json
-  end   
+  end
+  
+  def add_booth_credits
+    owned_structure = OwnedStructure.find(params[:id])
+    structure = Structure.find(owned_structure.structure_id)
+    booth_structure = Booth.find(:conditions => ["structure_id = ?", structure.id])
+    if owned_structure.inventory_count == 0
+      total_credits = booth_structure.item_price * booth_structure.inventory_capacity
+      user = User.find(owned_structure.user_id)
+      user.add_credits(total_credits)
+    end  
+    hash["instance"] = user
+    hash["already_loaded"] = true
+    hash["model"] = "user"
+    array.push hash
+    render :json => array.to_json    
+  end     
 
 end

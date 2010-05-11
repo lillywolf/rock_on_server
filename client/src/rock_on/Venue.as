@@ -82,29 +82,6 @@ package rock_on
 			return timeSinceStateChanged;
 		}
 		
-//		public function stateTranslate():void
-//		{
-//			switch (_last_state)
-//			{
-//				case "empty_state":
-//					advanceState(EMPTY_STATE);
-//					break;
-//				case "show_state":
-//					advanceState(SHOW_STATE);
-//					break;
-//				case "encore_state":
-//					advanceState(ENCORE_STATE);
-//					break;
-//				case "show_wait_state":
-//					advanceState(SHOW_WAIT_STATE);
-//					break;
-//				case "encore_wait_state":
-//					advanceState(ENCORE_WAIT_STATE);
-//					break;
-//				default: throw new Error("Unrecognized state name");					
-//			}
-//		}
-		
 		public function stateTranslateString():int
 		{
 			switch (_last_state)
@@ -236,8 +213,17 @@ package rock_on
 			
 		}
 		
+		public function checkForVenueTurnover():void
+		{
+			if (state == ENCORE_STATE || state == ENCORE_WAIT_STATE)
+			{
+				_venueManager.dwellingManager.serverController.sendRequest({id: id, level: _venueManager.levelManager.level}, "owned_dwelling", "change_venue");
+			}
+		}
+		
 		public function startEmptyState():void
 		{
+			checkForVenueTurnover();
 			state = EMPTY_STATE;
 		}
 		

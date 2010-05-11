@@ -10,9 +10,7 @@ package controllers
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
-	import rock_on.Booth;
 	import rock_on.BoothManager;
-	import rock_on.ListeningStation;
 	import rock_on.ListeningStationManager;
 	
 	import server.ServerController;
@@ -134,7 +132,7 @@ package controllers
 		
 		public function validateBoothCountZero(id:int):void
 		{
-			_serverController.sendRequest({id: id, client_validate: "true"}, "owned_structure", "validate_boothcount_zero");
+			_serverController.sendRequest({id: id, client_validate: "true"}, "owned_structure", "update_inventory_count");
 		}
 		
 		public function updateOwnedStructureOnServerResponse(osCopy:OwnedStructure, method:String, worldView:WorldView):void
@@ -157,17 +155,22 @@ package controllers
 		
 		private function updateBoothOnServerResponse(os:OwnedStructure, method:String, boothManager:BoothManager):void
 		{
-			boothManager.updateBoothOnServerResponse(os as Booth, method);		
+			boothManager.updateBoothOnServerResponse(os, method);		
 		}
 		
 		private function updateListeningStationOnServerResponse(os:OwnedStructure, method:String, listeningStationManager:ListeningStationManager):void
 		{
-			listeningStationManager.updateStationOnServerResponse(os as ListeningStation, method);
+			listeningStationManager.updateStationOnServerResponse(os, method);
 		}
 		
 		public function set serverController(val:ServerController):void
 		{
 			_serverController = val;
+		}
+		
+		public function get serverController():ServerController
+		{
+			return _serverController;
 		}
 	}
 }
