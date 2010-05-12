@@ -7,8 +7,8 @@ class User < ActiveRecord::Base
   has_many :owned_structures
   
   def add_credits(to_add)
-    user.credits += to_add
-    user.save    
+    self.credits += to_add
+    self.save    
   end
     
 end

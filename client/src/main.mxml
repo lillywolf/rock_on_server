@@ -32,6 +32,7 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import models.User;
 			import models.OwnedStructure;
 			import models.OwnedDwelling;
 			import rock_on.ContentIndex;
@@ -175,6 +176,10 @@
 				if (evt.model == "owned_structure")
 				{
 					gdi.structureManager.updateOwnedStructureOnServerResponse(instance as OwnedStructure, evt.method, worldView);
+				}
+				if (evt.model == "user")
+				{
+					gdi.user.updateUserOnServerResponse(instance as User, evt.method);
 				}
 			}
 			private function checkForUpdatedVenue(instance:OwnedDwelling, method:String):void

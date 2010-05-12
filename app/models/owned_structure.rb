@@ -53,7 +53,16 @@ class OwnedStructure < ActiveRecord::Base
     elsif structure.structure_type == "ListeningStation"
       
     end        
-  end   
+  end
+  
+  def add_hash(array, method, already_loaded)
+    hash = Hash.new
+    hash["instance"] = self
+    hash["already_loaded"] = already_loaded
+    hash["model"] = "owned_structure"
+    hash["method"] = method
+    array.push hash   
+  end     
   
   def get_time_elapsed(time_since)
     time = Time.new

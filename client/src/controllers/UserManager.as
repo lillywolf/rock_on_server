@@ -14,7 +14,7 @@ package controllers
 		public function UserManager(essentialModelManager:EssentialModelManager, target:IEventDispatcher=null)
 		{
 			super(essentialModelManager, target);
-		}
+		}		
 		
 		public function incrementCredits(toAdd:int):void
 		{

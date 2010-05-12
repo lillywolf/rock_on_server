@@ -61,6 +61,17 @@ package models
 			// Ping server and add on response
 		}
 		
+		public function updateUserOnServerResponse(newUserInstance:User, method:String):void
+		{
+			updateProperties(newUserInstance);
+			evaluateLevel();
+		}
+		
+		public function evaluateLevel():void
+		{
+			
+		}		
+		
 		private function onStructureAdded(evt:CollectionEvent):void
 		{
 			var ownedStructure:OwnedStructure = evt.items[0] as OwnedStructure;
@@ -102,9 +113,19 @@ package models
 		public function updateProperties(params:Object):void
 		{
 			_id = params.id;
-			_xp = params.xp;
-			_credits = params.credits;
-			_premium_credits = params.premium_credits;			
+			
+			if (params.xp)
+			{
+				_xp = params.xp;			
+			}
+			if (params.credits)
+			{
+				_credits = params.credits;			
+			}
+			if (params.premium_credits)
+			{
+				_premium_credits = params.premium_credits;			
+			}
 		}
 
 		public function set id(val:int):void

@@ -10,7 +10,6 @@ package rock_on
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
-	import mx.events.DynamicEvent;
 	
 	import world.ActiveAsset;
 	import world.Point;
@@ -52,18 +51,30 @@ package rock_on
 		
 		public function updateBoothOnServerResponse(os:OwnedStructure, method:String):void
 		{
+			var selectedBooth:Booth;
+			
+			for each (var booth:Booth in booths)
+			{
+				if (booth.id == os.id)
+				{
+					selectedBooth = booth;									
+				}
+			}
+						
 			if (method == "update_inventory_count")
 			{
 				if (os.inventory_count <= 0)
 				{
-					for each (var booth:Booth in booths)
+					if (selectedBooth.state != Booth.UNSTOCKED_STATE)
 					{
-						if (booth.id == os.id && booth.state != Booth.UNSTOCKED_STATE)
-						{
-							booth.advanceState(Booth.UNSTOCKED_STATE);										
-						}
+						selectedBooth.advanceState(Booth.UNSTOCKED_STATE);										
 					}
 				}				
+			}
+			
+			if (method == "add_booth_credits")
+			{
+				selectedBooth.advanceState(Booth.STOCKED_STATE);
 			}			
 		}
 		
@@ -88,8 +99,8 @@ package rock_on
 			btn.booth = booth;
 			btn.addEventListener(MouseEvent.CLICK, onCollectionButtonClicked);
 			var actualCoords:Point = World.worldToActualCoords(new Point3D(booth.x, booth.y, booth.z));
-			btn.x = actualCoords.x;
-			btn.y = actualCoords.y;
+			btn.x = actualCoords.x + _myWorld.x;
+			btn.y = actualCoords.y + _myWorld.y;
 			Application.application.addChild(btn);		
 		}
 		

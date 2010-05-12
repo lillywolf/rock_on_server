@@ -76,18 +76,25 @@ class OwnedStructureController < ApplicationController
   end
   
   def add_booth_credits
+    array = Array.new
+    hash = Hash.new
     owned_structure = OwnedStructure.find(params[:id])
     structure = Structure.find(owned_structure.structure_id)
-    booth_structure = Booth.find(:conditions => ["structure_id = ?", structure.id])
-    if owned_structure.inventory_count == 0
-      total_credits = booth_structure.item_price * booth_structure.inventory_capacity
-      user = User.find(owned_structure.user_id)
-      user.add_credits(total_credits)
-    end  
+    user = User.find(owned_structure.user_id)    
+    if owned_structure.inventory_count == 0    
+      BoothStructure.find_each(:conditions => ["structure_id = ?", structure.id]) do |booth_structure|
+        total_credits = booth_structure.item_price * booth_structure.inventory_capacity
+        owned_structure.inventory_count = booth_structure.inventory_capacity
+        owned_structure.save
+        owned_structure.add_hash(array, "add_booth_credits", true)
+        user.add_credits(total_credits)      
+      end
+    end
     hash["instance"] = user
     hash["already_loaded"] = true
     hash["model"] = "user"
-    array.push hash
+    hash["method"] = "add_booth_credits"
+    array.push hash    
     render :json => array.to_json    
   end     
 
