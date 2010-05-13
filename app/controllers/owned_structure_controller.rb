@@ -32,7 +32,8 @@ class OwnedStructureController < ApplicationController
   def create_new
     @array = Array.new
     os = OwnedStructure.create();
-    os.layerable_id = params[:id]
+    os.structure_id = params[:id]
+    os.owned_dwelling_id = params[:owned_dwelling_id]
     os.user_id = params[:user_id]
     os.save
     hash = Hash.new
@@ -77,7 +78,6 @@ class OwnedStructureController < ApplicationController
   
   def add_booth_credits
     array = Array.new
-    hash = Hash.new
     owned_structure = OwnedStructure.find(params[:id])
     structure = Structure.find(owned_structure.structure_id)
     user = User.find(owned_structure.user_id)    
@@ -87,15 +87,24 @@ class OwnedStructureController < ApplicationController
         owned_structure.inventory_count = booth_structure.inventory_capacity
         owned_structure.save
         owned_structure.add_hash(array, "add_booth_credits", true)
-        user.add_credits(total_credits)      
+        user.add_credits(total_credits)
+        user.add_xp(total_credits * booth_structure.getBoothCreditsMultiplier)      
       end
     end
-    hash["instance"] = user
-    hash["already_loaded"] = true
-    hash["model"] = "user"
-    hash["method"] = "add_booth_credits"
-    array.push hash    
+    user.add_hash(array, "add_booth_credits", true)
     render :json => array.to_json    
-  end     
-
+  end 
+  
+  def add_station_credits
+    array = Array.new
+    owned_structure = OwnedStructure.find(params[:id])
+    structure = Structure.find(owned_structure.structure_id)
+    user = User.find(owned_structure.user_id)
+    user.add_credts(structure.capacity * structure.getListenerCredits)
+    user.add_xp(structure.capacity * structure.getListenerCredits * structure.getStationCreditsMultiplier)
+    user.save
+    user.add_hash
+    render :json => array.to_json        
+  end
+    
 end

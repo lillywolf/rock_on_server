@@ -40,7 +40,7 @@ package game
 			
 			_userManager.user.increaseXp(xpToAdd);			
 			
-			if (_userManager.user.level.order < i)
+			if (_userManager.user.level.rank < i)
 			{
 				_userManager.user.incrementLevel(i);
 			}	

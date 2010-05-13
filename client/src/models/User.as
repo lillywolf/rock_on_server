@@ -64,13 +64,7 @@ package models
 		public function updateUserOnServerResponse(newUserInstance:User, method:String):void
 		{
 			updateProperties(newUserInstance);
-			evaluateLevel();
-		}
-		
-		public function evaluateLevel():void
-		{
-			
-		}		
+		}	
 		
 		private function onStructureAdded(evt:CollectionEvent):void
 		{
@@ -166,6 +160,16 @@ package models
 		public function get credits():int
 		{
 			return _credits;
+		}
+		
+		public function set premium_credits(val:int):void
+		{
+			_premium_credits = val;
+		}
+		
+		public function get premium_credits():int
+		{
+			return _premium_credits;
 		}
 		
 		public function set snid(val:int):void

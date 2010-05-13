@@ -7,6 +7,7 @@ package rock_on
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.Application;
 	import mx.events.DynamicEvent;
 	
 	import views.WorldView;
@@ -116,7 +117,13 @@ package rock_on
 		
 		public function endUnstockedState():void
 		{
-			
+			for each (var btn:SpecialButton in Application.application)
+			{
+				if (btn.booth == this)
+				{
+					Application.application.removeChild(btn);
+				}
+			}
 		}
 		
 		public function updateState():void

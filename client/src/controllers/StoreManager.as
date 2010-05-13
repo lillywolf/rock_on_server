@@ -4,11 +4,14 @@ package controllers
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	
+	import game.GameDataInterface;
+	
 	import models.Store;
 	import models.StoreOwnedThinger;
 	import models.User;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.Application;
 	import mx.core.UIComponent;
 	import mx.events.CollectionEvent;
 	
@@ -21,6 +24,7 @@ package controllers
 	{
 		[Bindable] public var stores:ArrayCollection;
 		[Bindable] public var _user:User;
+		[Bindable] public var _gdi:GameDataInterface;
 		
 		public function StoreManager(essentialModelManager:EssentialModelManager, target:IEventDispatcher=null)
 		{
@@ -83,6 +87,9 @@ package controllers
 			else if (sot.structure)
 			{
 				model = 'structure';
+				
+				// Might want to change how this works
+				params.owned_dwelling_id = Application.application.worldView.venueManager.venue.id;
 			}
 			else if (sot.usable)
 			{
@@ -90,7 +97,7 @@ package controllers
 			}
 			
 			params.id = sot[model].id;
-			params.user_id = _user.id;
+			params.user_id = _gdi.userManager.user.id;
 			var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.INSTANCE_TO_CREATE, 'owned_'+model, params, 'create_new', true, true);			
 			_essentialModelManager.dispatchEvent(evt);
 		}
@@ -105,7 +112,12 @@ package controllers
 				}
 			}
 			return null;
-		}		
+		}	
+		
+		public function set gdi(val:GameDataInterface):void
+		{
+			_gdi = val;
+		}
 		
 	}
 }

@@ -191,7 +191,7 @@ package rock_on
 						removeStationWhenFinished(station);					
 					}
 				}
-			}			
+			}
 		}	
 		
 		public function removeStationWhenFinished(station:ListeningStation):void

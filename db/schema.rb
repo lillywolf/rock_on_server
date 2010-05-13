@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100511003617) do
+ActiveRecord::Schema.define(:version => 20100513081520) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -67,7 +67,7 @@ ActiveRecord::Schema.define(:version => 20100511003617) do
   create_table "levels", :force => true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "order"
+    t.integer  "rank"
     t.integer  "xp_diff"
     t.text     "items_unlocked"
     t.integer  "dwelling_expansion_x"

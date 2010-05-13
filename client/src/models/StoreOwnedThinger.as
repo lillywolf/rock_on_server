@@ -35,10 +35,15 @@ package models
 		
 		public function getMovieClip():MovieClip
 		{
+			var newMC:MovieClip = new MovieClip();
 			if (layerable)
 			{
-				var newMC:MovieClip = new MovieClip();
 				newMC = layerable.mc;
+				return newMC;
+			}
+			else if (structure)
+			{
+				newMC = structure.mc;
 				return newMC;
 			}
 			return null;
@@ -72,6 +77,16 @@ package models
 		public function get layerable_id():int
 		{
 			return _layerable_id;
+		}	
+		
+		public function set structure_id(val:int):void
+		{
+			_structure_id = val;
+		}
+		
+		public function get structure_id():int
+		{
+			return _structure_id;
 		}	
 		
 		public function set store(val:Store):void

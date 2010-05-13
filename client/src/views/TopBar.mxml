@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="80" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import mx.containers.HBox;
 			import controllers.LevelManager;
 			import mx.controls.Label;
 			import mx.core.UIComponent;
@@ -19,6 +20,9 @@
 			[Bindable] public var myUser:User;
 			
 			public var creditsBox:Text;
+			public var xpBox:Text;
+			public var levelBox:Text;
+			public var mainHBox:HBox;
 			
 			[Bindable] public var layerableManager:LayerableManager;
 			[Bindable] public var structureManager:StructureManager;
@@ -53,38 +57,99 @@
 			
 			public function onUserLoaded():void
 			{
-				showUserData();				
+				setBarSkeleton();
+				showCredits();
+				showXp();	
+				showLevel();			
 			}
 			
-			public function showUserData():void
+			public function setBarSkeleton():void
+			{
+				mainHBox = new HBox();
+				mainHBox.width = (width - 60);
+				mainHBox.height = 50;
+				mainHBox.y = 20;
+				mainHBox.x = 30;
+				addChild(mainHBox);
+			}
+			
+			public function showLevel():void
+			{
+				var backCanvas:Canvas = createBackCanvas();
+				var grayCanvas:Canvas = createGrayCanvas();
+				grayCanvas.x = 4;
+				grayCanvas.y = 4;
+				grayCanvas.height = 27;
+				levelBox = new Text();
+				levelBox.text = myUser.level.rank.toString();
+				levelBox.x = 28;
+				levelBox.y = 1;
+				setFontStyle(levelBox, 18);
+				grayCanvas.addChild(levelBox);
+				backCanvas.addChild(grayCanvas);
+				mainHBox.addChild(backCanvas);
+			}
+			
+			public function showXp():void
+			{
+				var backCanvas:Canvas = createBackCanvas();
+				var grayCanvas:Canvas = createGrayCanvas();
+				grayCanvas.x = 4;
+				grayCanvas.y = 4;
+				grayCanvas.height = 27;
+				xpBox = new Text();
+				xpBox.text = myUser.xp.toString();
+				xpBox.x = 28;
+				xpBox.y = 1;
+				setFontStyle(xpBox, 18);
+				grayCanvas.addChild(xpBox);
+				backCanvas.addChild(grayCanvas);
+				mainHBox.addChild(backCanvas);				
+			}
+			
+			public function createBackCanvas():Canvas
 			{
 				var backCanvas:Canvas = new Canvas();
 				backCanvas.setStyle("backgroundColor", 0x000000);
 				backCanvas.setStyle("cornerRadius", 14);
 				backCanvas.setStyle("borderColor", 0x000000);
-				backCanvas.setStyle("borderStyle", "solid");
-				backCanvas.x = 28;
-				backCanvas.y = 16;
-				var creditsCanvas:Canvas = new Canvas();
-				creditsCanvas.setStyle("backgroundColor", 0x333333);
-				creditsCanvas.setStyle("cornerRadius", 10);
-				creditsCanvas.setStyle("borderColor", 0x000000);
-				creditsCanvas.setStyle("borderStyle", "solid");
+				backCanvas.setStyle("borderStyle", "solid");				
+				return backCanvas;				
+			}
+			
+			public function createGrayCanvas():Canvas
+			{
+				var grayCanvas:Canvas = new Canvas();
+				grayCanvas.clipContent = false;				
+				grayCanvas.setStyle("backgroundColor", 0x333333);
+				grayCanvas.setStyle("cornerRadius", 10);
+				grayCanvas.setStyle("borderColor", 0x000000);
+				grayCanvas.setStyle("borderStyle", "solid");	
+				return grayCanvas;			
+			}
+			
+			public function setFontStyle(textBox:Text, fontSize:int):void
+			{
+				textBox.setStyle("paddingLeft", 6);
+				textBox.setStyle("paddingRight", 6);
+				textBox.setStyle("fontFamily", "Museo-Slab-900");
+				textBox.setStyle("fontSize", fontSize);
+				textBox.setStyle("color", 0xffffff);				
+			}
+			
+			public function showCredits():void
+			{
+				var backCanvas:Canvas = createBackCanvas();
+				var creditsCanvas:Canvas = createGrayCanvas();
 				creditsCanvas.x = 4;
 				creditsCanvas.y = 4;
 				creditsCanvas.height = 27;
-				creditsCanvas.clipContent = false;
 				creditsBox = new Text();
 				creditsBox.id = 'myCredits';
 				creditsBox.text = myUser.credits.toString();
-				creditsBox.setStyle('fontSize', '11');
 				creditsBox.x = 28;
 				creditsBox.y = 1;
-				creditsBox.setStyle("paddingLeft", 6);
-				creditsBox.setStyle("paddingRight", 6);
-				creditsBox.setStyle("fontFamily", "Museo-Slab-900");
-				creditsBox.setStyle("fontSize", 18);
-				creditsBox.setStyle("color", 0xffffff);
+				setFontStyle(creditsBox, 18);
 				var coinIcon:CoinIcon = new CoinIcon();
 				coinIcon.scaleX = 0.4;
 				coinIcon.scaleY = 0.4;
@@ -95,7 +160,7 @@
 				creditsCanvas.addChild(uic);
 				creditsCanvas.addChild(creditsBox);
 				backCanvas.addChild(creditsCanvas);
-				addChild(backCanvas);
+				mainHBox.addChild(backCanvas);
 			}
 			
 			private function getFriendData():void

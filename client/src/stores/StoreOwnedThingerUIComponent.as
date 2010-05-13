@@ -16,8 +16,11 @@ package stores
 			super();
 			_storeOwnedThinger = sot;
 			_mc = sot.getMovieClip();
-			_mc.stop();
-			addChild(_mc);
+			if (_mc)
+			{
+				_mc.stop();
+				addChild(_mc);		
+			}
 		}
 		
 		public function set storeOwnedThinger(val:StoreOwnedThinger):void

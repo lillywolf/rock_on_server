@@ -66,6 +66,9 @@ package game
 			dwellingManager = new DwellingManager(essentialModelManager);
 			userManager = new UserManager(essentialModelManager);
 			levelManager = new LevelManager(essentialModelManager);
+			
+			userManager.levelManager = levelManager;
+			
 			if (preLoadedContent)
 			{
 				setPreLoadedContent(preLoadedContent);
@@ -77,6 +80,8 @@ package game
 			userManager.serverController = sc;
 			levelManager.serverController = sc;
 			dwellingManager.serverController = sc;
+			
+			storeManager.gdi = this;
 		}
 		
 		public function onInstanceToCreate(evt:ServerDataEvent):void

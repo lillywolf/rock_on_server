@@ -5,7 +5,7 @@ package models
 	public class Level extends EssentialModel
 	{
 		public var _id:int;
-		public var _order:int;
+		public var _rank:int;
 		public var _xp_diff:int;
 		public var _dwelling_expansion_x:int;
 		public var _dwelling_expansion_y:int;
@@ -21,7 +21,7 @@ package models
 		private function setProperties(params:Object):void
 		{
 			_id = params.id;
-			_order = params.order;
+			_rank = params.rank;
 			_xp_diff = params.xp_diff;
 			_dwelling_expansion_x = params.dwelling_expansion_x;
 			_dwelling_expansion_y = params.dwelling_expansion_y;
@@ -38,14 +38,14 @@ package models
 			return _id;
 		}
 				
-		public function set order(val:int):void
+		public function set rank(val:int):void
 		{
-			_order = val;
+			_rank = val;
 		}
 		
-		public function get order():int
+		public function get rank():int
 		{
-			return _order;
+			return _rank;
 		}	
 			
 		public function set xp_diff(val:int):void

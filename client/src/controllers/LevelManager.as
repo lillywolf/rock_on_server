@@ -3,6 +3,7 @@ package controllers
 	import flash.events.IEventDispatcher;
 	
 	import models.Level;
+	import models.User;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
@@ -20,6 +21,26 @@ package controllers
 		{
 			super(essentialModelManager, target);
 			_levels = essentialModelManager.levels;
+		}
+		
+		public function setLevelOnUser(myUser:User):Level
+		{
+			var lvl:Level = getLevelByOrder(myUser.level_id);
+			myUser.level = lvl;
+			_level = lvl;
+			return lvl;
+		}
+		
+		public function getLevelByOrder(rank:int):Level
+		{
+			for each (var lvl:Level in _levels)
+			{
+				if (lvl.rank == rank)
+				{
+					return lvl;
+				}
+			}
+			return null;
 		}
 		
 		public function set serverController(val:ServerController):void

@@ -180,6 +180,7 @@
 				if (evt.model == "user")
 				{
 					gdi.user.updateUserOnServerResponse(instance as User, evt.method);
+					gdi.levelManager.setLevelOnUser(gdi.user);
 				}
 			}
 			private function checkForUpdatedVenue(instance:OwnedDwelling, method:String):void

@@ -108,7 +108,7 @@ package rock_on
 		{
 			var btn:SpecialButton = evt.currentTarget as SpecialButton;
 			var booth:Booth = btn.booth;
-			var creditsToAdd:int = booth.getTotalInventory() * BOOTH_CREDITS_MULTIPLIER;
+//			var creditsToAdd:int = booth.getTotalInventory() * BOOTH_CREDITS_MULTIPLIER;
 			
 			_structureManager.serverController.sendRequest({id: booth.id}, "owned_structure", "add_booth_credits");
 		}
@@ -122,7 +122,7 @@ package rock_on
 				{
 					selectedBooth = booths.getItemAt(Math.floor(Math.random()*booths.length)) as Booth;			
 				}
-				while (selectedBooth == booth && selectedBooth.state != Booth.STOCKED_STATE);
+				while (selectedBooth == booth || selectedBooth.state != Booth.STOCKED_STATE);
 			}
 			return selectedBooth;	
 		}

@@ -221,7 +221,7 @@
 			
 			public function showStore():void
 			{
-				var store:Store = storeManager.getStoreByName("Booth Store");
+				var store:Store = storeManager.getStoreByName("Structure Store");
 				var uic:UIComponent = storeManager.getStoreUIComponent(store);
 				uic.width = 500;
 				uic.height = 400;
