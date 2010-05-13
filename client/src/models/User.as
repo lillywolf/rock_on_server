@@ -1,5 +1,7 @@
 package models
 {
+	import controllers.UserManager;
+	
 	import flash.events.IEventDispatcher;
 	
 	import mx.collections.ArrayCollection;
@@ -22,6 +24,8 @@ package models
 		public var _owned_structures:ArrayCollection;
 		
 		public var _last_showtime:String;
+		
+		public var _userManager:UserManager;
 		
 		public function User(params:Object=null, target:IEventDispatcher=null)
 		{
@@ -120,6 +124,10 @@ package models
 			{
 				_premium_credits = params.premium_credits;			
 			}
+			if (params.level_id)
+			{
+				_level_id = params.level_id;
+			}
 		}
 
 		public function set id(val:int):void
@@ -205,6 +213,7 @@ package models
 		public function set level_id(val:int):void
 		{
 			_level_id = val;
+			_userManager.levelManager.setLevelOnUser(this);
 		}
 		
 		public function get level_id():int
@@ -221,6 +230,16 @@ package models
 		{
 			return _xp;
 		}
+		
+		public function set userManager(val:UserManager):void
+		{
+			_userManager = val;
+		}
+		
+		public function get userManager():UserManager
+		{
+			return _userManager;
+		}	
 		
 	}
 }

@@ -17,6 +17,7 @@ package rock_on
 		public static const STOCKED_STATE:int = 1;
 		public static const UNSTOCKED_STATE:int = 2;
 		
+		public var collectionButton:SpecialButton;
 		public var queueCapacity:Number;
 		public var currentQueue:Number;
 		public var actualQueue:Number;
@@ -117,12 +118,9 @@ package rock_on
 		
 		public function endUnstockedState():void
 		{
-			for each (var btn:SpecialButton in Application.application)
+			if (collectionButton)
 			{
-				if (btn.booth == this)
-				{
-					Application.application.removeChild(btn);
-				}
+				Application.application.removeChild(collectionButton);
 			}
 		}
 		

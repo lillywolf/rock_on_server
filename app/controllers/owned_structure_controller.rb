@@ -78,20 +78,24 @@ class OwnedStructureController < ApplicationController
   
   def add_booth_credits
     array = Array.new
+    total_credits = 0
+    total_xp = 0
     owned_structure = OwnedStructure.find(params[:id])
     structure = Structure.find(owned_structure.structure_id)
     user = User.find(owned_structure.user_id)    
     if owned_structure.inventory_count == 0    
       BoothStructure.find_each(:conditions => ["structure_id = ?", structure.id]) do |booth_structure|
-        total_credits = booth_structure.item_price * booth_structure.inventory_capacity
+        total_credits += booth_structure.item_price * booth_structure.inventory_capacity
+        total_xp += booth_structure.item_price * booth_structure.inventory_capacity * booth_structure.getBoothCreditsMultiplier
         owned_structure.inventory_count = booth_structure.inventory_capacity
         owned_structure.save
         owned_structure.add_hash(array, "add_booth_credits", true)
-        user.add_credits(total_credits)
-        user.add_xp(total_credits * booth_structure.getBoothCreditsMultiplier)      
       end
+      user.add_credits(total_credits)
+      user.add_xp(total_xp)
+      logger.debug(user.level_id.to_s)
+      user.add_hash(array, "add_booth_credits", true)
     end
-    user.add_hash(array, "add_booth_credits", true)
     render :json => array.to_json    
   end 
   

@@ -36,23 +36,13 @@ package controllers
 		public function set user(val:User):void
 		{
 			_user = val;
-			setLevel();
+			_user.userManager = this;
+			_levelManager.setLevelOnUser(_user);
 		}	
 		
 		public function get user():User
 		{
 			return _user;
-		}
-		
-		public function setLevel():void
-		{
-			for each (var lvl:Level in levelManager.levels)
-			{
-				if (lvl.id == _user.level_id)
-				{
-					_user.level = lvl;
-				}
-			}
 		}
 		
 		public function set levelManager(val:LevelManager):void

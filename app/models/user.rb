@@ -18,15 +18,13 @@ class User < ActiveRecord::Base
   end
   
   def update_level
-    array = Array.new
     total_xp_diff = 0
     levels = Level.all(:order => "rank ASC")
     levels.each do |level|
       total_xp_diff += level.xp_diff
-      logger.debug(total_xp_diff.to_s)
       if total_xp_diff >= self.xp
-        logger.debug(level.rank.to_s)
         self.level_id = level.id
+        logger.debug(self.level_id)
         self.save
         break
       end
@@ -35,6 +33,7 @@ class User < ActiveRecord::Base
   
   def add_hash(array, method, already_loaded)
     hash = Hash.new
+    logger.debug(self.level_id.to_s)
     hash["instance"] = self
     hash["already_loaded"] = already_loaded
     hash["model"] = "user"

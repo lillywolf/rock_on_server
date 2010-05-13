@@ -97,6 +97,7 @@ package rock_on
 		{	
 			var btn:SpecialButton = new SpecialButton();
 			btn.booth = booth;
+			booth.collectionButton = btn;
 			btn.addEventListener(MouseEvent.CLICK, onCollectionButtonClicked);
 			var actualCoords:Point = World.worldToActualCoords(new Point3D(booth.x, booth.y, booth.z));
 			btn.x = actualCoords.x + _myWorld.x;
