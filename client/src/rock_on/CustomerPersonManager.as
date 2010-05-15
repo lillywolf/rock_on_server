@@ -235,6 +235,14 @@ package rock_on
 			{
 				throw new Error("how the hell did this happen?");
 			}
+		}
+		
+		public function removeAllCustomers():void
+		{
+			for each (var cp:CustomerPerson in this)
+			{
+				remove(cp);
+			}
 		}		
 		
 		private function onDirectionChanged(evt:WorldEvent):void

@@ -25,12 +25,12 @@ package models
 		public function OwnedStructure(params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
-			_id = params.id;
 			updateProperties(params);
 		}
 		
 		public function updateProperties(params:Object):void
 		{
+			_id = params.id;
 			_structure_id = params.structure_id;
 			_x = params.x;
 			_y = params.y;

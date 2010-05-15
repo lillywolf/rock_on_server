@@ -43,7 +43,14 @@ class OwnedStructure < ActiveRecord::Base
     if self.inventory_count < INVENTORY_ERROR_MARGIN
       self.inventory_count = 0
     end    
-  end  
+  end
+  
+  def save_new_placement(x, y, z)
+    self.x = x.to_i
+    self.y = y.to_i
+    self.z = z.to_i
+    self.save
+  end    
   
   def do_type_specific_updates
     structure = Structure.find(self.structure_id)
@@ -54,6 +61,18 @@ class OwnedStructure < ActiveRecord::Base
       
     end        
   end
+  
+  def do_type_specific_creation
+    structure = Structure.find(self.structure_id)
+    if structure.structure_type == "Booth"
+      BoothStructure.find_each(:conditions => ["structure_id = ?", structure.id]) do |booth_structure|
+        self.inventory_count = booth_structure.inventory_capacity
+      end  
+      self.inventory_updated_at = Time.new
+    elsif structure.structure_type == "ListeningStation"
+      
+    end    
+  end  
   
   def add_hash(array, method, already_loaded)
     hash = Hash.new

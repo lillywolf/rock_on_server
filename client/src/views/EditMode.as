@@ -1,8 +1,12 @@
 package views
 {
+	import controllers.StructureManager;
+	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.ColorTransform;
+	
+	import game.ImposterOwnedStructure;
 	
 	import models.OwnedStructure;
 	
@@ -14,22 +18,24 @@ package views
 	import world.Point;
 	import world.Point3D;
 	import world.World;
-	import world.WorldGrid;
 
 	public class EditMode extends UIComponent
 	{
 		public var _world:World;
+		public var _editView:EditView;
 		public var currentAsset:ActiveAsset;
-		public var activated:Boolean = false;
+		public var locked:Boolean = false;
+		public var _structureManager:StructureManager;
 		public var flexiUIC:FlexibleUIComponent;
 		
 		public static const INVALID_COLOR:ColorTransform = new ColorTransform(1, 0.25, 0.25);
 		public static const NORMAL_COLOR:ColorTransform = new ColorTransform(1, 1, 1);
 		
-		public function EditMode(world:World)
+		public function EditMode(world:World, editView:EditView)
 		{
 			super();
 			_world = world;
+			_editView = editView;
 			_world.addEventListener(MouseEvent.CLICK, onWorldClicked);
 
 			enableMouseDetection();
@@ -66,30 +72,75 @@ package views
 			flexiUIC.height = height;
 		}
 		
-		private function onWorldClicked(evt:MouseEvent):void
+		public function createPurchaseCopy(thinger:Object):ActiveAsset
 		{
-			if (evt.target.parent is ActiveAsset)
+			if (thinger is OwnedStructure)
 			{
-				if ((evt.target.parent as ActiveAsset).thinger is OwnedStructure && !activated)
+				var asset:ActiveAsset = _structureManager.generateAssetFromOwnedStructure(thinger as OwnedStructure);
+				var currentPoint:Point = new Point(_world.mouseX, _world.mouseY);
+				_world.addStaticAsset(asset, World.actualToWorldCoords(currentPoint));
+				return asset;
+			}
+			return null;
+		}
+		
+		public function evaluateClickedAsset(asset:Object):void
+		{
+			if (asset is ActiveAsset)
+			{
+				var assetParent:ActiveAsset = asset as ActiveAsset;
+				if (assetParent.thinger is OwnedStructure && (assetParent.thinger as OwnedStructure).editing == false)
 				{
-					activateMoveableStructure(evt.target.parent as ActiveAsset);
-					activated = true;
+					activateMoveableStructure(assetParent);
+					locked = true;
+					(assetParent.thinger as OwnedStructure).editing = true;
 				}
-				else if (activated)
+				else if (assetParent.thinger is OwnedStructure)
 				{
 					deactivateMoveableStructure();
-					activated = false;
+					locked = false;
+					(assetParent.thinger as OwnedStructure).editing = false;
+					if (assetParent.thinger is ImposterOwnedStructure)
+					{
+						saveNewOwnedStructure(assetParent.thinger as OwnedStructure, assetParent);
+					}
 				}
-			}
-			else if (evt.target.parent is WorldGrid)
+			}			
+		}
+		
+		public function deactivateStructureWithoutSaving():void
+		{
+			if (currentAsset)
 			{
-				deactivateMoveableStructure();
-				activated = false;
+				var os:OwnedStructure = currentAsset.thinger as OwnedStructure;
+				os.editing = false;
+				_world.removeAsset(currentAsset);			
 			}
+			if (_world.hasEventListener(MouseEvent.MOUSE_MOVE))
+			{
+				_world.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);			
+			}			
+		}
+		
+		public function saveNewOwnedStructure(os:OwnedStructure, asset:ActiveAsset):void
+		{
+			_structureManager.serverController.sendRequest({user_id: _editView.userManager.user.id, owned_dwelling_id: _editView.venueManager.venue.id, structure_id: os.structure.id, x: asset.worldCoords.x, y: asset.worldCoords.y, z: asset.worldCoords.z}, "owned_structure", "create_new");
+		}
+		
+		public function onWorldClicked(evt:MouseEvent):void
+		{
+			evaluateClickedAsset(evt.target.parent);
 		}		
 		
 		public function activateMoveableStructure(asset:ActiveAsset):void
-		{			
+		{	
+//			if (!asset.lastWorldPoint)
+//			{
+//				var currentPoint:Point = new Point(_world.mouseX, _world.mouseY);
+//				asset.realCoords = currentPoint;
+//				asset.worldCoords = World.actualToWorldCoords(currentPoint);			
+//			}
+					
 			_world.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			currentAsset = asset;
 			currentAsset.speed = 1;
@@ -97,7 +148,10 @@ package views
 		
 		public function deactivateMoveableStructure():void
 		{
-			saveCurrentPlacement();
+			if (!(currentAsset.thinger is ImposterOwnedStructure))
+			{
+				saveCurrentPlacement();			
+			}
 			if (_world.hasEventListener(MouseEvent.MOUSE_MOVE))
 			{
 				_world.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);			
@@ -167,6 +221,25 @@ package views
 				destination.z = _world.tilesDeep;
 			}
 			return destination;			
+		}
+		
+		public function cancelEditActivities():void
+		{
+			if (locked)
+			{
+				deactivateStructureWithoutSaving();
+				locked = false;
+			}
+		}
+		
+		public function set structureManager(val:StructureManager):void
+		{
+			_structureManager = val;
+		}
+		
+		public function get structureManager():StructureManager
+		{
+			return _structureManager;
 		}
 		
 	}

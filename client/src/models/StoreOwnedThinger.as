@@ -2,6 +2,7 @@ package models
 {
 	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
+	import flash.utils.getQualifiedClassName;
 	
 	public class StoreOwnedThinger extends EssentialModel
 	{
@@ -35,18 +36,22 @@ package models
 		
 		public function getMovieClip():MovieClip
 		{
+			var className:String;
+			var klass:Class;
 			var newMC:MovieClip = new MovieClip();
+			
 			if (layerable)
 			{
-				newMC = layerable.mc;
-				return newMC;
+				className = flash.utils.getQualifiedClassName(layerable.mc);
 			}
 			else if (structure)
 			{
-				newMC = structure.mc;
-				return newMC;
+				className = flash.utils.getQualifiedClassName(structure.mc);
 			}
-			return null;
+			
+			klass = EssentialModelReference.getClassCopy(className);
+			newMC = new klass();
+			return newMC;
 		}
 
 		public function set id(val:int):void

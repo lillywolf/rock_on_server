@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="100" clipContent="false" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import models.Store;
 			import mx.containers.HBox;
 			import mx.controls.Button;
 			import mx.controls.Label;
@@ -50,7 +51,8 @@
 				createInventoryCanvas();
 				addTabs();			
 					
-				addEventListener('facebookDataLoaded', onFriendDataLoaded);
+				addEventListener("facebookDataLoaded", onFriendDataLoaded);
+				addEventListener(MouseEvent.CLICK, onBottomBarClicked);
 			}		
 		
 			public function onUserLoaded():void
@@ -138,7 +140,7 @@
 			
 			private function onStoreButtonClicked(evt:MouseEvent):void
 			{
-				switchToWorldViewAndShowStore();
+				showStore();
 			}
 			
 			private function switchToEditView():void
@@ -153,11 +155,14 @@
 				worldView.showBandMembers();
 			}
 			
-			private function switchToWorldViewAndShowStore():void
+			public function showStore():void
 			{
-				Application.application.currentState = "worldView";
-				worldView.showStore();
-			}			
+				var store:Store = storeManager.getStoreByName("Structure Store");
+				var uic:UIComponent = storeManager.getStoreUIComponent(store);
+				uic.x = WorldView.WINDOW_WIDTH/2 - uic.width/2;
+				uic.y = WorldView.WINDOW_HEIGHT/2 - uic.height/2;
+				parentApplication.addChild(uic);
+			}						
 			
 			private function onThingerPurchased(evt:StoreEvent):void
 			{
@@ -235,6 +240,14 @@
 			private function onUserRendererClicked(evt:MouseEvent):void
 			{
 				Application.application.currentState = "worldView";
+			}
+			
+			private function onBottomBarClicked(evt:MouseEvent):void
+			{
+				if (Application.application.currentState == "editView")
+				{
+					editView.editMode.cancelEditActivities();				
+				}
 			}
 												
 		]]>

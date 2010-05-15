@@ -21,7 +21,7 @@
 		</mx:State>
 		<mx:State name="editView" basedOn="topBar">
 			<mx:AddChild>
-				<views:EditView id="editView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}" venueManager="{worldView.venueManager}"/>
+				<views:EditView id="editView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}" venueManager="{worldView.venueManager}" dwellingManager="{gdi.dwellingManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="twoDimensional">
@@ -32,6 +32,10 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import mx.events.StateChangeEvent;
+			import game.ImposterOwnedStructure;
+			import world.ActiveAsset;
+			import stores.StoreEvent;
 			import models.User;
 			import models.OwnedStructure;
 			import models.OwnedDwelling;
@@ -77,6 +81,7 @@
 			{
 				facebookInterface = new FacebookFunTime();
 				currentState = 'worldView';
+				gdi.storeManager.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
 			}
 			public function onFacebookUserLoaded(uid:int, evt:FacebookEvent):void
 			{
@@ -190,6 +195,36 @@
 					worldView.venueManager.onVenueUpdated(method, instance);
 				}
 			}
+			private function onThingerPurchased(evt:StoreEvent):void
+			{
+				if (evt.thinger.structure)
+				{
+					var os:OwnedStructure = new ImposterOwnedStructure(evt.thinger);
+					editView.pausedForStateCompletion = os;
+					switchToEditView();
+					if (editView.editMode)
+					{
+						var asset:ActiveAsset = editView.editMode.createPurchaseCopy(os);
+						editView.pausedForStateCompletion = null;					
+						editView.editMode.evaluateClickedAsset(asset);
+					}
+				}
+			}
+			public function switchToEditView():void
+			{
+				currentState = "editView";
+				editView.addEventListener("editViewCreated", onEditViewCreated);
+			}
+			private function onEditViewCreated(evt:DynamicEvent):void
+			{
+				if (editView.pausedForStateCompletion)
+				{
+					var asset:ActiveAsset = editView.editMode.createPurchaseCopy(editView.pausedForStateCompletion);
+					editView.pausedForStateCompletion = null;					
+					editView.editMode.evaluateClickedAsset(asset);					
+				}
+			}
+			
 		]]>
 	</mx:Script>
 </mx:Application>

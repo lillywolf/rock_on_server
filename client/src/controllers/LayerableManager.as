@@ -2,7 +2,6 @@ package controllers
 {
 	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
-	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.getQualifiedClassName;
 	
@@ -84,27 +83,29 @@ package controllers
 			return _owned_layerables;
 		}
 		
-		public function formatMovieClipByDimensions(mc:MovieClip, dimensionX:int, dimensionY:int):UIComponent
+		public static function formatMovieClipByDimensions(mc:MovieClip, dimensionX:int, dimensionY:int):UIComponent
 		{
 			var ratio:Number = mc.width/mc.height;
 			var uic:UIComponent = new UIComponent();
 			uic.width = dimensionX;
 			uic.height = dimensionY;
 			mc.stop();
+			var toScale:Number;
 			var rect:Rectangle;
 			
 			if (mc.width > mc.height)
 			{
-				mc.width = dimensionX;
-				mc.height = dimensionX * 1/ratio;
-				rect = mc.getBounds(uic);
+				toScale = dimensionX / mc.width;
 			}
 			else 
 			{
-				mc.height = dimensionY;
-				mc.width = dimensionY * ratio;
-				rect = mc.getBounds(uic);	
+				toScale = dimensionY / mc.height;
 			}
+			
+			mc.scaleX = toScale;
+			mc.scaleY = toScale;
+			rect = mc.getBounds(uic);
+			
 			mc.y = -(rect.top) + (dimensionY - mc.height)/2; 							
 			mc.x = -(rect.left) + (dimensionX - mc.width)/2;			
 			uic.addChild(mc);

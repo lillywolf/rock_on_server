@@ -58,6 +58,8 @@
 			[Bindable] public var myUser:User;
 			
 			public static const PERSON_SPEED:Number = 0.07;
+			public static const WINDOW_WIDTH:int = 760;
+			public static const WINDOW_HEIGHT:int = 610;
 			
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
@@ -96,8 +98,8 @@
 			{
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
 				myWorld = new World(800, 800, 40);				
-				addChild(myWorld);	
-				
+				addChild(myWorld);
+								
 				myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);
 								
 				customerPersonManager = new CustomerPersonManager();
@@ -200,6 +202,13 @@
 						Alert.show("Not a Groupie!");
 					}
 				}
+				else
+				{
+					if (editMode.locked == false)
+					{
+						editMode.onWorldClicked(evt);					
+					}
+				}
 			}
 			
 			private function onWorldThingerPurchased(evt:UserEvent):void
@@ -217,17 +226,6 @@
 				stageManager = new StageManager(structureManager, myWorld);
 				stageManager.setInMotion();
 				concertStage = stageManager.concertStage;
-			}
-			
-			public function showStore():void
-			{
-				var store:Store = storeManager.getStoreByName("Structure Store");
-				var uic:UIComponent = storeManager.getStoreUIComponent(store);
-				uic.width = 500;
-				uic.height = 400;
-				uic.x = this.width - uic.width/2;
-				uic.y = this.height - uic.height/2;
-				parentApplication.addChild(uic);
 			}
 			
 			public function showGroupies():void

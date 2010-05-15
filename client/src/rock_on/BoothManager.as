@@ -75,6 +75,11 @@ package rock_on
 			if (method == "add_booth_credits")
 			{
 				selectedBooth.advanceState(Booth.STOCKED_STATE);
+			}
+			
+			if (method == "save_placement")
+			{
+				booth.updateProperties(os);
 			}			
 		}
 		

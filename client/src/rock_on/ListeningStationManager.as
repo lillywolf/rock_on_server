@@ -36,11 +36,11 @@ package rock_on
 			super(target);
 			_myWorld = myWorld;		
 			_structureManager = structureManager;
+			listeningStations = new ArrayCollection();
 		}
 		
 		public function setInMotion():void
 		{
-			listeningStations = new ArrayCollection();
 			passerbyManager = new PasserbyManager(this, _myWorld);
 			showListeningStations();
 			showPassersby();			

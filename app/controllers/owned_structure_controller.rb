@@ -16,30 +16,30 @@ class OwnedStructureController < ApplicationController
   end
   
   def save_placement
-    @array = Array.new
+    array = Array.new
     owned_structure = OwnedStructure.find(params[:id])
-    owned_structure.x = params[:x]
-    owned_structure.y = params[:y]
-    owned_structure.z = params[:z]
+    owned_structure.save_new_placement(params[:x], params[:y], params[:z])
     owned_structure.save
-    hash = Hash.new
-    hash["instance"] = owned_structure
-    hash["already_loaded"] = true
-    @array.push hash
-    render :json => @array.to_json
+    owned_structure.add_hash(array, "save_placement", true)
+    render :json => array.to_json
   end  
   
   def create_new
     @array = Array.new
     os = OwnedStructure.create();
-    os.structure_id = params[:id]
+    os.structure_id = params[:structure_id]
     os.owned_dwelling_id = params[:owned_dwelling_id]
     os.user_id = params[:user_id]
+    os.save_new_placement(params[:x], params[:y], params[:z])
+    os.in_use = true
+    os.do_type_specific_creation
     os.save
     hash = Hash.new
     hash["instance"] = os
     hash["belongs_to"] = ["user", "structure"]
     hash["belongs_to_id"] = [os.user_id, os.structure_id]
+    hash["method"] = "create_new"
+    hash["model"] = "owned_structure"
     @array.push hash
     render :json => @array.to_json
   end 

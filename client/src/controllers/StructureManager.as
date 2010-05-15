@@ -16,6 +16,8 @@ package controllers
 	import server.ServerController;
 	
 	import views.WorldView;
+	
+	import world.ActiveAsset;
 
 	public class StructureManager extends Manager
 	{
@@ -137,6 +139,10 @@ package controllers
 		
 		public function updateOwnedStructureOnServerResponse(osCopy:OwnedStructure, method:String, worldView:WorldView):void
 		{
+			if (method == "create_new")
+			{
+				
+			}
 			for each (var os:OwnedStructure in owned_structures)
 			{
 				if (os.id == osCopy.id)
@@ -156,6 +162,13 @@ package controllers
 		private function updateBoothOnServerResponse(os:OwnedStructure, method:String, boothManager:BoothManager):void
 		{
 			boothManager.updateBoothOnServerResponse(os, method);		
+		}
+		
+		public function generateAssetFromOwnedStructure(os:OwnedStructure):ActiveAsset
+		{
+			var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
+			asset.thinger = os;
+			return asset;
 		}
 		
 		private function updateListeningStationOnServerResponse(os:OwnedStructure, method:String, listeningStationManager:ListeningStationManager):void
