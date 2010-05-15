@@ -15,6 +15,8 @@ package controllers
 	
 	import server.ServerController;
 	
+	import stores.StoreEvent;
+	
 	import views.WorldView;
 	
 	import world.ActiveAsset;
@@ -139,24 +141,37 @@ package controllers
 		
 		public function updateOwnedStructureOnServerResponse(osCopy:OwnedStructure, method:String, worldView:WorldView):void
 		{
-			if (method == "create_new")
-			{
-				
-			}
 			for each (var os:OwnedStructure in owned_structures)
 			{
 				if (os.id == osCopy.id)
 				{
-					if (os.structure.structure_type == "Booth")
-					{
-						updateBoothOnServerResponse(os, method, worldView.boothManager);
-					}
-					else if (os.structure.structure_type == "ListeningStation")
-					{
-						updateListeningStationOnServerResponse(os, method, worldView.listeningStationManager);
-					}
+					var osReference:OwnedStructure = os;
 				}
-			}			
+			}
+			if (method == "sell")
+			{
+				removeOwnedStructureFromSystem(osReference);
+			}
+//			else if (method == "create_new")
+//			{
+//				
+//			}
+			else if (os.structure.structure_type == "Booth")
+			{
+				updateBoothOnServerResponse(os, method, worldView.boothManager);
+			}
+			else if (os.structure.structure_type == "ListeningStation")
+			{
+				updateListeningStationOnServerResponse(os, method, worldView.listeningStationManager);
+			}						
+		}
+		
+		private function removeOwnedStructureFromSystem(os:OwnedStructure):void
+		{
+			var index:int = owned_structures.getItemIndex(os);
+			owned_structures.removeItemAt(index);
+			var evt:StoreEvent = new StoreEvent(StoreEvent.THINGER_SOLD, os, true, true);
+			dispatchEvent(evt);
 		}
 		
 		private function updateBoothOnServerResponse(os:OwnedStructure, method:String, boothManager:BoothManager):void

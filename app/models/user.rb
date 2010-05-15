@@ -6,6 +6,8 @@ class User < ActiveRecord::Base
   has_many :owned_dwellings
   has_many :owned_structures
   
+  SELLBACK_FRACTION = 0.5
+  
   def add_credits(to_add)
     self.credits += to_add
     self.save    

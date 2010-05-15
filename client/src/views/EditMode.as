@@ -15,6 +15,8 @@ package views
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
 	
+	import stores.StoreEvent;
+	
 	import world.ActiveAsset;
 	import world.Point;
 	import world.Point3D;
@@ -85,6 +87,11 @@ package views
 			return null;
 		}
 		
+		private function onThingerSold(evt:StoreEvent):void
+		{
+			_myWorld.assetRenderer.removeOwnedThinger(evt.thinger);
+		}
+		
 		public function evaluateClickedAsset(asset:Object):void
 		{
 			if (asset is ActiveAsset)
@@ -142,6 +149,7 @@ package views
 		public function sellButtonClicked():void
 		{
 			var os:OwnedStructure = currentAsset.thinger as OwnedStructure;
+			_structureManager.serverController.sendRequest({id: os.id}, "owned_structure", "sell");
 		}
 		
 		public function moveButtonClicked():void
@@ -260,6 +268,7 @@ package views
 		public function set structureManager(val:StructureManager):void
 		{
 			_structureManager = val;
+			_structureManager.addEventListener(StoreEvent.THINGER_SOLD, onThingerSold);			
 		}
 		
 		public function get structureManager():StructureManager

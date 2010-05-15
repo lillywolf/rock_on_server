@@ -190,6 +190,18 @@ package world
 
 		}
 		
+		public function removeOwnedThinger(thinger:Object):void
+		{
+			for each (var asset:ActiveAsset in unsortedAssets)
+			{
+				if (asset.thinger == thinger)
+				{
+					var index:int = unsortedAssets.getItemIndex(asset);
+					unsortedAssets.removeItemAt(index);
+				}
+			}
+		}
+		
 		private function removeExistingAssets():void
 		{
 			for (var i:int = 0; i<sortedAssets.length; i++)

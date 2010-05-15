@@ -5,6 +5,7 @@ class OwnedStructure < ActiveRecord::Base
   
   INVENTORY_ERROR_MARGIN = 10
   STATION_TIME_BUFFER = -30
+  SALE_XP_MULTIPLIER = 2
   
   def validate_usage_complete(array)
     @time_elapsed = get_time_elapsed(self.created_at)

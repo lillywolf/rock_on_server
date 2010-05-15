@@ -4,7 +4,8 @@ package stores
 
 	public class StoreEvent extends Event
 	{
-		public static const THINGER_PURCHASED:String = 'StoreEvent:ThingerPurchased';
+		public static const THINGER_PURCHASED:String = "StoreEvent:ThingerPurchased";
+		public static const THINGER_SOLD:String = "StoreEvent:ThingerSold";
 		public var _thinger:Object;
 		
 		public function StoreEvent(type:String, thinger:Object=null, bubbles:Boolean=false, cancelable:Boolean=false)

@@ -107,8 +107,33 @@ class OwnedStructureController < ApplicationController
     user.add_credts(structure.capacity * structure.getListenerCredits)
     user.add_xp(structure.capacity * structure.getListenerCredits * structure.getStationCreditsMultiplier)
     user.save
-    user.add_hash
+    
+    # Need to update this guy -- include xp?
+    user.add_hash(array, "add_credits", true)
     render :json => array.to_json        
   end
+  
+  def sell
+    array = Array.new
+    @price = 0
+    owned_structure = OwnedStructure.find(params[:id])
+    structure = Structure.find(owned_structure.structure_id)
+
+    StoreOwnedThinger.find_each(:conditions => ["thinger_id = ? and thinger_type = ?", structure.id, "structure"]) do |store_owned_thinger|
+      @price = store_owned_thinger.price
+    end  
+
+    user = User.find(owned_structure.user_id)
+    user.add_credits(User::SELLBACK_FRACTION * @price)
+    user.add_xp(OwnedStructure::SALE_XP_MULTIPLIER * @price)
+    user.save
+    user.add_hash(array, "add_credits", true)
+
+    owned_structure.destroy
+    hash = Hash.new
+    owned_structure.add_hash(array, "sell", true)
+
+    render :json => array.to_json            
+  end  
     
 end
