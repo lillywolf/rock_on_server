@@ -10,6 +10,7 @@ package views
 	
 	import models.OwnedStructure;
 	
+	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
@@ -21,7 +22,7 @@ package views
 
 	public class EditMode extends UIComponent
 	{
-		public var _world:World;
+		public var _myWorld:World;
 		public var _editView:EditView;
 		public var currentAsset:ActiveAsset;
 		public var locked:Boolean = false;
@@ -34,9 +35,9 @@ package views
 		public function EditMode(world:World, editView:EditView)
 		{
 			super();
-			_world = world;
+			_myWorld = world;
 			_editView = editView;
-			_world.addEventListener(MouseEvent.CLICK, onWorldClicked);
+			_myWorld.addEventListener(MouseEvent.CLICK, onWorldClicked);
 
 			enableMouseDetection();
 
@@ -53,9 +54,9 @@ package views
 		
 		private function enableMouseDetection():void
 		{
-			_world.graphics.beginFill(0x000000, 0.2);
-			_world.graphics.drawRect(_world.x, -(_world.y), Application.application.width, Application.application.height);
-			_world.graphics.endFill();			
+			_myWorld.graphics.beginFill(0x000000, 0.2);
+			_myWorld.graphics.drawRect(_myWorld.x, -(_myWorld.y), Application.application.width, Application.application.height);
+			_myWorld.graphics.endFill();			
 		}
 		
 		private function addFlexibleUIC():void
@@ -77,8 +78,8 @@ package views
 			if (thinger is OwnedStructure)
 			{
 				var asset:ActiveAsset = _structureManager.generateAssetFromOwnedStructure(thinger as OwnedStructure);
-				var currentPoint:Point = new Point(_world.mouseX, _world.mouseY);
-				_world.addStaticAsset(asset, World.actualToWorldCoords(currentPoint));
+				var currentPoint:Point = new Point(_myWorld.mouseX, _myWorld.mouseY);
+				_myWorld.addStaticAsset(asset, World.actualToWorldCoords(currentPoint));
 				return asset;
 			}
 			return null;
@@ -114,11 +115,11 @@ package views
 			{
 				var os:OwnedStructure = currentAsset.thinger as OwnedStructure;
 				os.editing = false;
-				_world.removeAsset(currentAsset);			
+				_myWorld.removeAsset(currentAsset);			
 			}
-			if (_world.hasEventListener(MouseEvent.MOUSE_MOVE))
+			if (_myWorld.hasEventListener(MouseEvent.MOUSE_MOVE))
 			{
-				_world.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);			
+				_myWorld.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);			
 			}			
 		}
 		
@@ -132,18 +133,27 @@ package views
 			evaluateClickedAsset(evt.target.parent);
 		}		
 		
+		public function showOwnedStructureEditOptions():void
+		{
+			var osEditOptions:OwnedStructureEditOptions = new OwnedStructureEditOptions(currentAsset, _myWorld, this);
+			Application.application.addChild(osEditOptions);
+		}
+		
+		public function sellButtonClicked():void
+		{
+			var os:OwnedStructure = currentAsset.thinger as OwnedStructure;
+		}
+		
+		public function moveButtonClicked():void
+		{
+			_myWorld.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+			currentAsset.speed = 1;			
+		}
+		
 		public function activateMoveableStructure(asset:ActiveAsset):void
-		{	
-//			if (!asset.lastWorldPoint)
-//			{
-//				var currentPoint:Point = new Point(_world.mouseX, _world.mouseY);
-//				asset.realCoords = currentPoint;
-//				asset.worldCoords = World.actualToWorldCoords(currentPoint);			
-//			}
-					
-			_world.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+		{						
 			currentAsset = asset;
-			currentAsset.speed = 1;
+			showOwnedStructureEditOptions();
 		}
 		
 		public function deactivateMoveableStructure():void
@@ -152,9 +162,9 @@ package views
 			{
 				saveCurrentPlacement();			
 			}
-			if (_world.hasEventListener(MouseEvent.MOUSE_MOVE))
+			if (_myWorld.hasEventListener(MouseEvent.MOUSE_MOVE))
 			{
-				_world.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);			
+				_myWorld.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);			
 			}
 		}
 		
@@ -170,13 +180,13 @@ package views
 		
 		private function onMouseMove(evt:Event):void
 		{
-			var currentPoint:Point = new Point(_world.mouseX, _world.mouseY);
+			var currentPoint:Point = new Point(_myWorld.mouseX, _myWorld.mouseY);
 			var worldDestination:Point3D = World.actualToWorldCoords(currentPoint);
 			worldDestination.x = Math.round(worldDestination.x);
 			worldDestination.z = Math.round(worldDestination.z);
 			
 //			worldDestination = keepPointInBounds(worldDestination);
-			_world.moveAssetTo(currentAsset, worldDestination, false);
+			_myWorld.moveAssetTo(currentAsset, worldDestination, false);
 			
 			if (isFurnitureOutOfBounds() || isFurnitureOnInvalidPoint())
 			{
@@ -190,7 +200,10 @@ package views
 		
 		public function isFurnitureOutOfBounds():Boolean
 		{
-			if (currentAsset.worldCoords.x > _world.tilesWide || currentAsset.worldCoords.x < 0 || currentAsset.worldCoords.z > _world.tilesDeep || currentAsset.worldCoords.z < 0)
+			if (currentAsset.worldCoords.x + (currentAsset.thinger as OwnedStructure).structure.width / 2 > _myWorld.tilesWide || 
+			currentAsset.worldCoords.x - (currentAsset.thinger as OwnedStructure).structure.width / 2 < 0 || 
+			currentAsset.worldCoords.z + (currentAsset.thinger as OwnedStructure).structure.depth / 2 > _myWorld.tilesDeep || 
+			currentAsset.worldCoords.z - (currentAsset.thinger as OwnedStructure).structure.depth / 2 < 0)
 			{
 				return true;
 			}
@@ -198,7 +211,19 @@ package views
 		}
 		
 		public function isFurnitureOnInvalidPoint():Boolean
-		{
+		{			
+			var exemptStructures:ArrayCollection = new ArrayCollection();
+			exemptStructures.addItem(currentAsset.thinger as OwnedStructure);
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.establishStructureOccupiedSpaces(exemptStructures);
+			var structureSpaces:ArrayCollection = new ArrayCollection();
+			structureSpaces = _myWorld.pathFinder.getPoint3DForMovingStructure(currentAsset, currentAsset.thinger as OwnedStructure, structureSpaces);
+			for each (var pt3D:Point3D in structureSpaces)
+			{
+				if (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(pt3D)))
+				{
+					return true;
+				}
+			}
 			return false;
 		}
 		
@@ -208,17 +233,17 @@ package views
 			{
 				destination.x = 0;
 			}
-			else if (destination.x > _world.tilesWide)
+			else if (destination.x > _myWorld.tilesWide)
 			{
-				destination.x = _world.tilesWide;
+				destination.x = _myWorld.tilesWide;
 			}
 			if (destination.z < 0)
 			{
 				destination.z = 0;
 			}
-			else if (destination.z > _world.tilesDeep)
+			else if (destination.z > _myWorld.tilesDeep)
 			{
-				destination.z = _world.tilesDeep;
+				destination.z = _myWorld.tilesDeep;
 			}
 			return destination;			
 		}

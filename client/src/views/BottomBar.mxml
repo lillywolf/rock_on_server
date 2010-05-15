@@ -130,7 +130,14 @@
 			
 			private function onEditButtonClicked(evt:MouseEvent):void
 			{
-				switchToEditView();
+				if (Application.application.currentState != "editView")
+				{
+					switchToEditView();				
+				}
+				else
+				{
+					switchToWorldView();
+				}
 			}
 			
 			private function onMusicButtonClicked(evt:MouseEvent):void
@@ -151,8 +158,8 @@
 			public function switchToWorldView():void
 			{
 				Application.application.currentState = "worldView";
-				worldView.showGroupies();
-				worldView.showBandMembers();
+//				worldView.showGroupies();
+//				worldView.showBandMembers();
 			}
 			
 			public function showStore():void
@@ -246,7 +253,10 @@
 			{
 				if (Application.application.currentState == "editView")
 				{
-					editView.editMode.cancelEditActivities();				
+					if (editView.editMode)
+					{
+						editView.editMode.cancelEditActivities();									
+					}
 				}
 			}
 												

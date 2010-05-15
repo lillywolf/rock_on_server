@@ -1,6 +1,5 @@
 package controllers
 {
-	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	
@@ -71,7 +70,15 @@ package controllers
 			{
 				sot = (evt.target as StoreOwnedThingerUIComponent).storeOwnedThinger;
 			}
-			else if (evt.target is MovieClip)
+			else if (evt.target.parent is StoreOwnedThingerUIComponent)
+			{
+				sot = (evt.target.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
+			}
+			else if (evt.target.parent.parent is StoreOwnedThingerUIComponent)
+			{
+				sot = (evt.target.parent.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
+			}
+			else if (evt.target.parent.parent.parent is StoreOwnedThingerUIComponent)
 			{
 				sot = (evt.target.parent.parent.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
 			}

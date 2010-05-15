@@ -294,7 +294,7 @@ package world
 			return structureSpaces;
 		}
 		
-		private function getPoint3DForStructure(os:OwnedStructure, structureSpaces:ArrayCollection):ArrayCollection
+		public function getPoint3DForStructure(os:OwnedStructure, structureSpaces:ArrayCollection):ArrayCollection
 		{
 			// Does not count height			
 			for (var xPt:int = 0; xPt < os.structure.width; xPt++)
@@ -302,6 +302,25 @@ package world
 				for (var zPt:int = 0; zPt < os.structure.depth; zPt++)
 				{
 					var osPt3D:Point3D = pathGrid[os.x + xPt][0][os.z + zPt];
+					structureSpaces.addItem(osPt3D);										
+				}
+			}
+			if (!os.structure.width || !os.structure.depth)
+			{
+				throw new Error("No dimensions specified for structure");
+			} 
+			
+			return structureSpaces;
+		}
+		
+		public function getPoint3DForMovingStructure(asset:ActiveAsset, os:OwnedStructure, structureSpaces:ArrayCollection):ArrayCollection
+		{
+			// Does not count height			
+			for (var xPt:int = 0; xPt < os.structure.width; xPt++)
+			{
+				for (var zPt:int = 0; zPt < os.structure.depth; zPt++)
+				{
+					var osPt3D:Point3D = pathGrid[asset.worldCoords.x + xPt][0][asset.worldCoords.z + zPt];
 					structureSpaces.addItem(osPt3D);										
 				}
 			}
