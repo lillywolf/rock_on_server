@@ -12,9 +12,12 @@ package stores
 	{
 		public var _store:Store;
 		public var canvas:Canvas;
-		public static const STORE_WIDTH:int = 500;
-		public static const STORE_HEIGHT:int = 400;
-		public static const PADDING_X:int = 10;
+		public static const STORE_WIDTH:int = 600;
+		public static const STORE_HEIGHT:int = 360;
+		public static const ITEM_PADDING_X:int = 12;
+		public static const ITEM_PADDING_Y:int = 12;
+		public static const PADDING_X:int = 20;
+		public static const PADDING_Y:int = 20;
 		
 		public function StoreUIComponent(store:Store)
 		{
@@ -26,6 +29,13 @@ package stores
 		{
 			width = STORE_WIDTH;
 			height = STORE_HEIGHT;
+			var backCanvas:Canvas = StoreOwnedThingerUIComponent.createContainer();
+			backCanvas.width = STORE_WIDTH + 12;
+			backCanvas.height = STORE_HEIGHT + 16;
+			backCanvas.x = -6;
+			backCanvas.y = -10;
+			addChild(backCanvas);
+			
 			canvas = new Canvas();
 			canvas.setStyle("backgroundColor", 0x333333);
 			canvas.setStyle("cornerRadius", "14");
@@ -42,8 +52,8 @@ package stores
 			var btn:Button = new Button();
 			btn.width = 30;
 			btn.height = 20;
-			btn.setStyle("right", 0);
-			btn.setStyle("top", 0);
+			btn.setStyle("right", 10);
+			btn.setStyle("top", 10);
 			btn.addEventListener(MouseEvent.CLICK, onCloseButtonClicked);
 			canvas.addChild(btn);
 		}

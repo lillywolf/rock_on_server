@@ -33,7 +33,7 @@ package controllers
 			var copy:MovieClip = new klass() as MovieClip;
 			if (formatted)
 			{
-				var uic:UIComponent = formatMovieClipByDimensions(copy, dimensionX, dimensionY);
+				var uic:UIComponent = formatMovieClipByDimensions(copy, dimensionX, dimensionY, 0, 0);
 			}
 			return uic;
 		}
@@ -83,7 +83,7 @@ package controllers
 			return _owned_layerables;
 		}
 		
-		public static function formatMovieClipByDimensions(mc:MovieClip, dimensionX:int, dimensionY:int):UIComponent
+		public static function formatMovieClipByDimensions(mc:MovieClip, dimensionX:int, dimensionY:int, itemPaddingX:int, itemPaddingY:int):UIComponent
 		{
 			var ratio:Number = mc.width/mc.height;
 			var uic:UIComponent = new UIComponent();
@@ -108,6 +108,8 @@ package controllers
 			
 			mc.y = -(rect.top) + (dimensionY - mc.height)/2; 							
 			mc.x = -(rect.left) + (dimensionX - mc.width)/2;			
+			uic.x = itemPaddingX;
+			uic.y = itemPaddingY;
 			uic.addChild(mc);
 			return uic;
 		}

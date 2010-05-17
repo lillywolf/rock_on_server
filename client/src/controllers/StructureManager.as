@@ -3,10 +3,13 @@ package controllers
 	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
 	
+	import game.ImposterOwnedStructure;
+	
 	import models.OwnedStructure;
 	import models.Structure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.Application;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
@@ -152,11 +155,8 @@ package controllers
 			{
 				removeOwnedStructureFromSystem(osReference);
 			}
-//			else if (method == "create_new")
-//			{
-//				
-//			}
-			else if (os.structure.structure_type == "Booth")
+			
+			if (os.structure.structure_type == "Booth")
 			{
 				updateBoothOnServerResponse(os, method, worldView.boothManager);
 			}
@@ -164,6 +164,24 @@ package controllers
 			{
 				updateListeningStationOnServerResponse(os, method, worldView.listeningStationManager);
 			}						
+		}
+		
+		private function assignNewOwnedStructureToImposter(osCopy:OwnedStructure):void
+		{
+			if (Application.application.currentState == "editView")
+			{
+				for each (var asset:ActiveAsset in Application.application.worldView.myWorld.assetRenderer)
+				{
+					if (asset.thinger is ImposterOwnedStructure)
+					{
+						(asset.thinger as OwnedStructure).updateProperties(osCopy);
+					}
+				}
+			}
+			else
+			{
+				throw new Error("Handle race condition");
+			}			
 		}
 		
 		private function removeOwnedStructureFromSystem(os:OwnedStructure):void

@@ -206,7 +206,7 @@
 					{
 						var asset:ActiveAsset = editView.editMode.createPurchaseCopy(os);
 						editView.pausedForStateCompletion = null;					
-						editView.editMode.evaluateClickedAsset(asset);
+						editView.editMode.startMoveWithoutEditOptions(asset);
 					}
 				}
 			}
@@ -221,7 +221,7 @@
 				{
 					var asset:ActiveAsset = editView.editMode.createPurchaseCopy(editView.pausedForStateCompletion);
 					editView.pausedForStateCompletion = null;					
-					editView.editMode.evaluateClickedAsset(asset);					
+					editView.editMode.startMoveWithoutEditOptions(asset);					
 				}
 			}
 			

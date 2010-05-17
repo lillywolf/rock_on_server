@@ -28,8 +28,15 @@ class OwnedStructure < ActiveRecord::Base
   def update_inventory_count(owned_dwelling)
     structure = Structure.find(self.structure_id)
     if structure.structure_type == "Booth"
+      num_groupies = 0
+      user = User.find(self.user_id)
+      Creature.find_each(:conditions => ["user_id = ?", user.id]) do |creature|
+        if creature.creature_type == "Groupie"
+          num_groupies = num_groupies + 1
+        end  
+      end  
       time_since_last_update = get_time_elapsed(self.inventory_updated_at)
-      estimated_purchases = (time_since_last_update / structure.collection_time) * owned_dwelling.fancount
+      estimated_purchases = (time_since_last_update / structure.collection_time) * (owned_dwelling.fancount + num_groupies)
       if self.inventory_count - estimated_purchases < 0
         self.inventory_count = 0
       else  

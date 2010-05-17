@@ -9,10 +9,12 @@ package views
 	import game.ImposterOwnedStructure;
 	
 	import models.OwnedStructure;
+	import models.Structure;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 	import mx.core.UIComponent;
+	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
 	import stores.StoreEvent;
@@ -75,11 +77,33 @@ package views
 			flexiUIC.height = height;
 		}
 		
+		public function onOwnedStructureCollectionChange(evt:CollectionEvent):void
+		{
+			if (evt.kind == "add")
+			{
+				var newOwnedStructure:OwnedStructure = evt.items[0] as OwnedStructure;
+				for each (var asset:ActiveAsset in _myWorld.assetRenderer.unsortedAssets)
+				{
+					if (asset.thinger is ImposterOwnedStructure && asset.thinger.structure_id == newOwnedStructure.structure_id)
+					{
+						var structure:Structure = asset.thinger.structure;
+						newOwnedStructure.structure = asset.thinger.structure;
+						asset.thinger = new OwnedStructure(newOwnedStructure);
+					}
+				}
+			}
+		}
+		
 		public function createPurchaseCopy(thinger:Object):ActiveAsset
 		{
+			var asset:ActiveAsset;
+			if (thinger is ImposterOwnedStructure)
+			{
+				asset = _structureManager.generateAssetFromOwnedStructure(thinger as ImposterOwnedStructure);
+			}
 			if (thinger is OwnedStructure)
 			{
-				var asset:ActiveAsset = _structureManager.generateAssetFromOwnedStructure(thinger as OwnedStructure);
+				asset = _structureManager.generateAssetFromOwnedStructure(thinger as OwnedStructure);
 				var currentPoint:Point = new Point(_myWorld.mouseX, _myWorld.mouseY);
 				_myWorld.addStaticAsset(asset, World.actualToWorldCoords(currentPoint));
 				return asset;
@@ -150,12 +174,22 @@ package views
 		{
 			var os:OwnedStructure = currentAsset.thinger as OwnedStructure;
 			_structureManager.serverController.sendRequest({id: os.id}, "owned_structure", "sell");
+			deactivateStructureWithoutSaving();
+			locked = false;			
 		}
 		
 		public function moveButtonClicked():void
 		{
 			_myWorld.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			currentAsset.speed = 1;			
+		}
+		
+		public function startMoveWithoutEditOptions(asset:ActiveAsset):void
+		{
+			locked = true;
+			(asset.thinger as OwnedStructure).editing = true;				
+			currentAsset = asset;
+			moveButtonClicked();		
 		}
 		
 		public function activateMoveableStructure(asset:ActiveAsset):void
@@ -268,7 +302,8 @@ package views
 		public function set structureManager(val:StructureManager):void
 		{
 			_structureManager = val;
-			_structureManager.addEventListener(StoreEvent.THINGER_SOLD, onThingerSold);			
+			_structureManager.addEventListener(StoreEvent.THINGER_SOLD, onThingerSold);	
+			_structureManager.owned_structures.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedStructureCollectionChange);					
 		}
 		
 		public function get structureManager():StructureManager

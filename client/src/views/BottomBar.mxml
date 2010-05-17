@@ -167,7 +167,7 @@
 				var store:Store = storeManager.getStoreByName("Structure Store");
 				var uic:UIComponent = storeManager.getStoreUIComponent(store);
 				uic.x = WorldView.WINDOW_WIDTH/2 - uic.width/2;
-				uic.y = WorldView.WINDOW_HEIGHT/2 - uic.height/2;
+				uic.y = WorldView.WINDOW_HEIGHT/2 - uic.height/2 - 40;
 				parentApplication.addChild(uic);
 			}						
 			
