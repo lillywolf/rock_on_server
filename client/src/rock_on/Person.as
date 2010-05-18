@@ -90,7 +90,18 @@ package rock_on
 			}
 			
 			frameNumber = evaluateHorizontalAndVerticalRelationship(horizontalRelationship, verticalRelationship, frameNumber, structure, strictFacing);
-			stand(frameNumber);
+	
+			var animationType:String;
+			if (frameNumber == 37)
+			{
+				animationType = "stand_still_away";
+			}
+			else if (frameNumber == 39)
+			{
+				animationType = "stand_still_toward";
+			}
+			
+			stand(frameNumber, animationType);
 		}
 		
 		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void

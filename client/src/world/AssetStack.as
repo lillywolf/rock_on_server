@@ -51,18 +51,19 @@ package world
 			trace(evt.target.name, flash.utils.getQualifiedClassName(evt.target));		
 		}
 		
-		public function stand(frameNumber:int):void
+		public function stand(frameNumber:int, animationType:String):void
 		{
 			var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
-			for (var i:int = 0; i < movieClipChildren; i++)
-			{
-				var mc:MovieClip = _movieClipStack.getChildAt(i) as MovieClip;
-				mc.gotoAndPlay(frameNumber);
-				mc.stop();									
-			}			
+			doAnimation(animationType, frameNumber);
+//			for (var i:int = 0; i < movieClipChildren; i++)
+//			{
+//				var mc:MovieClip = _movieClipStack.getChildAt(i) as MovieClip;
+//				mc.gotoAndPlay(frameNumber);
+//				mc.stop();									
+//			}			
 		}
 		
-		public function doAnimation(animationType:String):void
+		public function doAnimation(animationType:String, frameNumber:int=0):void
 		{
 			if (_layerableOrder[animationType])
 			{
@@ -95,7 +96,14 @@ package world
 				{
 					var newMc:MovieClip = newStack.getChildAt(0) as MovieClip;
 					_movieClipStack.addChildAt(newMc, k);
-					newMc.gotoAndPlay(animationType);			
+					if (frameNumber == 0)
+					{
+						newMc.gotoAndPlay(animationType);								
+					}
+					else
+					{
+						newMc.gotoAndStop(frameNumber);
+					}
 				}
 			}
 		}

@@ -279,12 +279,18 @@ package rock_on
 			var myStyles:ArrayCollection = new ArrayCollection();
 			var bodyLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 2, creature_id: creatureId, in_use: true});
 			var eyeLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 1, creature_id: creatureId, in_use:true});
+			var bottomLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 6, creature_id: creatureId, in_use: true});
 			for each (var layerable:Layerable in Application.application.gdi.layerableManager.layerables)
 			{
 				if (layerable.symbol_name == "PeachBody")
 				{
 					bodyLayer.layerable = new Layerable(layerable);
 					bodyLayer.layerable.mc = new PeachBody();
+				}
+				else if (layerable.symbol_name == "Pants4")
+				{
+					bottomLayer.layerable = new Layerable(layerable);
+					bottomLayer.layerable.mc = new Pants4();
 				}
 			}			
 			myStyles.addItem(bodyLayer);

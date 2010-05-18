@@ -41,16 +41,10 @@ package helpers
 		private function initializeLayerableOrder():void
 		{
 			layerableOrder = new Array();
-			layerableOrder['walk_toward'] = ['body', 'eyes', 'instrument'];
-			layerableOrder['walk_away'] = ['instrument', 'eyes', 'body'];
-			layerableOrder['stand_still_toward'] = ['body', 'eyes', 'instrument'];
-			layerableOrder['stand_still_away'] = ['instrument', 'eyes', 'body'];
-			
-//			var sort:Sort = new Sort();
-//			sort.fields = [new SortField("layer_name", true)];
-//			var preSortedLayerables:ArrayCollection = _layerableManager.layerables;
-//			preSortedLayerables.sort = sort;
-//			preSortedLayerables.refresh();	
+			layerableOrder['walk_toward'] = ["body", "eyes", "shoes", "bottom", "top", "instrument"];
+			layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top"];
+			layerableOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "instrument"];
+			layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top"];
 			
 			sortedLayerables = new Dictionary();
 			

@@ -163,7 +163,7 @@ package rock_on
 				_movieClipStack.scaleX = -(orientation);
 			}
 			
-			stand(frameNumber);			
+			stand(frameNumber, "stand_still_toward");			
 		}
 		
 		public function standStill():void
@@ -189,7 +189,18 @@ package rock_on
 				frameNumber = 39;
 				_movieClipStack.scaleX = orientation;
 			}
-			stand(frameNumber);
+			
+			var animationType:String;
+			if (frameNumber == 37)
+			{
+				animationType = "stand_still_away";
+			}
+			else if (frameNumber == 39)
+			{
+				animationType = "stand_still_toward";
+			}			
+			
+			stand(frameNumber, animationType);
 		}
 		
 		public function startWaitState():void
