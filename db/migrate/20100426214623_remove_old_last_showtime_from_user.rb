@@ -4,5 +4,6 @@ class RemoveOldLastShowtimeFromUsers < ActiveRecord::Migration
   end
 
   def self.down
+    add_column :users, :old_last_showtime, :string          
   end
 end
