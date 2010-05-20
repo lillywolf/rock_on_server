@@ -51,6 +51,7 @@ package facebook
 		
 		protected function onConnect(evt:FacebookEvent):void
 		{
+			Alert.show("Connected");
 			if (evt.success)
 			{
 				snid = int(fbook.uid);

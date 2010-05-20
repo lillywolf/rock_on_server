@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100513081520) do
+ActiveRecord::Schema.define(:version => 20100520203538) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -193,7 +193,7 @@ ActiveRecord::Schema.define(:version => 20100513081520) do
   create_table "users", :force => true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "snid"
+    t.integer  "snid",            :limit => 8
     t.integer  "xp"
     t.integer  "credits"
     t.integer  "premium_credits"
