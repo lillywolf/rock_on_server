@@ -18,7 +18,7 @@ package server
 	public class ServerController extends EventDispatcher
 	{
 		
-		public static const BASE_URL:String = "http://localhost:3001/";
+		public static const BASE_URL:String = "http://glowing-sunrise-33.heroku.com/site/";
 		
 		public var _gdi:GameDataInterface;
 		public var httpService:HTTPService;
