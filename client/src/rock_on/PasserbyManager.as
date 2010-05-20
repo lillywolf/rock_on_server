@@ -113,7 +113,7 @@ package rock_on
 				setSpawnLocation();
 				_myWorld.addAsset(person, spawnLocation);				
 				addItem(person);
-				person.movieClipStack.alpha = 0.5;				
+//				person.movieClipStack.alpha = 0.5;				
 				determineNextStep(person);
 			}
 			else

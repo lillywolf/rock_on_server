@@ -104,8 +104,10 @@ package rock_on
 		}	
 		
 		public function startStockedState():void
-		{
+		{			
 			state = STOCKED_STATE;
+//			structure.mc.gotoAndPlay(5);
+			structure.mc.stop();
 		}
 		
 		public function startUnstockedState():void

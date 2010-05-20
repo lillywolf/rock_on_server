@@ -3,6 +3,9 @@ package models
 	import flash.display.DisplayObject;
 	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
+	import flash.filters.ColorMatrixFilter;
+	
+	import helpers.ColorAdapter;
 	
 	import mx.events.DynamicEvent;
 
@@ -14,6 +17,9 @@ package models
 		public var _layer_name:String;
 		public var _mc:MovieClip;
 		public var _name:String;
+		public var _editable_color:Boolean;
+		
+		public var cmf:ColorMatrixFilter;
 		
 		public function Layerable(params:Object, loadedClass:Class=null, target:IEventDispatcher=null)
 		{
@@ -36,6 +42,20 @@ package models
 			_symbol_name = params['symbol_name'];
 			_layer_name = params['layer_name'];
 			_name = params['name'];
+			setOptionalProperties(params);
+		}
+		
+		public function setOptionalProperties(params:Object):void
+		{
+			if (params.editable_color)
+			{
+				_editable_color = params.editable_color;
+				if (_editable_color)
+				{
+
+					
+				}
+			}
 		}
 		
 		public function set id(val:int):void
@@ -109,6 +129,16 @@ package models
 		public function get mc():MovieClip
 		{
 			return _mc;
+		}
+		
+		public function set editable_color(val:Boolean):void
+		{
+			_editable_color = val;
+		}
+		
+		public function get editable_color():Boolean
+		{
+			return _editable_color;
 		}
 	}
 }

@@ -43,7 +43,7 @@ package rock_on
 			for each (var assetStack:AssetStack in groupies)
 			{
 				var cp:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, _concertStage, _boothManager, assetStack.layerableOrder, assetStack.creature, 0.4);
-				cp.speed = 0.07;
+				cp.speed = 0.06;
 				_customerPersonManager.add(cp);
 			}
 		}		

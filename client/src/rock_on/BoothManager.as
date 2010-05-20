@@ -142,19 +142,19 @@ package rock_on
 			var boothFront:Point3D;
 			if (customerless)
 			{
-				boothFront = new Point3D(Math.floor(booth.structure.width/2 + booth.x + 1), 0, Math.floor(booth.structure.depth/4 + booth.z));
+				boothFront = new Point3D(Math.ceil(booth.structure.width/2 + booth.x + 1), 0, Math.floor(booth.structure.depth/4 + booth.z));
 			}
 			else if (queuedCustomer)
 			{
-				boothFront = new Point3D(Math.floor(booth.structure.width/2 + booth.x + index + 1), 0, Math.floor(booth.structure.depth/4 + booth.z));				
+				boothFront = new Point3D(Math.ceil(booth.structure.width/2 + booth.x + index + 1), 0, Math.floor(booth.structure.depth/4 + booth.z));				
 			}
 			else if (routedCustomer)
 			{
-				boothFront = new Point3D(Math.floor(booth.structure.width/2 + booth.x + (booth.actualQueue + index + 1)), 0, Math.floor(booth.structure.depth/4 + booth.z));																	
+				boothFront = new Point3D(Math.ceil(booth.structure.width/2 + booth.x + (booth.actualQueue + index + 1)), 0, Math.floor(booth.structure.depth/4 + booth.z));																	
 			}
 			else
 			{
-				boothFront = new Point3D(Math.floor(booth.structure.width/2 + booth.x + (booth.currentQueue + 1)), 0, Math.floor(booth.structure.depth/4 + booth.z));													
+				boothFront = new Point3D(Math.ceil(booth.structure.width/2 + booth.x + (booth.currentQueue + 1)), 0, Math.floor(booth.structure.depth/4 + booth.z));													
 			}
 			return boothFront;
 		}

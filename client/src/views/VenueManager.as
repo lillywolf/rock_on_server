@@ -57,7 +57,7 @@ package views
 			for (var i:int = 0; i < venue.fancount; i++)
 			{
 				var cp:CustomerPerson = _creatureGenerator.createCustomer("generic", "walk_toward");
-				cp.speed = 0.07;
+				cp.speed = 0.06;
 				_customerPersonManager.add(cp);
 			}
 		}

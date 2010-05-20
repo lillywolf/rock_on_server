@@ -156,24 +156,6 @@ package rock_on
 			}
 		}
 		
-//		private function updateQueue(evt:DynamicEvent):void
-//		{
-//			var person:CustomerPerson = evt.person;
-//			var i:int;
-//			for (i = 0; i < person.currentBoothSlot - 1; i++)
-//			{	
-//				for each (var cp:CustomerPerson in this)
-//				{
-//					if (cp.currentBooth == person.currentBooth && cp.currentBoothSlot == (person.currentBoothSlot - 1) && cp.isEnRoute)
-//					{
-//						person.moveUpInQueue(person.currentBooth);
-//						
-//						cp.incrementQueueSlotWhileEnRoute();
-//					}
-//				}
-//			}
-//		}
-		
 		private function onFinalDestinationReached(evt:WorldEvent):void
 		{
 			if (evt.activeAsset is CustomerPerson)

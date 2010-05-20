@@ -102,7 +102,8 @@ package world
 					}
 					else
 					{
-						newMc.gotoAndStop(frameNumber);
+						newMc.gotoAndPlay(frameNumber);
+						newMc.stop();
 					}
 				}
 			}

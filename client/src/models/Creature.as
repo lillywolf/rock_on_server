@@ -56,10 +56,10 @@ package models
 		public function initializeLayerableOrder():void
 		{
 			layerableOrder = new Array();
-			layerableOrder['walk_toward'] = ["body", "eyes", "shoes", "bottom", "top", "instrument"];
-			layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top"];
-			layerableOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "instrument"];
-			layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top"];
+			layerableOrder['walk_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
+			layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
+			layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
 		}
 		
 		public function getConstructedCreature(animation:String, sizeX:Number, sizeY:Number):AssetStack
