@@ -1,4 +1,4 @@
-class RemoveOldLastShowtimeFromUsers < ActiveRecord::Migration
+class RemoveOldLastShowtimeFromUser < ActiveRecord::Migration
   def self.up
     remove_column :users, :old_last_showtime       
   end
