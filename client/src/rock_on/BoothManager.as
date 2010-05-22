@@ -22,6 +22,7 @@ package rock_on
 		
 		public var booths:ArrayCollection;
 		public var _myWorld:World;
+		public var friendMirror:Boolean;
 		[Bindable] public var _venue:Venue;
 		public var _structureManager:StructureManager;
 		
@@ -45,7 +46,11 @@ package rock_on
 			if (booth.inventory_count - toDecrease <= 0)
 			{
 				booth.inventory_count = 0;
-				_structureManager.validateBoothCountZero(booth.id);
+				
+				if (!friendMirror)
+				{
+					_structureManager.validateBoothCountZero(booth.id);				
+				}
 			}			
 		}
 		
@@ -91,6 +96,7 @@ package rock_on
 				var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
 				asset.thinger = os;
 				var booth:Booth = new Booth(this, _venue, os);
+				booth.friendMirror = friendMirror;
 				booths.addItem(booth);
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				_myWorld.addStaticAsset(asset, addTo);
@@ -122,7 +128,17 @@ package rock_on
 		public function getRandomBooth(booth:Booth=null):Booth
 		{
 			var selectedBooth:Booth = null;
-			if (booths.length && !(booths.length == 1 && booth))
+			
+			var unstockedBooths:int = 0;
+			for each (var booth:Booth in booths)
+			{
+				if (booth.state == Booth.UNSTOCKED_STATE)
+				{
+					unstockedBooths++;
+				}
+			}
+			
+			if (booths.length && !(booths.length == 1 && booth) && booths.length != unstockedBooths)
 			{
 				do 
 				{

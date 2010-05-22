@@ -3,6 +3,7 @@ package world
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
 	import mx.core.Application;
 	
 	import rock_on.Person;
@@ -228,6 +229,7 @@ package world
 			if (getStructureOccupiedSpaces)
 			{
 				var structureOccupiedSpaces:ArrayCollection = establishStructureOccupiedSpaces(exemptStructures);
+//				Alert.show("sos: " + structureOccupiedSpaces.length.toString());
 				for each (pt in structureOccupiedSpaces)
 				{
 					allOccupiedSpaces.addItem(pt);
@@ -236,6 +238,7 @@ package world
 			if (getPeopleOccupiedSpaces)
 			{
 				var peopleOccupiedSpaces:ArrayCollection = establishPeopleOccupiedSpaces();	
+//				Alert.show("pos: " + peopleOccupiedSpaces.length.toString());				
 				for each (pt in peopleOccupiedSpaces)
 				{
 					allOccupiedSpaces.addItem(pt);
@@ -249,7 +252,7 @@ package world
 		{
 			if (occupiedSpaces.length >= _world.tilesDeep*_world.tilesWide)
 			{
-				throw new Error("No free spaces! That's crazy pills!");
+				throw new Error("No free spaces! That's crazy pills! total spaces: " + _world.tilesDeep.toString() + "::" + _world.tilesWide.toString());
 			}			
 		}
 		

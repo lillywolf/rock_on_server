@@ -78,11 +78,19 @@ package helpers
 					ol.layerable = layerable;
 					creature.owned_layerables.addItem(ol);
 					
-					var klass:Class = EssentialModelReference.getClassCopy(flash.utils.getQualifiedClassName(layerable.mc));
-					mc = new klass() as MovieClip;
-					mc.scaleX = GENERIC_X;
-					mc.scaleY = GENERIC_Y;
-					constructedCreature.movieClipStack.addChild(mc);
+					if (layerable.mc)
+					{
+						var klass:Class = EssentialModelReference.getClassCopy(flash.utils.getQualifiedClassName(layerable.mc));					
+						mc = new klass() as MovieClip;
+						mc.scaleX = GENERIC_X;
+						mc.scaleY = GENERIC_Y;
+						constructedCreature.movieClipStack.addChild(mc);
+					}
+					else
+					{
+//						throw new Error("Layerable " + layerable.id + " has no mc"); 
+					}
+					
 				}	
 			}
 			constructedCreature.movieClipStack.buttonMode = true;	

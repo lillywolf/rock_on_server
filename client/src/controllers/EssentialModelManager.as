@@ -24,6 +24,7 @@ package controllers
 	import models.User;
 	
 	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
 	import mx.events.DynamicEvent;
 	
 	import server.ServerController;
@@ -367,12 +368,25 @@ package controllers
 		public function loadClassInstance(obj:Object, appDomain:ApplicationDomain):void
 		{
 			var className:String = obj['symbol_name'];
-			var loadedClass:Class = appDomain.getDefinition(className) as Class;
-			essentialModelReference.loadedClasses.addItem(loadedClass);
-			essentialModelReference.loadedModels[className] = {klass: loadedClass, applicationDomain: appDomain};			
-			obj.setMovieClipFromClass(loadedClass);
 			
-			updateMovieClipForAnyClassCopies(obj, loadedClass);
+			if (className == null)
+			{
+				Alert.show(obj.toString() + " is null");
+			}
+			if (obj is Structure && className == null)
+			{
+				Alert.show((obj as Structure).id.toString() + " is null");
+			}
+			
+			if (className)
+			{
+				var loadedClass:Class = appDomain.getDefinition(className) as Class;
+				essentialModelReference.loadedClasses.addItem(loadedClass);
+				essentialModelReference.loadedModels[className] = {klass: loadedClass, applicationDomain: appDomain};			
+				obj.setMovieClipFromClass(loadedClass);
+				
+				updateMovieClipForAnyClassCopies(obj, loadedClass);
+			}
 			
 			var evt:EssentialEvent = new EssentialEvent(EssentialEvent.INSTANCE_LOADED, obj, null, true, true);
 			dispatchEvent(evt);					

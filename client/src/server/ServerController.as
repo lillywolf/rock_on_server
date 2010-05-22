@@ -18,8 +18,8 @@ package server
 	public class ServerController extends EventDispatcher
 	{
 		
-		public static const BASE_URL:String = "http://glowing-sunrise-33.heroku.com/site/";
-//		public static const BASE_URL:String = "http://localhost:3001/";
+//		public static const BASE_URL:String = "http://glowing-sunrise-33.heroku.com/";
+		public static const BASE_URL:String = "http://localhost:3001/";
 		
 		public var _gdi:GameDataInterface;
 		public var httpService:HTTPService;
@@ -72,7 +72,7 @@ package server
 		
 		private function onServerResponse(evt:ResultEvent):void
 		{	
-			var params:Object = getParams( evt );
+			var params:Object = getParams( evt );						
 			var requestKey:String = httpServiceRequests[evt.token];
 //			requestCache.cacheRequest( params.hashkey, params );
 //			params = requestCache.retrieveRequest( params.hashkey );

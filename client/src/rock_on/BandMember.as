@@ -232,7 +232,7 @@ package rock_on
 			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
 			if (occupiedSpaces.length >= _world.tilesDeep*_world.tilesWide)
 			{
-				throw new Error("No free spaces! That's crazy pills!");
+				throw new Error("No free spaces for band member!");
 			}
 			
 			// Adjust so that person avoids furniture on stage

@@ -213,7 +213,11 @@ package rock_on
 		{
 			state = FAN_BUTTON_STATE;
 			_listeningStationManager.addListeners(this);
-			_listeningStationManager.onFanButtonState(this);
+			
+			if (!friendMirror)
+			{
+				_listeningStationManager.onFanButtonState(this);			
+			}
 		}	
 		
 		public function isSlotAvailable():Boolean

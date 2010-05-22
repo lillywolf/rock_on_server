@@ -2,6 +2,12 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import controllers.DwellingManager;
+			import controllers.LevelManager;
+			import rock_on.GroupieManager;
+			import rock_on.ListeningStationManager;
+			import helpers.CreatureGenerator;
+			import rock_on.StageManager;
 			import game.GameMagicManager;
 			import rock_on.ContentIndex;
 			import rock_on.BoothManager;
@@ -65,6 +71,15 @@
 			[Bindable] public var creatureManager:CreatureManager;
 			[Bindable] public var thingerManager:ThingerManager;
 			[Bindable] public var userManager:UserManager;
+			[Bindable] public var levelManager:LevelManager;
+			[Bindable] public var dwellingManager:DwellingManager;
+			
+			[Bindable] public var stageManager:StageManager;
+			[Bindable] public var creatureGenerator:CreatureGenerator;
+			[Bindable] public var listeningStationManager:ListeningStationManager;
+			[Bindable] public var venueManager:VenueManager;
+			[Bindable] public var bandManager:BandManager;
+			[Bindable] public var groupieManager:GroupieManager;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
@@ -86,6 +101,38 @@
 				var evt:DynamicEvent = new DynamicEvent("worldAdded", true, true);
 				dispatchEvent(evt);
 			}
+			
+			public function startFriendMirror():void
+			{
+				addStage();
+				boothManager = new BoothManager(structureManager, myWorld);
+				creatureGenerator = new CreatureGenerator(layerableManager, boothManager, concertStage);
+				generateManagers();
+				initializeVenue();
+									
+				showBooths();
+				showListeningStations();
+				showVenue();
+				showGroupies();
+			}
+			
+			private function initializeVenue():void
+			{
+				venueManager.getVenue();
+				
+				boothManager.venue = venueManager.venue;
+				listeningStationManager.venue = venueManager.venue;
+				customerPersonManager.venue = venueManager.venue;
+				bandManager.venue = venueManager.venue;				
+			}			
+			
+			private function generateManagers():void
+			{
+				listeningStationManager = new ListeningStationManager(structureManager, myWorld);
+				groupieManager = new GroupieManager(customerPersonManager, boothManager, concertStage, creatureManager, myWorld);
+				bandManager = new BandManager(creatureManager, booths, concertStage, myWorld);
+				venueManager = new VenueManager(creatureGenerator, customerPersonManager, dwellingManager, levelManager, bandManager, booths, concertStage, myWorld);
+			}			
 			
 			private function onEnterFrame(evt:Event):void
 			{
@@ -128,53 +175,75 @@
 			
 			public function showBooths():void
 			{
-				boothManager = new BoothManager(structureManager, myWorld);
+				boothManager.friendMirror = true;
 				boothManager.setInMotion();
 			}
 			
 			public function addStage():void
 			{
-				stages = new ArrayCollection();
-				var stageStructures:ArrayCollection = structureManager.getStructuresByType("ConcertStage");
-				concertStage = new ConcertStage(stageStructures[0]);
-				var os:OwnedStructure = stageStructures[0];
-				
-				var asset:ActiveAsset = new ActiveAsset(new MovieClip());
-				asset.thinger = os;
-				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
-				concertStage.worldCoords = addTo;
-				myWorld.addAsset(asset, addTo);
-				
-				bandMemberManager.concertStage = concertStage;				
+//				stages = new ArrayCollection();
+//				var stageStructures:ArrayCollection = structureManager.getStructuresByType("ConcertStage");
+//				concertStage = new ConcertStage(stageStructures[0]);
+//				var os:OwnedStructure = stageStructures[0];
+//				
+//				var asset:ActiveAsset = new ActiveAsset(new MovieClip());
+//				asset.thinger = os;
+//				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
+//				concertStage.worldCoords = addTo;
+//				myWorld.addAsset(asset, addTo);
+//				
+//				bandMemberManager.concertStage = concertStage;		
+				stageManager = new StageManager(structureManager, myWorld);
+				stageManager.setInMotion();
+				concertStage = stageManager.concertStage;		
 			}
+			
+			private function showListeningStations():void
+			{
+				listeningStationManager.friendMirror = true;
+				listeningStationManager.setInMotion();	
+				
+				listeningStationManager.boothManager = boothManager;
+				listeningStationManager.stageManager = stageManager;				
+				listeningStationManager.customerPersonManager = customerPersonManager;			
+			}			
 			
 			public function showGroupies():void
 			{	
 				// Creating ActiveAssets 2x as much as necessary here...
 				
-				var groupies:ArrayCollection = creatureManager.getConstructedCreaturesByType("Groupie", 1, 1);
-				
-				for each (var assetStack:AssetStack in groupies)
-				{
-					var cp:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, concertStage, boothManager, assetStack.layerableOrder, assetStack.creature, 0.4);
-					cp.speed = 0.07;
-					customerPersonManager.add(cp);
-				}
+//				var groupies:ArrayCollection = creatureManager.getConstructedCreaturesByType("Groupie", 1, 1);
+//				
+//				for each (var assetStack:AssetStack in groupies)
+//				{
+//					var cp:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, concertStage, boothManager, assetStack.layerableOrder, assetStack.creature, 0.4);
+//					cp.speed = 0.07;
+//					customerPersonManager.add(cp);
+//				}
+				groupieManager.friendMirror = true;
+				groupieManager.setInMotion();
 			}
 			
 			public function showBandMembers():void
 			{
-				var bandMembers:ArrayCollection = creatureManager.getConstructedCreaturesByType("BandMember", 1, 1);
-				
-				for each (var assetStack:AssetStack in bandMembers)
-				{
-					var bandMember:BandMember = new BandMember(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
-					bandMember.concertStage = concertStage;
-					bandMember.addExemptStructures();
-					bandMember.speed = 0.06;
-					bandMemberManager.add(bandMember);
-				}
+//				var bandMembers:ArrayCollection = creatureManager.getConstructedCreaturesByType("BandMember", 1, 1);
+//				
+//				for each (var assetStack:AssetStack in bandMembers)
+//				{
+//					var bandMember:BandMember = new BandMember(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
+//					bandMember.concertStage = concertStage;
+//					bandMember.addExemptStructures();
+//					bandMember.speed = 0.06;
+//					bandMemberManager.add(bandMember);
+//				}
+				bandManager.friendMirror = true;
+				bandManager.setInMotion();
 			}
+			
+			private function showVenue():void
+			{
+				venueManager.addCustomersToVenue();
+			}			
 			
 			private function addStaticAsset(asset:ActiveAsset, addTo:Point3D):void
 			{

@@ -37,7 +37,7 @@ package world
 		public function drawInitialGrid():void
 		{
 			wg = new WorldGrid(_worldWidth, _worldDepth, _blockSize);
-			addChild(wg);
+//			addChild(wg);
 			tilesWide = _worldWidth/_blockSize;
 			tilesDeep = _worldDepth/_blockSize;
 		}

@@ -24,6 +24,7 @@ package rock_on
 	{
 		public var listeningStations:ArrayCollection;
 		public var passerbyManager:PasserbyManager;
+		public var friendMirror:Boolean;
 		public var _structureManager:StructureManager;
 		public var _stageManager:StageManager;
 		public var _boothManager:BoothManager;
@@ -109,6 +110,7 @@ package rock_on
 				var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
 				asset.thinger = os;
 				var listeningStation:ListeningStation = new ListeningStation(this, _boothManager, _venue, os);
+				listeningStation.friendMirror = friendMirror;
 				listeningStation.activeAsset = asset;
 				listeningStation.createdAt = GameClock.convertStringTimeToUnixTime(os.created_at);
 				listeningStation.stationType = _structureManager.getListeningStationTypeByMovieClip(os.structure.mc);
@@ -217,7 +219,7 @@ package rock_on
 		public function set customerPersonManager(val:CustomerPersonManager):void
 		{
 			_customerPersonManager = val;
-		}			
+		}				
 		
 	}
 }

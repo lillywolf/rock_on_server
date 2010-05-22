@@ -24,6 +24,7 @@ package rock_on
 		public var proxiedQueue:ArrayCollection;
 		public var hasCustomerEnRoute:Boolean;
 		public var state:int;
+		public var friendMirror:Boolean;
 		
 		public var _boothManager:BoothManager;
 		[Bindable] public var _venue:Venue;
@@ -113,9 +114,13 @@ package rock_on
 		public function startUnstockedState():void
 		{
 			state = UNSTOCKED_STATE;
-			_boothManager.addBoothCollectionButton(this);
-			var evt:DynamicEvent = new DynamicEvent("unStockedState", true, true);
-			dispatchEvent(evt);
+			
+			if (!friendMirror)
+			{
+				_boothManager.addBoothCollectionButton(this);
+				var evt:DynamicEvent = new DynamicEvent("unStockedState", true, true);
+				dispatchEvent(evt);			
+			}
 		}
 		
 		public function endUnstockedState():void

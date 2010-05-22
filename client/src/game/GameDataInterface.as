@@ -18,6 +18,7 @@ package game
 	
 	import models.User;
 	
+	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
@@ -257,6 +258,7 @@ package game
 		
 		public function checkIfLoadingAndInstantiationComplete():void
 		{
+//			Alert.show(pendingRequests.toString() + "::" + loadCounter.toString());
 			if (essentialModelManager.instancesToLoad.length == 0 && pendingRequests == loadCounter)
 			{
 				if (isLoggedInUser())
@@ -274,7 +276,8 @@ package game
 		public function checkForLoadedMovieClips():void
 		{
 			// This number is currently adjusted for stages without MCs!! CHANGE LATER!!
-			if (structureManager.ownedStructureMovieClipsLoaded == structureManager.ownedStructuresLoaded - 1)
+//			Alert.show(structureManager.ownedStructureMovieClipsLoaded.toString() + "::" + structureManager.ownedStructuresLoaded.toString());
+			if (structureManager.ownedStructureMovieClipsLoaded == structureManager.ownedStructuresLoaded)
 			{
 				if (isLoggedInUser())
 				{

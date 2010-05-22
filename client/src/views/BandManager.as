@@ -19,6 +19,7 @@ package views
 	{
 		public var bandMembers:ArrayCollection;
 		public var bandMemberManager:BandMemberManager;
+		public var friendMirror:Boolean;
 		public var _creatureManager:CreatureManager;
 		public var _booths:ArrayCollection;
 		public var _concertStage:ConcertStage;

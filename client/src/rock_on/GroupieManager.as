@@ -13,6 +13,7 @@ package rock_on
 	public class GroupieManager extends EventDispatcher
 	{
 		public var groupies:ArrayCollection;
+		public var friendMirror:Boolean;
 		public var _customerPersonManager:CustomerPersonManager;
 		public var _creatureManager:CreatureManager;
 		public var _myWorld:World;

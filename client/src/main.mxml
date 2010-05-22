@@ -111,16 +111,15 @@
 				friendView.userManager = friendGDI.userManager;
 				friendView.structureManager = friendGDI.structureManager;
 				friendView.layerableManager = friendGDI.layerableManager;
-				friendView.creatureManager = friendGDI.creatureManager;				
+				friendView.creatureManager = friendGDI.creatureManager;
+				friendView.levelManager = friendGDI.levelManager;
+				friendView.dwellingManager = friendGDI.dwellingManager;				
 				friendView.addEventListener("worldAdded", onFriendViewWorldAdded);
 			}
 			private function onFriendViewWorldAdded(evt:DynamicEvent):void
 			{
 				friendView.removeEventListener("worldAdded", onFriendViewWorldAdded);
-				friendView.showBooths();
-				friendView.addStage();	
-				friendView.showGroupies();
-				friendView.showBandMembers();			
+				friendView.startFriendMirror();		
 			}
 			public function showFriendVenuePostLoad(friendGDI:GameDataInterface):void
 			{

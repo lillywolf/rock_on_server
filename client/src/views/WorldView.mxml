@@ -104,20 +104,17 @@
 								
 				customerPersonManager = new CustomerPersonManager();
 				customerPersonManager.myWorld = myWorld;
-												
+							
 				var evt:DynamicEvent = new DynamicEvent("worldAdded", true, true);
 				dispatchEvent(evt);
 			}
 			
 			public function setInMotion():void
 			{	
-				addStage();
-				
+				addStage();				
 				boothManager = new BoothManager(structureManager, myWorld);
 				creatureGenerator = new CreatureGenerator(layerableManager, boothManager, concertStage);
-
-				generateManagers();
-				
+				generateManagers();				
 				initializeVenue();	
 						
 				showBooths();
