@@ -50,6 +50,16 @@ package rock_on
 			}
 		}
 		
+		public function addAfterInitializing(cp:CustomerPerson):void
+		{
+			if (_myWorld)
+			{
+				addToWorld(cp);
+				cp.reInitialize();
+				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
+			}
+		}
+				
 		private function addToWorld(cp:CustomerPerson):void
 		{
 			var destination:Point3D = cp.pickPointNearStructure(_concertStage);
@@ -207,15 +217,24 @@ package rock_on
 		{
 			if(_myWorld)
 			{
-				_myWorld.removeChild(person);
-				var movingSkinIndex:Number = _myWorld.assetRenderer.sortedAssets.getItemIndex(person);
-				_myWorld.assetRenderer.sortedAssets.removeItemAt(movingSkinIndex);
+				_myWorld.removeAsset(person);
 				var personIndex:Number = getItemIndex(person);
 				removeItemAt(personIndex);
 			}
 			else 
 			{
 				throw new Error("how the hell did this happen?");
+			}
+		}
+		
+		public function redrawAllCustomers():void
+		{
+			var cpLength:int = length;
+			for (var i:int = (cpLength - 1); i >= 0; i--)
+			{
+				var cp:CustomerPerson = this[i] as CustomerPerson;
+				remove(cp);
+				addAfterInitializing(cp);				
 			}
 		}
 		

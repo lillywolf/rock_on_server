@@ -215,6 +215,7 @@
 			
 			public function showBooths():void
 			{
+				boothManager.addEventListener(WorldEvent.STRUCTURE_PLACED, onBoothPlaced);
 				boothManager.setInMotion();
 			}
 			
@@ -223,6 +224,12 @@
 				stageManager = new StageManager(structureManager, myWorld);
 				stageManager.setInMotion();
 				concertStage = stageManager.concertStage;
+			}
+			
+			public function onBoothPlaced(evt:WorldEvent):void
+			{
+				boothManager.reInitializeBooths();
+				customerPersonManager.redrawAllCustomers();
 			}
 			
 			public function showGroupies():void

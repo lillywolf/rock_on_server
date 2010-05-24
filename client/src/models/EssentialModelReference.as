@@ -1,6 +1,8 @@
 package models
 {
+	import flash.display.MovieClip;
 	import flash.utils.Dictionary;
+	import flash.utils.getQualifiedClassName;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
@@ -40,6 +42,14 @@ package models
 		{
 			var klass:Class = Application.application.loadedModels[className].klass;
 			return klass;
+		}
+		
+		public static function getMovieClipCopy(mc:MovieClip):MovieClip
+		{
+			var className:String = flash.utils.getQualifiedClassName(mc);
+			var klass:Class = EssentialModelReference.getClassCopy(className);
+			var newMc:MovieClip = new klass() as MovieClip;
+			return newMc;
 		}
 
 	}

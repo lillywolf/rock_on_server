@@ -2,9 +2,11 @@ package controllers
 {
 	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
+	import flash.utils.getQualifiedClassName;
 	
 	import game.ImposterOwnedStructure;
 	
+	import models.EssentialModelReference;
 	import models.OwnedStructure;
 	import models.Structure;
 	
@@ -158,11 +160,11 @@ package controllers
 			
 			if (os.structure.structure_type == "Booth")
 			{
-				updateBoothOnServerResponse(os, method, worldView.boothManager);
+				updateBoothOnServerResponse(osReference, method, worldView.boothManager);
 			}
 			else if (os.structure.structure_type == "ListeningStation")
 			{
-				updateListeningStationOnServerResponse(os, method, worldView.listeningStationManager);
+				updateListeningStationOnServerResponse(osReference, method, worldView.listeningStationManager);
 			}						
 		}
 		
@@ -199,7 +201,10 @@ package controllers
 		
 		public function generateAssetFromOwnedStructure(os:OwnedStructure):ActiveAsset
 		{
-			var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
+			var className:String = flash.utils.getQualifiedClassName(os.structure.mc);
+			var klass:Class = EssentialModelReference.getClassCopy(className);
+			var mc:MovieClip = new klass() as MovieClip;
+			var asset:ActiveAsset = new ActiveAsset(mc);
 			asset.thinger = os;
 			return asset;
 		}

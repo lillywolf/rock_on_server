@@ -225,8 +225,8 @@ package rock_on
 			if(_myWorld)
 			{
 				_myWorld.removeAsset(person);
-				var movingSkinIndex:Number = _myWorld.assetRenderer.sortedAssets.getItemIndex(person);
-				_myWorld.assetRenderer.sortedAssets.removeItemAt(movingSkinIndex);
+//				var movingSkinIndex:Number = _myWorld.assetRenderer.sortedAssets.getItemIndex(person);
+//				_myWorld.assetRenderer.sortedAssets.removeItemAt(movingSkinIndex);
 				var personIndex:Number = getItemIndex(person);
 				removeItemAt(personIndex);
 			}

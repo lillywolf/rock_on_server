@@ -48,6 +48,26 @@ package rock_on
 			startRoamState();
 		}
 		
+		public function reInitialize():void
+		{
+			if (enthralledTimer)
+			{
+				enthralledTimer.stop();
+				enthralledTimer = null;
+			}
+			if (activityTimer)
+			{
+				activityTimer.stop();
+				activityTimer = null;
+			}
+			if (queuedTimer)
+			{
+				queuedTimer.stop();
+				queuedTimer = null;
+			}
+			currentBooth = null;
+		}
+		
 		override public function update(deltaTime:Number):Boolean
 		{
 			switch (state)

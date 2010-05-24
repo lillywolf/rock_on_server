@@ -2,10 +2,12 @@ package rock_on
 {
 	import controllers.StructureManager;
 	
+	import flash.display.MovieClip;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	
+	import models.EssentialModelReference;
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
@@ -15,6 +17,7 @@ package rock_on
 	import world.Point;
 	import world.Point3D;
 	import world.World;
+	import world.WorldEvent;
 
 	public class BoothManager extends EventDispatcher
 	{
@@ -23,6 +26,7 @@ package rock_on
 		public var booths:ArrayCollection;
 		public var _myWorld:World;
 		public var friendMirror:Boolean;
+		public var editMirror:Boolean;
 		[Bindable] public var _venue:Venue;
 		public var _structureManager:StructureManager;
 		
@@ -84,8 +88,40 @@ package rock_on
 			
 			if (method == "save_placement")
 			{
-				booth.updateProperties(os);
+				selectedBooth.updateProperties(os);
+				updateBoothPlacementPostServerResponse(selectedBooth);
 			}			
+		}
+		
+		public function updateBoothPlacementPostServerResponse(booth:Booth):void
+		{
+			for each (var asset:ActiveAsset in _myWorld.assetRenderer.unsortedAssets)
+			{
+				if (asset.thinger)
+				{
+					if (asset.thinger.id == (booth as OwnedStructure).id)
+					{
+						asset.worldCoords.x = booth.x;
+						asset.worldCoords.y = booth.y;
+						asset.worldCoords.z = booth.z;
+						_myWorld.removeAsset(asset);
+						_myWorld.addStaticAsset(asset, asset.worldCoords);
+						var evt:WorldEvent = new WorldEvent(WorldEvent.STRUCTURE_PLACED, asset, true, true);
+						dispatchEvent(evt);
+					}
+				}
+			}
+		}
+		
+		public function reInitializeBooths():void
+		{
+			for each (var booth:Booth in booths)
+			{
+				booth.currentQueue = 0;
+				booth.actualQueue = 0;
+				booth.proxiedQueue.removeAll();
+				booth.hasCustomerEnRoute = false;
+			}
 		}
 		
 		public function showBooths():void
@@ -93,7 +129,8 @@ package rock_on
 			var boothStructures:ArrayCollection = _structureManager.getStructuresByType("Booth");
 			for each (var os:OwnedStructure in boothStructures)
 			{
-				var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
+				var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+				var asset:ActiveAsset = new ActiveAsset(mc);
 				asset.thinger = os;
 				var booth:Booth = new Booth(this, _venue, os);
 				booth.friendMirror = friendMirror;

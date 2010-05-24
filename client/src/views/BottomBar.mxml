@@ -158,8 +158,6 @@
 			public function switchToWorldView():void
 			{
 				Application.application.currentState = "worldView";
-//				worldView.showGroupies();
-//				worldView.showBandMembers();
 			}
 			
 			public function showStore():void

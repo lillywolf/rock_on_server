@@ -7,6 +7,7 @@ package world
 		public static const DESTINATION_REACHED:String = "World:DestinationReached";
 		public static const FINAL_DESTINATION_REACHED:String = "World:FinalDestinationReached";	
 		public static const DIRECTION_CHANGED:String = "World:DirectionChanged";	
+		public static const STRUCTURE_PLACED:String = "World:StructurePlaced";
 		
 		public var _activeAsset:ActiveAsset;
 
