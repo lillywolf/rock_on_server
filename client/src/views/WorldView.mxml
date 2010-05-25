@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import models.EssentialModelReference;
 			import mx.controls.Button;
 			import controllers.LevelManager;
 			import models.OwnedDwelling;
@@ -225,7 +226,6 @@
 			public function showBooths():void
 			{
 				boothManager.uiLayer = uiLayer;
-				boothManager.addEventListener(WorldEvent.STRUCTURE_PLACED, onBoothPlaced);
 				boothManager.setInMotion();
 			}
 			
@@ -236,10 +236,9 @@
 				concertStage = stageManager.concertStage;
 			}
 			
-			public function onBoothPlaced(evt:WorldEvent):void
+			public function boothPlaced():void
 			{
 				boothManager.reInitializeBooths();
-				customerPersonManager.redrawAllCustomers();
 			}
 			
 			public function showGroupies():void
@@ -256,11 +255,36 @@
 			{
 				parentApplication.onCreatureToCustomize(creature);
 			}
+		
+			public function updateRenderedStructures(os:OwnedStructure, method:String):void
+			{
+				var asset:ActiveAsset = myWorld.findAssetByThinger(os);
+				if (method == "sell")
+				{
+					myWorld.assetRenderer.removeAsset(asset);
+				}
+				if (method == "save_placement")
+				{
+					myWorld.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z));
+				}
+				if (method == "create_new")
+				{
+					var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+					asset = new ActiveAsset(mc);
+					var addTo:Point3D = new Point3D(os.x, os.y, os.z);					
+					myWorld.addStaticAsset(asset, addTo);
+				}
+				reInitializeStructures(os);
+			}
 			
-//			private function onThingerPurchased(evt:StoreEvent):void
-//			{
-//
-//			}
+			public function reInitializeStructures(os:OwnedStructure):void
+			{				
+				if (os.structure.structure_type == "Booth")
+				{
+					boothManager.reInitializeBooths();
+				}
+				customerPersonManager.redrawAllCustomers();
+			}
 			
 		]]>
 	</mx:Script>	

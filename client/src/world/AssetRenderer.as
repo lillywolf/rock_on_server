@@ -202,6 +202,12 @@ package world
 			}
 		}
 		
+		public function removeAsset(asset:ActiveAsset):void
+		{
+			var index:int = unsortedAssets.getItemIndex(asset);
+			unsortedAssets.removeItemAt(index);
+		}
+		
 		private function removeExistingAssets():void
 		{
 			for (var i:int = 0; i<sortedAssets.length; i++)
@@ -209,7 +215,7 @@ package world
 				var asset:ActiveAsset = sortedAssets[i];
 				if (sortedAssets.contains(asset))
 				{
-						removeChild(asset);									
+					removeChild(asset);									
 				}
 			}			
 		}

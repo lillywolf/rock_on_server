@@ -2,12 +2,14 @@ package rock_on
 {
 	import controllers.StructureManager;
 	
+	import flash.display.MovieClip;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	
 	import game.GameClock;
 	
+	import models.EssentialModelReference;
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
@@ -25,6 +27,7 @@ package rock_on
 		public var listeningStations:ArrayCollection;
 		public var passerbyManager:PasserbyManager;
 		public var friendMirror:Boolean;
+		public var editMirror:Boolean;
 		public var _structureManager:StructureManager;
 		public var _stageManager:StageManager;
 		public var _boothManager:BoothManager;
@@ -107,10 +110,12 @@ package rock_on
 			var listeningStructures:ArrayCollection = _structureManager.getStructuresByType("ListeningStation");
 			for each (var os:OwnedStructure in listeningStructures)
 			{
-				var asset:ActiveAsset = new ActiveAsset(os.structure.mc);
+				var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);				
+				var asset:ActiveAsset = new ActiveAsset(mc);
 				asset.thinger = os;
 				var listeningStation:ListeningStation = new ListeningStation(this, _boothManager, _venue, os);
 				listeningStation.friendMirror = friendMirror;
+				listeningStation.editMirror = editMirror;
 				listeningStation.activeAsset = asset;
 				listeningStation.createdAt = GameClock.convertStringTimeToUnixTime(os.created_at);
 				listeningStation.stationType = _structureManager.getListeningStationTypeByMovieClip(os.structure.mc);
@@ -168,11 +173,8 @@ package rock_on
 		public function remove(station:ListeningStation):void
 		{
 			if(_myWorld)
-			{
-				// Why not unsorted assets removal?
-				
-				var index:Number = _myWorld.assetRenderer.unsortedAssets.getItemIndex(station.activeAsset);
-				_myWorld.assetRenderer.unsortedAssets.removeItemAt(index);
+			{				
+				_myWorld.assetRenderer.removeAsset(station.activeAsset);
 				var stationIndex:Number = listeningStations.getItemIndex(station);
 				listeningStations.removeItemAt(stationIndex);
 			}
@@ -184,17 +186,45 @@ package rock_on
 		
 		public function updateStationOnServerResponse(os:OwnedStructure, method:String):void
 		{
+			var station:ListeningStation = getStationById(os.id);
+						
 			if (method == "validate_usage_complete")
 			{
-				for each (var station:ListeningStation in listeningStations)
+				removeStationWhenFinished(station);					
+			}
+			if (method == "save_placement")
+			{
+				station.updateProperties(os);
+				moveStationUIComponents(station);
+			}				
+		}
+		
+		public function getStationById(id:int):ListeningStation
+		{
+			for each (var station:ListeningStation in listeningStations)
+			{
+				if (station.id == id)
 				{
-					if (station.id == os.id)
-					{
-						removeStationWhenFinished(station);					
-					}
+					return station;
 				}
 			}
+			return null;
 		}	
+		
+		private function moveStationUIComponents(station:ListeningStation):void
+		{
+			if (station.state == ListeningStation.FAN_BUTTON_STATE && station.collectionButton)
+			{
+				moveStationCollectionButton(station.collectionButton, station);
+			}
+		}
+		
+		private function moveStationCollectionButton(btn:SpecialButton, station:ListeningStation):void
+		{
+			var actualCoords:Point = World.worldToActualCoords(new Point3D(station.x, station.y, station.z));
+			btn.x = actualCoords.x + _myWorld.x;
+			btn.y = actualCoords.y + _myWorld.y;			
+		}				
 		
 		public function removeStationWhenFinished(station:ListeningStation):void
 		{

@@ -101,6 +101,7 @@
 				listeningStationManager.venue = venueManager.venue;
 				boothManager.editMirror = true;
 				boothManager.setInMotion();
+				listeningStationManager.editMirror = true;
 				listeningStationManager.showListeningStations();
 			}
 			

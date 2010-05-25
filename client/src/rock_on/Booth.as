@@ -7,7 +7,6 @@ package rock_on
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
-	import mx.core.Application;
 	import mx.events.DynamicEvent;
 	
 	import views.WorldView;
@@ -25,6 +24,7 @@ package rock_on
 		public var hasCustomerEnRoute:Boolean;
 		public var state:int;
 		public var friendMirror:Boolean;
+		public var editMirror:Boolean;
 		
 		public var _boothManager:BoothManager;
 		[Bindable] public var _venue:Venue;
@@ -127,19 +127,25 @@ package rock_on
 		{
 			if (collectionButton)
 			{
-				Application.application.removeChild(collectionButton);
+				_boothManager.uiLayer.removeChild(collectionButton);
 			}
-		}
+		}		
 		
 		public function updateState():void
 		{
 			if (inventory_count > 0)
 			{
-				startStockedState();
+				if (state != STOCKED_STATE)
+				{
+					startStockedState();				
+				}
 			}
 			else
 			{
-				startUnstockedState();
+				if (state != UNSTOCKED_STATE)
+				{
+					startUnstockedState();				
+				}
 			}
 			
 			updateInventoryCount();

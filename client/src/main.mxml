@@ -180,6 +180,7 @@
 				if (evt.model == "owned_structure")
 				{
 					gdi.structureManager.updateOwnedStructureOnServerResponse(instance as OwnedStructure, evt.method, worldView);
+					worldView.updateRenderedStructures(instance as OwnedStructure, evt.method);
 				}
 				if (evt.model == "user")
 				{

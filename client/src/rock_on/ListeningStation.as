@@ -49,7 +49,10 @@ package rock_on
 			
 		public function setInMotion():void
 		{
-			initializeTimeAndState();
+			if (!editMirror)
+			{
+				initializeTimeAndState();			
+			}
 		}	
 				
 		public function setProperties():void
@@ -62,6 +65,10 @@ package rock_on
 			else if (_structure.mc is Booth_01)
 			{
 				stationType = "RecordPlayer";
+				radius = new Point3D(2, 0, 1);
+			}
+			else if (_structure.mc is Jukebox)
+			{
 				radius = new Point3D(2, 0, 1);
 			}
 		}	

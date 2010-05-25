@@ -18,7 +18,6 @@ package rock_on
 	import world.Point;
 	import world.Point3D;
 	import world.World;
-	import world.WorldEvent;
 
 	public class BoothManager extends EventDispatcher
 	{
@@ -62,60 +61,58 @@ package rock_on
 		
 		public function updateBoothOnServerResponse(os:OwnedStructure, method:String):void
 		{
-			var selectedBooth:Booth;
-			
-			for each (var booth:Booth in booths)
-			{
-				if (booth.id == os.id)
-				{
-					selectedBooth = booth;									
-				}
-			}
+			var booth:Booth = getBoothById(os.id);
 						
 			if (method == "update_inventory_count")
 			{
-				if (os.inventory_count <= 0)
-				{
-					if (selectedBooth.state != Booth.UNSTOCKED_STATE)
-					{
-						selectedBooth.advanceState(Booth.UNSTOCKED_STATE);										
-					}
-				}				
-			}
-			
+				booth.updateState();		
+			}			
 			if (method == "add_booth_credits")
 			{
-				selectedBooth.updateProperties(os);
-				selectedBooth.advanceState(Booth.STOCKED_STATE);
-			}
-			
+				booth.updateProperties(os);
+				booth.advanceState(Booth.STOCKED_STATE);
+			}			
 			if (method == "save_placement")
 			{
-				selectedBooth.updateProperties(os);
-				updateBoothPlacementPostServerResponse(selectedBooth);
-			}			
+				booth.updateProperties(os);
+				moveBoothUIComponents(booth);
+			}						
+			if (method == "sell")
+			{
+				removeBooth(booth);
+			}				
+			if (method == "create_new")
+			{
+				booth = createBooth(os);
+				booth.updateState();
+			}		
 		}
 		
-		public function updateBoothPlacementPostServerResponse(booth:Booth):void
+		public function removeBooth(booth:Booth):void
 		{
-			for each (var asset:ActiveAsset in _myWorld.assetRenderer.unsortedAssets)
+			var index:int = booths.getItemIndex(booth);
+			booths.removeItemAt(index);				
+		}
+		
+		public function createBooth(os:OwnedStructure):Booth
+		{
+			var booth:Booth = new Booth(this, _venue, os);
+			booth.friendMirror = friendMirror;
+			booth.editMirror = editMirror;
+			booths.addItem(booth);
+			return booth;
+		}
+		
+		public function getBoothById(id:int):Booth
+		{
+			for each (var booth:Booth in booths)
 			{
-				if (asset.thinger)
+				if (booth.id == id)
 				{
-					if (asset.thinger is OwnedStructure && asset.thinger.id == (booth as OwnedStructure).id)
-					{
-						asset.worldCoords.x = booth.x;
-						asset.worldCoords.y = booth.y;
-						asset.worldCoords.z = booth.z;
-						_myWorld.removeAsset(asset);
-						_myWorld.addStaticAsset(asset, asset.worldCoords);
-						moveBoothUIComponents(booth);
-						var evt:WorldEvent = new WorldEvent(WorldEvent.STRUCTURE_PLACED, asset, true, true);
-						dispatchEvent(evt);
-						break;
-					}
+					return booth;									
 				}
-			}
+			}	
+			return null;		
 		}
 		
 		private function moveBoothUIComponents(booth:Booth):void
@@ -142,17 +139,21 @@ package rock_on
 			var boothStructures:ArrayCollection = _structureManager.getStructuresByType("Booth");
 			for each (var os:OwnedStructure in boothStructures)
 			{
-				var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
-				var asset:ActiveAsset = new ActiveAsset(mc);
-				asset.thinger = os;
-				var booth:Booth = new Booth(this, _venue, os);
-				booth.friendMirror = friendMirror;
-				booths.addItem(booth);
-				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
+				var booth:Booth = createBooth(os);
+				var asset:ActiveAsset = createBoothAsset(booth);
+				var addTo:Point3D = new Point3D(booth.x, booth.y, booth.z);
 				_myWorld.addStaticAsset(asset, addTo);
 				booth.updateState();
 			}
-		}		
+		}	
+		
+		public function createBoothAsset(booth:Booth):ActiveAsset
+		{
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(booth.structure.mc);
+			var asset:ActiveAsset = new ActiveAsset(mc);			
+			asset.thinger = booth;	
+			return asset;		
+		}	
 		
 		public function addBoothCollectionButton(booth:Booth):void
 		{	
@@ -193,16 +194,8 @@ package rock_on
 		
 		public function getRandomBooth(booth:Booth=null):Booth
 		{
-			var selectedBooth:Booth = null;
-			
-			var unstockedBooths:int = 0;
-			for each (var booth:Booth in booths)
-			{
-				if (booth.state == Booth.UNSTOCKED_STATE)
-				{
-					unstockedBooths++;
-				}
-			}
+			var selectedBooth:Booth = null;			
+			var unstockedBooths:int = getUnstockedBooths().length;
 			
 			if (booths.length && !(booths.length == 1 && booth) && booths.length != unstockedBooths)
 			{
@@ -213,6 +206,19 @@ package rock_on
 				while (selectedBooth == booth || selectedBooth.state != Booth.STOCKED_STATE);
 			}
 			return selectedBooth;	
+		}
+		
+		public function getUnstockedBooths():ArrayCollection
+		{
+			var unstockedBooths:ArrayCollection = new ArrayCollection();
+			for each (var booth:Booth in booths)
+			{
+				if (booth.state == Booth.UNSTOCKED_STATE)
+				{
+					unstockedBooths.addItem(booth);
+				}
+			}	
+			return unstockedBooths;		
 		}
 				
 		public function getBoothFront(booth:Booth, index:int=0, routedCustomer:Boolean=false, queuedCustomer:Boolean=false, customerless:Boolean=false):Point3D
@@ -249,6 +255,11 @@ package rock_on
 		public function set uiLayer(val:UILayer):void
 		{
 			_uiLayer = val;
+		}
+		
+		public function get uiLayer():UILayer
+		{
+			return _uiLayer;
 		}
 		
 	}

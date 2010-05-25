@@ -167,6 +167,11 @@ package game
 				{
 					requestChildrenFromServer(obj, requestType);					
 				}
+				if (obj.created_from_client)
+				{
+					loadObject(obj, requestType);
+				}
+				
 				if (obj.already_loaded)
 				{
 					updateProperties(obj);

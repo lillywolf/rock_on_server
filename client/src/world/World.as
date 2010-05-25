@@ -218,6 +218,32 @@ package world
 			asset.movieClip.stop();
 		}		
 		
+		public function findAssetByThinger(thinger:Object):ActiveAsset
+		{
+			for each (var asset:ActiveAsset in assetRenderer.unsortedAssets)
+			{
+				if (asset.thinger)
+				{
+					if (asset.thinger.id == thinger.id)
+					{
+						return asset;					
+					}
+				}
+			}
+			return null;
+		}
+		
+		public function updateAssetCoords(asset:ActiveAsset, newCoords:Point3D):void
+		{
+			asset.worldCoords.x = newCoords.x;
+			asset.worldCoords.y = newCoords.y;
+			asset.worldCoords.z = newCoords.z;
+			removeAsset(asset);
+			addAsset(asset, asset.worldCoords);
+//			var evt:WorldEvent = new WorldEvent(WorldEvent.STRUCTURE_PLACED, asset, true, true);
+//			dispatchEvent(evt);			
+		}
+		
 		private function onDirectionChanged(evt:WorldEvent):void
 		{
 			var asset:ActiveAsset = evt.activeAsset;

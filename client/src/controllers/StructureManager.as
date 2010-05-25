@@ -158,11 +158,11 @@ package controllers
 				removeOwnedStructureFromSystem(osReference);
 			}
 			
-			if (os.structure.structure_type == "Booth")
+			if (osReference.structure.structure_type == "Booth")
 			{
 				updateBoothOnServerResponse(osReference, method, worldView.boothManager);
 			}
-			else if (os.structure.structure_type == "ListeningStation")
+			else if (osReference.structure.structure_type == "ListeningStation")
 			{
 				updateListeningStationOnServerResponse(osReference, method, worldView.listeningStationManager);
 			}						
