@@ -11,7 +11,8 @@ package rock_on
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
-	import mx.core.Application;
+	
+	import views.UILayer;
 	
 	import world.ActiveAsset;
 	import world.Point;
@@ -24,6 +25,7 @@ package rock_on
 		public static const BOOTH_CREDITS_MULTIPLIER:int = 50;
 		
 		public var booths:ArrayCollection;
+		public var _uiLayer:UILayer;
 		public var _myWorld:World;
 		public var friendMirror:Boolean;
 		public var editMirror:Boolean;
@@ -83,6 +85,7 @@ package rock_on
 			
 			if (method == "add_booth_credits")
 			{
+				selectedBooth.updateProperties(os);
 				selectedBooth.advanceState(Booth.STOCKED_STATE);
 			}
 			
@@ -99,17 +102,27 @@ package rock_on
 			{
 				if (asset.thinger)
 				{
-					if (asset.thinger.id == (booth as OwnedStructure).id)
+					if (asset.thinger is OwnedStructure && asset.thinger.id == (booth as OwnedStructure).id)
 					{
 						asset.worldCoords.x = booth.x;
 						asset.worldCoords.y = booth.y;
 						asset.worldCoords.z = booth.z;
 						_myWorld.removeAsset(asset);
 						_myWorld.addStaticAsset(asset, asset.worldCoords);
+						moveBoothUIComponents(booth);
 						var evt:WorldEvent = new WorldEvent(WorldEvent.STRUCTURE_PLACED, asset, true, true);
 						dispatchEvent(evt);
+						break;
 					}
 				}
+			}
+		}
+		
+		private function moveBoothUIComponents(booth:Booth):void
+		{
+			if (booth.state == Booth.UNSTOCKED_STATE && booth.collectionButton)
+			{
+				moveBoothCollectionButton(booth.collectionButton, booth);
 			}
 		}
 		
@@ -147,10 +160,25 @@ package rock_on
 			btn.booth = booth;
 			booth.collectionButton = btn;
 			btn.addEventListener(MouseEvent.CLICK, onCollectionButtonClicked);
+			addBoothCollectionButtonToUILayer(btn, booth);
+		}
+		
+		public function addBoothCollectionButtonToUILayer(btn:SpecialButton, booth:Booth):void
+		{
 			var actualCoords:Point = World.worldToActualCoords(new Point3D(booth.x, booth.y, booth.z));
 			btn.x = actualCoords.x + _myWorld.x;
 			btn.y = actualCoords.y + _myWorld.y;
-			Application.application.addChild(btn);		
+			if (!friendMirror && !editMirror)
+			{
+				_uiLayer.addChild(btn);
+			}			
+		}
+		
+		private function moveBoothCollectionButton(btn:SpecialButton, booth:Booth):void
+		{
+			var actualCoords:Point = World.worldToActualCoords(new Point3D(booth.x, booth.y, booth.z));
+			btn.x = actualCoords.x + _myWorld.x;
+			btn.y = actualCoords.y + _myWorld.y;			
 		}
 		
 		private function onCollectionButtonClicked(evt:MouseEvent):void
@@ -160,6 +188,7 @@ package rock_on
 //			var creditsToAdd:int = booth.getTotalInventory() * BOOTH_CREDITS_MULTIPLIER;
 			
 			_structureManager.serverController.sendRequest({id: booth.id}, "owned_structure", "add_booth_credits");
+			_uiLayer.removeChild(btn);
 		}
 		
 		public function getRandomBooth(booth:Booth=null):Booth
@@ -215,6 +244,11 @@ package rock_on
 		public function set venue(val:Venue):void
 		{
 			_venue = val;
+		}
+		
+		public function set uiLayer(val:UILayer):void
+		{
+			_uiLayer = val;
 		}
 		
 	}

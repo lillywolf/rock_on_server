@@ -54,6 +54,9 @@ package rock_on
 		{
 			if (_myWorld)
 			{
+				cp.lastWorldPoint = null;
+				cp.worldCoords = null;
+				cp.proxiedDestination = null;
 				addToWorld(cp);
 				cp.reInitialize();
 				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);

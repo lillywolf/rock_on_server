@@ -99,6 +99,7 @@
 				venueManager = Application.application.worldView.venueManager;
 				boothManager.venue = venueManager.venue;
 				listeningStationManager.venue = venueManager.venue;
+				boothManager.editMirror = true;
 				boothManager.setInMotion();
 				listeningStationManager.showListeningStations();
 			}
