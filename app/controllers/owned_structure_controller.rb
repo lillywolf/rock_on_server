@@ -38,6 +38,8 @@ class OwnedStructureController < ApplicationController
     hash["instance"] = os
     hash["belongs_to"] = ["user", "structure"]
     hash["belongs_to_id"] = [os.user_id, os.structure_id]
+    hash["already_loaded"] = true
+    hash["created_from_client"] = true
     hash["method"] = "create_new"
     hash["model"] = "owned_structure"
     @array.push hash
