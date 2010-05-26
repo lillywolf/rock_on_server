@@ -3,6 +3,8 @@ package rock_on
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	
+	import helpers.CreatureGenerator;
+	
 	import models.Creature;
 	import models.Layerable;
 	import models.OwnedLayerable;
@@ -18,7 +20,8 @@ package rock_on
 
 	public class PasserbyManager extends ArrayCollection
 	{
-		private var _myWorld:World;		
+		private var _myWorld:World;	
+		public var _creatureGenerator:CreatureGenerator;	
 		public var spawnLocation:Point3D;
 		public var spawnInterval:int;
 		public var _listeningStationManager:ListeningStationManager;
@@ -27,10 +30,11 @@ package rock_on
 		public static const SPAWN_INTERVAL_BASE:int = 2000;
 		public static const SPAWN_INTERVAL_MULTIPLIER:int = 5000;
 				
-		public function PasserbyManager(listeningStationManager:ListeningStationManager, myWorld:World, source:Array=null)
+		public function PasserbyManager(listeningStationManager:ListeningStationManager, myWorld:World, creatureGenerator:CreatureGenerator, source:Array=null)
 		{
 			super(source);
 			_listeningStationManager = listeningStationManager;
+			_creatureGenerator = creatureGenerator;
 			setWorld(myWorld);
 		}
 		
@@ -57,21 +61,15 @@ package rock_on
 		
 		private function generatePasserby():Passerby
 		{
-			var creature:Creature = new Creature({id: -1, creature_type: "Passerby"});
-			var ownedLayerables:ArrayCollection = getStyles(-1);
-			creature.owned_layerables = ownedLayerables;
-			var assetStack:AssetStack = creature.getConstructedCreature("walk_toward", 1, 1);	
-			var passerby:Passerby = new Passerby(assetStack.movieClipStack, _listeningStationManager, this, _myWorld, assetStack.layerableOrder, assetStack.creature, 0.4);			
+			var asset:AssetStack = _creatureGenerator.createCreatureAsset("generic", "walk_toward", "Passerby");
+			var passerby:Passerby = new Passerby(asset.movieClipStack, _listeningStationManager, this, _myWorld, asset.layerableOrder, asset.creature, 0.4);			
 			return passerby;		
 		}
 		
 		private function generateStationListener():StationListener
 		{
-			var creature:Creature = new Creature({id: -1, creature_type: "Passerby"});
-			var ownedLayerables:ArrayCollection = getStyles(-1);
-			creature.owned_layerables = ownedLayerables;
-			var assetStack:AssetStack = creature.getConstructedCreature("walk_toward", 1, 1);	
-			var sl:StationListener = new StationListener(assetStack.movieClipStack, _listeningStationManager, this, _myWorld, assetStack.layerableOrder, assetStack.creature, 0.4);			
+			var asset:AssetStack = _creatureGenerator.createCreatureAsset("generic", "walk_toward", "StationListener");
+			var sl:StationListener = new StationListener(asset.movieClipStack, _listeningStationManager, this, _myWorld, asset.layerableOrder, asset.creature, 0.4);			
 			return sl;		
 		}
 		
@@ -186,7 +184,7 @@ package rock_on
 			{			
 				spawnLocation = listener.setInitialDestination();
 				_myWorld.addAsset(listener, spawnLocation);
-				listener.movieClipStack.alpha = 0.5;				
+//				listener.movieClipStack.alpha = 0.5;				
 				addItem(listener);
 			}
 			else

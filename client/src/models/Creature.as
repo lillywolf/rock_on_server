@@ -22,15 +22,15 @@ package models
 		{
 			super(null, target);
 			
-			_owned_layerables = new ArrayCollection();
-			
+			_owned_layerables = new ArrayCollection();			
 			setPropertiesFromParams(params);
 			initializeLayerableOrder();
 		}
 		
-		private function setPropertiesFromParams(params:Object):void
+		public function setPropertiesFromParams(params:Object):void
 		{
 			_id = params.id;
+			
 			if (params.creature_type)
 			{
 				_type = params.creature_type;

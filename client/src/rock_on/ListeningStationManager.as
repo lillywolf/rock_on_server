@@ -1,5 +1,6 @@
 package rock_on
 {
+	import controllers.LayerableManager;
 	import controllers.StructureManager;
 	
 	import flash.display.MovieClip;
@@ -9,12 +10,14 @@ package rock_on
 	
 	import game.GameClock;
 	
+	import helpers.CreatureGenerator;
+	
 	import models.EssentialModelReference;
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
-	import mx.core.Application;
 	
+	import views.UILayer;
 	import views.VenueManager;
 	
 	import world.ActiveAsset;
@@ -26,26 +29,31 @@ package rock_on
 	{
 		public var listeningStations:ArrayCollection;
 		public var passerbyManager:PasserbyManager;
+		public var creatureGenerator:CreatureGenerator;
 		public var friendMirror:Boolean;
 		public var editMirror:Boolean;
 		public var _structureManager:StructureManager;
 		public var _stageManager:StageManager;
 		public var _boothManager:BoothManager;
+		public var _layerableManager:LayerableManager;
 		public var _customerPersonManager:CustomerPersonManager;
 		public var _myWorld:World;
 		public var _venue:Venue;
+		public var _uiLayer:UILayer;
 		
-		public function ListeningStationManager(structureManager:StructureManager, myWorld:World, target:IEventDispatcher=null)
+		public function ListeningStationManager(structureManager:StructureManager, layerableManager:LayerableManager, myWorld:World, target:IEventDispatcher=null)
 		{
 			super(target);
-			_myWorld = myWorld;		
+			_myWorld = myWorld;	
+			_layerableManager = layerableManager;	
 			_structureManager = structureManager;
+			creatureGenerator = new CreatureGenerator(layerableManager);
 			listeningStations = new ArrayCollection();
 		}
 		
 		public function setInMotion():void
 		{
-			passerbyManager = new PasserbyManager(this, _myWorld);
+			passerbyManager = new PasserbyManager(this, _myWorld, creatureGenerator);
 			showListeningStations();
 			showPassersby();			
 		}
@@ -79,9 +87,12 @@ package rock_on
 			btn.station = station;
 			btn.addEventListener(MouseEvent.CLICK, onFanButtonClicked);
 			var actualCoords:Point = World.worldToActualCoords(new Point3D(station.x, station.y, station.z));
-			btn.x = actualCoords.x;
-			btn.y = actualCoords.y;
-			Application.application.addChild(btn);
+			btn.x = actualCoords.x + _myWorld.x;
+			btn.y = actualCoords.y + _myWorld.y;
+			if (!friendMirror && !editMirror)
+			{
+				_uiLayer.addChild(btn);
+			}			
 		}
 		
 		private function onFanButtonClicked(evt:MouseEvent):void
@@ -158,7 +169,7 @@ package rock_on
 				
 			do
 			{
-				stationFront = new Point3D(Math.floor(station.x + station.structure.width/2 + 1 + Math.round(Math.random()*station.radius.x)), 0, Math.floor(station.z - station.structure.depth/2 + Math.round(Math.random()*station.radius.x*2)+1));										
+				stationFront = new Point3D(Math.floor(station.x + station.structure.width/2 + 1 + Math.round(Math.random()*station.radius.x)), 0, Math.floor(station.z - Math.round(Math.random()*station.radius.z*2)));										
 			}			
 			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stationFront)));
 			return stationFront;
@@ -271,7 +282,17 @@ package rock_on
 		public function set customerPersonManager(val:CustomerPersonManager):void
 		{
 			_customerPersonManager = val;
-		}				
+		}	
+		
+		public function set uiLayer(val:UILayer):void
+		{
+			_uiLayer = val;
+		}
+		
+		public function get uiLayer():UILayer
+		{
+			return _uiLayer;
+		}					
 		
 	}
 }

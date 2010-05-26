@@ -12,6 +12,7 @@ package views
 	
 	import mx.collections.ArrayCollection;
 	
+	import rock_on.BoothManager;
 	import rock_on.ConcertStage;
 	import rock_on.CustomerPerson;
 	import rock_on.CustomerPersonManager;
@@ -31,9 +32,10 @@ package views
 		public var _booths:ArrayCollection;
 		public var _concertStage:ConcertStage;
 		public var _bandManager:BandManager;
+		public var _boothManager:BoothManager;
 		public var _levelManager:LevelManager;
 		
-		public function VenueManager(creatureGenerator:CreatureGenerator, customerPersonManager:CustomerPersonManager, dwellingManager:DwellingManager, levelManager:LevelManager, bandManager:BandManager, booths:ArrayCollection, concertStage:ConcertStage, myWorld:World, target:IEventDispatcher=null)
+		public function VenueManager(creatureGenerator:CreatureGenerator, customerPersonManager:CustomerPersonManager, dwellingManager:DwellingManager, levelManager:LevelManager, bandManager:BandManager, boothManager:BoothManager, concertStage:ConcertStage, myWorld:World, target:IEventDispatcher=null)
 		{
 			super(target);
 			_creatureGenerator = creatureGenerator;
@@ -41,7 +43,8 @@ package views
 			_dwellingManager = dwellingManager;
 			_levelManager = levelManager;
 			_bandManager = bandManager;
-			_booths = booths;
+			_boothManager = boothManager;
+			_booths = _boothManager.booths;
 			_concertStage = concertStage;
 			_myWorld = myWorld;
 		}
@@ -56,7 +59,7 @@ package views
 		{
 			for (var i:int = 0; i < venue.fancount; i++)
 			{
-				var cp:CustomerPerson = _creatureGenerator.createCustomer("generic", "walk_toward");
+				var cp:CustomerPerson = _creatureGenerator.createCustomer("generic", "walk_toward", _concertStage, _boothManager);
 				cp.speed = 0.06;
 				_customerPersonManager.add(cp);
 			}

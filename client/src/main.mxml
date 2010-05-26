@@ -21,7 +21,7 @@
 		</mx:State>
 		<mx:State name="editView" basedOn="topBar">
 			<mx:AddChild>
-				<views:EditView id="editView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}" venueManager="{worldView.venueManager}" dwellingManager="{gdi.dwellingManager}"/>
+				<views:EditView id="editView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" boothManager="{worldView.boothManager}" venueManager="{worldView.venueManager}" dwellingManager="{gdi.dwellingManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="twoDimensional">

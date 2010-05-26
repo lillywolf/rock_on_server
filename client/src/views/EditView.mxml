@@ -108,7 +108,7 @@
 			{
 				addStage();
 				boothManager = new BoothManager(structureManager, myWorld);
-				listeningStationManager = new ListeningStationManager(structureManager, myWorld);
+				listeningStationManager = new ListeningStationManager(structureManager, layerableManager, myWorld);
 				venueManager = Application.application.worldView.venueManager;
 				boothManager.venue = venueManager.venue;
 				listeningStationManager.venue = venueManager.venue;
