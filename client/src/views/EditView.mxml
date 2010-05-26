@@ -44,6 +44,7 @@
 			public var myWorld:World;
 			[Bindable] public var myUser:User;
 			
+			public var uiLayer:UILayer;
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
 			public var editMode:EditMode;
@@ -76,14 +77,26 @@
 			{
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
 				myWorld = new World(800, 800, 40);				
-				addChild(myWorld);									
+				addChild(myWorld);	
+												
 				editMode = new EditMode(myWorld, this);
 				editMode.addEventListener('structurePlaced', onStructurePlaced);
 				editMode.structureManager = structureManager;
 				addChild(editMode);		
 				initializeSpace();
+				
+				addUILayer();				
+				
 				dispatchEditViewCreationEvent();			
 			}
+			
+			private function addUILayer():void
+			{
+				uiLayer = new UILayer();
+				uiLayer.width = width;
+				uiLayer.height = height;
+				addChild(uiLayer);				
+			}			
 			
 			public function dispatchEditViewCreationEvent():void
 			{
@@ -142,7 +155,20 @@
 				myWorld.addAsset(asset, addTo);
 				asset.movieClip.gotoAndPlay(1);
 				asset.movieClip.stop();
-			}			
+			}
+			
+			public function updateRenderedStructures(os:OwnedStructure, method:String):void
+			{
+				var asset:ActiveAsset = myWorld.findAssetByThinger(os);
+				if (method == "sell")
+				{
+					myWorld.assetRenderer.removeAsset(asset);
+				}
+				if (method == "save_placement")
+				{
+					myWorld.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z));
+				}
+			}							
 		]]>
 	</mx:Script>	
 </mx:Canvas>

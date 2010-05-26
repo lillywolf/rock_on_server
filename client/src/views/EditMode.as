@@ -58,7 +58,7 @@ package views
 		
 		private function enableMouseDetection():void
 		{
-			_myWorld.graphics.beginFill(0x000000, 0.2);
+			_myWorld.graphics.beginFill(0x000000, 0);
 			_myWorld.graphics.drawRect(_myWorld.x, -(_myWorld.y), Application.application.width, Application.application.height);
 			_myWorld.graphics.endFill();			
 		}
@@ -117,12 +117,13 @@ package views
 		}
 		
 		public function evaluateClickedAsset(asset:Object):void
-		{
+		{			
 			if (asset is ActiveAsset)
 			{
 				var assetParent:ActiveAsset = asset as ActiveAsset;
 				if (assetParent.thinger is OwnedStructure && (assetParent.thinger as OwnedStructure).editing == false)
 				{
+					resetEditMode();			
 					activateMoveableStructure(assetParent);
 					locked = true;
 					(assetParent.thinger as OwnedStructure).editing = true;
@@ -140,18 +141,62 @@ package views
 			}			
 		}
 		
+		public function resetEditMode():void
+		{
+			if (locked)
+			{
+				removeListenersFromWorld();
+				resetAssetColor();
+				updateCurrentAssetCoordinates();
+				updateCurrentAssetMode(false);
+				removeAllOwnedStructureEditOptions();
+			}
+		}
+		
+		public function removeListenersFromWorld():void
+		{
+			if (_myWorld.hasEventListener(MouseEvent.MOUSE_MOVE))
+			{
+				_myWorld.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+			}
+		}
+		
+		public function resetAssetColor():void
+		{
+			if (currentAsset)
+			{
+				currentAsset.transform.colorTransform = NORMAL_COLOR;							
+			}
+		}
+		
+		public function updateCurrentAssetCoordinates():void
+		{
+			if (currentAsset)
+			{
+				var os:OwnedStructure = currentAsset.thinger as OwnedStructure;
+				_myWorld.removeAsset(currentAsset);			
+				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
+				_myWorld.addStaticAsset(currentAsset, addTo);								
+			}
+		}
+		
+		public function updateCurrentAssetMode(mode:Boolean):void
+		{
+			if (currentAsset)
+			{
+				(currentAsset.thinger as OwnedStructure).editing = mode;
+			}
+		}
+				
 		public function deactivateStructureWithoutSaving():void
 		{
 			if (currentAsset)
 			{
 				var os:OwnedStructure = currentAsset.thinger as OwnedStructure;
 				os.editing = false;
-				_myWorld.removeAsset(currentAsset);			
+//				_myWorld.removeAsset(currentAsset);			
 			}
-			if (_myWorld.hasEventListener(MouseEvent.MOUSE_MOVE))
-			{
-				_myWorld.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);			
-			}			
+			removeListenersFromWorld();		
 		}
 		
 		public function saveNewOwnedStructure(os:OwnedStructure, asset:ActiveAsset):void
@@ -167,7 +212,12 @@ package views
 		public function showOwnedStructureEditOptions():void
 		{
 			var osEditOptions:OwnedStructureEditOptions = new OwnedStructureEditOptions(currentAsset, _myWorld, this);
-			Application.application.addChild(osEditOptions);
+			_editView.uiLayer.addChild(osEditOptions);
+		}
+		
+		public function removeAllOwnedStructureEditOptions():void
+		{
+			_editView.uiLayer.removeAllChildren();
 		}
 		
 		public function sellButtonClicked():void

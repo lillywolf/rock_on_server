@@ -181,6 +181,7 @@
 				{
 					gdi.structureManager.updateOwnedStructureOnServerResponse(instance as OwnedStructure, evt.method, worldView);
 					worldView.updateRenderedStructures(instance as OwnedStructure, evt.method);
+					editView.updateRenderedStructures(instance as OwnedStructure, evt.method);
 				}
 				if (evt.model == "user")
 				{

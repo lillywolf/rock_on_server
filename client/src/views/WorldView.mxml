@@ -282,8 +282,12 @@
 				if (os.structure.structure_type == "Booth")
 				{
 					boothManager.reInitializeBooths();
+					customerPersonManager.redrawAllCustomers();
 				}
-				customerPersonManager.redrawAllCustomers();
+				else if (os.structure.structure_type == "ListeningStation")
+				{
+					listeningStationManager.reInitializeListeningStations();				
+				}
 			}
 			
 		]]>

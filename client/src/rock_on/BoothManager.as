@@ -161,17 +161,17 @@ package rock_on
 			btn.booth = booth;
 			booth.collectionButton = btn;
 			btn.addEventListener(MouseEvent.CLICK, onCollectionButtonClicked);
-			addBoothCollectionButtonToUILayer(btn, booth);
+			addBoothCollectionButtonToUILayer(booth);
 		}
 		
-		public function addBoothCollectionButtonToUILayer(btn:SpecialButton, booth:Booth):void
+		public function addBoothCollectionButtonToUILayer(booth:Booth):void
 		{
 			var actualCoords:Point = World.worldToActualCoords(new Point3D(booth.x, booth.y, booth.z));
-			btn.x = actualCoords.x + _myWorld.x;
-			btn.y = actualCoords.y + _myWorld.y;
+			booth.collectionButton.x = actualCoords.x + _myWorld.x;
+			booth.collectionButton.y = actualCoords.y + _myWorld.y;
 			if (!friendMirror && !editMirror)
 			{
-				_uiLayer.addChild(btn);
+				_uiLayer.addChild(booth.collectionButton);
 			}			
 		}
 		

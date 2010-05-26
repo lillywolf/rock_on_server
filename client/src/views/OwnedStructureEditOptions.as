@@ -4,7 +4,6 @@ package views
 	
 	import mx.containers.Canvas;
 	import mx.controls.Button;
-	import mx.core.Application;
 	import mx.core.UIComponent;
 	
 	import world.ActiveAsset;
@@ -59,13 +58,15 @@ package views
 		private function onMoveButtonClicked(evt:MouseEvent):void
 		{
 			_editMode.moveButtonClicked();
-			Application.application.removeChild(this);
+			parent.removeChild(this);
+			removeEventListener(MouseEvent.CLICK, onMoveButtonClicked);
 		}
 		
 		private function onSellButtonClicked(evt:MouseEvent):void
 		{
 			_editMode.sellButtonClicked();
-			Application.application.removeChild(this);
+			parent.removeChild(this);
+			removeEventListener(MouseEvent.CLICK, onSellButtonClicked);
 		}
 		
 	}

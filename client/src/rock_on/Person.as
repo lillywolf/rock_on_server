@@ -135,14 +135,14 @@ package rock_on
 		{
 			var rand:Number = Math.random();
 			
-			if (horizontalRelationship == "left")
-			{
-				frameNumber = 37;
-				this.movieClipStack.scaleX = orientation;
-			}
-			else if (horizontalRelationship == "right")
+			if (verticalRelationship == "bottom")
 			{
 				frameNumber = 39;
+				this.movieClipStack.scaleX = -(orientation);
+			}
+			else if (horizontalRelationship == "left")
+			{
+				frameNumber = 37;
 				this.movieClipStack.scaleX = orientation;
 			}
 			else if (verticalRelationship == "top")
@@ -150,10 +150,10 @@ package rock_on
 				frameNumber = 37;
 				this.movieClipStack.scaleX = -(orientation);
 			}
-			else if (verticalRelationship == "bottom")
+			else if (horizontalRelationship == "right")
 			{
 				frameNumber = 39;
-				this.movieClipStack.scaleX = -(orientation);
+				this.movieClipStack.scaleX = orientation;
 			}
 			else
 			{

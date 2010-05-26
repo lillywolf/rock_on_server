@@ -19,10 +19,10 @@
 			public var myWorld:World;
 			[Bindable] public var myUser:User;
 			
-			public var creditsBox:Text;
-			public var xpBox:Text;
-			public var levelBox:Text;
-			public var mainHBox:HBox;
+			[Bindable] public var creditsBox:Text;
+			[Bindable] public var xpBox:Text;
+			[Bindable] public var levelBox:Text;
+			[Bindable] public var mainHBox:HBox;
 			
 			[Bindable] public var layerableManager:LayerableManager;
 			[Bindable] public var structureManager:StructureManager;

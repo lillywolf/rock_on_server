@@ -50,6 +50,16 @@ package rock_on
 			showPassersby();			
 		}
 		
+		public function reInitializeListeningStations():void
+		{
+			passerbyManager.removeAllRegularPassersBy();
+			
+			for each (var station:ListeningStation in listeningStations)
+			{
+				passerbyManager.reinitializeStaticListeners(station);				
+			}
+		}				
+		
 		public function addListeners(station:ListeningStation):void
 		{
 			if (station.currentListeners.length < station.listenerCount)
@@ -110,21 +120,33 @@ package rock_on
 			var listeningStructures:ArrayCollection = _structureManager.getStructuresByType("ListeningStation");
 			for each (var os:OwnedStructure in listeningStructures)
 			{
-				var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);				
-				var asset:ActiveAsset = new ActiveAsset(mc);
-				asset.thinger = os;
-				var listeningStation:ListeningStation = new ListeningStation(this, _boothManager, _venue, os);
-				listeningStation.friendMirror = friendMirror;
-				listeningStation.editMirror = editMirror;
+				var listeningStation:ListeningStation = createListeningStation(os);
+				var asset:ActiveAsset = createListeningStationAsset(listeningStation);
 				listeningStation.activeAsset = asset;
-				listeningStation.createdAt = GameClock.convertStringTimeToUnixTime(os.created_at);
-				listeningStation.stationType = _structureManager.getListeningStationTypeByMovieClip(os.structure.mc);
-				listeningStations.addItem(listeningStation);
 				listeningStation.setInMotion();
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				_myWorld.addStaticAsset(asset, addTo);
 			}
-		}	
+		}
+		
+		public function createListeningStation(os:OwnedStructure):ListeningStation
+		{
+			var station:ListeningStation = new ListeningStation(this, _boothManager, _venue, os);
+			station.friendMirror = friendMirror;
+			station.editMirror = editMirror;
+			station.createdAt = GameClock.convertStringTimeToUnixTime(os.created_at);
+			station.stationType = _structureManager.getListeningStationTypeByMovieClip(os.structure.mc);			
+			listeningStations.addItem(station);
+			return station;
+		}			
+		
+		public function createListeningStationAsset(station:ListeningStation):ActiveAsset
+		{
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(station.structure.mc);
+			var asset:ActiveAsset = new ActiveAsset(mc);			
+			asset.thinger = station;	
+			return asset;		
+		}
 		
 		public function getStationFront(station:ListeningStation):Point3D
 		{	

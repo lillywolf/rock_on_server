@@ -42,6 +42,19 @@ package rock_on
 			spawnTimer.start();			
 		}
 		
+		public function removeAllRegularPassersBy():void
+		{
+			var pbLength:int = length;
+			for (var i:int = (pbLength - 1); i >= 0; i--)
+			{
+				var passerby:Passerby = this[i] as Passerby;
+				if (!(passerby is StationListener))
+				{
+					remove(passerby);				
+				}
+			}
+		}		
+		
 		private function generatePasserby():Passerby
 		{
 			var creature:Creature = new Creature({id: -1, creature_type: "Passerby"});
@@ -91,13 +104,13 @@ package rock_on
 			if (Math.random()*_listeningStationManager.listeningStations.length > (1 - STATIONLISTENER_CONVERSION_PROBABILITY) && _listeningStationManager.isAnyStationAvailable())
 			{
 				var sl:StationListener = generateStationListener();
-				sl.speed = 0.08;
+				sl.speed = 0.07;
 				add(sl);			
 			}
 			else
 			{
 				var passerby:Passerby = generatePasserby();				
-				passerby.speed = 0.08;
+				passerby.speed = 0.07;
 				add(passerby);
 			}
 				
@@ -106,15 +119,14 @@ package rock_on
 			spawnTimer.stop();
 		}
 		
-		public function add(person:Passerby):void
+		public function add(passerby:Passerby):void
 		{
 			if(_myWorld)
 			{			
 				setSpawnLocation();
-				_myWorld.addAsset(person, spawnLocation);				
-				addItem(person);
-//				person.movieClipStack.alpha = 0.5;				
-				determineNextStep(person);
+				_myWorld.addAsset(passerby, spawnLocation);				
+				addItem(passerby);
+				determineNextStep(passerby);
 			}
 			else
 			{
@@ -144,29 +156,43 @@ package rock_on
 		{
 			for (var i:int = 0; i < station.listenerCount; i++)
 			{
-				addByStation(station);
+				addNewStationListener(station);
 			}
 		}
 		
-		public function addByStation(station:ListeningStation):void
+		public function reinitializeStaticListeners(station:ListeningStation):void
 		{
-			var stationListener:StationListener = generateStationListener();
-			stationListener.currentStation = station;
-			stationListener.speed = 0.07;
-			
+			for each (var listener:StationListener in station.currentListeners)
+			{
+				remove(listener as Passerby);
+				listener.currentStation = station;
+				addStationListener(listener);				
+			}
+		}
+		
+		public function addNewStationListener(station:ListeningStation):void
+		{
+			var listener:StationListener = generateStationListener();
+			listener.currentStation = station;
+			listener.speed = 0.07;		
+			addStationListener(listener);
+			listener.isStatic = true;
+			listener.startEnthralledState();									
+		}
+		
+		public function addStationListener(listener:StationListener):void
+		{
 			if(_myWorld)
 			{			
-				spawnLocation = stationListener.setInitialDestination();
-				_myWorld.addAsset(stationListener, spawnLocation);
-				stationListener.movieClipStack.alpha = 0.5;				
-				addItem(stationListener);
-				stationListener.isStatic = true;
-				stationListener.startEnthralledState();
+				spawnLocation = listener.setInitialDestination();
+				_myWorld.addAsset(listener, spawnLocation);
+				listener.movieClipStack.alpha = 0.5;				
+				addItem(listener);
 			}
 			else
 			{
 				throw new Error("you have to fill your pool before you dive");
-			}						
+			}				
 		}
 		
 		private function onFinalDestinationReached(evt:WorldEvent):void
