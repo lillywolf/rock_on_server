@@ -1,5 +1,6 @@
 package rock_on
 {
+	import flash.display.DisplayObjectContainer;
 	import flash.events.IEventDispatcher;
 	
 	import game.GameClock;
@@ -125,10 +126,11 @@ package rock_on
 		
 		public function endUnstockedState():void
 		{
-			if (collectionButton)
-			{
-				_boothManager.uiLayer.removeChild(collectionButton);
-			}
+//			if (collectionButton)
+//			{
+//				var btnParent:DisplayObjectContainer = collectionButton.parent;
+//				btnParent.removeChild(collectionButton);
+//			}
 		}		
 		
 		public function updateState():void

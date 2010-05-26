@@ -179,15 +179,23 @@
 				}
 				if (evt.model == "owned_structure")
 				{
-					gdi.structureManager.updateOwnedStructureOnServerResponse(instance as OwnedStructure, evt.method, worldView);
-					worldView.updateRenderedStructures(instance as OwnedStructure, evt.method);
-					editView.updateRenderedStructures(instance as OwnedStructure, evt.method);
+					updateOwnedStructurePostServer(instance as OwnedStructure, evt.method);
 				}
 				if (evt.model == "user")
 				{
 					gdi.user.updateUserOnServerResponse(instance as User, evt.method);
 					gdi.levelManager.setLevelOnUser(gdi.user);
 				}
+			}
+			private function updateOwnedStructurePostServer(os:OwnedStructure, method:String):void
+			{
+				gdi.structureManager.updateOwnedStructureOnServerResponse(os, method, worldView);
+				worldView.updateRenderedStructures(os, method);
+				
+				if (editView)
+				{
+					editView.updateRenderedStructures(os, method);					
+				}				
 			}
 			private function checkForUpdatedVenue(instance:OwnedDwelling, method:String):void
 			{
