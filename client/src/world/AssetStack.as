@@ -54,13 +54,7 @@ package world
 		public function stand(frameNumber:int, animationType:String):void
 		{
 			var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
-			doAnimation(animationType, frameNumber);
-//			for (var i:int = 0; i < movieClipChildren; i++)
-//			{
-//				var mc:MovieClip = _movieClipStack.getChildAt(i) as MovieClip;
-//				mc.gotoAndPlay(frameNumber);
-//				mc.stop();									
-//			}			
+			doAnimation(animationType, frameNumber);		
 		}
 		
 		public function doAnimation(animationType:String, frameNumber:int=0):void

@@ -29,6 +29,7 @@ package views
 		public var creaturePreview:UIComponent;
 		public var displayedLayerableList:UIComponent;
 		public var currentAnimation:String;
+		public var currentFrame:int;
 		
 		public static const VIEWER_X:Number = 200;
 		public static const VIEWER_WIDTH:Number = 400;
@@ -41,6 +42,7 @@ package views
 			_creatureManager = creatureManager;
 			
 			currentAnimation = "walk_toward";
+			currentFrame = 39;
 			
 			createAvailableLayerableList(currentAnimation);
 			generateCreaturePreview(currentAnimation);
@@ -127,6 +129,7 @@ package views
 			createCreaturePreview();
 
 			constructedCreature = _creature.getConstructedCreature(animation, 1, 1);
+			constructedCreature.doAnimation(animation, currentFrame);
 			constructedCreature.x = creaturePreview.width / 2;
 			creaturePreview.addChild(constructedCreature.movieClipStack);
 			addChild(creaturePreview);

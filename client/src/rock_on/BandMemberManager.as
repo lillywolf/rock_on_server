@@ -1,8 +1,15 @@
 package rock_on
 {
+	import customizer.CustomizerEvent;
+	
+	import flash.events.MouseEvent;
+	
 	import mx.collections.ArrayCollection;
+	import mx.containers.Canvas;
+	import mx.core.UIComponent;
 	
 	import world.ActiveAsset;
+	import world.AssetStack;
 	import world.Point3D;
 	import world.World;
 	import world.WorldEvent;
@@ -71,6 +78,54 @@ package rock_on
 		{
 			spawnLocation = new Point3D(Math.floor(_concertStage.structure.width - (Math.random()*_concertStage.structure.width)), 0, Math.floor(_myWorld.tilesDeep - Math.random()*(_concertStage.structure.depth)));	
 		}
+		
+		
+		public function putBandMembersInCustomizer(animation:String):Canvas
+		{
+			var customizerUI:Canvas = getCustomizerUI();
+			var index:int = 0;
+			for each (var bm:BandMember in this)
+			{
+				var asset:AssetStack = getBandMemberAssetCopy(bm, animation);
+				asset.creature = bm.creature;
+				asset.addEventListener(MouseEvent.CLICK, onBandMemberClicked);
+				asset.x = asset.width * index + asset.width/2;
+				asset.y = asset.height;
+				var uic:UIComponent = new UIComponent();
+				uic.addChild(asset);
+				customizerUI.addChild(uic);
+			}
+			return customizerUI;
+		}
+		
+		private function onBandMemberClicked(evt:MouseEvent):void
+		{
+			var asset:AssetStack = evt.currentTarget as AssetStack;
+			asset.removeEventListener(MouseEvent.CLICK, onBandMemberClicked);
+			var customizerEvent:CustomizerEvent = new CustomizerEvent(CustomizerEvent.CREATURE_SELECTED, true, true);
+			customizerEvent.selectedCreatureAsset = asset;
+			dispatchEvent(customizerEvent);
+		}
+		
+		public function getBandMemberAssetCopy(bm:BandMember, animation:String):AssetStack
+		{
+			var asset:AssetStack = bm.creature.getConstructedCreature(animation, 1, 1);
+			asset.doAnimation(animation, 39);
+			return asset;
+		}	
+		
+		public function getCustomizerUI():Canvas
+		{
+			var ui:Canvas = new Canvas();
+			ui.clipContent = false;
+			ui.width = 500;
+			ui.height = 400;
+			ui.setStyle("backgroundColor", 0x333333);
+			ui.setStyle("cornerRadius", 14);
+			ui.setStyle("borderColor", 0x333333);
+			ui.setStyle("borderStyle", "solid");
+			return ui;
+		}	
 		
 		public function update(deltaTime:Number):void
 		{			

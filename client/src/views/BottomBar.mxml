@@ -2,6 +2,11 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="100" clipContent="false" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import world.AssetStack;
+			import models.Creature;
+			import world.ActiveAsset;
+			import customizer.CustomizerEvent;
+			import mx.events.CollectionEvent;
 			import models.Store;
 			import mx.containers.HBox;
 			import mx.controls.Button;
@@ -42,6 +47,8 @@
 			public var arrowBtnClass:Class;
 			[Embed(source="../libs/icons/store.png")]
 			public var storeBtnClass:Class;
+			[Embed(source="../libs/icons/guitar.png")]
+			public var guitarBtnClass:Class;
 			
 
 			private function onCreationComplete():void
@@ -126,6 +133,12 @@
 				storeBtn.y = 468;
 				storeBtn.x = 606;
 				this.addChild(storeBtn);				
+				var guitarBtn:Button = new Button();
+				guitarBtn.setStyle("skin", guitarBtnClass);
+				guitarBtn.addEventListener(MouseEvent.CLICK, onCustomizerButtonClicked);
+				guitarBtn.y = 468;
+				guitarBtn.x = 656;
+				this.addChild(guitarBtn);				
 			}
 			
 			private function onEditButtonClicked(evt:MouseEvent):void
@@ -148,6 +161,34 @@
 			private function onStoreButtonClicked(evt:MouseEvent):void
 			{
 				showStore();
+			}
+			
+			private function onCustomizerButtonClicked(evt:MouseEvent):void
+			{
+				showCustomizerOptions();
+			}
+			
+			private function showCustomizerOptions():void
+			{
+				var customizerUI:Canvas = worldView.bandManager.bandMemberManager.putBandMembersInCustomizer("walk_toward");
+				worldView.bandManager.bandMemberManager.addEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
+				worldView.uiLayer.addChild(customizerUI);
+			}
+			
+			private function onBandMemberSelected(evt:CustomizerEvent):void
+			{
+				worldView.bandManager.bandMemberManager.removeEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
+				worldView.uiLayer.removeChild(evt.selectedCreatureAsset.parent.parent);
+				showCustomizer(evt.selectedCreatureAsset);
+			}
+			
+			private function showCustomizer(asset:AssetStack):void
+			{
+				var customizer:CreatureCustomizer = new CreatureCustomizer(asset.creature as Creature, worldView.creatureManager);
+				var canvas:Canvas = new Canvas();
+				canvas.y = CreatureCustomizer.VIEWER_HEIGHT;
+				canvas.addChild(customizer);
+				worldView.uiLayer.addChild(canvas);
 			}
 			
 			private function switchToEditView():void
