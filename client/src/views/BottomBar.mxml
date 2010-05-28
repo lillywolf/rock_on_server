@@ -170,7 +170,7 @@
 			
 			private function showCustomizerOptions():void
 			{
-				var customizerUI:Canvas = worldView.bandManager.bandMemberManager.putBandMembersInCustomizer("walk_toward");
+				var customizerUI:UICanvas = worldView.bandManager.bandMemberManager.putBandMembersInCustomizer("walk_toward");
 				worldView.bandManager.bandMemberManager.addEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
 				worldView.uiLayer.addChild(customizerUI);
 			}
@@ -185,8 +185,8 @@
 			private function showCustomizer(asset:AssetStack):void
 			{
 				var customizer:CreatureCustomizer = new CreatureCustomizer(asset.creature as Creature, worldView.creatureManager);
-				var canvas:Canvas = new Canvas();
-				canvas.y = CreatureCustomizer.VIEWER_HEIGHT;
+				var canvas:UICanvas = new UICanvas();
+				canvas.setStyles(0xffffff, 0x333333, 14, 500, 400);
 				canvas.addChild(customizer);
 				worldView.uiLayer.addChild(canvas);
 			}

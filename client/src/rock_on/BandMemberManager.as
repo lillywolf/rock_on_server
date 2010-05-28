@@ -5,8 +5,9 @@ package rock_on
 	import flash.events.MouseEvent;
 	
 	import mx.collections.ArrayCollection;
-	import mx.containers.Canvas;
-	import mx.core.UIComponent;
+	
+	import views.ContainerUIC;
+	import views.UICanvas;
 	
 	import world.ActiveAsset;
 	import world.AssetStack;
@@ -80,9 +81,9 @@ package rock_on
 		}
 		
 		
-		public function putBandMembersInCustomizer(animation:String):Canvas
+		public function putBandMembersInCustomizer(animation:String):UICanvas
 		{
-			var customizerUI:Canvas = getCustomizerUI();
+			var customizerUI:UICanvas = getCustomizerUI();
 			var index:int = 0;
 			for each (var bm:BandMember in this)
 			{
@@ -91,7 +92,8 @@ package rock_on
 				asset.addEventListener(MouseEvent.CLICK, onBandMemberClicked);
 				asset.x = asset.width * index + asset.width/2;
 				asset.y = asset.height;
-				var uic:UIComponent = new UIComponent();
+				var uic:ContainerUIC = new ContainerUIC();
+				uic.thinger = bm;
 				uic.addChild(asset);
 				customizerUI.addChild(uic);
 			}
@@ -114,16 +116,10 @@ package rock_on
 			return asset;
 		}	
 		
-		public function getCustomizerUI():Canvas
+		public function getCustomizerUI():UICanvas
 		{
-			var ui:Canvas = new Canvas();
-			ui.clipContent = false;
-			ui.width = 500;
-			ui.height = 400;
-			ui.setStyle("backgroundColor", 0x333333);
-			ui.setStyle("cornerRadius", 14);
-			ui.setStyle("borderColor", 0x333333);
-			ui.setStyle("borderStyle", "solid");
+			var ui:UICanvas = new UICanvas();
+			ui.setStyles(0xffffff, 0x333333, 14, 500, 400);
 			return ui;
 		}	
 		

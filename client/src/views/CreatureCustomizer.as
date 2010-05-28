@@ -1,6 +1,7 @@
 package views
 {
 	import controllers.CreatureManager;
+	import controllers.LayerableManager;
 	
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
@@ -8,11 +9,14 @@ package views
 	import flash.utils.getQualifiedClassName;
 	
 	import models.Creature;
+	import models.EssentialModelReference;
 	import models.OwnedLayerable;
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Button;
 	import mx.core.UIComponent;
+	
+	import rock_on.SpecialButton;
 	
 	import world.AssetStack;
 
@@ -25,15 +29,21 @@ package views
 		public var currentLayerables:ArrayCollection;
 		public var availableLayerables:Dictionary;
 		
-		public var displayedLayerableListContainer:UIComponent;
-		public var creaturePreview:UIComponent;
-		public var displayedLayerableList:UIComponent;
+		public var displayedLayerableListContainer:ContainerUIC;
+		public var creaturePreview:UICanvas;
+		public var displayedLayerableList:ContainerUIC;
 		public var currentAnimation:String;
 		public var currentFrame:int;
 		
 		public static const VIEWER_X:Number = 200;
+		public static const PREVIEW_WIDTH:Number = 100;
 		public static const VIEWER_WIDTH:Number = 400;
 		public static const VIEWER_HEIGHT:Number = 400;
+		public static const BUTTONS_HEIGHT:int = 100;
+		public static const ITEM_WIDTH:int = 80;
+		public static const ITEM_HEIGHT:int = 80;
+		public static const ITEM_PADDING:int = 10;
+		public static const ITEMS_PER_ROW:int = 4;
 		
 		public function CreatureCustomizer(creature:Creature, creatureManager:CreatureManager)
 		{
@@ -69,16 +79,13 @@ package views
 		
 		public function addLayerButtons():void
 		{
-			var btn:Button;
+			var btn:SpecialButton;
 			var i:int = 0;
 			for each (var str:String in _creature.layerableOrder[currentAnimation])
 			{
-				btn = new Button();
-				btn.x = 100 + i * 40;
-				btn.y = 0;
-				btn.width = 30;
-				btn.height = 30;
-				btn.id = str;
+				btn = new SpecialButton();
+				btn.setStyles(PREVIEW_WIDTH + i * 40, 0, 30, 30);
+				btn.layerName = str;
 				btn.addEventListener(MouseEvent.CLICK, onLayerSelected);
 				creaturePreview.addChild(btn);
 				i++;
@@ -87,9 +94,9 @@ package views
 		
 		private function onLayerSelected(evt:MouseEvent):void
 		{
-			var btn:Button = evt.target as Button;
-			var selectedLayer:String = btn.id;
-			showAvailableLayerablesForCreatureAndLayer(selectedLayer);
+			var btn:SpecialButton = evt.target as SpecialButton;
+			var layerName:String = btn.layerName;
+			showAvailableLayerablesForCreatureAndLayer(layerName);
 		}
 		
 		public function addCloseButton():void
@@ -131,17 +138,19 @@ package views
 			constructedCreature = _creature.getConstructedCreature(animation, 1, 1);
 			constructedCreature.doAnimation(animation, currentFrame);
 			constructedCreature.x = creaturePreview.width / 2;
-			creaturePreview.addChild(constructedCreature.movieClipStack);
+			var uic:ContainerUIC = new ContainerUIC();
+			uic.y = constructedCreature.height;
+			uic.thinger = constructedCreature;
+			uic.addChild(constructedCreature.movieClipStack);
+			creaturePreview.addChild(uic);
 			addChild(creaturePreview);
 		}
 		
 		public function createCreaturePreview():void
 		{
-			creaturePreview = new UIComponent();
-			creaturePreview.width = VIEWER_WIDTH;
-			creaturePreview.height = VIEWER_HEIGHT;
-			creaturePreview.x = VIEWER_X;
-			creaturePreview.y = 0;			
+			creaturePreview = new UICanvas();
+			creaturePreview.setStyles(0xffffff, 0x333333, 14, VIEWER_WIDTH, VIEWER_HEIGHT);
+//			creaturePreview.y = 0;			
 		}
 		
 		public function populateCurrentLayerables():void
@@ -169,7 +178,7 @@ package views
 			{
 				removeChild(displayedLayerableListContainer);
 			}		
-			displayedLayerableListContainer = new UIComponent();			
+			displayedLayerableListContainer = new ContainerUIC();			
 		}
 		
 		private function createAvailableLayerableList(currentAnimation:String):void
@@ -192,7 +201,7 @@ package views
 				if (ol.layerable.layer_name == layerName && !ol.in_use)
 				{
 					var mc:MovieClip = copyMovieClipForLayerableList(ol.layerable.mc, layerName);
-					availableLayerablesForLayer.addItem(mc);
+					availableLayerablesForLayer.addItem(ol);
 				}
 			}
 			availableLayerables[layerName] = availableLayerablesForLayer;			
@@ -200,12 +209,25 @@ package views
 		
 		private function showAvailableLayerableList(layerName:String):void
 		{
-			displayedLayerableList = new UIComponent();
-			for each (var mc:MovieClip in availableLayerables[layerName])
+			displayedLayerableList = new ContainerUIC();
+			var i:int = 0;
+			for each (var ol:OwnedLayerable in availableLayerables[layerName])
 			{
-				displayedLayerableList.addChild(mc);				
+				var uic:ContainerUIC = createLayerableOption(ol);
+				uic.setStyles(i * ITEM_WIDTH, Math.floor(i/ITEMS_PER_ROW) * ITEM_HEIGHT + ITEM_PADDING, ITEM_WIDTH, ITEM_HEIGHT);							
+				displayedLayerableList.addChild(uic);
+				i++;			
 			}
 			displayedLayerableListContainer.addChild(displayedLayerableList);			
+		}
+		
+		public function createLayerableOption(ol:OwnedLayerable):ContainerUIC
+		{
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
+			var uic:ContainerUIC = LayerableManager.formatMovieClipByDimensions(mc, ITEM_WIDTH, ITEM_HEIGHT, ITEM_PADDING, ITEM_PADDING);
+			uic.thinger = ol;
+			uic.addEventListener(MouseEvent.CLICK, onLayerableClicked);
+			return uic;	
 		}
 		
 		public function showAvailableLayerablesForCreatureAndLayer(layerName:String):void
@@ -214,8 +236,10 @@ package views
 			
 			showAvailableLayerableList(layerName);
 			
-			displayedLayerableListContainer.x = VIEWER_X + VIEWER_WIDTH;
 			displayedLayerableListContainer.height = VIEWER_HEIGHT;
+//			displayedLayerableListContainer.width = VIEWER_WIDTH;
+			displayedLayerableListContainer.x = VIEWER_WIDTH - PREVIEW_WIDTH;
+			displayedLayerableListContainer.y = BUTTONS_HEIGHT;
 			displayedLayerableListContainer.addEventListener(MouseEvent.CLICK, onLayerableClicked);
 			addChild(displayedLayerableListContainer);
 		}
@@ -238,40 +262,29 @@ package views
 		
 		private function onLayerableClicked(evt:MouseEvent):void
 		{
-			if (evt.target is MovieClip)
+			if (evt.currentTarget is ContainerUIC)
 			{
-				var obj:Object = evt.target;
-				var className:String = flash.utils.getQualifiedClassName(obj);
-				var klass:Class = creatureManager.essentialModelManager.essentialModelReference.loadedModels[className].klass;
-				for each (var ol:OwnedLayerable in creature.owned_layerables)
+				var uic:ContainerUIC = evt.currentTarget as ContainerUIC;
+				if (uic.thinger is OwnedLayerable)
 				{
-					if (ol.layerable.mc is klass)
-					{
-						var layerName:String = ol.layerable.layer_name;
-						
-						removeMatchingLayerableFromPreview(layerName);
-						removeLayerableFromOptionsList(ol.layerable.mc, layerName);
-						
-						currentLayerables.addItem(ol);
-						constructedCreature.movieClipStack.addChild(ol.layerable.mc);
-					}
+					var ol:OwnedLayerable = uic.thinger as OwnedLayerable;
+					var layerName:String = ol.layerable.layer_name;
+					
+					var olMatch:OwnedLayerable = removeMatchingLayerableFromPreview(uic.thinger as OwnedLayerable);
+					addLayerableToOptionsList(olMatch, uic);				
+					removeLayerableFromOptionsList(uic, layerName, uic.thinger as OwnedLayerable);
+					
+					currentLayerables.addItem(ol);
+					constructedCreature.movieClipStack.addChild(ol.layerable.mc);
 				}
 			}
 		}
 		
-		private function removeLayerableFromOptionsList(mc:MovieClip, layerName:String):void
+		private function removeLayerableFromOptionsList(uic:ContainerUIC, layerName:String, ol:OwnedLayerable):void
 		{
-			var className:String = flash.utils.getQualifiedClassName(mc);
-			var klass:Class = creatureManager.essentialModelManager.essentialModelReference.loadedModels[className].klass;
-			for each (var obj:Object in availableLayerables[layerName])
-			{
-				if (obj is klass)
-				{
-					displayedLayerableList.removeChild(obj as MovieClip);
-					var index:int = (availableLayerables[layerName] as ArrayCollection).getItemIndex(obj);
-					(availableLayerables[layerName] as ArrayCollection).removeItemAt(index);
-				}
-			}
+			displayedLayerableList.removeChild(uic);					
+			var index:int = (availableLayerables[layerName] as ArrayCollection).getItemIndex(ol);
+			(availableLayerables[layerName] as ArrayCollection).removeItemAt(index);
 		}
 		
 		private function copyMovieClipForLayerableList(mc:MovieClip, layerName:String):MovieClip
@@ -282,25 +295,33 @@ package views
 			return copiedMovieClip;		
 		}
 		
-		private function addLayerableToOptionsList(mc:MovieClip, layerName:String):void
+		private function addLayerableToOptionsList(ol:OwnedLayerable, uic:ContainerUIC):void
 		{
-			var copiedMovieClip:MovieClip = copyMovieClipForLayerableList(mc, layerName);
-			(availableLayerables[layerName] as ArrayCollection).addItem(copiedMovieClip);		
-			displayedLayerableList.addChild(copiedMovieClip);
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
+			(availableLayerables[ol.layerable.layer_name] as ArrayCollection).addItem(ol);
+			var index:int = displayedLayerableList.getChildIndex(uic);		
+			var newUic:ContainerUIC = createLayerableOption(ol);
+			newUic.setStyles(index * ITEM_WIDTH, Math.floor(index/ITEMS_PER_ROW) * ITEM_HEIGHT + ITEM_PADDING, ITEM_WIDTH, ITEM_HEIGHT);										
+			displayedLayerableList.addChild(newUic);
 		}
 		
-		private function removeMatchingLayerableFromPreview(layerName:String):void
+		private function removeMatchingLayerableFromPreview(olCopy:OwnedLayerable):OwnedLayerable
 		{
-			for each (var ol:OwnedLayerable in creature.owned_layerables)
+			var layerName:String = olCopy.layerable.layer_name;
+			
+			for each (var ol:OwnedLayerable in currentLayerables)
 			{
-				if (constructedCreature.movieClipStack.contains(ol.layerable.mc) && ol.layerable.layer_name == layerName)
+				if (ol.layerable.layer_name == layerName)
 				{
-					var layerableIndex:int = currentLayerables.getItemIndex(ol);
-					currentLayerables.removeItemAt(layerableIndex);
-					addLayerableToOptionsList(ol.layerable.mc, layerName);
-					constructedCreature.movieClipStack.removeChild(ol.layerable.mc);
+					var index:int = currentLayerables.getItemIndex(ol);
+					currentLayerables.removeItemAt(index);
+					break;
 				}
 			}
+		
+			var mc:MovieClip = constructedCreature.getMovieClipByLayerName(ol.layerable.layer_name, "walk_toward");
+			constructedCreature.movieClipStack.removeChild(mc);	
+			return ol;				
 		}
 		
 		public function set creatureManager(val:CreatureManager):void

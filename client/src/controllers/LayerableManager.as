@@ -9,6 +9,8 @@ package controllers
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
+	
+	import views.ContainerUIC;
 
 	public class LayerableManager extends Manager
 	{
@@ -83,10 +85,10 @@ package controllers
 			return _owned_layerables;
 		}
 		
-		public static function formatMovieClipByDimensions(mc:MovieClip, dimensionX:int, dimensionY:int, itemPaddingX:int, itemPaddingY:int):UIComponent
+		public static function formatMovieClipByDimensions(mc:MovieClip, dimensionX:int, dimensionY:int, itemPaddingX:int, itemPaddingY:int):ContainerUIC
 		{
 			var ratio:Number = mc.width/mc.height;
-			var uic:UIComponent = new UIComponent();
+			var uic:ContainerUIC = new ContainerUIC();
 			uic.width = dimensionX;
 			uic.height = dimensionY;
 			mc.stop();

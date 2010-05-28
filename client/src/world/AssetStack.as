@@ -46,6 +46,32 @@ package world
 			}
 		}
 		
+		public function getMovieClipByLayerName(layerName:String, animation:String):MovieClip
+		{
+			var totalOwnedLayerables:int = _creature.owned_layerables.length.valueOf();			
+			var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
+			var className:String = null;
+			
+			for (var i:int = 0; i < totalOwnedLayerables; i++)
+			{
+				if (layerName == (_creature.owned_layerables.getItemAt(i) as OwnedLayerable).layerable.layer_name && (_creature.owned_layerables.getItemAt(i) as OwnedLayerable).in_use)
+				{
+					var ol:OwnedLayerable = _creature.owned_layerables.getItemAt(i) as OwnedLayerable;
+					className = flash.utils.getQualifiedClassName(ol.layerable.mc);
+				}
+			}
+			
+			for (var j:int = 0; j < movieClipChildren; j++)
+			{			
+				var tempName:String = flash.utils.getQualifiedClassName(_movieClipStack.getChildAt(j));
+				if (tempName == className)
+				{
+					return _movieClipStack.getChildAt(j) as MovieClip;
+				}
+			}
+			return null;
+		}
+		
 		private function onMovieClipStackClicked(evt:MouseEvent):void
 		{
 			trace(evt.target.name, flash.utils.getQualifiedClassName(evt.target));		
