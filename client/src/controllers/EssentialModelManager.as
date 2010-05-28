@@ -16,6 +16,7 @@ package controllers
 	import models.Layerable;
 	import models.Level;
 	import models.OwnedDwelling;
+	import models.OwnedLayerable;
 	import models.OwnedStructure;
 	import models.OwnedThinger;
 	import models.Store;
@@ -62,6 +63,7 @@ package controllers
 		public var store_owned_thinger:StoreOwnedThinger;
 		public var structure:Structure;
 		public var owned_structure:OwnedStructure;
+		public var owned_layerable:OwnedLayerable;
 		public var dwelling:Dwelling;
 		public var owned_dwelling:OwnedDwelling;
 		public var level:Level;

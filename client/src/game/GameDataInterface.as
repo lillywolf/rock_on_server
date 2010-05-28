@@ -217,11 +217,14 @@ package game
 			
 			// Handles user class case
 			
-			for each (instance in essentialModelManager[obj.model])
+			if (essentialModelManager[obj.model])
 			{
-				if (instance.id == obj.instance[obj.model].id)
+				for each (instance in essentialModelManager[obj.model])
 				{
-					instance.updateProperties(obj.instance[obj.model]);
+					if (instance.id == obj.instance[obj.model].id)
+					{
+						instance.updateProperties(obj.instance[obj.model]);
+					}
 				}
 			}
 		}

@@ -32,6 +32,9 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import controllers.CreatureManager;
+			import world.AssetStack;
+			import models.OwnedLayerable;
 			import mx.events.StateChangeEvent;
 			import game.ImposterOwnedStructure;
 			import world.ActiveAsset;
@@ -181,6 +184,10 @@
 				{
 					updateOwnedStructurePostServer(instance as OwnedStructure, evt.method);
 				}
+				if (evt.model == "owned_layerable")
+				{
+					updateOwnedLayerablePostServer(instance as OwnedLayerable, evt.method);
+				}
 				if (evt.model == "user")
 				{
 					gdi.user.updateUserOnServerResponse(instance as User, evt.method);
@@ -196,6 +203,15 @@
 				{
 					editView.updateRenderedStructures(os, method);					
 				}				
+			}
+			private function updateOwnedLayerablePostServer(ol:OwnedLayerable, method:String):void
+			{
+				var creature:Creature = gdi.creatureManager.getCreatureById(ol.creature_id);
+				if (creature.type == "BandMember")
+				{
+					worldView.bandManager.bandMemberManager.updateRenderedBandMembers(ol, creature, method);
+				}
+				gdi.layerableManager.updateOwnedLayerableOnServerResponse(ol, method);
 			}
 			private function checkForUpdatedVenue(instance:OwnedDwelling, method:String):void
 			{

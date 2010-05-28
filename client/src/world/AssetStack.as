@@ -46,6 +46,44 @@ package world
 			}
 		}
 		
+		public function swapMovieClipsByOwnedLayerable(ol:OwnedLayerable, animation:String):void
+		{
+			var newMc:MovieClip = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
+			var oldMc:MovieClip = getMovieClipByLayerName(ol.layerable.layer_name, animation);
+			if (oldMc)
+			{
+				movieClipStack.addChild(newMc);			
+				movieClipStack.swapChildren(oldMc, newMc);		
+				movieClipStack.removeChild(oldMc);				
+			}
+			else
+			{
+				var index:int = getLayerableIndex(ol, animation);
+				movieClipStack.addChildAt(newMc, index);				
+			}
+		}
+		
+		public function getLayerableIndex(ol:OwnedLayerable, animation:String):int
+		{
+			var i:int = 0;
+			for each (var str:String in layerableOrder[animation])
+			{
+				if (str == ol.layerable.layer_name)
+				{
+					var index:int = i; 
+					break;
+				}
+				for each (var tempOl:OwnedLayerable in creature.owned_layerables)
+				{
+					if (tempOl.layerable.layer_name == str)
+					{
+						i++;				
+					}
+				}
+			}
+			return index;
+		}		
+				
 		public function getMovieClipByLayerName(layerName:String, animation:String):MovieClip
 		{
 			var totalOwnedLayerables:int = _creature.owned_layerables.length.valueOf();			

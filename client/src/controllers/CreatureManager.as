@@ -82,6 +82,18 @@ package controllers
 			return matchingCreatures;
 		}
 		
+		public function getCreatureById(id:int):Creature
+		{
+			for each (var creature:Creature in _creatures)
+			{
+				if (creature.id == id)
+				{
+					return creature;
+				}
+			}
+			return null;
+		}
+		
 		public function generateCreatureCustomizer(creature:Creature):CreatureCustomizer
 		{
 			var creatureCustomizer:CreatureCustomizer = new CreatureCustomizer(creature, this);

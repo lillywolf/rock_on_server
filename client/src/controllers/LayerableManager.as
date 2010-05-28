@@ -6,6 +6,7 @@ package controllers
 	import flash.utils.getQualifiedClassName;
 	
 	import models.Layerable;
+	import models.OwnedLayerable;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
@@ -38,6 +39,19 @@ package controllers
 				var uic:UIComponent = formatMovieClipByDimensions(copy, dimensionX, dimensionY, 0, 0);
 			}
 			return uic;
+		}
+		
+		public function updateOwnedLayerableOnServerResponse(olCopy:OwnedLayerable, method:String):void
+		{
+			var olReference:OwnedLayerable;
+			for each (var ol:OwnedLayerable in owned_layerables)
+			{
+				if (ol.id == olCopy.id)
+				{
+					olReference = ol;
+				}
+			}	
+			olReference.updateProperties(olCopy);
 		}
 		
 		public function load(params:Object):void

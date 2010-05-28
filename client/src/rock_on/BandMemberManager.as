@@ -4,6 +4,9 @@ package rock_on
 	
 	import flash.events.MouseEvent;
 	
+	import models.Creature;
+	import models.OwnedLayerable;
+	
 	import mx.collections.ArrayCollection;
 	
 	import views.ContainerUIC;
@@ -73,6 +76,27 @@ package rock_on
 					bm.standFacingCrowd();
 				}
 			}
+		}
+		
+		public function updateRenderedBandMembers(ol:OwnedLayerable, creature:Creature, method:String):void
+		{
+			if (method == "make_in_use")
+			{
+				var bm:BandMember = getBandMemberById(creature.id);
+				bm.swapMovieClipsByOwnedLayerable(ol, "walk_toward");
+			}
+		}
+		
+		public function getBandMemberById(id:int):BandMember
+		{
+			for each (var bm:BandMember in this)
+			{
+				if (bm.creature.id == id)
+				{
+					return bm;
+				}
+			}
+			return null;
 		}
 		
 		public function setSpawnLocation():void
