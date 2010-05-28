@@ -270,21 +270,69 @@ package views
 					var ol:OwnedLayerable = uic.thinger as OwnedLayerable;
 					var layerName:String = ol.layerable.layer_name;
 					
-					var olMatch:OwnedLayerable = removeMatchingLayerableFromPreview(uic.thinger as OwnedLayerable);
-					addLayerableToOptionsList(olMatch, uic);				
+					var olMatch:OwnedLayerable = getMatchingLayerable(uic.thinger as OwnedLayerable);
+					if (olMatch)
+					{
+						removeOldLayerable(olMatch);
+						addLayerableToPreview(ol, olMatch);					
+						addLayerableToOptionsList(olMatch, uic);				
+					}
+					else
+					{
+						var index:int = getLayerableIndex(ol, currentAnimation);
+						addLayerableToPreview(ol, olMatch, index);
+					}
 					removeLayerableFromOptionsList(uic, layerName, uic.thinger as OwnedLayerable);
-					
-					currentLayerables.addItem(ol);
-					constructedCreature.movieClipStack.addChild(ol.layerable.mc);
 				}
 			}
 		}
 		
-		private function removeLayerableFromOptionsList(uic:ContainerUIC, layerName:String, ol:OwnedLayerable):void
+		private function getLayerableIndex(ol:OwnedLayerable, animation:String):int
+		{
+			var i:int = 0;
+			for each (var str:String in constructedCreature.layerableOrder[animation])
+			{
+				if (str == ol.layerable.layer_name)
+				{
+					var index:int = i; 
+					break;
+				}
+				for each (var tempOl:OwnedLayerable in currentLayerables)
+				{
+					if (tempOl.layerable.layer_name == str)
+					{
+						i++;				
+					}
+				}
+			}
+			return index;
+		}
+		
+		private function addLayerableToPreview(ol:OwnedLayerable, olMatch:OwnedLayerable, index:int=0):void
+		{
+			currentLayerables.addItem(ol);
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
+			mc.gotoAndPlay(currentFrame);
+			mc.stop();
+			if (olMatch)
+			{
+				var mcMatch:MovieClip = getMovieClipByLayerable(olMatch, "walk_toward");	
+				constructedCreature.movieClipStack.addChild(mc);			
+				constructedCreature.movieClipStack.swapChildren(mcMatch, mc);		
+				constructedCreature.movieClipStack.removeChild(mcMatch);				
+			}
+			else
+			{
+				constructedCreature.movieClipStack.addChildAt(mc, index);
+			}
+		}
+		
+		private function removeLayerableFromOptionsList(uic:ContainerUIC, layerName:String, ol:OwnedLayerable):int
 		{
 			displayedLayerableList.removeChild(uic);					
 			var index:int = (availableLayerables[layerName] as ArrayCollection).getItemIndex(ol);
 			(availableLayerables[layerName] as ArrayCollection).removeItemAt(index);
+			return index;
 		}
 		
 		private function copyMovieClipForLayerableList(mc:MovieClip, layerName:String):MovieClip
@@ -302,27 +350,49 @@ package views
 			var index:int = displayedLayerableList.getChildIndex(uic);		
 			var newUic:ContainerUIC = createLayerableOption(ol);
 			newUic.setStyles(index * ITEM_WIDTH, Math.floor(index/ITEMS_PER_ROW) * ITEM_HEIGHT + ITEM_PADDING, ITEM_WIDTH, ITEM_HEIGHT);										
-			displayedLayerableList.addChild(newUic);
+			displayedLayerableList.addChildAt(newUic, index);
 		}
 		
-		private function removeMatchingLayerableFromPreview(olCopy:OwnedLayerable):OwnedLayerable
+		private function getMatchingLayerable(olCopy:OwnedLayerable):OwnedLayerable
 		{
-			var layerName:String = olCopy.layerable.layer_name;
-			
+			var layerName:String = olCopy.layerable.layer_name;	
+			var olMatch:OwnedLayerable;		
 			for each (var ol:OwnedLayerable in currentLayerables)
 			{
 				if (ol.layerable.layer_name == layerName)
 				{
-					var index:int = currentLayerables.getItemIndex(ol);
-					currentLayerables.removeItemAt(index);
+					olMatch = ol;
 					break;
 				}
 			}
-		
-			var mc:MovieClip = constructedCreature.getMovieClipByLayerName(ol.layerable.layer_name, "walk_toward");
-			constructedCreature.movieClipStack.removeChild(mc);	
-			return ol;				
+			return olMatch;				
 		}
+		
+		private function removeOldLayerable(ol:OwnedLayerable):void
+		{
+//			var mc:MovieClip = getMovieClipByLayerable(ol, "walk_toward");
+//			var mcIndex:int = constructedCreature.movieClipStack.getChildIndex(mc);
+//			constructedCreature.movieClipStack.removeChild(mc);	
+			var index:int = currentLayerables.getItemIndex(ol);
+			currentLayerables.removeItemAt(index);
+//			return mcIndex;			
+		}
+		
+		public function getMovieClipByLayerable(ol:OwnedLayerable, animation:String):MovieClip
+		{
+			var movieClipChildren:int = constructedCreature.movieClipStack.numChildren.valueOf();
+			var className:String = flash.utils.getQualifiedClassName(ol.layerable.mc);
+			
+			for (var j:int = 0; j < movieClipChildren; j++)
+			{			
+				var tempName:String = flash.utils.getQualifiedClassName(constructedCreature.movieClipStack.getChildAt(j));
+				if (tempName == className)
+				{
+					return constructedCreature.movieClipStack.getChildAt(j) as MovieClip;
+				}
+			}
+			return null;
+		}		
 		
 		public function set creatureManager(val:CreatureManager):void
 		{
