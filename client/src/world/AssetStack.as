@@ -51,9 +51,9 @@ package world
 			var newOl:OwnedLayerable = getOwnedLayerableMatch(ol);
 			var newMc:MovieClip = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
 			var oldOl:OwnedLayerable = getOwnedLayerableByLayerName(ol.layerable.layer_name, animation);
-			var oldMc:MovieClip = getMovieClipByOwnedLayerable(oldOl);
-			if (oldMc)
+			if (oldOl)
 			{
+				var oldMc:MovieClip = getMovieClipByOwnedLayerable(oldOl);
 				movieClipStack.addChild(newMc);			
 				movieClipStack.swapChildren(oldMc, newMc);		
 				movieClipStack.removeChild(oldMc);

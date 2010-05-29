@@ -125,7 +125,9 @@ package views
 		
 		private function onCloseButtonClicked(evt:MouseEvent):void
 		{
-			parentApplication.currentState = 'worldView';
+//			parentApplication.currentState = "worldView";
+			var parentUI:UICanvas = this.parent as UICanvas;
+			parentUI.removeChild(this);
 		}
 		
 		public function generateCreaturePreview(animation:String):void

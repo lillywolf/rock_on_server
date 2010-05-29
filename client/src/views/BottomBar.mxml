@@ -49,6 +49,10 @@
 			public var storeBtnClass:Class;
 			[Embed(source="../libs/icons/guitar.png")]
 			public var guitarBtnClass:Class;
+			[Embed(source="../libs/icons/heart.png")]
+			public var heartBtnClass:Class;
+			[Embed(source="../libs/icons/pizza.png")]
+			public var pizzaBtnClass:Class;
 			
 
 			private function onCreationComplete():void
@@ -71,12 +75,12 @@
 			{
 				var backCanvas:Canvas = new Canvas();
 				backCanvas.x = -2;
-				backCanvas.y = 504;
-				backCanvas.width = 764;
-				backCanvas.height = 110;
+				backCanvas.y = 515;
+				backCanvas.width = 763;
+				backCanvas.height = 115;
 				backCanvas.clipContent = false;
 				backCanvas.setStyle("backgroundColor", 0x000000);
-				backCanvas.setStyle("cornerRadius", 16);
+				backCanvas.setStyle("cornerRadius", 6);
 				backCanvas.setStyle("borderStyle", "solid");
 				backCanvas.setStyle("borderColor", 0x000000);
 				this.addChild(backCanvas);
@@ -86,12 +90,12 @@
 			{
 				inventoryCanvas = new Canvas();
 				inventoryCanvas.x = 0;
-				inventoryCanvas.y = 510;
+				inventoryCanvas.y = 520;
 				inventoryCanvas.width = 760;
-				inventoryCanvas.height = 100;
+				inventoryCanvas.height = 110;
 				inventoryCanvas.clipContent = false;
 				inventoryCanvas.setStyle("backgroundColor", 0x333333);
-				inventoryCanvas.setStyle("cornerRadius", 12);
+				inventoryCanvas.setStyle("cornerRadius", 6);
 				inventoryCanvas.setStyle("borderStyle", "solid");
 				inventoryCanvas.setStyle("borderColor", 0x000000);
 				addChild(inventoryCanvas);
@@ -100,45 +104,50 @@
 			private function createTabCanvas():void
 			{
 				tabCanvas = new HBox();
-				tabCanvas.setStyle("horizontalGap", 5);
+				tabCanvas.setStyle("horizontalGap", 12);
 				tabCanvas.x = 500;
-				tabCanvas.y = 466;
+				tabCanvas.y = 424;
 				tabCanvas.width = 160;
 				tabCanvas.height = 54;
 				tabCanvas.clipContent = false;
-				tabCanvas.setStyle("backgroundColor", 0x000000);
-				tabCanvas.setStyle("cornerRadius", 14);
-				tabCanvas.setStyle("borderStyle", "solid");
-				tabCanvas.setStyle("borderColor", 0x000000);
+//				tabCanvas.setStyle("backgroundColor", 0x000000);
+//				tabCanvas.setStyle("cornerRadius", 14);
+//				tabCanvas.setStyle("borderStyle", "solid");
+//				tabCanvas.setStyle("borderColor", 0x000000);
 				addChild(tabCanvas);
 			}
 			
 			private function addTabs():void
 			{
+				var btnFilter:GlowFilter = createButtonFilter();
 				var editBtn:Button = new Button();
 				editBtn.setStyle("skin", arrowBtnClass);
 				editBtn.addEventListener(MouseEvent.CLICK, onEditButtonClicked);
-				editBtn.y = 468;
+				editBtn.y = 458;
 				editBtn.x = 502;
+				editBtn.filters = [btnFilter];
 				this.addChild(editBtn);
 				var musicBtn:Button = new Button();
 				musicBtn.setStyle("skin", musicBtnClass);
 				musicBtn.addEventListener(MouseEvent.CLICK, onMusicButtonClicked);
-				musicBtn.y = 468;
-				musicBtn.x = 552;
+				musicBtn.y = 458;
+				musicBtn.x = 555;
+				musicBtn.filters = [btnFilter];				
 				this.addChild(musicBtn);				
 				var storeBtn:Button = new Button();
 				storeBtn.setStyle("skin", storeBtnClass);
 				storeBtn.addEventListener(MouseEvent.CLICK, onStoreButtonClicked);
-				storeBtn.y = 468;
-				storeBtn.x = 606;
+				storeBtn.y = 458;
+				storeBtn.x = 612;
+				storeBtn.filters = [btnFilter];				
 				this.addChild(storeBtn);				
-				var guitarBtn:Button = new Button();
-				guitarBtn.setStyle("skin", guitarBtnClass);
-				guitarBtn.addEventListener(MouseEvent.CLICK, onCustomizerButtonClicked);
-				guitarBtn.y = 468;
-				guitarBtn.x = 656;
-				this.addChild(guitarBtn);				
+				var pizzaBtn:Button = new Button();
+				pizzaBtn.setStyle("skin", pizzaBtnClass);
+				pizzaBtn.addEventListener(MouseEvent.CLICK, onCustomizerButtonClicked);
+				pizzaBtn.y = 458;
+				pizzaBtn.x = 665;
+				pizzaBtn.filters = [btnFilter];				
+				this.addChild(pizzaBtn);				
 			}
 			
 			private function onEditButtonClicked(evt:MouseEvent):void
@@ -229,6 +238,18 @@
 				showFacebookUser();
 			}
 			
+			public function createTextFilter():GlowFilter
+			{
+				var filter:GlowFilter = new GlowFilter(0x222222, 1, 1.1, 1.1, 30, 5); 
+				return filter;
+			}				
+
+			public function createButtonFilter():GlowFilter
+			{
+				var filter:GlowFilter = new GlowFilter(0xffffff, 1, 2, 2, 20, 5); 
+				return filter;
+			}				
+			
 			private function showFacebookFriends():void
 			{
 				var index:int = 0;
@@ -256,7 +277,7 @@
 			public function addFriendRendererStyle(renderer:InventoryItemRenderer):void
 			{	
 				renderer.height = 80;
-				renderer.y = 10;
+				renderer.y = 13;
 			}
 			
 			public function showFacebookUser():void

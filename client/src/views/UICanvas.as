@@ -15,11 +15,11 @@ package views
 		public function setStyles(color:Object, backgroundColor:Object, cornerRadius:int, width:int=0, height:int=0):void
 		{
 			clipContent = false;
-			setStyle("backgroundColor", backgroundColor);
-			setStyle("cornedRadius", cornerRadius);
-			setStyle("color", color);
-			setStyle("borderColor", backgroundColor);
-			setStyle("borderStyle", "solid");
+//			setStyle("backgroundColor", backgroundColor);
+//			setStyle("cornedRadius", cornerRadius);
+//			setStyle("color", color);
+//			setStyle("borderColor", backgroundColor);
+//			setStyle("borderStyle", "solid");
 			width = width;
 			height = height;
 			x = MAX_WIDTH/2 - width/2;

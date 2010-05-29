@@ -1,6 +1,7 @@
 package views
 {
 	import flash.events.MouseEvent;
+	import flash.filters.GlowFilter;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Label;
@@ -31,6 +32,12 @@ package views
 			addEventListener(MouseEvent.ROLL_OUT, onMouseOut);
 			
 		}
+		
+		public function createTextFilter():GlowFilter
+		{
+			var filter:GlowFilter = new GlowFilter(0x333333, 1, 1.4, 1.4, 30, 4); 
+			return filter;
+		}		
 		
 		public function set thingerIndex(val:int):void
 		{

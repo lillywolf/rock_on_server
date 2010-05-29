@@ -36,17 +36,17 @@ package world
 //			var xCoord:int = Math.sqrt( (_gridWidth * _gridWidth) / 2);
 
 			mc.graphics.clear();
-			mc.graphics.lineStyle(3,0x0000ff);
+			mc.graphics.lineStyle(1,0xB0DEFF);
 			
 			var xCoord:Number = Math.sqrt( (_gridWidth * _gridWidth) / 2 );
 			var yCoord:Number = xCoord * GRID_ANGLE;
 			
-//			mc.graphics.beginFill(0xff0000, 0);
-//			mc.graphics.lineTo(xCoord, yCoord);
-//			mc.graphics.lineTo(xCoord*2, 0);
-//			mc.graphics.lineTo(xCoord, -yCoord);
-//			mc.graphics.lineTo(0, 0);
-//			mc.graphics.endFill();			
+			mc.graphics.beginFill(0x92C5E8, 1);
+			mc.graphics.lineTo(xCoord, yCoord);
+			mc.graphics.lineTo(xCoord*2, 0);
+			mc.graphics.lineTo(xCoord, -yCoord);
+			mc.graphics.lineTo(0, 0);
+			mc.graphics.endFill();			
 		}
 
 		public function drawGridBlocks():void
@@ -62,19 +62,19 @@ package world
 			
 			mc.graphics.moveTo(0, 0);
 	
-			for (i=0; i<totalBlocksHigh; i++)
-			{
-				for (j=1; j<totalBlocksWide+1; j++)
-				{
-					mc.graphics.beginFill(0x000000, 0);
-					mc.graphics.moveTo(xGridCoord*(j-1+i), yGridCoord*(j-1-i));
-					mc.graphics.lineTo(xGridCoord*(j+i)+1, yGridCoord*(j-i));
-					mc.graphics.lineTo(xGridCoord*(j+i+1), yGridCoord*(j-1-i));
-					mc.graphics.lineTo(xGridCoord*(j+i), yGridCoord*(j-2-i));
-					mc.graphics.moveTo(xGridCoord*(j-1+i), yGridCoord*(j-1-i));
-					mc.graphics.endFill();
-				}
-			}		
+//			for (i=0; i<totalBlocksHigh; i++)
+//			{
+//				for (j=1; j<totalBlocksWide+1; j++)
+//				{
+//					mc.graphics.beginFill(0x000000, 0);
+//					mc.graphics.moveTo(xGridCoord*(j-1+i), yGridCoord*(j-1-i));
+//					mc.graphics.lineTo(xGridCoord*(j+i)+1, yGridCoord*(j-i));
+//					mc.graphics.lineTo(xGridCoord*(j+i+1), yGridCoord*(j-1-i));
+//					mc.graphics.lineTo(xGridCoord*(j+i), yGridCoord*(j-2-i));
+//					mc.graphics.moveTo(xGridCoord*(j-1+i), yGridCoord*(j-1-i));
+//					mc.graphics.endFill();
+//				}
+//			}		
 			
 			addChild(mc);	
 		}

@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="80" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Image;
 			import mx.containers.HBox;
 			import controllers.LevelManager;
 			import mx.controls.Label;
@@ -24,6 +25,8 @@
 			[Bindable] public var levelBox:Text;
 			[Bindable] public var mainHBox:HBox;
 			
+			public var textFilter:GlowFilter;
+			
 			[Bindable] public var layerableManager:LayerableManager;
 			[Bindable] public var structureManager:StructureManager;
 			[Bindable] public var storeManager:StoreManager;
@@ -38,7 +41,12 @@
 			public var lastTime:Number;	
 			
 			public var worldView:WorldView;
-			public var editView:EditView;		
+			public var editView:EditView;
+			
+			[Embed(source="../libs/icons/guitar.png")]
+			public var guitarIconClass:Class;					
+			[Embed(source="../libs/icons/headphones.png")]
+			public var headphonesIconClass:Class;					
 					
 			private function onCreationComplete():void
 			{
@@ -70,41 +78,88 @@
 				mainHBox.height = 50;
 				mainHBox.y = 20;
 				mainHBox.x = 30;
+				mainHBox.setStyle("horizontalGap", 15);
 				addChild(mainHBox);
 			}
 			
 			public function showLevel():void
 			{
-				var backCanvas:Canvas = createBackCanvas();
-				var grayCanvas:Canvas = createGrayCanvas();
-				grayCanvas.x = 4;
-				grayCanvas.y = 4;
-				grayCanvas.height = 27;
+				var textFilter:GlowFilter = createXpFilter();				
+//				var backCanvas:Canvas = createBackCanvas();
+				var canvas:Canvas = createGrayCanvas();
+				canvas.x = 4;
+				canvas.y = 4;
+				canvas.height = 29;
 				levelBox = new Text();
+				levelBox.filters = [textFilter];
 				levelBox.text = myUser.level.rank.toString();
 				levelBox.x = 28;
-				levelBox.y = 1;
-				setFontStyle(levelBox, 18);
-				grayCanvas.addChild(levelBox);
-				backCanvas.addChild(grayCanvas);
-				mainHBox.addChild(backCanvas);
+				levelBox.y = 3;
+				setFontStyle(levelBox, 16);
+				canvas.addChild(levelBox);
+//				backCanvas.addChild(grayCanvas);
+				mainHBox.addChild(canvas);
 			}
 			
 			public function showXp():void
 			{
-				var backCanvas:Canvas = createBackCanvas();
-				var grayCanvas:Canvas = createGrayCanvas();
-				grayCanvas.x = 4;
-				grayCanvas.y = 4;
-				grayCanvas.height = 27;
+				var textFilter:GlowFilter = createXpFilter();
+				var canvas:Canvas = createGreenCanvas();
+				canvas.x = 4;
+				canvas.y = 4;
+				canvas.height = 27;
 				xpBox = new Text();
 				xpBox.text = myUser.xp.toString();
-				xpBox.x = 28;
-				xpBox.y = 1;
-				setFontStyle(xpBox, 18);
-				grayCanvas.addChild(xpBox);
-				backCanvas.addChild(grayCanvas);
-				mainHBox.addChild(backCanvas);				
+				xpBox.setStyle("color", 0xd3ffa4);
+				xpBox.x = 27;
+				xpBox.y = 3;
+				xpBox.filters = [textFilter];
+				var icon:Image = new Image();
+				icon.source = guitarIconClass;
+				icon.x = -9;
+				icon.y = -12;
+				canvas.addChild(icon);
+				setFontStyle(xpBox, 16);
+				canvas.addChild(xpBox);
+				mainHBox.addChild(canvas);				
+			}
+			
+			public function createGreenCanvas():Canvas
+			{
+				var canvas:Canvas = genericCanvasStyles();
+//				canvas.setStyle("backgroundColor", 0x92e43b);
+//				canvas.setStyle("borderColor", 0x003824);
+				return canvas;
+			}
+			
+			public function createBlueCanvas():Canvas
+			{
+				var canvas:Canvas = genericCanvasStyles();
+//				canvas.setStyle("backgroundColor", 0x33bff3);
+//				canvas.setStyle("borderColor", 0x00164A);
+				return canvas;				
+			}
+			
+			public function genericCanvasStyles():Canvas
+			{
+				var canvas:Canvas = new Canvas();
+//				canvas.setStyle("cornerRadius", 8);
+//				canvas.setStyle("borderStyle", "solid");
+//				canvas.setStyle("borderThickness", 1);				
+				canvas.clipContent = false; 
+				return canvas;				
+			}
+			
+			public function createXpFilter():GlowFilter
+			{
+				var filter:GlowFilter = new GlowFilter(0x333333, 1, 1.4, 1.4, 30, 4); 
+				return filter;
+			}
+			
+			public function createCreditsFilter():GlowFilter
+			{
+				var filter:GlowFilter = new GlowFilter(0x333333, 1, 1.3, 1.3, 30, 4); 
+				return filter;				
 			}
 			
 			public function createBackCanvas():Canvas
@@ -121,10 +176,10 @@
 			{
 				var grayCanvas:Canvas = new Canvas();
 				grayCanvas.clipContent = false;				
-				grayCanvas.setStyle("backgroundColor", 0x333333);
-				grayCanvas.setStyle("cornerRadius", 10);
-				grayCanvas.setStyle("borderColor", 0x000000);
-				grayCanvas.setStyle("borderStyle", "solid");	
+//				grayCanvas.setStyle("backgroundColor", 0x333333);
+//				grayCanvas.setStyle("cornerRadius", 10);
+//				grayCanvas.setStyle("borderColor", 0x000000);
+//				grayCanvas.setStyle("borderStyle", "solid");	
 				return grayCanvas;			
 			}
 			
@@ -139,28 +194,34 @@
 			
 			public function showCredits():void
 			{
-				var backCanvas:Canvas = createBackCanvas();
-				var creditsCanvas:Canvas = createGrayCanvas();
-				creditsCanvas.x = 4;
-				creditsCanvas.y = 4;
-				creditsCanvas.height = 27;
+				var canvas:Canvas = createBlueCanvas();
+				var textFilter:GlowFilter = createCreditsFilter();
+				canvas.x = 4;
+				canvas.y = 4;
+				canvas.height = 27;
 				creditsBox = new Text();
 				creditsBox.id = 'myCredits';
+				creditsBox.filters = [textFilter];
 				creditsBox.text = myUser.credits.toString();
-				creditsBox.x = 28;
-				creditsBox.y = 1;
-				setFontStyle(creditsBox, 18);
-				var coinIcon:CoinIcon = new CoinIcon();
-				coinIcon.scaleX = 0.4;
-				coinIcon.scaleY = 0.4;
-				var uic:UIComponent = new UIComponent();
-				uic.addChild(coinIcon);
-				uic.x = 6;
-				uic.y = 5;
-				creditsCanvas.addChild(uic);
-				creditsCanvas.addChild(creditsBox);
-				backCanvas.addChild(creditsCanvas);
-				mainHBox.addChild(backCanvas);
+				creditsBox.x = 35;
+				creditsBox.y = 3;
+				setFontStyle(creditsBox, 16);
+//				var coinIcon:CoinIcon = new CoinIcon();
+//				coinIcon.scaleX = 0.4;
+//				coinIcon.scaleY = 0.4;
+//				var uic:UIComponent = new UIComponent();
+//				uic.addChild(coinIcon);
+//				uic.x = 6;
+//				uic.y = 5;
+//				canvas.addChild(uic);
+				var icon:Image = new Image();
+				icon.source = headphonesIconClass;
+				icon.x = -9;
+				icon.y = -12;
+				canvas.addChild(icon);
+				canvas.addChild(creditsBox);
+//				backCanvas.addChild(creditsCanvas);
+				mainHBox.addChild(canvas);
 			}
 			
 			private function getFriendData():void
