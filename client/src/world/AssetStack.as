@@ -48,19 +48,36 @@ package world
 		
 		public function swapMovieClipsByOwnedLayerable(ol:OwnedLayerable, animation:String):void
 		{
+			var newOl:OwnedLayerable = getOwnedLayerableMatch(ol);
 			var newMc:MovieClip = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
-			var oldMc:MovieClip = getMovieClipByLayerName(ol.layerable.layer_name, animation);
+			var oldOl:OwnedLayerable = getOwnedLayerableByLayerName(ol.layerable.layer_name, animation);
+			var oldMc:MovieClip = getMovieClipByOwnedLayerable(oldOl);
 			if (oldMc)
 			{
 				movieClipStack.addChild(newMc);			
 				movieClipStack.swapChildren(oldMc, newMc);		
-				movieClipStack.removeChild(oldMc);				
+				movieClipStack.removeChild(oldMc);
+				oldOl.in_use = false;			
 			}
 			else
 			{
 				var index:int = getLayerableIndex(ol, animation);
 				movieClipStack.addChildAt(newMc, index);				
 			}
+			newOl.in_use = true;
+			doAnimation(currentAnimation, currentFrameNumber);	
+		}
+		
+		public function getOwnedLayerableMatch(olMatch:OwnedLayerable):OwnedLayerable
+		{
+			for each (var ol:OwnedLayerable in creature.owned_layerables)
+			{
+				if (ol.id == olMatch.id)
+				{
+					return ol;
+				}
+			}
+			return null;
 		}
 		
 		public function getLayerableIndex(ol:OwnedLayerable, animation:String):int
@@ -82,23 +99,26 @@ package world
 				}
 			}
 			return index;
-		}		
-				
-		public function getMovieClipByLayerName(layerName:String, animation:String):MovieClip
+		}	
+		
+		public function getOwnedLayerableByLayerName(layerName:String, animation:String):OwnedLayerable
 		{
 			var totalOwnedLayerables:int = _creature.owned_layerables.length.valueOf();			
-			var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
-			var className:String = null;
 			
 			for (var i:int = 0; i < totalOwnedLayerables; i++)
 			{
 				if (layerName == (_creature.owned_layerables.getItemAt(i) as OwnedLayerable).layerable.layer_name && (_creature.owned_layerables.getItemAt(i) as OwnedLayerable).in_use)
 				{
 					var ol:OwnedLayerable = _creature.owned_layerables.getItemAt(i) as OwnedLayerable;
-					className = flash.utils.getQualifiedClassName(ol.layerable.mc);
 				}
-			}
-			
+			}	
+			return ol;		
+		}	
+		
+		public function getMovieClipByOwnedLayerable(ol:OwnedLayerable):MovieClip
+		{
+			var className:String = flash.utils.getQualifiedClassName(ol.layerable.mc);
+			var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
 			for (var j:int = 0; j < movieClipChildren; j++)
 			{			
 				var tempName:String = flash.utils.getQualifiedClassName(_movieClipStack.getChildAt(j));
@@ -107,7 +127,14 @@ package world
 					return _movieClipStack.getChildAt(j) as MovieClip;
 				}
 			}
-			return null;
+			return null;			
+		}
+				
+		public function getMovieClipByLayerName(layerName:String, animation:String):MovieClip
+		{
+			var ol:OwnedLayerable = getOwnedLayerableByLayerName(layerName, animation);
+			var mc:MovieClip = getMovieClipByOwnedLayerable(ol);
+			return mc;
 		}
 		
 		private function onMovieClipStackClicked(evt:MouseEvent):void
@@ -123,6 +150,8 @@ package world
 		
 		public function doAnimation(animationType:String, frameNumber:int=0):void
 		{
+			currentAnimation = animationType;
+			currentFrameNumber = frameNumber;
 			if (_layerableOrder[animationType])
 			{
 				var totalChildren:int = (_layerableOrder[animationType] as Array).length;

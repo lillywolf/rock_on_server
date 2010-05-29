@@ -32,6 +32,8 @@ package world
 		public var _directionality:Point3D;
 		
 		public var _thinger:Object;
+		public var currentAnimation:String;
+		public var currentFrameNumber:int;
 		
 		public function ActiveAsset(movieClip:MovieClip)
 		{

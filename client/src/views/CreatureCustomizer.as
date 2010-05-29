@@ -115,7 +115,7 @@ package views
 			var discardedLayerables:ArrayCollection = new ArrayCollection();
 			for each (var ol:OwnedLayerable in _creature.owned_layerables)
 			{
-				if (!currentLayerables.contains(ol))
+				if (!currentLayerables.contains(ol) && ol.in_use)
 				{
 					discardedLayerables.addItem(ol);
 				}
