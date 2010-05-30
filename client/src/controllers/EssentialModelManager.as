@@ -13,6 +13,7 @@ package controllers
 	import models.Creature;
 	import models.Dwelling;
 	import models.EssentialModelReference;
+	import models.FriendUser;
 	import models.Layerable;
 	import models.Level;
 	import models.OwnedDwelling;
@@ -54,6 +55,7 @@ package controllers
 		[Bindable] public var dwellings:ArrayCollection;
 		[Bindable] public var owned_dwellings:ArrayCollection;
 		[Bindable] public var booth_structures:ArrayCollection;
+		[Bindable] public var friend_users:ArrayCollection;
 		
 		public var layerable:Layerable;
 		public var creature:Creature;
@@ -68,6 +70,7 @@ package controllers
 		public var owned_dwelling:OwnedDwelling;
 		public var level:Level;
 		public var booth_structure:BoothStructure;
+		public var friend_user:FriendUser;
 		
 		public var baseUrl:String = ServerController.BASE_URL;		
 		
@@ -95,6 +98,7 @@ package controllers
 			dwellings = new ArrayCollection();
 			owned_dwellings = new ArrayCollection();
 			booth_structures = new ArrayCollection();
+			friend_users = new ArrayCollection();
 			essentialModelReference = new EssentialModelReference();
 		}
 		

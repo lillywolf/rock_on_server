@@ -2,6 +2,13 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="100" clipContent="false" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import controllers.LevelManager;
+			import models.Level;
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.collections.ArrayCollection;
+			import game.GameDataInterface;
+			import controllers.FriendManager;
 			import world.AssetStack;
 			import models.Creature;
 			import world.ActiveAsset;
@@ -37,6 +44,8 @@
 			[Bindable] public var storeManager:StoreManager;
 			[Bindable] public var thingerManager:ThingerManager;
 			[Bindable] public var userManager:UserManager;
+			[Bindable] public var friendManager:FriendManager;
+			[Bindable] public var levelManager:LevelManager;
 			
 			public static const USER_PIC_DIMENSION:int = 92;
 			public static const FRIEND_PIC_DIMENSION:int = 50;
@@ -62,13 +71,23 @@
 				createInventoryCanvas();
 				addTabs();			
 					
-				addEventListener("facebookDataLoaded", onFriendDataLoaded);
+//				addEventListener("facebookDataLoaded", onFriendDataLoaded);
 				addEventListener(MouseEvent.CLICK, onBottomBarClicked);
 			}		
 		
 			public function onUserLoaded():void
 			{
-				myUser.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);		
+				myUser.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);	
+				onUserAndFriendsLoaded();
+			}
+			
+			public function onUserAndFriendsLoaded():void
+			{
+				if (parentApplication.userLoaded && parentApplication.friendsLoaded)
+				{
+					showFacebookFriends();				
+					showFacebookUser(facebookUser);												
+				}
 			}
 			
 			private function createBackCanvas():void
@@ -76,13 +95,35 @@
 				var backCanvas:Canvas = new Canvas();
 				backCanvas.x = -2;
 				backCanvas.y = 515;
-				backCanvas.width = 763;
+				backCanvas.width = 762;
 				backCanvas.height = 115;
 				backCanvas.clipContent = false;
-				backCanvas.setStyle("backgroundColor", 0x000000);
-				backCanvas.setStyle("cornerRadius", 6);
-				backCanvas.setStyle("borderStyle", "solid");
-				backCanvas.setStyle("borderColor", 0x000000);
+//				backCanvas.setStyle("backgroundColor", 0xffffff);
+//				backCanvas.setStyle("cornerRadius", 8);
+//				backCanvas.setStyle("borderStyle", "solid");
+//				backCanvas.setStyle("borderColor", 0xDBDBDB);
+//				backCanvas.setStyle("borderThickness", 5);
+//				backCanvas.setStyle("borderSides", "top");
+				var thirdCanvas:Canvas = new Canvas();
+				thirdCanvas.width = 762;
+				thirdCanvas.height = 92;
+				thirdCanvas.y = 23;
+				thirdCanvas.setStyle("backgroundColor", 0x9CD1FF);
+				thirdCanvas.setStyle("cornerRadius", 8);
+				thirdCanvas.setStyle("borderStyle", "solid");
+				thirdCanvas.setStyle("borderColor", 0x9CD1FF);
+				thirdCanvas.clipContent = false;				
+				var secondCanvas:Canvas = new Canvas();
+				secondCanvas.width = 762;
+				secondCanvas.height = 80;
+				secondCanvas.y = 35;
+				secondCanvas.clipContent = false;
+				secondCanvas.setStyle("backgroundColor", 0x99CFFF);
+				secondCanvas.setStyle("cornerRadius", 8);
+				secondCanvas.setStyle("borderStyle", "solid");
+				secondCanvas.setStyle("borderColor", 0x99CFFF);
+//				backCanvas.addChild(thirdCanvas);
+//				backCanvas.addChild(secondCanvas);
 				this.addChild(backCanvas);
 			}
 			
@@ -94,10 +135,10 @@
 				inventoryCanvas.width = 760;
 				inventoryCanvas.height = 110;
 				inventoryCanvas.clipContent = false;
-				inventoryCanvas.setStyle("backgroundColor", 0x333333);
-				inventoryCanvas.setStyle("cornerRadius", 6);
-				inventoryCanvas.setStyle("borderStyle", "solid");
-				inventoryCanvas.setStyle("borderColor", 0x000000);
+//				inventoryCanvas.setStyle("backgroundColor", 0x333333);
+//				inventoryCanvas.setStyle("cornerRadius", 6);
+//				inventoryCanvas.setStyle("borderStyle", "solid");
+//				inventoryCanvas.setStyle("borderColor", 0x000000);
 				addChild(inventoryCanvas);
 			}
 			
@@ -229,13 +270,14 @@
 //				inventoryIndex++;
 			}
 			
-			private function onFriendDataLoaded(evt:DynamicEvent):void
+			public function friendDataLoaded(evt:DynamicEvent):void
 			{
-				facebookFriends = evt.facebookFriends;
-				facebookUser = evt.facebookUser;
+				facebookFriends = friendManager.facebookFriends;
+				facebookUser = friendManager.facebookUser;
+				onUserAndFriendsLoaded();
 				
-				showFacebookFriends();				
-				showFacebookUser();
+//				showFacebookFriends();				
+//				showFacebookUser(facebookUser);
 			}
 			
 			public function createTextFilter():GlowFilter
@@ -246,43 +288,98 @@
 
 			public function createButtonFilter():GlowFilter
 			{
-				var filter:GlowFilter = new GlowFilter(0xffffff, 1, 2, 2, 20, 5); 
+				var filter:GlowFilter = new GlowFilter(0xffffff, 0, 2, 2, 20, 5); 
 				return filter;
 			}				
 			
 			private function showFacebookFriends():void
 			{
+				var orderedUsers:ArrayCollection = orderUsersByLevel();
+				
 				var index:int = 0;
-				for each (var friend:FacebookUser in facebookFriends)
+				var friendRenderer:InventoryItemRenderer;
+				var pic:Image;
+				for each (var obj:Object in orderedUsers)
 				{
-					var friendRenderer:InventoryItemRenderer = new InventoryItemRenderer();
+					var friend:FacebookUser = obj.user;
+					var friendUser:User = friendManager.getFriendBasicInfo(Number(friend.uid));
+					friendRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, levelManager.getLevelByXp(friendUser.xp));
+
 					addFriendRendererStyle(friendRenderer);
 					friendRenderer.thingerIndex = index;
-					var pic:Image = new Image();
-					pic.x = (friendRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
-					pic.y = (friendRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
-					pic.source = friend.pic_square;
+					friendRenderer.thinger = friend;
+					pic = getFriendPicture(friend, friendRenderer);
 					friendRenderer.uic = pic;
 					friendRenderer.x += USER_PIC_DIMENSION;
 					friendRenderer.addLevelBox(index);
 					friendRenderer.addName(friend.first_name);
 					inventoryCanvas.addChild(friendRenderer);
-					index++;
-					
-					friendRenderer.thinger = friend;
 					friendRenderer.addEventListener(MouseEvent.CLICK, onFriendRendererClicked);
-				}				
+					index++;					
+				}	
+				for (var j:int = index; j < 10; j++)
+				{
+					friendRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, myUser.level);
+					friendRenderer.thingerIndex = j;					
+					addFriendRendererStyle(friendRenderer);
+					pic = getDefaultPicture(friendRenderer);
+					friendRenderer.uic = pic;
+					friendRenderer.x += USER_PIC_DIMENSION;
+					friendRenderer.addName("Invite");
+					inventoryCanvas.addChild(friendRenderer);
+				}			
+			}
+			
+			public function getDefaultPicture(friendRenderer:InventoryItemRenderer):Image
+			{
+				var pic:Image = new Image();
+				pic.x = (friendRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
+				pic.y = (friendRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
+				pic.source = guitarBtnClass;	
+				return pic;			
+			}
+			
+			public function getFriendPicture(friend:FacebookUser, friendRenderer:InventoryItemRenderer):Image
+			{
+				var pic:Image = new Image();
+				pic.x = (friendRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
+				pic.y = (friendRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
+				pic.source = friend.pic_square;
+				if (pic.source == null)
+				{
+					pic.source = guitarBtnClass;
+				}
+				return pic;				
+			}
+			
+			public function orderUsersByLevel():ArrayCollection
+			{
+				var orderedUsers:ArrayCollection = new ArrayCollection();
+				orderedUsers.addItem({user: facebookUser, rank: myUser.level.rank});
+				for each (var facebooker:FacebookUser in facebookFriends)
+				{
+					var friendUser:User = friendManager.getFriendBasicInfo(Number(facebooker.uid));
+					var level:Level = levelManager.getLevelByXp(friendUser.xp);
+					orderedUsers.addItem({user: facebooker, rank: level});
+				}
+				var sortField:SortField = new SortField("rank");
+				sortField.numeric = true;
+				var sort:Sort = new Sort();
+				sort.fields = [sortField];
+				orderedUsers.sort = sort;
+				return orderedUsers;
 			}
 			
 			public function addFriendRendererStyle(renderer:InventoryItemRenderer):void
 			{	
-				renderer.height = 80;
+				renderer.height = 58;
 				renderer.y = 13;
 			}
 			
-			public function showFacebookUser():void
+			public function showFacebookUser(facebookUser:FacebookUser):void
 			{
-				var userRenderer:InventoryItemRenderer = new InventoryItemRenderer();
+				var friendUser:User = friendManager.getFriendBasicInfo(int(facebookUser.uid));
+				var userRenderer:InventoryItemRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, levelManager.getLevelByXp(friendUser.xp) as Level);
 				addFriendRendererStyle(userRenderer);
 				userRenderer.x = 10;				
 				var pic:Image = new Image();

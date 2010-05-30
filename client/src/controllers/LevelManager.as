@@ -43,6 +43,26 @@ package controllers
 			return null;
 		}
 		
+		public function getLevelByXp(xp:int):Level
+		{
+			var neededXp:int = 0;
+			var sort:Sort = new Sort();
+			var sortField:SortField = new SortField("rank");
+			sortField.numeric = true;
+			sort.fields = [sortField];
+			levels.sort = sort;
+			levels.refresh();
+			for (var i:int = 0; i < levels.length; i++)
+			{
+				neededXp += (levels[i] as Level).xp_diff;
+				if (xp < neededXp)
+				{
+					return levels[i-1] as Level;
+				}
+			}
+			return null;
+		}
+		
 		public function set serverController(val:ServerController):void
 		{
 			_serverController = val;
@@ -70,7 +90,7 @@ package controllers
 		
 		public function sortLevels():void
 		{
-			var sortField:SortField = new SortField("order");
+			var sortField:SortField = new SortField("rank");
 			sortField.numeric = true;
 			var sort:Sort = new Sort();
 			sort.fields = [sortField];

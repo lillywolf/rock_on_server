@@ -3,30 +3,37 @@ package views
 	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
 	
+	import models.Level;
+	
 	import mx.containers.Canvas;
 	import mx.controls.Label;
 	import mx.core.UIComponent;
 
 	public class InventoryItemRenderer extends Canvas
 	{
-		public static const DIMENSION:int = 66;
-		public static const PADDING:int = 6;
+		public static const DIMENSION:int = 58;
+		public static const PADDING:int = 12;
+		public static const DIMENSIONX:int = 58;
+		public static const DIMENSIONY:int = 58;
+		public static const INNER_PADDING:int = 2;
 		
 		public var _thingerIndex:int;
 		public var _uic:UIComponent;
 		public var _thinger:*;
+		public var _level:Level;
 		public var frameUIC:UIComponent;
 		public var rankCanvas:Canvas;
 				
-		public function InventoryItemRenderer()
+		public function InventoryItemRenderer(backgroundColor:Object, borderColor:Object, level:Level)
 		{
-			super();			
-			this.width = DIMENSION;
-			this.height = DIMENSION;
-			this.setStyle('backgroundColor', 'black');
-			this.setStyle('cornerRadius', '14');
+			super();	
+			_level = level;		
+			this.width = DIMENSIONX;
+			this.height = DIMENSIONY;
+			this.setStyle('backgroundColor', backgroundColor);
+			this.setStyle('cornerRadius', "8");
 			this.setStyle('borderStyle', 'solid');
-			this.setStyle('borderColor', 'black');
+			this.setStyle('borderColor', borderColor);
 			this.clipContent = false;	
 			addEventListener(MouseEvent.ROLL_OVER, onMouseOver);
 			addEventListener(MouseEvent.ROLL_OUT, onMouseOut);
@@ -110,10 +117,10 @@ package views
 			levelBox.setStyle("borderStyle", "solid");
 			levelBox.setStyle("borderColor", 0x091063);
 			levelBox.setStyle("cornerRadius", 8);
-			levelBox.x = 2;
-			levelBox.y = 0;
+			levelBox.x = 0 - INNER_PADDING;
+			levelBox.y = -2 - INNER_PADDING;
 			var levelText:Label = new Label();
-			levelText.text = (index+1).toString();
+			levelText.text = (_level.rank).toString();
 			levelText.setStyle("color", 0xffffff);
 			levelText.setStyle("textAlign", "center");
 			levelText.y = 1;
@@ -129,12 +136,14 @@ package views
 		public function addName(name:String):void
 		{
 			var friendName:Label = new Label();
+			var textFilter:GlowFilter = createTextFilter();
+			friendName.filters = [textFilter];
 			friendName.text = name;
 			friendName.setStyle("fontFamily", "Museo-Slab-900");
 			friendName.setStyle("fontSize", "11");
 			friendName.setStyle("color", 0xffffff);
-			friendName.width = width;
-			friendName.y = 63;
+			friendName.width = width - INNER_PADDING;
+			friendName.y = 64;
 			friendName.setStyle("textAlign", "center");
 			this.addChild(friendName);
 		}		

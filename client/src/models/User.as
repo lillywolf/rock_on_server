@@ -13,7 +13,7 @@ package models
 	public class User extends EssentialModel
 	{
 		public var _id:int;
-		public var _snid:int;
+		public var _snid:Number;
 		public var _xp:int;
 		public var _credits:int;
 		public var _premium_credits:int;
@@ -128,6 +128,10 @@ package models
 			{
 				_level_id = params.level_id;
 			}
+			if (params.snid)
+			{
+				_snid = params.snid;
+			}
 		}
 
 		public function set id(val:int):void
@@ -180,12 +184,12 @@ package models
 			return _premium_credits;
 		}
 		
-		public function set snid(val:int):void
+		public function set snid(val:Number):void
 		{
 			_snid = val;
 		}
 		
-		public function get snid():int
+		public function get snid():Number
 		{
 			return _snid;
 		}

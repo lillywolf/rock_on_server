@@ -6,7 +6,7 @@
 				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}" levelManager="{gdi.levelManager}"/>
 			</mx:AddChild>
 			<mx:AddChild position="after">
-				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
+				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" friendManager="{friendManager}" levelManager="{gdi.levelManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
@@ -32,6 +32,8 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import com.facebook.data.users.FacebookUser;
+			import mx.events.CollectionEvent;
 			import controllers.CreatureManager;
 			import world.AssetStack;
 			import models.OwnedLayerable;
@@ -63,8 +65,11 @@
 			[Bindable] public var gameMagicManager:GameMagicManager;
 			
 			public var facebookInterface:FacebookFunTime;
-			public var friendManager:FriendManager;
+			[Bindable] public var friendManager:FriendManager;
 			public var gameContent:Dictionary;
+			public var userLoaded:Boolean;
+			public var friendsLoaded:Boolean;
+			public var facebookDataLoaded:Boolean;
 			
 			private function onPreInitialize():void
 			{
@@ -77,19 +82,39 @@
 				gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	
 				gdi.addEventListener(ServerDataEvent.UPDATE_COMPLETE, onUpdateComplete);
 				
-				friendManager = new FriendManager();	
+				friendManager = new FriendManager(gdi);	
+				friendManager.addEventListener("friendDataLoaded", onFriendDataLoaded);
 				gameMagicManager = new GameMagicManager(gdi.levelManager, gdi.userManager);	
 			}
 			private function onApplicationComplete():void
 			{
 				facebookInterface = new FacebookFunTime();
-				currentState = 'worldView';
+				addEventListener("facebookDataLoaded", onFacebookDataLoaded);
+				currentState = "worldView";
 				gdi.storeManager.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
 			}
 			public function onFacebookUserLoaded(uid:int, evt:FacebookEvent):void
 			{
 				gdi.getStaticGameContent();
 				gdi.getUserContent(uid);
+			}
+			public function onFacebookDataLoaded(evt:DynamicEvent):void
+			{
+				facebookDataLoaded = true;
+				friendManager.setFacebookData(evt.facebookFriends, evt.facebookUser);
+				getBasicFriendInfo();
+			}
+			public function onFriendDataLoaded(evt:DynamicEvent):void
+			{
+				friendsLoaded = true;
+				bottomBarView.friendDataLoaded(evt);
+			}
+			public function getBasicFriendInfo():void
+			{
+				if (userLoaded && facebookDataLoaded)
+				{
+					friendManager.retrieveBasicFriendInfoFromServer();								
+				}
 			}
 			public function getFriendData(uid:int):void
 			{
@@ -105,7 +130,12 @@
 			}
 			public function attemptToInitializeVenueForUser():void
 			{
-				worldView.setInMotion();	
+				if (!userLoaded)
+				{
+					userLoaded = true;
+					worldView.setInMotion();	
+					getBasicFriendInfo();			
+				}
 			}
 			public function attemptToShowFriendVenue(friendGDI:GameDataInterface):void
 			{
@@ -190,8 +220,15 @@
 				}
 				if (evt.model == "user")
 				{
-					gdi.user.updateUserOnServerResponse(instance as User, evt.method);
-					gdi.levelManager.setLevelOnUser(gdi.user);
+					if (evt.method == "get_friend_basics")
+					{	
+						friendManager.processBasicFriendData(instance as User, evt.method);
+					}
+					else
+					{
+						gdi.user.updateUserOnServerResponse(instance as User, evt.method);
+						gdi.levelManager.setLevelOnUser(gdi.user);
+					}
 				}
 			}
 			private function updateOwnedStructurePostServer(os:OwnedStructure, method:String):void

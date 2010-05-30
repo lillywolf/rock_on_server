@@ -50,7 +50,8 @@
 					
 			private function onCreationComplete():void
 			{
-				addEventListener(Event.ENTER_FRAME, onEnterFrame);			
+				addEventListener(Event.ENTER_FRAME, onEnterFrame);	
+				clipContent = false;		
 			}
 			
 			private function onEnterFrame(evt:Event):void
@@ -67,7 +68,7 @@
 			{
 				setBarSkeleton();
 				showCredits();
-				showXp();	
+				showPremiumCredits();	
 				showLevel();			
 			}
 			
@@ -75,35 +76,75 @@
 			{
 				mainHBox = new HBox();
 				mainHBox.width = (width - 60);
-				mainHBox.height = 50;
+				mainHBox.height = 80;
 				mainHBox.y = 20;
 				mainHBox.x = 30;
+				mainHBox.clipContent = false;
 				mainHBox.setStyle("horizontalGap", 15);
 				addChild(mainHBox);
 			}
 			
 			public function showLevel():void
 			{
-				var textFilter:GlowFilter = createXpFilter();				
-//				var backCanvas:Canvas = createBackCanvas();
-				var canvas:Canvas = createGrayCanvas();
+				var textFilter:GlowFilter = createGrayFilter();	
+				var canvas:Canvas = new Canvas();			
+//				var levelBox:Canvas = UserInfoRenderer.createLevelBox(myUser, 32, 29, 0, 0, 16, [textFilter]);
+				var levelText:Label = UserInfoRenderer.getLevelText(myUser, levelManager, 26, [textFilter]);
+				levelText.y = -3;
+				levelText.x = -8;
+				canvas.clipContent = false;
+				var progressBar:Canvas = UserInfoRenderer.createLevelProgressBar(myUser, levelManager, 130, 24, 0xE2FFB0, 0x038700, 0x1ea55e);
+				progressBar.y = -2;
+				progressBar.x = 28;
+				var xpText:Label = getXpText(13);
+				xpText.x = 28;
+				xpText.y = 31;
+				canvas.addChild(xpText);
+				canvas.addChild(progressBar);
+				canvas.addChild(levelText); 
+				mainHBox.addChild(canvas);
+			}
+			
+			public function getXpText(fontSize:int):Text
+			{
+				var textFilter:GlowFilter = createGrayFilter();				
+				xpBox = new Text();
+				xpBox.text = myUser.xp.toString() + "/" + UserInfoRenderer.getNextXpThreshold(myUser, levelManager).toString();
+				xpBox.setStyle("color", 0xffffff);
+				xpBox.setStyle("fontSize", fontSize);
+				xpBox.setStyle("fontFamily", "Museo-Slab-900");
+				xpBox.x = 27;
+				xpBox.y = 3;
+				xpBox.filters = [textFilter];
+				return xpBox;				
+			}
+			
+			public function showPremiumCredits():void
+			{
+				var textFilter:GlowFilter = createGrayFilter();
+				var canvas:Canvas = createGreenCanvas();
 				canvas.x = 4;
 				canvas.y = 4;
-				canvas.height = 29;
-				levelBox = new Text();
-				levelBox.filters = [textFilter];
-				levelBox.text = myUser.level.rank.toString();
-				levelBox.x = 28;
-				levelBox.y = 3;
-				setFontStyle(levelBox, 16);
-				canvas.addChild(levelBox);
-//				backCanvas.addChild(grayCanvas);
-				mainHBox.addChild(canvas);
+				canvas.height = 27;
+				creditsBox = new Text();
+				creditsBox.text = myUser.premium_credits.toString();
+				creditsBox.setStyle("color", 0xd3ffa4);
+				creditsBox.x = 27;
+				creditsBox.y = 3;
+				creditsBox.filters = [textFilter];
+				var icon:Image = new Image();
+				icon.source = guitarIconClass;
+				icon.x = -9;
+				icon.y = -12;
+				canvas.addChild(icon);
+				setFontStyle(creditsBox, 16);
+				canvas.addChild(creditsBox);
+				mainHBox.addChild(canvas);					
 			}
 			
 			public function showXp():void
 			{
-				var textFilter:GlowFilter = createXpFilter();
+				var textFilter:GlowFilter = createGrayFilter();
 				var canvas:Canvas = createGreenCanvas();
 				canvas.x = 4;
 				canvas.y = 4;
@@ -150,15 +191,21 @@
 				return canvas;				
 			}
 			
-			public function createXpFilter():GlowFilter
+			public function createGrayFilter():GlowFilter
 			{
 				var filter:GlowFilter = new GlowFilter(0x333333, 1, 1.4, 1.4, 30, 4); 
 				return filter;
 			}
-			
-			public function createCreditsFilter():GlowFilter
+
+			public function createGreenFilter():GlowFilter
 			{
-				var filter:GlowFilter = new GlowFilter(0x333333, 1, 1.3, 1.3, 30, 4); 
+				var filter:GlowFilter = new GlowFilter(0x1ea55e, 1, 1.4, 1.4, 30, 4); 
+				return filter;
+			}
+			
+			public function createBlueFilter():GlowFilter
+			{
+				var filter:GlowFilter = new GlowFilter(0x0052EB, 1, 1.3, 1.3, 30, 4); 
 				return filter;				
 			}
 			
@@ -195,7 +242,7 @@
 			public function showCredits():void
 			{
 				var canvas:Canvas = createBlueCanvas();
-				var textFilter:GlowFilter = createCreditsFilter();
+				var textFilter:GlowFilter = createGrayFilter();
 				canvas.x = 4;
 				canvas.y = 4;
 				canvas.height = 27;

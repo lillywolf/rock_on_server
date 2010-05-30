@@ -18,7 +18,6 @@ package game
 	
 	import models.User;
 	
-	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
@@ -44,6 +43,7 @@ package game
 		public var loadCounter:int = 0;
 		public var pendingRequests:int = 0;
 		public var gameClock:GameClock;
+		public var initialized:Boolean;
 		
 		public function GameDataInterface(preLoadedContent:Dictionary=null)
 		{
@@ -120,14 +120,17 @@ package game
 		
 		public function setUser(evt:CollectionEvent):void
 		{
-			user = essentialModelManager.users[0];
-			userManager.user = user;
-			
-			gameClock.updateLastShowtime(userManager.user.last_showtime);
-			
-			var serverDataEvent:ServerDataEvent = new ServerDataEvent(ServerDataEvent.USER_LOADED, 'user', evt.currentTarget, null, true, true);
-			dispatchEvent(serverDataEvent);
-			essentialModelManager.users.removeEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
+			if (((evt.items as Array).pop() as User).snid == Application.application.facebookInterface.snid)
+			{
+				user = essentialModelManager.users[0];
+				userManager.user = user;
+				
+//				gameClock.updateLastShowtime(userManager.user.last_showtime);
+				
+				var serverDataEvent:ServerDataEvent = new ServerDataEvent(ServerDataEvent.USER_LOADED, 'user', evt.currentTarget, null, true, true);
+				dispatchEvent(serverDataEvent);
+				essentialModelManager.users.removeEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
+			}
 		}
 		
 		public function getUserContent(uid:int):void
@@ -217,20 +220,34 @@ package game
 			
 			// Handles user class case
 			
-			if (essentialModelManager[obj.model])
+			if (obj.instance[obj.model].snid)
 			{
-				for each (instance in essentialModelManager[obj.model])
+				if (isGameUser(obj.instance[obj.model].snid))
 				{
-					if (instance.id == obj.instance[obj.model].id)
+					for each (instance in essentialModelManager[obj.model])
 					{
-						instance.updateProperties(obj.instance[obj.model]);
+						if (instance.id == obj.instance[obj.model].id)
+						{
+							instance.updateProperties(obj.instance[obj.model]);
+						}
 					}
 				}
 			}
 		}
 		
+		public function isGameUser(snid:int):Boolean
+		{
+			if (snid == Application.application.facebookInterface.snid)
+			{
+				return true;
+			}
+			return false;
+		}
+		
 		public function checkIfLoadingComplete():void
 		{
+			// Really, this way sucks...
+			
 			loadCounter++;
 			if (pendingRequests == loadCounter)
 			{
@@ -289,7 +306,7 @@ package game
 			{
 				if (isLoggedInUser())
 				{
-					Application.application.attemptToInitializeVenueForUser();											
+					Application.application.attemptToInitializeVenueForUser();																
 				}
 				else
 				{

@@ -175,7 +175,8 @@ package facebook
 			var evt:DynamicEvent = new DynamicEvent("facebookDataLoaded", true, true);
 			evt.facebookUser = facebookUser;
 			evt.facebookFriends = facebookFriendAppUsers;
-			Application.application.bottomBarView.dispatchEvent(evt);				
+			Application.application.dispatchEvent(evt);
+//			Application.application.bottomBarView.dispatchEvent(evt);				
 		}
 
 	}
