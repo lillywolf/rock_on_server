@@ -69,6 +69,19 @@ package controllers
 			return matchingCreatures;
 		}
 		
+		public function getConstructedCreatureById(id:int, sizeX:Number, sizeY:Number):AssetStack
+		{
+			for each (var creature:Creature in _creatures)
+			{
+				if (creature.id == id)
+				{
+					var assetStack:AssetStack = creature.getConstructedCreature('walk_toward', sizeX, sizeY);
+					break;
+				}
+			}	
+			return assetStack;		
+		}
+		
 		public function getCreaturesByType(type:String):ArrayCollection
 		{
 			var matchingCreatures:ArrayCollection = new ArrayCollection();
@@ -87,6 +100,18 @@ package controllers
 			for each (var creature:Creature in _creatures)
 			{
 				if (creature.id == id)
+				{
+					return creature;
+				}
+			}
+			return null;
+		}
+		
+		public function getRandomCreatureByType(type:String):Creature
+		{
+			for each (var creature:Creature in _creatures)
+			{
+				if (creature.type == type)
 				{
 					return creature;
 				}

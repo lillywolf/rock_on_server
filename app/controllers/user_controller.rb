@@ -39,4 +39,17 @@ class UserController < ApplicationController
     render :json => array.to_json
   end  
   
+  def get_friend_basics
+    array = Array.new
+    hash = Hash.new
+    user = User.first(:conditions => ["snid = ?", params[:snid]])
+    hash["instance"] = user
+    hash["created_from_client"] = true
+    hash["already_loaded"] = true
+    hash["model"] = "user"
+    hash["method"] = "get_friend_basics"
+    array.push hash
+    render :json => array.to_json        
+  end  
+  
 end

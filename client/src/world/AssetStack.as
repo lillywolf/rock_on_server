@@ -4,9 +4,13 @@ package world
 	import flash.events.MouseEvent;
 	import flash.utils.getQualifiedClassName;
 	
+	import helpers.CreatureEvent;
+	
 	import models.Creature;
 	import models.EssentialModelReference;
 	import models.OwnedLayerable;
+	
+	import mx.core.Application;
 
 	public class AssetStack extends ActiveAsset
 	{
@@ -139,7 +143,9 @@ package world
 		
 		private function onMovieClipStackClicked(evt:MouseEvent):void
 		{
-			trace(evt.target.name, flash.utils.getQualifiedClassName(evt.target));		
+			trace(evt.target.name, flash.utils.getQualifiedClassName(evt.target));	
+			var event:CreatureEvent = new CreatureEvent(CreatureEvent.CREATURE_CLICKED, evt.currentTarget.parent as AssetStack, true, true);
+			Application.application.bottomBarView.dispatchEvent(event);
 		}
 		
 		public function stand(frameNumber:int, animationType:String):void
@@ -182,6 +188,7 @@ package world
 				for (var k:int = 0; k < newChildren; k++)
 				{
 					var newMc:MovieClip = newStack.getChildAt(0) as MovieClip;
+					newMc.cacheAsBitmap = true;
 					_movieClipStack.addChildAt(newMc, k);
 					if (frameNumber == 0)
 					{

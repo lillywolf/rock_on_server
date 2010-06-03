@@ -59,7 +59,7 @@ package views
 		{
 			for (var i:int = 0; i < venue.fancount; i++)
 			{
-				var cp:CustomerPerson = _creatureGenerator.createCustomer("generic", "walk_toward", _concertStage, _boothManager);
+				var cp:CustomerPerson = _creatureGenerator.createCustomer("Concert Goer", "walk_toward", _concertStage, _boothManager);
 				cp.speed = 0.06;
 				_customerPersonManager.add(cp);
 			}

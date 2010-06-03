@@ -3,6 +3,7 @@ package game
 	import flash.events.IEventDispatcher;
 	
 	import models.Creature;
+	import models.EssentialModelReference;
 	
 	import world.Point3D;
 
@@ -11,6 +12,13 @@ package game
 		public function ImposterCreature(params:Object, target:IEventDispatcher=null)
 		{
 			super(params, target);
+			setRandomName();
+		}
+		
+		public function setRandomName():void
+		{
+			var rand:int = Math.floor(Math.random()*EssentialModelReference.creatureNames.length);
+			_name = EssentialModelReference.creatureNames[rand];
 		}
 		
 		override public function setPropertiesFromParams(params:Object):void

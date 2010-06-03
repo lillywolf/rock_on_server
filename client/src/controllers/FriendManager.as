@@ -4,6 +4,7 @@ package controllers
 	
 	import game.GameDataInterface;
 	
+	import models.Creature;
 	import models.User;
 	
 	import mx.collections.ArrayCollection;
@@ -16,6 +17,7 @@ package controllers
 	{
 		public var mainGDI:GameDataInterface;
 		public var basicFriendData:ArrayCollection;
+		public var randomBandMembers:ArrayCollection;
 		public var facebookFriends:Array;
 		public var facebookUser:FacebookUser;
 		public function FriendManager(gdi:GameDataInterface, source:Array=null)
@@ -24,7 +26,7 @@ package controllers
 			mainGDI = gdi;
 		}
 		
-		public function getFriendData(uid:int):void
+		public function getFriendData(uid:Number):void
 		{
 			var friendMap:Object = checkForFriendData(uid);
 			if (friendMap)
@@ -36,7 +38,7 @@ package controllers
 				createNewFriendMap(uid);
 			}
 		}
-		
+				
 		public function getFriendBasicInfo(uid:Number):User
 		{
 			for each (var friendUser:User in basicFriendData)
@@ -44,6 +46,30 @@ package controllers
 				if (friendUser.snid == uid)
 				{
 					return friendUser;
+				}
+			}
+			return null;
+		}
+		
+		public function getFriendUser(uid:Number):User
+		{
+			for each (var friendMap:Object in this)
+			{
+				if (friendMap.gdi.user.snid == uid)
+				{
+					return friendMap.gdi.user;
+				}
+			}
+			return null;
+		}
+		
+		public function getFriendGDI(uid:Number):GameDataInterface
+		{
+			for each (var friendMap:Object in this)
+			{
+				if (friendMap.gdi.user.snid == uid)
+				{
+					return friendMap.gdi;
 				}
 			}
 			return null;
@@ -58,13 +84,10 @@ package controllers
 		public function retrieveBasicFriendInfoFromServer():void
 		{
 			basicFriendData = new ArrayCollection();
-			basicFriendData.addItem(mainGDI.user);
+			addMainUser();
 			for each (var friend:FacebookUser in facebookFriends)
 			{
-				if (friend.uid != this.facebookUser.uid)
-				{
-					mainGDI.sc.sendRequest({snid: friend.uid}, "user", "get_friend_basics");							
-				}
+				mainGDI.sc.sendRequest({snid: friend.uid}, "user", "get_friend_basics");							
 			}
 		}
 		
@@ -73,12 +96,51 @@ package controllers
 			basicFriendData.addItem(friendUser);
 			if (basicFriendData.length == (facebookFriends.length + 1))
 			{
-				var evt:DynamicEvent = new DynamicEvent("friendDataLoaded", true, true);
-				dispatchEvent(evt);
+//				var evt:DynamicEvent = new DynamicEvent("friendDataLoaded", true, true);
+//				dispatchEvent(evt);
 			}
 		}
 		
-		public function createNewFriendMap(uid:int):Object
+		public function getFriendGDIs():void
+		{
+			for each (var friend:FacebookUser in facebookFriends)
+			{
+				createNewFriendMap(Number(friend.uid));
+			}			
+		}
+		
+		public function friendGDILoaded(friendGDI:GameDataInterface):void
+		{
+			var friendMap:Object = {snid: friendGDI.user.snid, gdi: friendGDI};
+			addItem(friendMap);						
+			if (length == facebookFriends.length)
+			{
+				addItem({snid: mainGDI.user.snid, gdi: mainGDI});
+				var evt:DynamicEvent = new DynamicEvent("friendDataLoaded", true, true);
+				dispatchEvent(evt);
+			}			
+		}
+		
+		public function processRandomBandMemberData(creature:Creature, method:String):void
+		{
+			randomBandMembers.addItem({creature: creature, id: creature.user_id});
+			if (randomBandMembers.length == (facebookFriends.length + 1))
+			{
+				var evt:DynamicEvent = new DynamicEvent("friendDataLoaded", true, true);
+				dispatchEvent(evt);							
+			}
+		}
+		
+		public function addMainUser():void
+		{
+			basicFriendData.addItem(mainGDI.user);		
+			if (!mainGDI.user)
+			{
+				throw new Error("user is null");
+			}	
+		}
+		
+		public function createNewFriendMap(uid:Number):Object
 		{
 			var gdi:GameDataInterface = new GameDataInterface(Application.application.gameContent);
 			gdi.addEventListener(ServerDataEvent.USER_LOADED, onUserLoaded);
@@ -88,11 +150,10 @@ package controllers
 			gdi.getUserContent(uid);
 			
 			var friendMap:Object = {snid: uid, gdi: gdi};
-			addItem(friendMap);			
 			return friendMap;
 		}
 		
-		public function checkForFriendData(uid:int):Object
+		public function checkForFriendData(uid:Number):Object
 		{
 			for each (var friendMap:Object in this)
 			{

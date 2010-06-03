@@ -66,18 +66,10 @@ package views
 			backing.setStyle("cornerRadius", 8);
 			backing.setStyle("borderColor", borderColor);
 			backing.setStyle("borderStyle", "solid");
-			backing.width = barWidth;
+			backing.width = barWidth + 2;
 			backing.height = barHeight;
 			var progress:Canvas = new Canvas();
-			var discardableXp:int = 0;
-			for each (var level:Level in levelManager.levels)
-			{
-				if (level.rank < myUser.level.rank)
-				{
-					discardableXp += level.xp_diff;
-				}
-			}
-			var xpFraction:Number = ((myUser.xp - discardableXp)/myUser.level.xp_diff);
+			var xpFraction:Number = levelManager.getLevelProgressPercentage(myUser.level, myUser.xp);
 			progress.width = barWidth * xpFraction;
 			progress.height = barHeight;
 			progress.setStyle("backgroundColor", progressColor);
@@ -88,7 +80,7 @@ package views
 			progress.y = 2;
 			backing.y = 2;
 			var cfg:ColorFrameGreen = new ColorFrameGreen();
-			cfg.width = barWidth + 6; 
+			cfg.width = barWidth + 8; 
 			cfg.height = barHeight + 6;
 			var uic:UIComponent = new UIComponent();
 			uic.addChild(cfg);
@@ -105,19 +97,6 @@ package views
 			canvas.addChild(uic);
 			return canvas;
 		}	
-		
-		public static function getNextXpThreshold(myUser:User, levelManager:LevelManager):int
-		{
-			var totalXp:int = 0;
-			for each (var level:Level in levelManager.levels)
-			{
-				if (level.rank <= myUser.level.rank)
-				{
-					totalXp += level.xp_diff;
-				}
-			}	
-			return totalXp;		
-		}
 		
 	}
 }

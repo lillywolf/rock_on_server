@@ -113,7 +113,7 @@
 			{
 				if (userLoaded && facebookDataLoaded)
 				{
-					friendManager.retrieveBasicFriendInfoFromServer();								
+					friendManager.getFriendGDIs();								
 				}
 			}
 			public function getFriendData(uid:int):void
@@ -136,6 +136,10 @@
 					worldView.setInMotion();	
 					getBasicFriendInfo();			
 				}
+			}
+			public function friendGDILoaded(friendGDI:GameDataInterface):void
+			{
+				friendManager.friendGDILoaded(friendGDI);
 			}
 			public function attemptToShowFriendVenue(friendGDI:GameDataInterface):void
 			{
@@ -161,9 +165,10 @@
 				friendView.userManager = friendGDI.userManager;
 				friendView.structureManager = friendGDI.structureManager;
 				friendView.layerableManager = friendGDI.layerableManager;
-				friendView.creatureManager = friendGDI.creatureManager;					
-				friendView.showBooths();
-				friendView.addStage();				
+				friendView.creatureManager = friendGDI.creatureManager;	
+				friendView.levelManager = friendGDI.levelManager;				
+				friendView.dwellingManager = friendGDI.dwellingManager;				
+				friendView.startFriendMirror();				
 			}
 			public function instancesLoadedForGameUser():void
 			{

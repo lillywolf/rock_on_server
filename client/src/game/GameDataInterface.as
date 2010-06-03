@@ -18,6 +18,7 @@ package game
 	
 	import models.User;
 	
+	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
@@ -44,6 +45,7 @@ package game
 		public var pendingRequests:int = 0;
 		public var gameClock:GameClock;
 		public var initialized:Boolean;
+		public var snid:Number;
 		
 		public function GameDataInterface(preLoadedContent:Dictionary=null)
 		{
@@ -120,21 +122,21 @@ package game
 		
 		public function setUser(evt:CollectionEvent):void
 		{
-			if (((evt.items as Array).pop() as User).snid == Application.application.facebookInterface.snid)
-			{
-				user = essentialModelManager.users[0];
+			var collection:ArrayCollection = evt.currentTarget as ArrayCollection;
+			if ((collection.getItemAt(collection.length - 1) as User).snid == snid)
+			{				
+				user = collection.getItemAt(collection.length - 1) as User;
 				userManager.user = user;
-				
-//				gameClock.updateLastShowtime(userManager.user.last_showtime);
-				
+								
 				var serverDataEvent:ServerDataEvent = new ServerDataEvent(ServerDataEvent.USER_LOADED, 'user', evt.currentTarget, null, true, true);
 				dispatchEvent(serverDataEvent);
 				essentialModelManager.users.removeEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
 			}
 		}
 		
-		public function getUserContent(uid:int):void
+		public function getUserContent(uid:Number):void
 		{
+			snid = uid;
 			getDataForModel({snid: uid}, "user", "find_by_snid");
 		}
 	
@@ -310,7 +312,8 @@ package game
 				}
 				else
 				{
-					Application.application.attemptToShowFriendVenue(this);
+					Application.application.friendGDILoaded(this);
+//					Application.application.attemptToShowFriendVenue(this);
 				}
 			}
 		}

@@ -35,7 +35,7 @@ package facebook
 		private var facebookAppUsersLoaded:Boolean;
 		private var facebookFriendsLoaded:Boolean;
 		
-		public var snid:int;
+		public var snid:Number;
 		
 		public function FacebookFunTime()
 		{
@@ -53,7 +53,7 @@ package facebook
 		{
 			if (evt.success)
 			{
-				snid = int(fbook.uid);
+				snid = Number(fbook.uid);
 				
 				setUserData(evt);
 				setFriendData(evt);

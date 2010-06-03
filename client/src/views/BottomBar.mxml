@@ -2,6 +2,11 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="100" clipContent="false" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import mx.containers.VBox;
+			import mx.controls.Text;
+			import world.WorldEvent;
+			import helpers.CreatureEvent;
+			import com.facebook.commands.events.CancelEvent;
 			import controllers.LevelManager;
 			import models.Level;
 			import mx.collections.Sort;
@@ -34,6 +39,9 @@
 			[Bindable] public var myUser:User;
 			
 			public var inventoryCanvas:Canvas;
+			public var creatureCanvas:Canvas;
+			public var displayedCreatureInfo:Canvas;
+			public var displayedCreatureUIC:ContainerUIC;
 			public var inventoryIndex:int = 0;
 			public var tabCanvas:HBox;
 			public var worldView:WorldView;
@@ -54,6 +62,10 @@
 			public var musicBtnClass:Class;
 			[Embed(source="../libs/icons/arrow.png")]
 			public var arrowBtnClass:Class;
+			[Embed(source="../libs/icons/hamburger.png")]
+			public var hamburgerBtnClass:Class;
+			[Embed(source="../libs/icons/microphone.png")]
+			public var microphoneBtnClass:Class;
 			[Embed(source="../libs/icons/store.png")]
 			public var storeBtnClass:Class;
 			[Embed(source="../libs/icons/guitar.png")]
@@ -62,6 +74,52 @@
 			public var heartBtnClass:Class;
 			[Embed(source="../libs/icons/pizza.png")]
 			public var pizzaBtnClass:Class;
+			[Embed(source="../libs/icons/headphones_small.png")]
+			public var smallHeadphonesIconClass:Class;
+			[Embed(source="../libs/icons/heart_small.png")]
+			public var smallHeartIconClass:Class;
+			[Embed(source="../libs/icons/guitar_small.png")]
+			public var smallGuitarIconClass:Class;
+			[Embed(source="../libs/icons/coffee_small.png")]
+			public var smallCoffeeIconClass:Class;
+			[Embed(source="../libs/icons/pizza_small.png")]
+			public var smallPizzaIconClass:Class;
+			[Embed(source="../libs/icons/musicnotes_small.png")]
+			public var smallMusicNotesIconClass:Class;
+			[Embed(source="../libs/icons/arrow_right_small.png")]
+			public var arrowScrollerRight:Class;
+			[Embed(source="../libs/icons/arrow_left_small.png")]
+			public var arrowScrollerLeft:Class;
+			[Embed(source="../libs/icons/smiley_green.png")]
+			public var smileGreenClass:Class;
+			[Embed(source="../libs/icons/star_unfilled_small.png")]
+			public var starUnfilled:Class;
+			[Embed(source="../libs/icons/star_filled_small.png")]
+			public var starFilled:Class;
+			[Embed(source="../libs/icons/hamburger_button.png")]
+			public var hamburgerButton:Class;
+			[Embed(source="../libs/icons/heart_button.png")]
+			public var heartButton:Class;
+			[Embed(source="../libs/icons/musicnotes_button.png")]
+			public var musicNotesButton:Class;
+			[Embed(source="../libs/icons/guitar_button.png")]
+			public var guitarButton:Class;
+			[Embed(source="../libs/icons/filler_green.png")]
+			public var fillerGreenClass:Class;
+			[Embed(source="../libs/icons/filler_green_empty.png")]
+			public var fillerGreenEmptyClass:Class;
+			[Embed(source="../libs/icons/filler_yellow.png")]
+			public var fillerYellowClass:Class;
+			[Embed(source="../libs/icons/filler_yellow_empty.png")]
+			public var fillerYellowEmptyClass:Class;
+			[Embed(source="../libs/icons/filler_red.png")]
+			public var fillerRedClass:Class;
+			[Embed(source="../libs/icons/filler_red_empty.png")]
+			public var fillerRedEmptyClass:Class;
+			[Embed(source="../libs/icons/star_filled_blue.png")]
+			public var starBlueFilled:Class;
+			[Embed(source="../libs/icons/star_unfilled_blue.png")]
+			public var starBlueUnfilled:Class;
 			
 
 			private function onCreationComplete():void
@@ -70,8 +128,10 @@
 				createTabCanvas();
 				createInventoryCanvas();
 				addTabs();			
-					
+				
+				width = 760;
 //				addEventListener("facebookDataLoaded", onFriendDataLoaded);
+				addEventListener(CreatureEvent.CREATURE_CLICKED, onCreatureClicked);
 				addEventListener(MouseEvent.CLICK, onBottomBarClicked);
 			}		
 		
@@ -85,46 +145,215 @@
 			{
 				if (parentApplication.userLoaded && parentApplication.friendsLoaded)
 				{
-					showFacebookFriends();				
-					showFacebookUser(facebookUser);												
+					showFacebookFriends();	
+					showInitialCreature();			
 				}
+			}
+			
+			public function showInitialCreature():void
+			{
+				var uic:ContainerUIC = getBandMember(friendManager.mainGDI, 0.55);
+				setDisplayedCreatureDimensions(uic);
+				displayCreatureInfo((uic.thinger as AssetStack).creature);
+				addChild(uic);					
+			}
+			
+			public function onCreatureClicked(evt:CreatureEvent):void
+			{
+				replaceCreature(evt.asset.creature);
+			}
+			
+			public function setDisplayedCreatureDimensions(uic:ContainerUIC):void
+			{
+				uic.x = width/2 - 327;
+				uic.y = inventoryCanvas.y + 86;
+				var asset:AssetStack = uic.thinger as AssetStack;
+				displayedCreatureUIC = uic;
+			}
+			
+			public function displayCreatureInfo(creature:Creature):void
+			{
+				displayedCreatureInfo = new Canvas();
+				displayedCreatureInfo.clipContent = false;
+				var nameLabel:Label = getCreatureName(creature.name);
+				displayedCreatureInfo.x = width/2 - 286;
+				displayedCreatureInfo.y = inventoryCanvas.y - 38;
+				displayedCreatureInfo.addChild(nameLabel);
+				var vbox:VBox = new VBox();
+				vbox.setStyle("verticalGap", 4);
+				vbox.y = 40;
+				var typeLabel:Text = getCreatureType(creature);
+				vbox.addChild(typeLabel);
+				var starCanvas:Canvas = getCreatureStars(creature);
+				starCanvas.y = typeLabel.textHeight + typeLabel.y + 13;
+				vbox.addChild(starCanvas);
+				displayedCreatureInfo.addChild(vbox);
+//				var buttonCanvas:Canvas = getCreatureButtons(creature);
+//				displayedCreatureInfo.addChild(buttonCanvas);
+//				var moodImage:Image = getCreatureMood(creature);
+//				displayedCreatureInfo.addChild(moodImage);
+				addChild(displayedCreatureInfo);				
+			}
+			
+			public function getCreatureButtons(creature:Creature):Canvas
+			{
+				var grayFilter:GlowFilter = createGrayFilter();
+				var canvas:Canvas = new Canvas();
+				var img1:Image = new Image();
+				img1.source = smallPizzaIconClass;
+				img1.filters = [grayFilter];
+				img1.y = 10;
+				canvas.addChild(img1);
+				var img2:Image = new Image();
+				img2.source = smallCoffeeIconClass;
+				img2.x = 35;
+				img2.y = 5;
+				img2.filters = [grayFilter];
+				canvas.addChild(img2);
+//				var img3:Image = new Image();
+//				img3.source = musicNotesButton;
+//				img3.x = 110;
+//				img3.y = 35;
+//				canvas.addChild(img3);
+				canvas.y = 85;
+				return canvas;
+			}
+			
+			public function getCreatureStars(creature:Creature):Canvas
+			{
+				var canvas:Canvas = new Canvas();
+				var star:Image;
+				var i:int;
+				for (i = 0; i<4; i++)
+				{
+					star = new Image();
+					if (creature.type == "BandMember")
+					{
+						star.source = starBlueFilled;
+					}
+					else
+					{
+						if (i < 3)
+						{
+							star.source = fillerRedClass;											
+						}
+						else if (i < 7)
+						{
+							star.source = fillerYellowClass;
+						}
+						else
+						{
+							star.source = fillerGreenClass;
+						}
+					}
+					star.x = i * 14;
+					canvas.addChild(star);
+				}
+				for (i = 4; i<10; i++)
+				{
+					star = new Image();
+					if (creature.type == "BandMember")
+					{
+						star.source = starBlueUnfilled;
+					}
+					else
+					{
+						if (i < 3)
+						{
+							star.source = fillerRedEmptyClass;											
+						}
+						else if (i < 7)
+						{
+							star.source = fillerYellowEmptyClass;
+						}
+						else
+						{
+							star.source = fillerGreenEmptyClass;
+						}
+					}
+					star.x = i * 14;
+					canvas.addChild(star);
+				}
+				return canvas;
+				
+			}
+			
+			public function getCreatureType(creature:Creature):Text
+			{
+				var canvas:Canvas = new Canvas();
+				var text:Text = new Text();
+				text.width = 140;
+				var textFilter:GlowFilter = createTextFilter();
+				if (creature.type == "Groupie")
+				{
+					text.text = "SuperFan";				
+				}
+				else if (creature.type == "BandMember")
+				{
+					text.text = "Novice Bandmate";
+				}
+				else
+				{
+					text.text = creature.type;
+				}
+				text.setStyle("color", 0xffffff);
+				text.setStyle("fontFamily", "Museo-Slab-900");
+				text.setStyle("fontSize", 13);
+				text.filters = [textFilter];
+				text.y = 40;
+				return text;
+			}
+			
+			public function getCreatureMood(creature:Creature):Image
+			{
+				var image:Image = new Image();
+				image.source = smileGreenClass;
+				image.y = 70;
+				return image;
+			}
+			
+			public function getCreatureName(name:String):Label
+			{
+				var nameLabel:Label = new Label();
+				nameLabel.text = name;
+				nameLabel.filters = [createTextFilter()];
+				nameLabel.setStyle("color", 0xffffff);
+				nameLabel.setStyle("fontFamily", "Museo-Slab-900");
+				nameLabel.setStyle("fontSize", 16);
+				return nameLabel;
+			}
+			
+			public function replaceCreature(creature:Creature):void
+			{
+				if (displayedCreatureUIC)
+				{
+					removeChild(displayedCreatureUIC);				
+				}
+				if (displayedCreatureInfo)
+				{
+					removeChild(displayedCreatureInfo);
+				}
+				var uic:ContainerUIC = getDisplayedCreature(creature, 0.55);
+				displayedCreatureUIC = uic;
+				setDisplayedCreatureDimensions(uic);
+				displayCreatureInfo(creature);
+				addChild(uic);
 			}
 			
 			private function createBackCanvas():void
 			{
-				var backCanvas:Canvas = new Canvas();
-				backCanvas.x = -2;
-				backCanvas.y = 515;
-				backCanvas.width = 762;
-				backCanvas.height = 115;
-				backCanvas.clipContent = false;
-//				backCanvas.setStyle("backgroundColor", 0xffffff);
-//				backCanvas.setStyle("cornerRadius", 8);
-//				backCanvas.setStyle("borderStyle", "solid");
-//				backCanvas.setStyle("borderColor", 0xDBDBDB);
-//				backCanvas.setStyle("borderThickness", 5);
-//				backCanvas.setStyle("borderSides", "top");
-				var thirdCanvas:Canvas = new Canvas();
-				thirdCanvas.width = 762;
-				thirdCanvas.height = 92;
-				thirdCanvas.y = 23;
-				thirdCanvas.setStyle("backgroundColor", 0x9CD1FF);
-				thirdCanvas.setStyle("cornerRadius", 8);
-				thirdCanvas.setStyle("borderStyle", "solid");
-				thirdCanvas.setStyle("borderColor", 0x9CD1FF);
-				thirdCanvas.clipContent = false;				
-				var secondCanvas:Canvas = new Canvas();
-				secondCanvas.width = 762;
-				secondCanvas.height = 80;
-				secondCanvas.y = 35;
-				secondCanvas.clipContent = false;
-				secondCanvas.setStyle("backgroundColor", 0x99CFFF);
-				secondCanvas.setStyle("cornerRadius", 8);
-				secondCanvas.setStyle("borderStyle", "solid");
-				secondCanvas.setStyle("borderColor", 0x99CFFF);
-//				backCanvas.addChild(thirdCanvas);
-//				backCanvas.addChild(secondCanvas);
-				this.addChild(backCanvas);
+				creatureCanvas = new Canvas();
+				creatureCanvas.width = 252;
+				creatureCanvas.height = 105;
+				creatureCanvas.y = 510;
+				creatureCanvas.x = 10;
+				creatureCanvas.alpha = 0.4;
+				creatureCanvas.setStyle("backgroundColor", 0xffffff);
+				creatureCanvas.setStyle("cornerRadius", 12);
+				creatureCanvas.setStyle("borderStyle", "solid");
+				creatureCanvas.setStyle("borderColor", 0xffffff);
+				creatureCanvas.clipContent = false;		
+				this.addChild(creatureCanvas);
 			}
 			
 			private function createInventoryCanvas():void
@@ -132,13 +361,8 @@
 				inventoryCanvas = new Canvas();
 				inventoryCanvas.x = 0;
 				inventoryCanvas.y = 520;
-				inventoryCanvas.width = 760;
 				inventoryCanvas.height = 110;
 				inventoryCanvas.clipContent = false;
-//				inventoryCanvas.setStyle("backgroundColor", 0x333333);
-//				inventoryCanvas.setStyle("cornerRadius", 6);
-//				inventoryCanvas.setStyle("borderStyle", "solid");
-//				inventoryCanvas.setStyle("borderColor", 0x000000);
 				addChild(inventoryCanvas);
 			}
 			
@@ -151,10 +375,6 @@
 				tabCanvas.width = 160;
 				tabCanvas.height = 54;
 				tabCanvas.clipContent = false;
-//				tabCanvas.setStyle("backgroundColor", 0x000000);
-//				tabCanvas.setStyle("cornerRadius", 14);
-//				tabCanvas.setStyle("borderStyle", "solid");
-//				tabCanvas.setStyle("borderColor", 0x000000);
 				addChild(tabCanvas);
 			}
 			
@@ -162,7 +382,7 @@
 			{
 				var btnFilter:GlowFilter = createButtonFilter();
 				var editBtn:Button = new Button();
-				editBtn.setStyle("skin", arrowBtnClass);
+				editBtn.setStyle("skin", storeBtnClass);
 				editBtn.addEventListener(MouseEvent.CLICK, onEditButtonClicked);
 				editBtn.y = 458;
 				editBtn.x = 502;
@@ -170,13 +390,13 @@
 				this.addChild(editBtn);
 				var musicBtn:Button = new Button();
 				musicBtn.setStyle("skin", musicBtnClass);
-				musicBtn.addEventListener(MouseEvent.CLICK, onMusicButtonClicked);
+				musicBtn.addEventListener(MouseEvent.CLICK, onUserButtonClicked);
 				musicBtn.y = 458;
 				musicBtn.x = 555;
 				musicBtn.filters = [btnFilter];				
 				this.addChild(musicBtn);				
 				var storeBtn:Button = new Button();
-				storeBtn.setStyle("skin", storeBtnClass);
+				storeBtn.setStyle("skin", microphoneBtnClass);
 				storeBtn.addEventListener(MouseEvent.CLICK, onStoreButtonClicked);
 				storeBtn.y = 458;
 				storeBtn.x = 612;
@@ -282,7 +502,7 @@
 			
 			public function createTextFilter():GlowFilter
 			{
-				var filter:GlowFilter = new GlowFilter(0x222222, 1, 1.1, 1.1, 30, 5); 
+				var filter:GlowFilter = new GlowFilter(0x333333, 1, 1.4, 1.4, 30, 5); 
 				return filter;
 			}				
 
@@ -291,21 +511,51 @@
 				var filter:GlowFilter = new GlowFilter(0xffffff, 0, 2, 2, 20, 5); 
 				return filter;
 			}				
+
+			public function createGrayFilter():GlowFilter
+			{
+				var filter:GlowFilter = new GlowFilter(0x333333, 1, 1.04, 1.04, 20, 4); 
+				return filter;
+			}				
 			
 			private function showFacebookFriends():void
 			{
 				var orderedUsers:ArrayCollection = orderUsersByLevel();
-				
+				var displayedUsers:int = 0;
+				if (orderedUsers.length > 6)
+				{
+					displayedUsers = 6;
+				}
+				else
+				{
+					displayedUsers = orderedUsers.length;
+				}
 				var index:int = 0;
 				var friendRenderer:InventoryItemRenderer;
 				var pic:Image;
-				for each (var obj:Object in orderedUsers)
-				{
-					var friend:FacebookUser = obj.user;
-					var friendUser:User = friendManager.getFriendBasicInfo(Number(friend.uid));
-					friendRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, levelManager.getLevelByXp(friendUser.xp));
 
-					addFriendRendererStyle(friendRenderer);
+				for (var j:int = index; j < 1; j++)
+				{
+					friendRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, myUser.level);
+					friendRenderer.renderRightToLeft = true;				
+					friendRenderer.thingerIndex = j;	
+					addFriendRendererStyle(null, friendRenderer, 0xffffff);
+					pic = getDefaultPicture(friendRenderer);
+					friendRenderer.uic = pic;
+					friendRenderer.x += USER_PIC_DIMENSION;
+					friendRenderer.addName("Invite");
+					inventoryCanvas.addChild(friendRenderer);
+					index++;
+				}				
+				for (j = index; j < displayedUsers; j++)
+				{
+					var obj:Object = orderedUsers[j-1];
+					var friend:FacebookUser = obj.user;
+					var friendGDI:GameDataInterface = friendManager.getFriendGDI(Number(friend.uid));
+					friendRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, levelManager.getLevelByXp(friendGDI.user.xp));
+					friendRenderer.renderRightToLeft = true;
+					addFriendRendererStyle(friendGDI, friendRenderer, 0xffffff);
+//					var icon:Image = addIcon(friendRenderer);
 					friendRenderer.thingerIndex = index;
 					friendRenderer.thinger = friend;
 					pic = getFriendPicture(friend, friendRenderer);
@@ -317,17 +567,34 @@
 					friendRenderer.addEventListener(MouseEvent.CLICK, onFriendRendererClicked);
 					index++;					
 				}	
-				for (var j:int = index; j < 10; j++)
+				for (j = index; j < 6; j++)
 				{
 					friendRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, myUser.level);
-					friendRenderer.thingerIndex = j;					
-					addFriendRendererStyle(friendRenderer);
+					friendRenderer.renderRightToLeft = true;				
+					friendRenderer.thingerIndex = j;	
+					addFriendRendererStyle(null, friendRenderer, 0xffffff);
 					pic = getDefaultPicture(friendRenderer);
 					friendRenderer.uic = pic;
 					friendRenderer.x += USER_PIC_DIMENSION;
 					friendRenderer.addName("Invite");
 					inventoryCanvas.addChild(friendRenderer);
-				}			
+				}	
+				inventoryCanvas.setStyle("right", 20);
+				showScroller();
+			}
+			
+			public function showScroller():void
+			{
+				var imageRight:Image = new Image();
+				imageRight.source = arrowScrollerRight;
+				imageRight.setStyle("right", -28);
+				imageRight.y = 17;
+				var imageLeft:Image = new Image();
+				imageLeft.source = arrowScrollerLeft;
+				imageLeft.x = -28;
+				imageLeft.y = 17;
+				inventoryCanvas.addChild(imageRight);
+				inventoryCanvas.addChild(imageLeft);
 			}
 			
 			public function getDefaultPicture(friendRenderer:InventoryItemRenderer):Image
@@ -358,8 +625,8 @@
 				orderedUsers.addItem({user: facebookUser, rank: myUser.level.rank});
 				for each (var facebooker:FacebookUser in facebookFriends)
 				{
-					var friendUser:User = friendManager.getFriendBasicInfo(Number(facebooker.uid));
-					var level:Level = levelManager.getLevelByXp(friendUser.xp);
+					var friendGDI:GameDataInterface = friendManager.getFriendGDI(Number(facebooker.uid));
+					var level:Level = levelManager.getLevelByXp(friendGDI.user.xp);
 					orderedUsers.addItem({user: facebooker, rank: level});
 				}
 				var sortField:SortField = new SortField("rank");
@@ -370,17 +637,92 @@
 				return orderedUsers;
 			}
 			
-			public function addFriendRendererStyle(renderer:InventoryItemRenderer):void
+			public function addFriendRendererStyle(friendGDI:GameDataInterface, renderer:InventoryItemRenderer, backingColor:Object):void
 			{	
+				var canvas:Canvas = new Canvas();
+				canvas.setStyle("backgroundColor", backingColor);
+				canvas.setStyle("cornerRadius", 14);
+				canvas.setStyle("borderStyle", "solid");
+				canvas.setStyle("borderColor", backingColor);
+				canvas.alpha = 0.4;
+				canvas.height = 88;
+				canvas.width = 72;
 				renderer.height = 58;
 				renderer.y = 13;
+				canvas.x = -7;
+				canvas.y = -6;
+				renderer.addChild(canvas);
+			}
+			
+			public function addIcon(renderer:InventoryItemRenderer):Image
+			{
+				var songCanvas:Canvas = new Canvas();
+				songCanvas.setStyle("backgroundColor", 0x990B4D);
+				songCanvas.setStyle("cornerRadius", 6);
+				songCanvas.setStyle("borderStyle", "solid");
+				songCanvas.setStyle("borderColor", 0x450020);
+				songCanvas.height = 22;
+//				songCanvas.x = 20;
+				var songLabel:Label = new Label();
+				songLabel.text = Math.floor(Math.random()*400).toString();
+				songLabel.setStyle("color", 0xffffff);
+				songLabel.setStyle("fontSize", 12);
+				songLabel.setStyle("fontFamily", "Museo-Slab-900");
+				songLabel.y = 95;
+//				songLabel.setStyle("paddingLeft", 2);
+//				songLabel.setStyle("paddingRight", 2);
+				var textFilter:GlowFilter = createTextFilter();
+				songLabel.filters = [textFilter];
+//				songLabel.y = 2;
+				songLabel.setStyle("right", -8);
+				var image:Image = new Image();
+				image.source = smallMusicNotesIconClass;
+				image.y = 90;
+				image.x = -5;
+//				songCanvas.addChild(songLabel);
+				renderer.addChild(songLabel);
+				renderer.addChild(image);
+				return image;
+			}
+			
+			public function getDisplayedCreature(creature:Creature, dimension:Number):ContainerUIC
+			{
+				var asset:AssetStack = creature.getConstructedCreature("walk_toward", dimension, dimension);
+				asset.doAnimation("walk_toward", 39);
+				asset.movieClipStack.scaleX = dimension;
+				asset.movieClipStack.scaleY = dimension;				
+				var uic:ContainerUIC = new ContainerUIC();
+				uic.thinger = asset;
+				uic.addChild(asset.movieClipStack);
+				asset.movieClipStack.cacheAsBitmap = true;
+				return uic;				
+			}
+			
+			public function getBandMember(friendGDI:GameDataInterface, dimension:Number):ContainerUIC
+			{
+				if (friendGDI)
+				{
+					var constructedCreatures:ArrayCollection = friendGDI.creatureManager.getConstructedCreaturesByType("BandMember", dimension, dimension);
+					if (constructedCreatures.length > 0)
+					{
+						var selectedCreature:AssetStack = constructedCreatures[0];
+						selectedCreature.doAnimation("walk_toward", 39);
+						selectedCreature.movieClipStack.scaleX = dimension;
+						selectedCreature.movieClipStack.scaleY = dimension;
+						var uic:ContainerUIC = new ContainerUIC();
+						uic.thinger = selectedCreature;
+						uic.addChild(selectedCreature.movieClipStack);
+						selectedCreature.movieClipStack.cacheAsBitmap = true;
+						return uic;
+					}
+				}	
+				return null;			
 			}
 			
 			public function showFacebookUser(facebookUser:FacebookUser):void
 			{
-				var friendUser:User = friendManager.getFriendBasicInfo(int(facebookUser.uid));
-				var userRenderer:InventoryItemRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, levelManager.getLevelByXp(friendUser.xp) as Level);
-				addFriendRendererStyle(userRenderer);
+				var userRenderer:InventoryItemRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, levelManager.getLevelByXp(myUser.xp) as Level);
+				addFriendRendererStyle(friendManager.mainGDI, userRenderer, 0xffffff);
 				userRenderer.x = 10;				
 				var pic:Image = new Image();
 				pic.x = (userRenderer.getDimension() - FRIEND_PIC_DIMENSION)/2;
@@ -391,7 +733,7 @@
 				inventoryCanvas.addChild(userRenderer);
 				
 				userRenderer.thinger = facebookUser;
-				userRenderer.addEventListener(MouseEvent.CLICK, onUserRendererClicked);
+				userRenderer.addEventListener(MouseEvent.CLICK, onUserButtonClicked);
 			}
 			
 			private function onFriendRendererClicked(evt:MouseEvent):void
@@ -401,7 +743,7 @@
 				Application.application.getFriendData(snid);
 			}
 			
-			private function onUserRendererClicked(evt:MouseEvent):void
+			private function onUserButtonClicked(evt:MouseEvent):void
 			{
 				Application.application.currentState = "worldView";
 			}

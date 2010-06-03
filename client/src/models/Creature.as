@@ -12,9 +12,11 @@ package models
 	public class Creature extends EssentialModel
 	{
 		public var _id:int;
+		public var _user_id:int;
 		public var _type:String;
 		public var _owned_layerables:ArrayCollection;
 		public var _additional_info:String;
+		public var _name:String;
 		public var location:Point3D;
 		public var layerableOrder:Array;
 		
@@ -30,6 +32,7 @@ package models
 		public function setPropertiesFromParams(params:Object):void
 		{
 			_id = params.id;
+			_user_id = params.id;
 			
 			if (params.creature_type)
 			{
@@ -50,6 +53,10 @@ package models
 			if (params.z != null)
 			{
 				location.z = params.z;
+			}
+			if (params.name)
+			{
+				_name = params.name;
 			}
 		}
 		
@@ -140,6 +147,26 @@ package models
 		public function get additional_info():String
 		{
 			return _additional_info;
+		}
+		
+		public function set name(val:String):void
+		{
+			_name = val;
+		}
+		
+		public function get name():String
+		{
+			return _name;
+		}
+		
+		public function set user_id(val:int):void
+		{
+			_user_id = val;
+		}
+		
+		public function get user_id():int
+		{
+			return _user_id;
 		}
 				
 	}

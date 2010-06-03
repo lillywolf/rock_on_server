@@ -12,7 +12,7 @@ package views
 	public class InventoryItemRenderer extends Canvas
 	{
 		public static const DIMENSION:int = 58;
-		public static const PADDING:int = 12;
+		public static const PADDING:int = 22;
 		public static const DIMENSIONX:int = 58;
 		public static const DIMENSIONY:int = 58;
 		public static const INNER_PADDING:int = 2;
@@ -23,11 +23,13 @@ package views
 		public var _level:Level;
 		public var frameUIC:UIComponent;
 		public var rankCanvas:Canvas;
+		public var renderRightToLeft:Boolean;
 				
 		public function InventoryItemRenderer(backgroundColor:Object, borderColor:Object, level:Level)
 		{
 			super();	
 			_level = level;		
+			_thingerIndex = -1;
 			this.width = DIMENSIONX;
 			this.height = DIMENSIONY;
 			this.setStyle('backgroundColor', backgroundColor);
@@ -37,7 +39,6 @@ package views
 			this.clipContent = false;	
 			addEventListener(MouseEvent.ROLL_OVER, onMouseOver);
 			addEventListener(MouseEvent.ROLL_OUT, onMouseOut);
-			
 		}
 		
 		public function createTextFilter():GlowFilter
@@ -59,7 +60,7 @@ package views
 		{
 			_uic = val;		
 			addChild(_uic);
-			if (_thingerIndex)
+			if (_thingerIndex != -1)
 			{
 				setX();
 			}
@@ -143,14 +144,21 @@ package views
 			friendName.setStyle("fontSize", "11");
 			friendName.setStyle("color", 0xffffff);
 			friendName.width = width - INNER_PADDING;
-			friendName.y = 64;
+			friendName.y = 63;
 			friendName.setStyle("textAlign", "center");
 			this.addChild(friendName);
 		}		
 		
 		public function setX():void
 		{
-			x = _thingerIndex * PADDING + _thingerIndex * DIMENSION;			
+			if (!renderRightToLeft)
+			{
+				x = _thingerIndex * PADDING + _thingerIndex * DIMENSION;						
+			}
+			else
+			{
+				this.setStyle("right", _thingerIndex * PADDING + _thingerIndex * DIMENSION);
+			}
 		}
 		
 		public function getDimension():int

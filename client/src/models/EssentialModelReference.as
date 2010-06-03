@@ -17,6 +17,11 @@ package models
 		public var classesToLoad:ArrayCollection;
 		public var loadedClasses:ArrayCollection;
 		public var allInstancesLoaded:ArrayCollection;
+		
+		public static var creatureNames:Array = 
+			["Julie", "Ed", "Harrison", "Sarah", "Brad", "Latoya", "Eunice", "Aidan", "Rachel", "Maria", "Candace", "Victoria", "Roopa",
+			"Jaya", "Evan", "Will", "Alice", "Erin", "Tasha", "Ana", "Miguel", "Mike", "Aspeth", "Oprah", "Chris", "Liberace"
+			];
 				
 		public function EssentialModelReference()
 		{
@@ -51,6 +56,6 @@ package models
 			var newMc:MovieClip = new klass() as MovieClip;
 			return newMc;
 		}
-
+		
 	}
 }

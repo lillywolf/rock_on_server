@@ -109,7 +109,7 @@
 			{
 				var textFilter:GlowFilter = createGrayFilter();				
 				xpBox = new Text();
-				xpBox.text = myUser.xp.toString() + "/" + UserInfoRenderer.getNextXpThreshold(myUser, levelManager).toString();
+				xpBox.text = myUser.xp.toString() + "/" + levelManager.getNextXpThreshold(myUser).toString();
 				xpBox.setStyle("color", 0xffffff);
 				xpBox.setStyle("fontSize", fontSize);
 				xpBox.setStyle("fontFamily", "Museo-Slab-900");

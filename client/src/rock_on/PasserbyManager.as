@@ -61,14 +61,14 @@ package rock_on
 		
 		private function generatePasserby():Passerby
 		{
-			var asset:AssetStack = _creatureGenerator.createCreatureAsset("generic", "walk_toward", "Passerby");
+			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "Passerby");
 			var passerby:Passerby = new Passerby(asset.movieClipStack, _listeningStationManager, this, _myWorld, asset.layerableOrder, asset.creature, 0.4);			
 			return passerby;		
 		}
 		
 		private function generateStationListener():StationListener
 		{
-			var asset:AssetStack = _creatureGenerator.createCreatureAsset("generic", "walk_toward", "StationListener");
+			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "StationListener");
 			var sl:StationListener = new StationListener(asset.movieClipStack, _listeningStationManager, this, _myWorld, asset.layerableOrder, asset.creature, 0.4);			
 			return sl;		
 		}

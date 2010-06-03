@@ -22,14 +22,18 @@ class User < ActiveRecord::Base
   def update_level
     total_xp_diff = 0
     levels = Level.all(:order => "rank ASC")
+    i = 0
     levels.each do |level|
       total_xp_diff += level.xp_diff
       if total_xp_diff >= self.xp
-        self.level_id = level.id
-        logger.debug(self.level_id)
+        self.level_id = levels[i-1].id
         self.save
         break
+      elsif levels.length == i - 1
+        self.level_id = levels[i-1].id
+        self.save
       end
+      i = i + 1
     end    
   end    
   

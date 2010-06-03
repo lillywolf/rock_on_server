@@ -61,6 +61,7 @@ package helpers
 		{
 			var params:Object = {creature_type: creatureType};
 			var imposter:ImposterCreature = new ImposterCreature({});
+			imposter.type = creatureType;
 			return imposter;
 		}
 		
@@ -95,7 +96,7 @@ package helpers
 		
 		public function createCustomer(type:String, animation:String, concertStage:ConcertStage, boothManager:BoothManager):CustomerPerson
 		{
-			var imposter:ImposterCreature = createImposterCreature();
+			var imposter:ImposterCreature = createImposterCreature(type);
 			var asset:AssetStack = addLayersToCreatureByType(type, animation, imposter);
 			asset.movieClipStack.buttonMode = true;	
 			var cp:CustomerPerson = new CustomerPerson(asset.movieClipStack, concertStage, boothManager, layerableOrder, imposter, 0.4);
@@ -115,7 +116,7 @@ package helpers
 			var asset:AssetStack = new AssetStack(new MovieClip());		
 			asset.creature = imposter;	
 			asset.layerableOrder = layerableOrder;		
-			if (type == "generic")
+			if (type == "Concert Goer" || type == "Passerby")
 			{	
 				for each (var str:String in layerableOrder[animation])
 				{					

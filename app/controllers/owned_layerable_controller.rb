@@ -39,6 +39,8 @@ class OwnedLayerableController < ApplicationController
     owned_layerable.save
     hash = Hash.new
     hash["instance"] = owned_layerable
+    hash["model"] = "owned_layerable"
+    hash["method"] = "make_in_use"
     hash["already_loaded"] = true
     @array.push hash
     render :json => @array.to_json
@@ -51,6 +53,8 @@ class OwnedLayerableController < ApplicationController
     owned_layerable.save
     hash = Hash.new
     hash["instance"] = owned_layerable
+    hash["model"] = "owned_layerable" 
+    hash["method"] = "remove_from_in_use"   
     hash["already_loaded"] = true
     @array.push hash
     render :json => @array.to_json
