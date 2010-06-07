@@ -2,39 +2,49 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="100" clipContent="false" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
-			import mx.containers.VBox;
-			import mx.controls.Text;
-			import world.WorldEvent;
-			import helpers.CreatureEvent;
 			import com.facebook.commands.events.CancelEvent;
-			import controllers.LevelManager;
-			import models.Level;
-			import mx.collections.Sort;
-			import mx.collections.SortField;
-			import mx.collections.ArrayCollection;
-			import game.GameDataInterface;
-			import controllers.FriendManager;
-			import world.AssetStack;
-			import models.Creature;
-			import world.ActiveAsset;
-			import customizer.CustomizerEvent;
-			import mx.events.CollectionEvent;
-			import models.Store;
-			import mx.containers.HBox;
-			import mx.controls.Button;
-			import mx.controls.Label;
-			import mx.controls.Image;
-			import mx.core.UIComponent;
-			import mx.events.DynamicEvent;
-			import facebook.FacebookFunTime;
 			import com.facebook.data.users.FacebookUser;
-			import mx.core.Application;
-			import world.World;
-			import models.User;
+			
+			import controllers.FriendManager;
+			import controllers.LevelManager;
+			import controllers.StoreManager;
 			import controllers.ThingerManager;
 			import controllers.UserManager;
-			import controllers.StoreManager;
-			import stores.StoreEvent;		
+			
+			import customizer.CustomizerEvent;
+			
+			import facebook.FacebookFunTime;
+			
+			import game.GameDataInterface;
+			
+			import helpers.CreatureEvent;
+			
+			import models.Creature;
+			import models.Level;
+			import models.Store;
+			import models.User;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.containers.HBox;
+			import mx.containers.VBox;
+			import mx.controls.Button;
+			import mx.controls.Image;
+			import mx.controls.Label;
+			import mx.controls.Text;
+			import mx.core.Application;
+			import mx.core.FlexGlobals;
+			import mx.core.UIComponent;
+			import mx.events.CollectionEvent;
+			import mx.events.DynamicEvent;
+			
+			import stores.StoreEvent;
+			
+			import world.ActiveAsset;
+			import world.AssetStack;
+			import world.World;
+			import world.WorldEvent;		
 			public var myWorld:World;
 			[Bindable] public var myUser:User;
 			
@@ -227,12 +237,12 @@
 				for (i = 0; i<4; i++)
 				{
 					star = new Image();
-					if (creature.type == "BandMember")
-					{
-						star.source = starBlueFilled;
-					}
-					else
-					{
+//					if (creature.type == "BandMember")
+//					{
+//						star.source = starBlueFilled;
+//					}
+//					else
+//					{
 						if (i < 3)
 						{
 							star.source = fillerRedClass;											
@@ -245,19 +255,19 @@
 						{
 							star.source = fillerGreenClass;
 						}
-					}
+//					}
 					star.x = i * 14;
 					canvas.addChild(star);
 				}
 				for (i = 4; i<10; i++)
 				{
 					star = new Image();
-					if (creature.type == "BandMember")
-					{
-						star.source = starBlueUnfilled;
-					}
-					else
-					{
+//					if (creature.type == "BandMember")
+//					{
+//						star.source = starBlueUnfilled;
+//					}
+//					else
+//					{
 						if (i < 3)
 						{
 							star.source = fillerRedEmptyClass;											
@@ -270,7 +280,7 @@
 						{
 							star.source = fillerGreenEmptyClass;
 						}
-					}
+//					}
 					star.x = i * 14;
 					canvas.addChild(star);
 				}
@@ -290,7 +300,7 @@
 				}
 				else if (creature.type == "BandMember")
 				{
-					text.text = "Novice Bandmate";
+					text.text = "Band Member";
 				}
 				else
 				{
@@ -413,7 +423,7 @@
 			
 			private function onEditButtonClicked(evt:MouseEvent):void
 			{
-				if (Application.application.currentState != "editView")
+				if (FlexGlobals.topLevelApplication.currentState != "editView")
 				{
 					switchToEditView();				
 				}
@@ -463,12 +473,12 @@
 			
 			private function switchToEditView():void
 			{
-				Application.application.currentState = "editView";
+				FlexGlobals.topLevelApplication.currentState = "editView";
 			}				
 			
 			public function switchToWorldView():void
 			{
-				Application.application.currentState = "worldView";
+				FlexGlobals.topLevelApplication.currentState = "worldView";
 			}
 			
 			public function showStore():void
@@ -687,7 +697,7 @@
 			
 			public function getDisplayedCreature(creature:Creature, dimension:Number):ContainerUIC
 			{
-				var asset:AssetStack = creature.getConstructedCreature("walk_toward", dimension, dimension);
+				var asset:AssetStack = creature.getConstructedCreature(creature.layerableOrder, "walk_toward", dimension, dimension);
 				asset.doAnimation("walk_toward", 39);
 				asset.movieClipStack.scaleX = dimension;
 				asset.movieClipStack.scaleY = dimension;				
@@ -740,17 +750,21 @@
 			{
 				var friend:FacebookUser = (evt.currentTarget as InventoryItemRenderer).thinger as FacebookUser;
 				var snid:int = int(friend.uid);
-				Application.application.getFriendData(snid);
+				FlexGlobals.topLevelApplication.getFriendData(snid);
 			}
 			
 			private function onUserButtonClicked(evt:MouseEvent):void
 			{
-				Application.application.currentState = "worldView";
+				if (FlexGlobals.topLevelApplication.currentState == "friendView")
+				{
+					FlexGlobals.topLevelApplication.friendView.tearDown();
+				}
+				FlexGlobals.topLevelApplication.currentState = "worldView";
 			}
 			
 			private function onBottomBarClicked(evt:MouseEvent):void
 			{
-				if (Application.application.currentState == "editView")
+				if (FlexGlobals.topLevelApplication.currentState == "editView")
 				{
 					if (editView.editMode)
 					{

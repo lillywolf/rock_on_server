@@ -12,6 +12,7 @@ package controllers
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
@@ -170,9 +171,9 @@ package controllers
 		
 		private function assignNewOwnedStructureToImposter(osCopy:OwnedStructure):void
 		{
-			if (Application.application.currentState == "editView")
+			if (FlexGlobals.topLevelApplication.currentState == "editView")
 			{
-				for each (var asset:ActiveAsset in Application.application.worldView.myWorld.assetRenderer)
+				for each (var asset:ActiveAsset in FlexGlobals.topLevelApplication.worldView.myWorld.assetRenderer)
 				{
 					if (asset.thinger is ImposterOwnedStructure)
 					{
@@ -201,9 +202,10 @@ package controllers
 		
 		public function generateAssetFromOwnedStructure(os:OwnedStructure):ActiveAsset
 		{
-			var className:String = flash.utils.getQualifiedClassName(os.structure.mc);
-			var klass:Class = EssentialModelReference.getClassCopy(className);
-			var mc:MovieClip = new klass() as MovieClip;
+//			var className:String = flash.utils.getQualifiedClassName(os.structure.mc);
+//			var klass:Class = EssentialModelReference.getClassCopy(className);
+//			var mc:MovieClip = new klass() as MovieClip;
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
 			var asset:ActiveAsset = new ActiveAsset(mc);
 			asset.thinger = os;
 			return asset;

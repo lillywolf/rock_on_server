@@ -119,8 +119,10 @@ package rock_on
 			if (!friendMirror)
 			{
 				_boothManager.addBoothCollectionButton(this);
-				var evt:DynamicEvent = new DynamicEvent("unStockedState", true, true);
-				dispatchEvent(evt);			
+				var evt:VenueEvent = new VenueEvent(VenueEvent.BOOTH_UNSTOCKED, true, true);
+				evt.venue = _venue;
+				evt.booth = this;
+				_venue.dispatchEvent(evt);	
 			}
 		}
 		

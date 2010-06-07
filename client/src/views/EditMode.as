@@ -13,6 +13,7 @@ package views
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
@@ -59,7 +60,7 @@ package views
 		private function enableMouseDetection():void
 		{
 			_myWorld.graphics.beginFill(0x000000, 0);
-			_myWorld.graphics.drawRect(_myWorld.x, -(_myWorld.y), Application.application.width, Application.application.height);
+			_myWorld.graphics.drawRect(_myWorld.x, -(_myWorld.y), FlexGlobals.topLevelApplication.width, FlexGlobals.topLevelApplication.height);
 			_myWorld.graphics.endFill();			
 		}
 		

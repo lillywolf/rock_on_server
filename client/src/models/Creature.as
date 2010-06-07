@@ -18,7 +18,7 @@ package models
 		public var _additional_info:String;
 		public var _name:String;
 		public var location:Point3D;
-		public var layerableOrder:Array;
+		public var _layerableOrder:Array;
 		
 		public function Creature(params:Object, target:IEventDispatcher=null)
 		{
@@ -69,7 +69,7 @@ package models
 			layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
 		}
 		
-		public function getConstructedCreature(animation:String, sizeX:Number, sizeY:Number):AssetStack
+		public function getConstructedCreature(layerablerOrder:Array, animation:String, sizeX:Number, sizeY:Number):AssetStack
 		{
 //			var movieClipStack:MovieClip = new MovieClip();
 			var constructedCreature:AssetStack = new AssetStack(new MovieClip());
@@ -80,20 +80,16 @@ package models
 					if (ol.layerable.layer_name == str && ol.in_use)
 					{
 						var mc:MovieClip = new MovieClip();
-						mc = ol.layerable.mc;
+						mc = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
 						mc.scaleX = sizeX;
 						mc.scaleY = sizeY;
 						mc.name = ol.layerable.layer_name;
+						constructedCreature.layerableOrder = layerableOrder;
 						constructedCreature.movieClipStack.addChild(mc);
 					}
 				}
 			}
 			constructedCreature.movieClipStack.buttonMode = true;
-//			var hitSprite:Sprite = new Sprite();
-//			hitSprite.width = movieClipStack.width;
-//			hitSprite.height = movieClipStack.height;
-//			movieClipStack.hitArea = hitSprite;
-//			trace(movieClipStack.hitArea);	
 			constructedCreature.creature = this;
 			constructedCreature.layerableOrder = layerableOrder;
 			return constructedCreature;
@@ -167,6 +163,16 @@ package models
 		public function get user_id():int
 		{
 			return _user_id;
+		}
+		
+		public function set layerableOrder(val:Array):void
+		{
+			_layerableOrder = val;
+		}
+		
+		public function get layerableOrder():Array
+		{
+			return _layerableOrder;
 		}
 				
 	}

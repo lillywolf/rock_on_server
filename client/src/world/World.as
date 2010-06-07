@@ -4,6 +4,7 @@ package world
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
 
 	public class World extends UIComponent
@@ -75,18 +76,18 @@ package world
 			var x:Number = worldCoords.x;
 			var y:Number = worldCoords.y;
 			var z:Number = worldCoords.z;
-			var actualX:Number = (x + z) * Application.application.xGridCoord;
-			var actualY:Number = (-2*y + x - z) * Application.application.yGridCoord;
+			var actualX:Number = (x + z) * FlexGlobals.topLevelApplication.xGridCoord;
+			var actualY:Number = (-2*y + x - z) * FlexGlobals.topLevelApplication.yGridCoord;
 			var actualCoords:Point = new Point(actualX, actualY);
 			return actualCoords;
 		}
 		
 		public static function actualToWorldCoords(actualCoords:Point):Point3D
 		{
-			var ratio:Number = Application.application.xGridCoord / Application.application.yGridCoord;			
-			var starter:Number = actualCoords.x / (Application.application.xGridCoord * 2);
-			var worldX:Number = starter + (actualCoords.y / (Application.application.yGridCoord * ratio));
-			var worldZ:Number = starter - (actualCoords.y / (Application.application.yGridCoord * ratio));
+			var ratio:Number = FlexGlobals.topLevelApplication.xGridCoord / FlexGlobals.topLevelApplication.yGridCoord;			
+			var starter:Number = actualCoords.x / (FlexGlobals.topLevelApplication.xGridCoord * 2);
+			var worldX:Number = starter + (actualCoords.y / (FlexGlobals.topLevelApplication.yGridCoord * ratio));
+			var worldZ:Number = starter - (actualCoords.y / (FlexGlobals.topLevelApplication.yGridCoord * ratio));
 			var worldY:Number = 0;
 			return new Point3D(worldX, worldY, worldZ);
 		}

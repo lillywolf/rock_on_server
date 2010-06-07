@@ -31,7 +31,7 @@ package rock_on
 				addEventListeners(cp);
 				addItem(cp);
 				_myWorld.addStaticAsset(cp, startPoint);
-				cp.timedConverstion(fanIndex);
+				cp.timedConversion(fanIndex);
 			}
 		}
 		
@@ -260,6 +260,17 @@ package rock_on
 				}
 			}
 		}	
+		
+		public function removeBoothFromAvailable(booth:Booth):void
+		{
+			for each (var cp:CustomerPerson in this)
+			{
+				if (cp.currentBooth == booth)
+				{
+					cp.advanceState(CustomerPerson.ROAM_STATE);
+				}
+			}
+		}
 						
 		public function set myWorld(val:World):void
 		{

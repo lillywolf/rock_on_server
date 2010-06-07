@@ -16,6 +16,7 @@ package rock_on
 	{
 		public var _structureManager:StructureManager;
 		public var _myWorld:World;
+		public var stageAsset:ActiveAsset;
 		public var stages:ArrayCollection;
 		public var concertStage:ConcertStage;
 		
@@ -32,17 +33,29 @@ package rock_on
 			addStage();
 		}
 		
+		public function tearDown():void
+		{
+			removeStage();
+		}
+		
 		private function addStage():void
 		{
 			var stageStructures:ArrayCollection = _structureManager.getStructuresByType("ConcertStage");
 			concertStage = new ConcertStage(stageStructures[0]);
 			
-			var asset:ActiveAsset = new ActiveAsset(new MovieClip());
-			asset.thinger = stageStructures[0];
+			stageAsset = new ActiveAsset(new MovieClip());
+			stageAsset.thinger = stageStructures[0];
 			var addTo:Point3D = new Point3D(concertStage.x, concertStage.y, concertStage.z);
 			concertStage.worldCoords = addTo;
-			_myWorld.addAsset(asset, addTo);
-		}		
+			_myWorld.addAsset(stageAsset, addTo);
+		}
+		
+		public function removeStage():void
+		{
+			_myWorld.removeAsset(stageAsset);
+			stageAsset = null;
+			concertStage = null;
+		}
 		
 	}
 }

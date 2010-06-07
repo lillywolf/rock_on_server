@@ -11,6 +11,7 @@ package controllers
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
 	import mx.events.CollectionEvent;
 	
@@ -109,7 +110,7 @@ package controllers
 		
 		public function buyThinger(sot:StoreOwnedThinger, storeUI:StoreUIComponent):void
 		{
-			Application.application.removeChild(storeUI);
+			FlexGlobals.topLevelApplication.removeChild(storeUI);
 			
 			var model:String;
 			
@@ -134,7 +135,7 @@ package controllers
 		public function placeOwnedStructure(sot:StoreOwnedThinger):void
 		{
 			// Might want to change how this works
-			Application.application.switchToEditView();
+			FlexGlobals.topLevelApplication.switchToEditView();
 			var storeEvent:StoreEvent = new StoreEvent(StoreEvent.THINGER_PURCHASED, sot, true, true);
 			dispatchEvent(storeEvent);			
 		}
@@ -143,7 +144,7 @@ package controllers
 		{
 			var model:String;			
 			var params:Object = new Object();			
-			params.owned_dwelling_id = Application.application.worldView.venueManager.venue.id;
+			params.owned_dwelling_id = FlexGlobals.topLevelApplication.worldView.venueManager.venue.id;
 			params.id = sot.structure.id;			
 			params.user_id = _gdi.userManager.user.id;
 			var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.INSTANCE_TO_CREATE, "owned_structure", params, 'create_new', true, true);			

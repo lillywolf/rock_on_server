@@ -10,7 +10,9 @@ package world
 	import models.EssentialModelReference;
 	import models.OwnedLayerable;
 	
+	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 
 	public class AssetStack extends ActiveAsset
 	{
@@ -145,7 +147,7 @@ package world
 		{
 			trace(evt.target.name, flash.utils.getQualifiedClassName(evt.target));	
 			var event:CreatureEvent = new CreatureEvent(CreatureEvent.CREATURE_CLICKED, evt.currentTarget.parent as AssetStack, true, true);
-			Application.application.bottomBarView.dispatchEvent(event);
+			FlexGlobals.topLevelApplication.bottomBarView.dispatchEvent(event);
 		}
 		
 		public function stand(frameNumber:int, animationType:String):void
@@ -153,6 +155,32 @@ package world
 			var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
 			doAnimation(animationType, frameNumber);		
 		}
+		
+		public function doFakeAnimation(animationType:String, frameNumber:int=0):void
+		{
+			currentAnimation = animationType;
+			currentFrameNumber = frameNumber;
+			if (_layerableOrder[animationType])
+			{
+//				getNewStack();
+			}
+		}
+		
+//		public function getNewStack():ArrayCollection
+//		{
+//			var numLayerables:int = (_layerableOrder[animationType] as Array).length;
+//			var layerablesInMc:int = movieClipStack.numChildren;
+//			var newStack:MovieClip = new MovieClip();
+//			for (var i:int = 0; i < layerablesInMc; i++)
+//			{
+//				trace(layerablesInMc.toString());
+//				movieClipStack.removeChildAt(0);
+//			}
+//			for (var j:int = 0; j < numLayerables; j++)
+//			{
+//				
+//			}
+//		}
 		
 		public function doAnimation(animationType:String, frameNumber:int=0):void
 		{
@@ -165,9 +193,15 @@ package world
 				var newStack:MovieClip = new MovieClip();
 				
 				var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
-				for (var l:int = 0; l < movieClipChildren; l++)
+				var limit:int = movieClipChildren;
+				for (var l:int = 0; l < limit; l++)
 				{
-					_movieClipStack.removeChildAt(0);									
+					var mcChild:MovieClip = _movieClipStack.getChildAt(0) as MovieClip;
+					var mcClass:String = getQualifiedClassName(mcChild);
+					trace(mcClass);
+					_movieClipStack.removeChildAt(0);
+					movieClipChildren = _movieClipStack.numChildren.valueOf();
+					trace(movieClipChildren.toString());
 				}
 				
 				for (var i:int = 0; i < totalChildren; i++)
@@ -175,9 +209,10 @@ package world
 					for (var j:int = 0; j < totalOwnedLayerables; j++)
 					{
 						var layerName:String = (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.layer_name;
-						var className:String = flash.utils.getQualifiedClassName((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);		
-						var klass:Class = EssentialModelReference.getClassCopy(className);
-						var mc:MovieClip = new klass() as MovieClip;
+//						var className:String = flash.utils.getQualifiedClassName((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);		
+//						var klass:Class = EssentialModelReference.getClassCopy(className);
+//						var mc:MovieClip = new klass() as MovieClip;
+						var mc:MovieClip = EssentialModelReference.getMovieClipCopy((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);
 						if (layerName == _layerableOrder[animationType][i] && (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).in_use)
 						{
 							newStack.addChild(mc);

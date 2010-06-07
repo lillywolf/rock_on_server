@@ -82,22 +82,46 @@
 				gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	
 				gdi.addEventListener(ServerDataEvent.UPDATE_COMPLETE, onUpdateComplete);
 				
-				friendManager = new FriendManager(gdi);	
-				friendManager.addEventListener("friendDataLoaded", onFriendDataLoaded);
-				gameMagicManager = new GameMagicManager(gdi.levelManager, gdi.userManager);	
+//				initializeFriendManager();
+				
+				gameMagicManager = new GameMagicManager(gdi.levelManager, gdi.userManager);
+
+//				Call when in non-Facebook test mode
+				
+				onFacebookUserLoaded(202357);
 			}
+			private function initializeFriendManager():void
+			{
+				friendManager = new FriendManager(gdi);	
+				friendManager.addEventListener("friendDataLoaded", onFriendDataLoaded);				
+			}	
 			private function onApplicationComplete():void
 			{
-				facebookInterface = new FacebookFunTime();
-				addEventListener("facebookDataLoaded", onFacebookDataLoaded);
+//				initializeFacebookInterface();				
 				currentState = "worldView";
 				gdi.storeManager.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
 			}
-			public function onFacebookUserLoaded(uid:int, evt:FacebookEvent):void
+			private function initializeFacebookInterface():void
+			{
+				facebookInterface = new FacebookFunTime();
+				addEventListener("facebookDataLoaded", onFacebookDataLoaded);				
+			}
+//			public function onFacebookUserLoaded(uid:int, evt:FacebookEvent):void
+//			{
+//				gdi.getStaticGameContent();
+//				gdi.getUserContent(uid);
+//			}
+			
+// 			Only for non-Facebook version
+			
+			public function onFacebookUserLoaded(uid:int):void
 			{
 				gdi.getStaticGameContent();
 				gdi.getUserContent(uid);
 			}
+			
+//			Only for non-Facebook version			
+			
 			public function onFacebookDataLoaded(evt:DynamicEvent):void
 			{
 				facebookDataLoaded = true;

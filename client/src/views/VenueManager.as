@@ -17,6 +17,7 @@ package views
 	import rock_on.CustomerPerson;
 	import rock_on.CustomerPersonManager;
 	import rock_on.Venue;
+	import rock_on.VenueEvent;
 	
 	import world.World;
 
@@ -25,6 +26,7 @@ package views
 		public static const PERSON_SCALE:Number = 0.4;		
 		
 		public var venue:Venue;
+		public var concertGoers:ArrayCollection;
 		public var _dwellingManager:DwellingManager;
 		public var _customerPersonManager:CustomerPersonManager;
 		public var _myWorld:World;
@@ -52,17 +54,34 @@ package views
 		public function getVenue():void
 		{
 			var venues:ArrayCollection = _dwellingManager.getDwellingsByType("Venue");
-			venue = new Venue(this, _myWorld, venues[0] as OwnedDwelling);		
+			venue = new Venue(this, _myWorld, venues[0] as OwnedDwelling);	
+			venue.addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);
+		}
+		
+		public function onBoothUnstocked(evt:VenueEvent):void
+		{
+			_customerPersonManager.removeBoothFromAvailable(evt.booth);
 		}
 		
 		public function addCustomersToVenue():void
 		{
+			concertGoers = new ArrayCollection();
 			for (var i:int = 0; i < venue.fancount; i++)
 			{
 				var cp:CustomerPerson = _creatureGenerator.createCustomer("Concert Goer", "walk_toward", _concertStage, _boothManager);
 				cp.speed = 0.06;
 				_customerPersonManager.add(cp);
+				concertGoers.addItem(cp);
 			}
+		}
+		
+		public function removeCustomersFromVenue():void
+		{
+			for each (var cp:CustomerPerson in concertGoers)
+			{
+				_customerPersonManager.remove(cp);
+			}
+			concertGoers.removeAll();
 		}
 		
 		public function onVenueUpdated(method:String, newInstance:OwnedDwelling):void

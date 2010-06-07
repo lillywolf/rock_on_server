@@ -9,6 +9,7 @@ package controllers
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.events.DynamicEvent;
 	
 	import server.ServerDataEvent;
@@ -31,7 +32,7 @@ package controllers
 			var friendMap:Object = checkForFriendData(uid);
 			if (friendMap)
 			{
-				Application.application.showFriendVenuePostLoad(friendMap.gdi);
+				FlexGlobals.topLevelApplication.showFriendVenuePostLoad(friendMap.gdi);
 			}
 			else
 			{
@@ -142,7 +143,7 @@ package controllers
 		
 		public function createNewFriendMap(uid:Number):Object
 		{
-			var gdi:GameDataInterface = new GameDataInterface(Application.application.gameContent);
+			var gdi:GameDataInterface = new GameDataInterface(FlexGlobals.topLevelApplication.gameContent);
 			gdi.addEventListener(ServerDataEvent.USER_LOADED, onUserLoaded);
 			gdi.addEventListener(ServerDataEvent.GAME_CONTENT_LOADED, onGameContentLoaded);
 			gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	

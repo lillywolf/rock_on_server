@@ -156,7 +156,7 @@ package rock_on
 			state = ROAM_STATE;
 		}
 		
-		public function timedConverstion(fanIndex:int):void
+		public function timedConversion(fanIndex:int):void
 		{
 			var convertTimer:Timer = new Timer(fanIndex * FAN_CONVERSION_DELAY);
 			convertTimer.addEventListener(TimerEvent.TIMER, onConversionComplete);

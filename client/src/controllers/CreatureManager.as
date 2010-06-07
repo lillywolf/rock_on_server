@@ -62,7 +62,8 @@ package controllers
 			{
 				if (creature.type == type)
 				{
-					assetStack = creature.getConstructedCreature('walk_toward', sizeX, sizeY);
+					var layerableOrder:Array = getLayerableOrderByCreatureType(creature.type);
+					assetStack = creature.getConstructedCreature(layerableOrder, 'walk_toward', sizeX, sizeY);
 					matchingCreatures.addItem(assetStack);
 				}
 			}
@@ -75,11 +76,47 @@ package controllers
 			{
 				if (creature.id == id)
 				{
-					var assetStack:AssetStack = creature.getConstructedCreature('walk_toward', sizeX, sizeY);
+					var layerableOrder:Array = getLayerableOrderByCreatureType(creature.type);
+					var assetStack:AssetStack = creature.getConstructedCreature(layerableOrder, 'walk_toward', sizeX, sizeY);
 					break;
 				}
 			}	
 			return assetStack;		
+		}
+		
+//		public function getConstructedCreature(creature:Creature, animation:String):void
+//		{
+//			for each (var layer:String in creature.layerableOrder[animation])
+//			{
+//				creature.owned_layerables.get
+//			}
+//		}
+		
+		public function getLayerableOrderByCreatureType(creatureType:String):Array
+		{
+			var layerableOrder:Array = new Array();
+			if (creatureType == "BandMember")
+			{
+				layerableOrder['walk_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
+				layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
+				layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];				
+			}
+			else if (creatureType == "Groupie")
+			{
+				layerableOrder['walk_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['stand_still_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];								
+			}
+			else
+			{
+				layerableOrder['walk_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['stand_still_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];								
+			}
+			return layerableOrder;
 		}
 		
 		public function getCreaturesByType(type:String):ArrayCollection

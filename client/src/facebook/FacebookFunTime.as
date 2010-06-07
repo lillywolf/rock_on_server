@@ -17,6 +17,7 @@ package facebook
 	
 	import mx.controls.Alert;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.events.DynamicEvent;
 	
 	public class FacebookFunTime
@@ -39,7 +40,7 @@ package facebook
 		
 		public function FacebookFunTime()
 		{
-			session = new FacebookSessionUtil(API_KEY, SECRET, Application.application.loaderInfo);
+			session = new FacebookSessionUtil(API_KEY, SECRET, FlexGlobals.topLevelApplication.loaderInfo);
 			fbook = session.facebook;
 			session.login();
 			
@@ -59,7 +60,7 @@ package facebook
 				setFriendData(evt);
 				setAppUserData(evt);
 				
-				Application.application.onFacebookUserLoaded(fbook.uid, evt);
+				FlexGlobals.topLevelApplication.onFacebookUserLoaded(fbook.uid, evt);
 			}
 			else
 			{
@@ -175,7 +176,7 @@ package facebook
 			var evt:DynamicEvent = new DynamicEvent("facebookDataLoaded", true, true);
 			evt.facebookUser = facebookUser;
 			evt.facebookFriends = facebookFriendAppUsers;
-			Application.application.dispatchEvent(evt);
+			FlexGlobals.topLevelApplication.dispatchEvent(evt);
 //			Application.application.bottomBarView.dispatchEvent(evt);				
 		}
 

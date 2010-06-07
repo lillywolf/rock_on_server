@@ -4,6 +4,7 @@ package views
 	import flash.events.MouseEvent;
 	
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
 
 	public class FlexibleUIComponent extends UIComponent
@@ -12,7 +13,7 @@ package views
 		{
 			super();
 			this.graphics.beginFill(0, 0);
-			this.graphics.drawRect(0, 0, Application.application.width, Application.application.height);
+			this.graphics.drawRect(0, 0, FlexGlobals.topLevelApplication.width, FlexGlobals.topLevelApplication.height);
 			this.graphics.endFill();
 			
 			addEventListener(Event.ADDED, onAdded);			

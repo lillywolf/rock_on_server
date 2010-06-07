@@ -14,6 +14,7 @@ package rock_on
 	import mx.collections.ArrayCollection;
 	import mx.controls.Button;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	
 	import views.VenueManager;
 	
@@ -169,7 +170,7 @@ package rock_on
 			counter.counterCanvas.setStyle("fontSize", "20");
 			counter.counterCanvas.setStyle("fontFamily", "Museo-Slab-900");
 			counter.counterCanvas.setStyle("color", 0xffffff);
-			Application.application.addChild(counter.counterCanvas);
+			FlexGlobals.topLevelApplication.addChild(counter.counterCanvas);
 		}
 		
 		private function onCounterComplete():void
@@ -266,7 +267,7 @@ package rock_on
 			startShowButton.x = 400;
 			startShowButton.y = 0;
 			startShowButton.addEventListener(MouseEvent.CLICK, onStartShowButtonClicked);
-			Application.application.addChild(startShowButton);
+			FlexGlobals.topLevelApplication.addChild(startShowButton);
 		}
 		
 		private function onStartShowButtonClicked(evt:MouseEvent):void
@@ -281,9 +282,9 @@ package rock_on
 		
 		public function removeShowButton():void
 		{
-			if (Application.application.contains(startShowButton))
+			if (FlexGlobals.topLevelApplication.contains(startShowButton))
 			{
-				Application.application.removeChild(startShowButton);
+				FlexGlobals.topLevelApplication.removeChild(startShowButton);
 			}
 			if (startShowButton)
 			{
