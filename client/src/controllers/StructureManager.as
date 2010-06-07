@@ -202,10 +202,8 @@ package controllers
 		
 		public function generateAssetFromOwnedStructure(os:OwnedStructure):ActiveAsset
 		{
-//			var className:String = flash.utils.getQualifiedClassName(os.structure.mc);
-//			var klass:Class = EssentialModelReference.getClassCopy(className);
-//			var mc:MovieClip = new klass() as MovieClip;
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+			mc.cacheAsBitmap = true;
 			var asset:ActiveAsset = new ActiveAsset(mc);
 			asset.thinger = os;
 			return asset;

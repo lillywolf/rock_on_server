@@ -196,7 +196,7 @@
 			}
 			public function instancesLoadedForGameUser():void
 			{
-				worldView.myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);				
+//				worldView.myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);				
 			}
 			public function instancesLoadedForFriend():void
 			{

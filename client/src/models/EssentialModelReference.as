@@ -14,7 +14,7 @@ package models
 	
 	public class EssentialModelReference
 	{
-		public static var loadedModels:Array = new Array();
+		public static var loadedModels:Dictionary = new Dictionary();
 		public var classCopies:Array;
 		
 		public var swfsToLoad:ArrayCollection;
@@ -32,7 +32,7 @@ package models
 		{
 //			if (!FlexGlobals.topLevelApplication.loadedModels)
 //			{
-//				loadedModels = new Array();		
+//				loadedModels = new Dictionary();		
 //				FlexGlobals.topLevelApplication.loadedModels = loadedModels;
 //			}
 			classCopies = new Array();

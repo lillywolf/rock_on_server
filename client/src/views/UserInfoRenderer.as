@@ -35,7 +35,7 @@ package views
 			levelText.setStyle("textAlign", "center");
 			levelText.y = (boxHeight - fontSize - 8)/2;
 			levelText.x = -1;
-			levelText.setStyle("fontFamily", "Museo-Slab-900");
+//			levelText.setStyle("fontFamily", "Museo-Slab-900");
 			levelText.setStyle("fontSize", fontSize);
 			levelBox.addChild(levelText);
 			return levelBox;
@@ -50,7 +50,7 @@ package views
 			levelText.setStyle("textAlign", "center");
 			levelText.y = 0;
 			levelText.x = 0;
-			levelText.setStyle("fontFamily", "Museo-Slab-900");
+//			levelText.setStyle("fontFamily", "Museo-Slab-900");
 			levelText.setStyle("fontSize", fontSize);
 			return levelText;			
 		}

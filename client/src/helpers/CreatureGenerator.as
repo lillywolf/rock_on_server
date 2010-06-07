@@ -39,9 +39,9 @@ package helpers
 		{
 			layerableOrder = new Array();
 			layerableOrder['walk_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front"];
 			layerableOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['stand_still_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];
 			
 			sortedLayerables = new Dictionary();
 			
@@ -137,7 +137,7 @@ package helpers
 				renderOrder['walk_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
 				renderOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
 				renderOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
-				renderOrder['stand_still_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];			
+				renderOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];			
 			}
 			var asset:AssetStack = getLayeredCreature(imposter, animation, renderOrder);
 			return asset;

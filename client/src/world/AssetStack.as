@@ -166,22 +166,6 @@ package world
 			}
 		}
 		
-//		public function getNewStack():ArrayCollection
-//		{
-//			var numLayerables:int = (_layerableOrder[animationType] as Array).length;
-//			var layerablesInMc:int = movieClipStack.numChildren;
-//			var newStack:MovieClip = new MovieClip();
-//			for (var i:int = 0; i < layerablesInMc; i++)
-//			{
-//				trace(layerablesInMc.toString());
-//				movieClipStack.removeChildAt(0);
-//			}
-//			for (var j:int = 0; j < numLayerables; j++)
-//			{
-//				
-//			}
-//		}
-		
 		public function doAnimation(animationType:String, frameNumber:int=0):void
 		{
 			currentAnimation = animationType;
@@ -200,6 +184,7 @@ package world
 					var mcClass:String = getQualifiedClassName(mcChild);
 					trace(mcClass);
 					_movieClipStack.removeChildAt(0);
+					mcChild = null;
 					movieClipChildren = _movieClipStack.numChildren.valueOf();
 					trace(movieClipChildren.toString());
 				}
@@ -209,9 +194,6 @@ package world
 					for (var j:int = 0; j < totalOwnedLayerables; j++)
 					{
 						var layerName:String = (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.layer_name;
-//						var className:String = flash.utils.getQualifiedClassName((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);		
-//						var klass:Class = EssentialModelReference.getClassCopy(className);
-//						var mc:MovieClip = new klass() as MovieClip;
 						var mc:MovieClip = EssentialModelReference.getMovieClipCopy((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);
 						if (layerName == _layerableOrder[animationType][i] && (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).in_use)
 						{
@@ -223,16 +205,17 @@ package world
 				for (var k:int = 0; k < newChildren; k++)
 				{
 					var newMc:MovieClip = newStack.getChildAt(0) as MovieClip;
-					newMc.cacheAsBitmap = true;
 					_movieClipStack.addChildAt(newMc, k);
 					if (frameNumber == 0)
 					{
+						newMc.cacheAsBitmap = false;
 						newMc.gotoAndPlay(animationType);								
 					}
 					else
 					{
-						newMc.gotoAndPlay(frameNumber);
-						newMc.stop();
+						newMc.cacheAsBitmap = true;
+						newMc.gotoAndStop(frameNumber);
+//						newMc.visible = false;
 					}
 				}
 			}
