@@ -307,7 +307,7 @@
 					text.text = creature.type;
 				}
 				text.setStyle("color", 0xffffff);
-//				text.setStyle("fontFamily", "Museo-Slab-900");
+				text.setStyle("fontFamily", "Museo-Slab-900");
 				text.setStyle("fontSize", 13);
 				text.filters = [textFilter];
 				text.y = 40;

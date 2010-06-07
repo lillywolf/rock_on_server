@@ -119,7 +119,7 @@
 				xpBox.text = myUser.xp.toString() + "/" + levelManager.getNextXpThreshold(myUser).toString();
 				xpBox.setStyle("color", 0xffffff);
 				xpBox.setStyle("fontSize", fontSize);
-//				xpBox.setStyle("fontFamily", "Museo-Slab-900");
+				xpBox.setStyle("fontFamily", "Museo-Slab-900");
 				xpBox.x = 27;
 				xpBox.y = 3;
 				xpBox.filters = [textFilter];
@@ -241,7 +241,7 @@
 			{
 				textBox.setStyle("paddingLeft", 6);
 				textBox.setStyle("paddingRight", 6);
-//				textBox.setStyle("fontFamily", "Museo-Slab-900");
+				textBox.setStyle("fontFamily", "Museo-Slab-900");
 				textBox.setStyle("fontSize", fontSize);
 				textBox.setStyle("color", 0xffffff);				
 			}
