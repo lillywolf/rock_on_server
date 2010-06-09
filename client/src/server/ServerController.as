@@ -18,7 +18,7 @@ package server
 	public class ServerController extends EventDispatcher
 	{
 		
-//		public static const BASE_URL:String = "http://glowing-sunrise-33.heroku.com/";
+//		public static const BASE_URL:String = "http://vivid-samurai-39.heroku.com/";
 		public static const BASE_URL:String = "http://localhost:3000/";
 		
 		public var _gdi:GameDataInterface;
@@ -55,6 +55,7 @@ package server
 			setHttpServiceUrl(route);
 			var token:AsyncToken = httpService.send(params);
 			httpServiceRequests[token] = controller;
+//			Alert.show("sent " + controller.toString());
 		}
 		
 		private function calculateRoute(controller:String, action:String):String
@@ -74,6 +75,7 @@ package server
 		{	
 			var params:Object = getParams( evt );						
 			var requestKey:String = httpServiceRequests[evt.token];
+//			Alert.show("received " + requestKey.toString());
 //			requestCache.cacheRequest( params.hashkey, params );
 //			params = requestCache.retrieveRequest( params.hashkey );
 			

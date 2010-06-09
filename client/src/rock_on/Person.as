@@ -58,7 +58,7 @@ package rock_on
 			}						
 		}
 		
-		public function standFacingObject(structure:OwnedStructure, frameNumber:int=0, strictFacing:Boolean=true):void
+		public function standFacingObject(structure:OwnedStructure, frameNumber:int=0, strictFacing:Boolean=true):Object
 		{
 			var horizontalRelationship:String;
 			var verticalRelationship:String;
@@ -102,12 +102,13 @@ package rock_on
 			}
 			
 			stand(frameNumber, animationType);
+			return {frameNumber: frameNumber, animation: animationType};
 		}
 		
-		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
-		{			
+		public function moveCustomerLater(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
+		{
 			if (this.worldCoords.x%1 == 0 && this.worldCoords.y%1 == 0 && this.worldCoords.z%1 == 0)
-			{
+			{			
 				_myWorld.moveAssetTo(this, destination, true, avoidStructures, avoidPeople);			
 			}
 			else
@@ -119,8 +120,21 @@ package rock_on
 			{
 				var nextPoint:Point3D = getNextPointAlongPath();
 				setDirection(nextPoint);			
-			}
+			}			
 		}
+		
+		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
+		{	
+			if (this.worldCoords.x%1 == 0 && this.worldCoords.y%1 == 0 && this.worldCoords.z%1 == 0)
+			{			
+//				if (!(_myWorld.assetRenderer.unsortedAssets.contains(this)))
+//				{
+//					_myWorld.addAsset(this, worldCoords);				
+//					_myWorld.bitmapBlotter.removeBitmapFromBlotter(this);
+//				}
+				_myWorld.assetGenius.evaluateMoveActivity(this, true, destination, avoidStructures, avoidPeople);
+			}
+		}	
 		
 		public function getNextPointAlongPath():Point3D
 		{

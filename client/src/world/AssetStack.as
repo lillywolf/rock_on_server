@@ -1,5 +1,6 @@
 package world
 {
+	import flash.display.Bitmap;
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.utils.getQualifiedClassName;
@@ -11,6 +12,8 @@ package world
 	import models.OwnedLayerable;
 	
 	import mx.collections.ArrayCollection;
+	import mx.containers.Canvas;
+	import mx.controls.Image;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
 
@@ -153,8 +156,8 @@ package world
 		public function stand(frameNumber:int, animationType:String):void
 		{
 			var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
-			doAnimation(animationType, frameNumber);		
-		}
+			doAnimation(animationType, frameNumber);
+		}	
 		
 		public function doFakeAnimation(animationType:String, frameNumber:int=0):void
 		{
@@ -202,6 +205,7 @@ package world
 					}
 				}
 				var newChildren:int = newStack.numChildren.valueOf();
+				
 				for (var k:int = 0; k < newChildren; k++)
 				{
 					var newMc:MovieClip = newStack.getChildAt(0) as MovieClip;
@@ -209,16 +213,66 @@ package world
 					if (frameNumber == 0)
 					{
 						newMc.cacheAsBitmap = false;
-						newMc.gotoAndPlay(animationType);								
+						newMc.gotoAndPlay(animationType);
 					}
 					else
 					{
 						newMc.cacheAsBitmap = true;
 						newMc.gotoAndStop(frameNumber);
-//						newMc.visible = false;
+					}
+				}				
+			}
+		}
+		
+		public function getMovieClipStackCopy(animation:String, frameNumber:int):MovieClip
+		{
+			var totalChildren:int = (_layerableOrder[animation] as Array).length;
+			var totalOwnedLayerables:int = _creature.owned_layerables.length.valueOf();
+			var newStack:MovieClip = new MovieClip();			
+			var movieClipChildren:int = _movieClipStack.numChildren;
+			
+			for (var l:int = 0; l < movieClipChildren; l++)
+			{
+				var mcChild:MovieClip = _movieClipStack.getChildAt(0) as MovieClip;
+				var mcClass:String = getQualifiedClassName(mcChild);
+				movieClipChildren = _movieClipStack.numChildren;
+			}
+			
+			for (var i:int = 0; i < totalChildren; i++)
+			{
+				for (var j:int = 0; j < totalOwnedLayerables; j++)
+				{
+					var layerName:String = (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.layer_name;
+					var mc:MovieClip = EssentialModelReference.getMovieClipCopy((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);
+					if (layerName == _layerableOrder[animation][i] && (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).in_use)
+					{
+						newStack.addChild(mc);
 					}
 				}
 			}
+			var updatedStack:MovieClip = animateChildMovieClips(newStack, animation, frameNumber);
+			return updatedStack;					
+		}
+		
+		public function animateChildMovieClips(stack:MovieClip, animation:String, frameNumber:int):MovieClip
+		{
+			var newStack:MovieClip = new MovieClip();
+			var numKids:int = stack.numChildren.valueOf();
+			for (var k:int = 0; k < numKids; k++)
+			{
+				var newMc:MovieClip = stack.getChildAt(0) as MovieClip;
+				newStack.addChildAt(newMc, k);
+				if (frameNumber == 0)
+				{
+					newMc.gotoAndPlay(animation);								
+				}
+				else
+				{
+					newMc.gotoAndPlay(animation);
+					newMc.gotoAndStop(frameNumber);
+				}
+			}
+			return newStack;
 		}
 		
 		public function set layerableOrder(val:Array):void

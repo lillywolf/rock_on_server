@@ -150,8 +150,20 @@ package rock_on
 				listeningStation.activeAsset = asset;
 				listeningStation.setInMotion();
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
-				_myWorld.addStaticAsset(asset, addTo);
+				addListeningStationToWorld(asset, addTo);
 				listeningStationAssets.addItem(asset);
+			}
+		}
+		
+		public function addListeningStationToWorld(asset:ActiveAsset, addTo:Point3D):void
+		{
+			if (editMirror)
+			{
+				_myWorld.addStaticAsset(asset, addTo);
+			}
+			else
+			{
+				_myWorld.addStaticBitmap(asset, addTo);				
 			}
 		}
 		

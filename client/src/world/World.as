@@ -1,6 +1,8 @@
 package world
 {
+	import flash.display.MovieClip;
 	import flash.events.Event;
+	import flash.geom.Rectangle;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
@@ -16,6 +18,8 @@ package world
 		public var tilesWide:int;
 		public var tilesDeep:int;
 		public var wg:WorldGrid;
+		public var _bitmapBlotter:BitmapBlotter;
+		public var _assetGenius:AssetGenius;
 		
 		[Bindable] public var assetRenderer:AssetRenderer;
 		[Bindable] public var pathFinder:PathFinder;		
@@ -65,11 +69,56 @@ package world
 			assetRenderer.unsortedAssets.addItem(activeAsset);
 		}
 		
+		public function addStaticBitmap(activeAsset:ActiveAsset, worldCoords:Point3D, animation:String=null, frameNumber:int=0):void
+		{
+			activeAsset.world = this;
+			activeAsset.worldCoords = worldCoords;
+			setLastWorldPoint(activeAsset);
+			
+			var addTo:Point = worldToActualCoords(worldCoords);
+			activeAsset.realCoords = addTo;
+			activeAsset.x = 0;
+			activeAsset.y = 0;
+			activeAsset.x += addTo.x;
+			activeAsset.y += addTo.y;
+			assetGenius.evaluateStandActivity(activeAsset, true, animation, frameNumber);
+//			_bitmapBlotter.addBitmap(activeAsset, animation, frameNumber);
+			
+		}
+		
+		public function getRectForStaticAsset(mc:MovieClip, realCoordX:int, realCoordY:int):Rectangle
+		{
+			mc.y = realCoordY;
+			mc.x = realCoordX;
+			var rect:Rectangle = mc.getBounds(this.assetRenderer);
+			return rect;
+		}		
+		
 		public function removeAsset(activeAsset:ActiveAsset):void
 		{
-			var index:int = assetRenderer.unsortedAssets.getItemIndex(activeAsset);
-			assetRenderer.unsortedAssets.removeItemAt(index);
+			if (assetRenderer.unsortedAssets.contains(activeAsset))
+			{
+				var index:int = assetRenderer.unsortedAssets.getItemIndex(activeAsset);
+				assetRenderer.unsortedAssets.removeItemAt(index);
+			}
+			else if (bitmapBlotter.getMatchingBitmap(activeAsset) != null)
+			{
+				bitmapBlotter.removeBitmapFromBlotter(activeAsset);
+			}
 		}
+		
+//		public function switchFromMovieClipToBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int=0):void
+//		{
+//			if (assetRenderer.unsortedAssets.contains(asset))
+//			{
+//				var index:int = assetRenderer.unsortedAssets.getItemIndex(asset);
+//				assetRenderer.unsortedAssets.removeItemAt(index);
+//			}
+//			if (bitmapBlotter.getMatchFromBitmapReferences(asset) == null)
+//			{
+//				bitmapBlotter.reIntroduceBitmap(asset, animation, frameNumber);			
+//			}
+//		}
 		
 		public static function worldToActualCoords(worldCoords:Point3D):Point
 		{
@@ -268,6 +317,26 @@ package world
 		public function get worldDepth():int
 		{
 			return _worldDepth;
+		}
+		
+		public function set bitmapBlotter(val:BitmapBlotter):void
+		{
+			_bitmapBlotter = val;
+		}
+		
+		public function get bitmapBlotter():BitmapBlotter
+		{
+			return _bitmapBlotter;
+		}
+		
+		public function set assetGenius(val:AssetGenius):void
+		{
+			_assetGenius = val;
+		}
+		
+		public function get assetGenius():AssetGenius
+		{
+			return _assetGenius;
 		}
 	}
 }

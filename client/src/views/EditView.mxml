@@ -46,6 +46,7 @@
 			
 			import world.ActiveAsset;
 			import world.AssetStack;
+			import world.BitmapBlotter;
 			import world.Point3D;
 			import world.World;	
 
@@ -53,6 +54,7 @@
 			[Bindable] public var myUser:User;
 			
 			public var uiLayer:UILayer;
+			public var bitmapBlotter:BitmapBlotter;
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
 			public var editMode:EditMode;
@@ -143,6 +145,7 @@
 			public function addStage():void
 			{
 				stageManager = new StageManager(structureManager, myWorld);
+				stageManager.editMirror = true;
 				stageManager.setInMotion();
 				concertStage = stageManager.concertStage;
 			}			

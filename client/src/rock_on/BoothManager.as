@@ -149,9 +149,21 @@ package rock_on
 				var booth:Booth = createBooth(os);
 				var asset:ActiveAsset = createBoothAsset(booth);
 				var addTo:Point3D = new Point3D(booth.x, booth.y, booth.z);
-				_myWorld.addStaticAsset(asset, addTo);
+				addBoothsToWorld(asset, addTo);
 				boothAssets.addItem(asset);
 				booth.updateState();
+			}
+		}
+		
+		public function addBoothsToWorld(asset:ActiveAsset, addTo:Point3D):void
+		{
+			if (editMirror)
+			{
+				_myWorld.addStaticAsset(asset, addTo);
+			}
+			else
+			{
+				_myWorld.addStaticBitmap(asset, addTo);
 			}
 		}
 		

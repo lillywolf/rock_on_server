@@ -16,6 +16,7 @@ package rock_on
 	{
 		public var _structureManager:StructureManager;
 		public var _myWorld:World;
+		public var editMirror:Boolean;
 		public var stageAsset:ActiveAsset;
 		public var stages:ArrayCollection;
 		public var concertStage:ConcertStage;
@@ -47,7 +48,19 @@ package rock_on
 			stageAsset.thinger = stageStructures[0];
 			var addTo:Point3D = new Point3D(concertStage.x, concertStage.y, concertStage.z);
 			concertStage.worldCoords = addTo;
-			_myWorld.addAsset(stageAsset, addTo);
+			addStageToWorld(stageAsset, addTo);
+		}
+		
+		public function addStageToWorld(asset:ActiveAsset, addTo:Point3D):void
+		{
+			if (editMirror)
+			{
+				_myWorld.addAsset(asset, addTo);
+			}
+			else
+			{
+				_myWorld.addStaticBitmap(asset, addTo);
+			}
 		}
 		
 		public function removeStage():void

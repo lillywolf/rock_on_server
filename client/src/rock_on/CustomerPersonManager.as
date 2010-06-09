@@ -66,7 +66,8 @@ package rock_on
 		private function addToWorld(cp:CustomerPerson):void
 		{
 			var destination:Point3D = cp.pickPointNearStructure(_concertStage);
-			_myWorld.addAsset(cp, destination);
+//			_myWorld.addAsset(cp, destination);
+			_myWorld.addStaticBitmap(cp, destination, "stand_still_away", 37);
 			this.addItem(cp);
 		}	
 		
@@ -236,7 +237,7 @@ package rock_on
 			for (var i:int = (cpLength - 1); i >= 0; i--)
 			{
 				var cp:CustomerPerson = this[i] as CustomerPerson;
-				remove(cp);
+				remove(cp);				
 				addAfterInitializing(cp);				
 			}
 		}

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()" clipContent="false">
 	<mx:Script>
 		<![CDATA[
 			import controllers.CreatureManager;
@@ -14,6 +14,8 @@
 			import flash.utils.getDefinitionByName;
 			import flash.utils.getQualifiedClassName;
 			import flash.utils.getTimer;
+			
+			import flashx.textLayout.container.ScrollPolicy;
 			
 			import game.GameClock;
 			import game.GameMagicManager;
@@ -62,7 +64,9 @@
 			import user.UserEvent;
 			
 			import world.ActiveAsset;
+			import world.AssetGenius;
 			import world.AssetStack;
+			import world.BitmapBlotter;
 			import world.Point3D;
 			import world.World;
 			import world.WorldEvent;	
@@ -74,6 +78,16 @@
 			public static const WINDOW_WIDTH:int = 760;
 			public static const WINDOW_HEIGHT:int = 610;
 			
+			public var worldWidth:int = 800;
+			public var worldHeight:int = 800;
+			public var tileSize:int = 40;
+			
+			public var bitmapLayer:Bitmap;
+			public var backgroundRect:Rectangle;
+			public var backgroundPoint:Point;
+			public var bitmapBlotter:BitmapBlotter;
+			public var backgroundCanvas:Canvas;
+			public var assetGenius:AssetGenius;
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
 			public var uiLayer:UILayer;
@@ -111,10 +125,7 @@
 			private function onCreationComplete():void
 			{
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				myWorld = new World(800, 800, 40);				
-				addChild(myWorld);								
-//				myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);
-				
+				addWorld();
 				addUILayer();
 								
 				customerPersonManager = new CustomerPersonManager();
@@ -122,6 +133,49 @@
 							
 				var evt:DynamicEvent = new DynamicEvent("worldAdded", true, true);
 				dispatchEvent(evt);
+			}
+			
+			public function addBackgroundLayer():void
+			{
+				var relWidth:Number = myWorld.wg.getRect(myWorld).width;
+				var relHeight:Number = myWorld.wg.getRect(myWorld).height;
+				bitmapBlotter = new BitmapBlotter(relWidth, relHeight, true, 0x00000000);
+				bitmapBlotter.myWorld = myWorld;
+				bitmapBlotter.incrementX = (width - relWidth)/2;
+				bitmapBlotter.incrementY = (height - relHeight)/2;
+				bitmapBlotter.relWidth = relWidth;
+				bitmapBlotter.relHeight = relHeight;
+				myWorld.bitmapBlotter = bitmapBlotter;
+				bitmapLayer = new Bitmap(bitmapBlotter);
+				bitmapLayer.opaqueBackground = null;
+				bitmapLayer.width = relWidth;
+				bitmapLayer.height = relHeight;
+				bitmapLayer.bitmapData = bitmapBlotter;
+				backgroundCanvas = new Canvas();
+				backgroundCanvas.width = relWidth;
+				backgroundCanvas.height = relHeight;
+				backgroundCanvas.clipContent = false;
+				backgroundCanvas.x = (width - relWidth)/2;
+				backgroundCanvas.y = (height - relHeight)/2;
+				backgroundCanvas.setStyle("backgroundAlpha", 0);
+				bitmapBlotter.backgroundCanvas = backgroundCanvas;
+				addChild(backgroundCanvas);
+			}
+			
+			public function addWorld():void
+			{
+				myWorld = new World(worldWidth, worldHeight, tileSize);	
+				addBackgroundLayer();
+				addAssetGenius();
+				addChild(myWorld);								
+//				myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);
+				
+			}
+			
+			public function addAssetGenius():void
+			{
+				assetGenius = new AssetGenius(myWorld.assetRenderer, bitmapBlotter, myWorld);
+				myWorld.assetGenius = assetGenius;				
 			}
 			
 			public function setInMotion():void
@@ -157,6 +211,8 @@
 			private function initializeVenue():void
 			{
 				venueManager.getVenue();
+				
+				bitmapBlotter.expectedAssetCount = venueManager.venue.fancount + structureManager.owned_structures.length;
 				
 				boothManager.venue = venueManager.venue;
 				listeningStationManager.venue = venueManager.venue;

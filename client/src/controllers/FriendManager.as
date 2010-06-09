@@ -97,8 +97,8 @@ package controllers
 			basicFriendData.addItem(friendUser);
 			if (basicFriendData.length == (facebookFriends.length + 1))
 			{
-//				var evt:DynamicEvent = new DynamicEvent("friendDataLoaded", true, true);
-//				dispatchEvent(evt);
+				var evt:DynamicEvent = new DynamicEvent("friendDataLoaded", true, true);
+				dispatchEvent(evt);
 			}
 		}
 		
