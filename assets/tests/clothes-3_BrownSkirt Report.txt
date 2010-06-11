@@ -1,0 +1,78 @@
+clothes-3_BrownSkirt.swf Movie Report
+--------------------------------------
+
+Metadata
+--------
+Bytes    Value
+-----    -----
+ 1044    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"> <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/"> <xmp:CreatorTool>Adobe Flash CS4 Professional</xmp:CreatorTool> <xmp:CreateDate>2010-05-29T03:52:31-07:00</xmp:CreateDate> <xmp:MetadataDate>2010-06-10T20:59:25-07:00</xmp:MetadataDate> <xmp:ModifyDate>2010-06-10T20:59:25-07:00</xmp:ModifyDate> </rdf:Description> <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/"> <dc:format>application/x-shockwave-flash</dc:format> </rdf:Description> <rdf:Description rdf:about="" xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/" xmlns:stRef="http://ns.adobe.com/xap/1.0/sType/ResourceRef#"> <xmpMM:DerivedFrom rdf:parseType="Resource"> <stRef:instanceID>xmp.iid:F77F117407206811B2FDFFA365F6BB87</stRef:instanceID> <stRef:documentID>xmp.did:F77F117407206811B2FDFFA365F6BB87</stRef:documentID> <stRef:originalDocumentID>xmp.did:F77F117407206811B2FDFFA365F6BB87</stRef:originalDocumentID> </xmpMM:DerivedFrom> <xmpMM:DocumentID>xmp.did:2CA4FA5E0B2068118F62DF5DE5CF99B6</xmpMM:DocumentID> <xmpMM:InstanceID>xmp.iid:2CA4FA5E0B2068118F62DF5DE5CF99B6</xmpMM:InstanceID> <xmpMM:OriginalDocumentID>xmp.did:F77F117407206811B2FDFFA365F6BB87</xmpMM:OriginalDocumentID> </rdf:Description> </rdf:RDF> 
+
+Frame #    Frame Bytes    Total Bytes    Scene
+-------    -----------    -----------    ----------------
+      1         128029         128029    BrownSkirt (AS 3.0 Classes Export Frame)
+      2              1         128030    
+      3              7         128037    
+      4              1         128038    
+      5              7         128045    
+      6              1         128046    
+      7              7         128053    
+      8              1         128054    
+      9              7         128061    
+     10              1         128062    
+     11              7         128069    
+     12              1         128070    
+     13              7         128077    
+     14              1         128078    
+     15              7         128085    
+     16              1         128086    
+     17             21         128107    
+     18              1         128108    
+     19             20         128128    
+     20              1         128129    
+     21              7         128136    
+     22              1         128137    
+     23              7         128144    
+     24              1         128145    
+     25              7         128152    
+     26              1         128153    
+     27              7         128160    
+     28              1         128161    
+     29              7         128168    
+     30              1         128169    
+     31              7         128176    
+     32              1         128177    
+     33              7         128184    
+     34              1         128185    
+     35              7         128192    
+     36              1         128193    
+     37             25         128218    
+     38              1         128219    
+     39             27         128246    
+     40              1         128247    
+
+Scene                        Shape Bytes    Text Bytes    ActionScript Bytes
+-------------------------    -----------    ----------    ------------------
+Scene 1                                0             0                     0
+
+Symbol                       Shape Bytes    Text Bytes    ActionScript Bytes
+-------------------------    -----------    ----------    ------------------
+BrownSkirt                         17644             0                  3980
+PurpleSkirt                        18056             0                     0
+YellowSkirt                        18038             0                     0
+Pants6                             19655             0                     0
+Shirt7                             17843             0                     0
+Shirt6                             29865             0                     0
+
+ActionScript Bytes    Location
+------------------    --------
+               565    BrownSkirt:Frame 1:BrownSkirt
+               558    BrownSkirt:Frame 1:Pants6
+               566    BrownSkirt:Frame 1:PurpleSkirt
+               558    BrownSkirt:Frame 1:Shirt6
+               558    BrownSkirt:Frame 1:Shirt7
+               566    BrownSkirt:Frame 1:YellowSkirt
+               609    BrownSkirt:Frame 1:clothes_fla.MainTimeline
+
+
+
+
