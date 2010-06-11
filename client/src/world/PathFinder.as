@@ -5,6 +5,7 @@ package world
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	
 	import rock_on.Person;
 
@@ -202,7 +203,7 @@ package world
 		public function establishOwnedStructures():ArrayCollection
 		{
 			var occupiedStructures:ArrayCollection = new ArrayCollection();
-			for each (var os:OwnedStructure in Application.application.gdi.structureManager.owned_structures)
+			for each (var os:OwnedStructure in FlexGlobals.topLevelApplication.gdi.structureManager.owned_structures)
 			{
 				addToOccupiedSpaces(os);
 			}

@@ -123,7 +123,13 @@
 			
 			public function tearDown():void
 			{
-				
+				groupieManager.tearDown();
+				venueManager.removeCustomersFromVenue();
+				stageManager.tearDown();
+				boothManager.tearDown();
+				listeningStationManager.tearDown();
+				creatureGenerator = null;
+				killManagers();
 			}
 			
 			public function startFriendMirror():void
@@ -158,7 +164,17 @@
 				groupieManager = new GroupieManager(customerPersonManager, boothManager, concertStage, creatureManager, myWorld);
 				bandManager = new BandManager(creatureManager, booths, concertStage, myWorld);
 				venueManager = new VenueManager(creatureGenerator, customerPersonManager, dwellingManager, levelManager, bandManager, boothManager, concertStage, myWorld);
-			}			
+			}	
+			
+			private function killManagers():void
+			{
+				listeningStationManager = null;
+				groupieManager = null;
+				bandManager = null;
+				venueManager = null;
+				boothManager = null;
+				stageManager = null;
+			}
 			
 			private function onEnterFrame(evt:Event):void
 			{
@@ -206,19 +222,7 @@
 			}
 			
 			public function addStage():void
-			{
-//				stages = new ArrayCollection();
-//				var stageStructures:ArrayCollection = structureManager.getStructuresByType("ConcertStage");
-//				concertStage = new ConcertStage(stageStructures[0]);
-//				var os:OwnedStructure = stageStructures[0];
-//				
-//				var asset:ActiveAsset = new ActiveAsset(new MovieClip());
-//				asset.thinger = os;
-//				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
-//				concertStage.worldCoords = addTo;
-//				myWorld.addAsset(asset, addTo);
-//				
-//				bandMemberManager.concertStage = concertStage;		
+			{	
 				stageManager = new StageManager(structureManager, myWorld);
 				stageManager.setInMotion();
 				concertStage = stageManager.concertStage;		
@@ -238,14 +242,6 @@
 			{	
 				// Creating ActiveAssets 2x as much as necessary here...
 				
-//				var groupies:ArrayCollection = creatureManager.getConstructedCreaturesByType("Groupie", 1, 1);
-//				
-//				for each (var assetStack:AssetStack in groupies)
-//				{
-//					var cp:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, concertStage, boothManager, assetStack.layerableOrder, assetStack.creature, 0.4);
-//					cp.speed = 0.07;
-//					customerPersonManager.add(cp);
-//				}
 				groupieManager.friendMirror = true;
 				groupieManager.setInMotion();
 			}

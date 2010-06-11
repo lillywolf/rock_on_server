@@ -5,11 +5,13 @@ package controllers
 	import flash.geom.Rectangle;
 	import flash.utils.getQualifiedClassName;
 	
+	import models.EssentialModelReference;
 	import models.OwnedStructure;
 	import models.Thinger;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
+	import mx.core.mx_internal;
 	
 	import server.ServerController;
 	
@@ -29,9 +31,9 @@ package controllers
 		
 		public function getMovieClipCopy(thinger:Object, formatted:Boolean=false, dimensionX:int=100, dimensionY:int=100, containerWidth:int=100, containerHeight:int=100):UIComponent
 		{
-			var className:String = flash.utils.getQualifiedClassName(thinger.mc);
-			var klass:Class = essentialModelManager.essentialModelReference.loadedModels[className].klass;
-			var copy:MovieClip = new klass() as MovieClip;
+//			var className:String = flash.utils.getQualifiedClassName(thinger.mc);
+//			var klass:Class = essentialModelManager.essentialModelReference.loadedModels[className].klass;
+			var copy:MovieClip = EssentialModelReference.getMovieClipCopy(thinger.mc);
 			var uic:UIComponent = new UIComponent();
 			if (formatted)
 			{

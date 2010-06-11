@@ -2,49 +2,59 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
-			import controllers.DwellingManager;
-			import rock_on.ListeningStationManager;
-			import rock_on.ListeningStation;
-			import rock_on.StageManager;
-			import rock_on.BoothManager;
-			import rock_on.Venue;
-			import flash.utils.getQualifiedClassName;
-			import models.EssentialModelReference;
-			import controllers.UserManager;
-			import mx.core.Application;
-			import mx.events.FlexEvent;
-			import user.UserEvent;
-			import mx.controls.Text;
-			import rock_on.ConcertStage;
-			import rock_on.Booth;
-			import mx.events.DynamicEvent;
-			import controllers.ThingerManager;
-			import stores.StoreEvent;
-			import models.OwnedLayerable;
-			import models.User;
-			import models.Structure;
-			import controllers.StructureManager;
 			import controllers.CreatureManager;
-			import models.OwnedStructure;
-			import controllers.StoreManager;
-			import mx.core.UIComponent;
-			import models.StoreOwnedThinger;
-			import models.Store;
-			import models.OwnedThinger;
-			import models.Thinger;
-			import world.AssetStack;
-			import models.Creature;
-			import mx.collections.ArrayCollection;
+			import controllers.DwellingManager;
 			import controllers.LayerableManager;
-			import world.Point3D;
+			import controllers.StoreManager;
+			import controllers.StructureManager;
+			import controllers.ThingerManager;
+			import controllers.UserManager;
+			
+			import flash.utils.getQualifiedClassName;
+			import flash.utils.getTimer;
+			
+			import models.Creature;
+			import models.EssentialModelReference;
+			import models.OwnedLayerable;
+			import models.OwnedStructure;
+			import models.OwnedThinger;
+			import models.Store;
+			import models.StoreOwnedThinger;
+			import models.Structure;
+			import models.Thinger;
+			import models.User;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Text;
+			import mx.core.Application;
+			import mx.core.FlexGlobals;
+			import mx.core.UIComponent;
+			import mx.events.DynamicEvent;
+			import mx.events.FlexEvent;
+			
+			import rock_on.Booth;
+			import rock_on.BoothManager;
+			import rock_on.ConcertStage;
+			import rock_on.ListeningStation;
+			import rock_on.ListeningStationManager;
+			import rock_on.StageManager;
+			import rock_on.Venue;
+			
+			import stores.StoreEvent;
+			
+			import user.UserEvent;
+			
 			import world.ActiveAsset;
-			import world.World;
-			import flash.utils.getTimer;	
+			import world.AssetStack;
+			import world.BitmapBlotter;
+			import world.Point3D;
+			import world.World;	
 
 			public var myWorld:World;
 			[Bindable] public var myUser:User;
 			
 			public var uiLayer:UILayer;
+			public var bitmapBlotter:BitmapBlotter;
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
 			public var editMode:EditMode;
@@ -109,7 +119,7 @@
 				addStage();
 				boothManager = new BoothManager(structureManager, myWorld);
 				listeningStationManager = new ListeningStationManager(structureManager, layerableManager, myWorld);
-				venueManager = Application.application.worldView.venueManager;
+				venueManager = FlexGlobals.topLevelApplication.worldView.venueManager;
 				boothManager.venue = venueManager.venue;
 				listeningStationManager.venue = venueManager.venue;
 				boothManager.editMirror = true;
@@ -135,6 +145,7 @@
 			public function addStage():void
 			{
 				stageManager = new StageManager(structureManager, myWorld);
+				stageManager.editMirror = true;
 				stageManager.setInMotion();
 				concertStage = stageManager.concertStage;
 			}			

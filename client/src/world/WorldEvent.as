@@ -8,6 +8,8 @@ package world
 		public static const FINAL_DESTINATION_REACHED:String = "World:FinalDestinationReached";	
 		public static const DIRECTION_CHANGED:String = "World:DirectionChanged";	
 		public static const STRUCTURE_PLACED:String = "World:StructurePlaced";
+		public static const MOVE_DELAY_COMPLETE:String = "World:MoveDelayComplete";
+		public static const STAND_DELAY_COMPLETE:String = "World:StandDelayComplete";
 		
 		public var _activeAsset:ActiveAsset;
 

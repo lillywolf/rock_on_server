@@ -28,6 +28,7 @@ package rock_on
 	public class ListeningStationManager extends EventDispatcher
 	{
 		public var listeningStations:ArrayCollection;
+		public var listeningStationAssets:ArrayCollection;
 		public var passerbyManager:PasserbyManager;
 		public var creatureGenerator:CreatureGenerator;
 		public var friendMirror:Boolean;
@@ -56,6 +57,12 @@ package rock_on
 			passerbyManager = new PasserbyManager(this, _myWorld, creatureGenerator);
 			showListeningStations();
 			showPassersby();			
+		}
+		
+		public function tearDown():void
+		{
+			removeListeningStations();
+			removePassersby();
 		}
 		
 		public function reInitializeListeningStations():void
@@ -124,10 +131,17 @@ package rock_on
 		public function showPassersby():void
 		{
 			passerbyManager.startSpawning();
-		}		
+		}	
+		
+		public function removePassersby():void
+		{
+			passerbyManager.stopSpawning();
+			passerbyManager.removeAllRegularPassersBy();
+		}
 		
 		public function showListeningStations():void
 		{
+			listeningStationAssets = new ArrayCollection();
 			var listeningStructures:ArrayCollection = _structureManager.getStructuresByType("ListeningStation");
 			for each (var os:OwnedStructure in listeningStructures)
 			{
@@ -136,8 +150,31 @@ package rock_on
 				listeningStation.activeAsset = asset;
 				listeningStation.setInMotion();
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
+				addListeningStationToWorld(asset, addTo);
+				listeningStationAssets.addItem(asset);
+			}
+		}
+		
+		public function addListeningStationToWorld(asset:ActiveAsset, addTo:Point3D):void
+		{
+			if (editMirror)
+			{
 				_myWorld.addStaticAsset(asset, addTo);
 			}
+			else
+			{
+				_myWorld.addStaticBitmap(asset, addTo);				
+			}
+		}
+		
+		public function removeListeningStations():void
+		{
+			for each (var asset:ActiveAsset in listeningStationAssets)
+			{
+				_myWorld.removeAsset(asset);
+			}
+			listeningStationAssets.removeAll();
+			listeningStations.removeAll();
 		}
 		
 		public function createListeningStation(os:OwnedStructure):ListeningStation

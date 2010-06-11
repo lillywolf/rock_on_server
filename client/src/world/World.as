@@ -1,9 +1,12 @@
 package world
 {
+	import flash.display.MovieClip;
 	import flash.events.Event;
+	import flash.geom.Rectangle;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
 
 	public class World extends UIComponent
@@ -15,6 +18,8 @@ package world
 		public var tilesWide:int;
 		public var tilesDeep:int;
 		public var wg:WorldGrid;
+		public var _bitmapBlotter:BitmapBlotter;
+		public var _assetGenius:AssetGenius;
 		
 		[Bindable] public var assetRenderer:AssetRenderer;
 		[Bindable] public var pathFinder:PathFinder;		
@@ -64,29 +69,74 @@ package world
 			assetRenderer.unsortedAssets.addItem(activeAsset);
 		}
 		
+		public function addStaticBitmap(activeAsset:ActiveAsset, worldCoords:Point3D, animation:String=null, frameNumber:int=0):void
+		{
+			activeAsset.world = this;
+			activeAsset.worldCoords = worldCoords;
+			setLastWorldPoint(activeAsset);
+			
+			var addTo:Point = worldToActualCoords(worldCoords);
+			activeAsset.realCoords = addTo;
+			activeAsset.x = 0;
+			activeAsset.y = 0;
+			activeAsset.x += addTo.x;
+			activeAsset.y += addTo.y;
+			assetGenius.evaluateStandActivity(activeAsset, true, animation, frameNumber);
+//			_bitmapBlotter.addBitmap(activeAsset, animation, frameNumber);
+			
+		}
+		
+		public function getRectForStaticAsset(mc:MovieClip, realCoordX:int, realCoordY:int):Rectangle
+		{
+			mc.y = realCoordY;
+			mc.x = realCoordX;
+			var rect:Rectangle = mc.getBounds(this.assetRenderer);
+			return rect;
+		}		
+		
 		public function removeAsset(activeAsset:ActiveAsset):void
 		{
-			var index:int = assetRenderer.unsortedAssets.getItemIndex(activeAsset);
-			assetRenderer.unsortedAssets.removeItemAt(index);
+			if (assetRenderer.unsortedAssets.contains(activeAsset))
+			{
+				var index:int = assetRenderer.unsortedAssets.getItemIndex(activeAsset);
+				assetRenderer.unsortedAssets.removeItemAt(index);
+			}
+			else if (bitmapBlotter.getMatchingBitmap(activeAsset) != null)
+			{
+				bitmapBlotter.removeBitmapFromBlotter(activeAsset);
+			}
 		}
+		
+//		public function switchFromMovieClipToBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int=0):void
+//		{
+//			if (assetRenderer.unsortedAssets.contains(asset))
+//			{
+//				var index:int = assetRenderer.unsortedAssets.getItemIndex(asset);
+//				assetRenderer.unsortedAssets.removeItemAt(index);
+//			}
+//			if (bitmapBlotter.getMatchFromBitmapReferences(asset) == null)
+//			{
+//				bitmapBlotter.reIntroduceBitmap(asset, animation, frameNumber);			
+//			}
+//		}
 		
 		public static function worldToActualCoords(worldCoords:Point3D):Point
 		{
 			var x:Number = worldCoords.x;
 			var y:Number = worldCoords.y;
 			var z:Number = worldCoords.z;
-			var actualX:Number = (x + z) * Application.application.xGridCoord;
-			var actualY:Number = (-2*y + x - z) * Application.application.yGridCoord;
+			var actualX:Number = (x + z) * FlexGlobals.topLevelApplication.xGridCoord;
+			var actualY:Number = (-2*y + x - z) * FlexGlobals.topLevelApplication.yGridCoord;
 			var actualCoords:Point = new Point(actualX, actualY);
 			return actualCoords;
 		}
 		
 		public static function actualToWorldCoords(actualCoords:Point):Point3D
 		{
-			var ratio:Number = Application.application.xGridCoord / Application.application.yGridCoord;			
-			var starter:Number = actualCoords.x / (Application.application.xGridCoord * 2);
-			var worldX:Number = starter + (actualCoords.y / (Application.application.yGridCoord * ratio));
-			var worldZ:Number = starter - (actualCoords.y / (Application.application.yGridCoord * ratio));
+			var ratio:Number = FlexGlobals.topLevelApplication.xGridCoord / FlexGlobals.topLevelApplication.yGridCoord;			
+			var starter:Number = actualCoords.x / (FlexGlobals.topLevelApplication.xGridCoord * 2);
+			var worldX:Number = starter + (actualCoords.y / (FlexGlobals.topLevelApplication.yGridCoord * ratio));
+			var worldZ:Number = starter - (actualCoords.y / (FlexGlobals.topLevelApplication.yGridCoord * ratio));
 			var worldY:Number = 0;
 			return new Point3D(worldX, worldY, worldZ);
 		}
@@ -267,6 +317,26 @@ package world
 		public function get worldDepth():int
 		{
 			return _worldDepth;
+		}
+		
+		public function set bitmapBlotter(val:BitmapBlotter):void
+		{
+			_bitmapBlotter = val;
+		}
+		
+		public function get bitmapBlotter():BitmapBlotter
+		{
+			return _bitmapBlotter;
+		}
+		
+		public function set assetGenius(val:AssetGenius):void
+		{
+			_assetGenius = val;
+		}
+		
+		public function get assetGenius():AssetGenius
+		{
+			return _assetGenius;
 		}
 	}
 }

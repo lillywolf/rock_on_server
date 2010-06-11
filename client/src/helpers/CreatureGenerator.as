@@ -12,6 +12,7 @@ package helpers
 	
 	import models.EssentialModelReference;
 	import models.Layerable;
+	import models.OwnedLayerable;
 	
 	import rock_on.BoothManager;
 	import rock_on.ConcertStage;
@@ -38,9 +39,9 @@ package helpers
 		{
 			layerableOrder = new Array();
 			layerableOrder['walk_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front"];
 			layerableOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['stand_still_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];
 			
 			sortedLayerables = new Dictionary();
 			
@@ -83,7 +84,7 @@ package helpers
 			}
 			else
 			{
-//				throw new Error("Layerable " + layerable.id + " has no mc"); 
+				throw new Error("Layerable " + ol.layerable.id + " has no mc"); 
 			}			
 		}
 		
@@ -99,6 +100,7 @@ package helpers
 			var imposter:ImposterCreature = createImposterCreature(type);
 			var asset:AssetStack = addLayersToCreatureByType(type, animation, imposter);
 			asset.movieClipStack.buttonMode = true;	
+			asset.creature = imposter;
 			var cp:CustomerPerson = new CustomerPerson(asset.movieClipStack, concertStage, boothManager, layerableOrder, imposter, 0.4);
 			return cp;		
 		}
@@ -107,6 +109,7 @@ package helpers
 		{
 			var imposter:ImposterCreature = createImposterCreature(creatureType);
 			var asset:AssetStack = addLayersToCreatureByType(type, animation, imposter);
+//			var asset:AssetStack = generateCreatureByType(type, animation, imposter);
 			asset.movieClipStack.buttonMode = true;	
 			return asset;
 		}
@@ -121,9 +124,41 @@ package helpers
 				for each (var str:String in layerableOrder[animation])
 				{					
 					addLayerToCreature(str, imposter, asset);
-				}	
+				}
 			}				
 			return asset;		
+		}
+		
+		public function generateCreatureByType(type:String, animation:String, imposter:ImposterCreature):AssetStack
+		{
+			var renderOrder:Array = new Array();;
+			if (type == "Concert Goer" || type == "Passerby")
+			{
+				renderOrder['walk_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
+				renderOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
+				renderOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
+				renderOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];			
+			}
+			var asset:AssetStack = getLayeredCreature(imposter, animation, renderOrder);
+			return asset;
+		}
+		
+		public function getLayeredCreature(imposter:ImposterCreature, animation:String, renderOrder:Array):AssetStack
+		{
+			var movieClipStack:MovieClip = new MovieClip();
+			for each (var layerName:String in renderOrder[animation])
+			{
+				for each (var ol:OwnedLayerable in imposter.owned_layerables)
+				{
+					if (ol.layerable.layer_name == layerName)
+					{
+						var mc:MovieClip = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
+						movieClipStack.addChild(mc);
+					}
+				}
+			}
+			var asset:AssetStack = new AssetStack(movieClipStack);
+			return asset;
 		}
 		
 		private function isLayerableType(layerable:Layerable, layerName:String, index:int, arr:Array):Boolean 

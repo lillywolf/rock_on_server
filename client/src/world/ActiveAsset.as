@@ -4,9 +4,13 @@ package world
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
 	import flash.utils.getQualifiedClassName;
 	
 	import mx.collections.ArrayCollection;
+	import mx.containers.Canvas;
+	import mx.controls.Image;
 
 	public class ActiveAsset extends Sprite
 	{
@@ -23,6 +27,8 @@ package world
 		public var _walkProgress:Number;
 		public var _isMoving:Boolean;
 		public var _fourDirectional:Boolean;
+		public var imageEnabled:Boolean;
+		public var enabledImage:Canvas;
 		
 		public var realCoordY:Number;
 		public var realCoordX:Number;
@@ -34,6 +40,8 @@ package world
 		public var _thinger:Object;
 		public var currentAnimation:String;
 		public var currentFrameNumber:int;
+		
+		public static const MOVE_DELAY_TIME:int = 200;
 		
 		public function ActiveAsset(movieClip:MovieClip)
 		{
@@ -57,6 +65,23 @@ package world
 		{
 			this.removeEventListener(Event.ADDED, onAdded);
 			addChild(_movieClip);
+		}
+		
+		public function startMoveDelayTimer():void
+		{
+			var t:Timer = new Timer(MOVE_DELAY_TIME);
+			t.addEventListener(TimerEvent.TIMER, onMoveDelayTimer);
+			t.start();
+		}
+		
+		private function onMoveDelayTimer(evt:TimerEvent):void
+		{
+			var t:Timer = evt.currentTarget as Timer;
+			t.stop();
+			t.removeEventListener(TimerEvent.TIMER, onMoveDelayTimer);
+			t = null;
+			var worldEvt:WorldEvent = new WorldEvent(WorldEvent.MOVE_DELAY_COMPLETE, this, true, true);
+			dispatchEvent(worldEvt);
 		}
 		
 		public function set world(val:World):void

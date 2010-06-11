@@ -11,6 +11,7 @@ package rock_on
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	
 	import world.ActiveAsset;
 	import world.AssetStack;
@@ -24,6 +25,7 @@ package rock_on
 		public var _creatureGenerator:CreatureGenerator;	
 		public var spawnLocation:Point3D;
 		public var spawnInterval:int;
+		public var spawnTimer:Timer;
 		public var _listeningStationManager:ListeningStationManager;
 		public static const VENUE_BOUND_X:int = 14;	
 		public static const STATIONLISTENER_CONVERSION_PROBABILITY:Number = 0.3;
@@ -41,9 +43,15 @@ package rock_on
 		public function startSpawning():void
 		{
 			spawnInterval = SPAWN_INTERVAL_BASE + Math.floor(Math.random()*SPAWN_INTERVAL_MULTIPLIER);
-			var spawnTimer:Timer = new Timer(spawnInterval);
+			spawnTimer = new Timer(spawnInterval);
 			spawnTimer.addEventListener(TimerEvent.TIMER, onSpawnTimer);
 			spawnTimer.start();			
+		}
+		
+		public function stopSpawning():void
+		{
+			spawnTimer.stop();
+			spawnTimer = null;
 		}
 		
 		public function removeAllRegularPassersBy():void
@@ -304,7 +312,7 @@ package rock_on
 			var bodyLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 2, creature_id: creatureId, in_use: true});
 			var eyeLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 1, creature_id: creatureId, in_use:true});
 			var bottomLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 6, creature_id: creatureId, in_use: true});
-			for each (var layerable:Layerable in Application.application.gdi.layerableManager.layerables)
+			for each (var layerable:Layerable in FlexGlobals.topLevelApplication.gdi.layerableManager.layerables)
 			{
 				if (layerable.symbol_name == "PeachBody")
 				{

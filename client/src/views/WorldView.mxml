@@ -1,60 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()" clipContent="false">
 	<mx:Script>
 		<![CDATA[
-			import models.EssentialModelReference;
-			import mx.controls.Button;
-			import controllers.LevelManager;
-			import models.OwnedDwelling;
-			import game.GameMagicManager;
-			import rock_on.StageManager;
-			import rock_on.BoothManager;
-			import helpers.CreatureGenerator;
-			import rock_on.GroupieManager;
+			import controllers.CreatureManager;
 			import controllers.DwellingManager;
+			import controllers.LayerableManager;
+			import controllers.LevelManager;
+			import controllers.StoreManager;
+			import controllers.StructureManager;
+			import controllers.ThingerManager;
+			import controllers.UserManager;
+			
+			import flash.utils.getDefinitionByName;
+			import flash.utils.getQualifiedClassName;
+			import flash.utils.getTimer;
+			
+			import flashx.textLayout.container.ScrollPolicy;
+			
+			import game.GameClock;
+			import game.GameMagicManager;
+			
+			import helpers.CreatureGenerator;
+			
+			import models.Creature;
+			import models.EssentialModelReference;
+			import models.OwnedDwelling;
+			import models.OwnedLayerable;
+			import models.OwnedStructure;
+			import models.OwnedThinger;
+			import models.Store;
+			import models.StoreOwnedThinger;
+			import models.Structure;
+			import models.Thinger;
+			import models.User;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.controls.Text;
+			import mx.core.Application;
+			import mx.core.UIComponent;
+			import mx.events.DynamicEvent;
+			import mx.events.FlexEvent;
+			
+			import rock_on.BandMember;
+			import rock_on.BandMemberManager;
+			import rock_on.Booth;
+			import rock_on.BoothManager;
+			import rock_on.ConcertStage;
+			import rock_on.CustomerPerson;
+			import rock_on.CustomerPersonManager;
+			import rock_on.GroupieManager;
+			import rock_on.ListeningStation;
 			import rock_on.ListeningStationManager;
 			import rock_on.PasserbyManager;
-			import game.GameClock;
-			import rock_on.ListeningStation;
+			import rock_on.Person;
 			import rock_on.Promoter;
 			import rock_on.PromoterManager;
-			import world.WorldEvent;
-			import mx.controls.Alert;
-			import controllers.UserManager;
-			import mx.core.Application;
-			import rock_on.BandMemberManager;
-			import rock_on.BandMember;
-			import mx.events.FlexEvent;
-			import user.UserEvent;
-			import mx.controls.Text;
-			import rock_on.ConcertStage;
-			import rock_on.CustomerPersonManager;
-			import rock_on.Booth;
-			import rock_on.CustomerPerson;
-			import rock_on.Person;
-			import mx.events.DynamicEvent;
-			import controllers.ThingerManager;
+			import rock_on.StageManager;
+			
 			import stores.StoreEvent;
-			import models.OwnedLayerable;
-			import models.User;
-			import models.Structure;
-			import controllers.StructureManager;
-			import controllers.CreatureManager;
-			import models.OwnedStructure;
-			import controllers.StoreManager;
-			import mx.core.UIComponent;
-			import models.StoreOwnedThinger;
-			import models.Store;
-			import models.OwnedThinger;
-			import models.Thinger;
-			import world.AssetStack;
-			import models.Creature;
-			import mx.collections.ArrayCollection;
-			import controllers.LayerableManager;
-			import world.Point3D;
+			
+			import user.UserEvent;
+			
 			import world.ActiveAsset;
+			import world.AssetGenius;
+			import world.AssetStack;
+			import world.BitmapBlotter;
+			import world.Point3D;
 			import world.World;
-			import flash.utils.getTimer;	
+			import world.WorldEvent;	
 
 			public var myWorld:World;
 			[Bindable] public var myUser:User;
@@ -63,6 +78,16 @@
 			public static const WINDOW_WIDTH:int = 760;
 			public static const WINDOW_HEIGHT:int = 610;
 			
+			public var worldWidth:int = 800;
+			public var worldHeight:int = 800;
+			public var tileSize:int = 40;
+			
+			public var bitmapLayer:Bitmap;
+			public var backgroundRect:Rectangle;
+			public var backgroundPoint:Point;
+			public var bitmapBlotter:BitmapBlotter;
+			public var backgroundCanvas:Canvas;
+			public var assetGenius:AssetGenius;
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
 			public var uiLayer:UILayer;
@@ -100,10 +125,7 @@
 			private function onCreationComplete():void
 			{
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				myWorld = new World(800, 800, 40);				
-				addChild(myWorld);								
-//				myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);
-				
+				addWorld();
 				addUILayer();
 								
 				customerPersonManager = new CustomerPersonManager();
@@ -111,6 +133,49 @@
 							
 				var evt:DynamicEvent = new DynamicEvent("worldAdded", true, true);
 				dispatchEvent(evt);
+			}
+			
+			public function addBackgroundLayer():void
+			{
+				var relWidth:Number = myWorld.wg.getRect(myWorld).width;
+				var relHeight:Number = myWorld.wg.getRect(myWorld).height;
+				bitmapBlotter = new BitmapBlotter(relWidth, relHeight, true, 0x00000000);
+				bitmapBlotter.myWorld = myWorld;
+				bitmapBlotter.incrementX = (width - relWidth)/2;
+				bitmapBlotter.incrementY = (height - relHeight)/2;
+				bitmapBlotter.relWidth = relWidth;
+				bitmapBlotter.relHeight = relHeight;
+				myWorld.bitmapBlotter = bitmapBlotter;
+				bitmapLayer = new Bitmap(bitmapBlotter);
+				bitmapLayer.opaqueBackground = null;
+				bitmapLayer.width = relWidth;
+				bitmapLayer.height = relHeight;
+				bitmapLayer.bitmapData = bitmapBlotter;
+				backgroundCanvas = new Canvas();
+				backgroundCanvas.width = relWidth;
+				backgroundCanvas.height = relHeight;
+				backgroundCanvas.clipContent = false;
+				backgroundCanvas.x = (width - relWidth)/2;
+				backgroundCanvas.y = (height - relHeight)/2;
+				backgroundCanvas.setStyle("backgroundAlpha", 0);
+				bitmapBlotter.backgroundCanvas = backgroundCanvas;
+				addChild(backgroundCanvas);
+			}
+			
+			public function addWorld():void
+			{
+				myWorld = new World(worldWidth, worldHeight, tileSize);	
+				addBackgroundLayer();
+				addAssetGenius();
+				addChild(myWorld);								
+//				myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);
+				
+			}
+			
+			public function addAssetGenius():void
+			{
+				assetGenius = new AssetGenius(myWorld.assetRenderer, bitmapBlotter, myWorld);
+				myWorld.assetGenius = assetGenius;				
 			}
 			
 			public function setInMotion():void
@@ -124,9 +189,9 @@
 				showBooths();
 				showListeningStations();
 				showVenue();		
-				showGroupies();				
+//				showGroupies();				
 			}
-			
+		
 			public function generateManagers():void
 			{
 				listeningStationManager = new ListeningStationManager(structureManager, layerableManager, myWorld);
@@ -146,6 +211,8 @@
 			private function initializeVenue():void
 			{
 				venueManager.getVenue();
+				
+				bitmapBlotter.expectedAssetCount = venueManager.venue.fancount + structureManager.owned_structures.length;
 				
 				boothManager.venue = venueManager.venue;
 				listeningStationManager.venue = venueManager.venue;
@@ -263,10 +330,12 @@
 				if (method == "sell")
 				{
 					myWorld.assetRenderer.removeAsset(asset);
+					reInitializeStructures(os);					
 				}
 				if (method == "save_placement")
 				{
 					myWorld.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z));
+					reInitializeStructures(os);					
 				}
 				if (method == "create_new")
 				{
@@ -274,8 +343,8 @@
 					asset = new ActiveAsset(mc);
 					var addTo:Point3D = new Point3D(os.x, os.y, os.z);					
 					myWorld.addStaticAsset(asset, addTo);
+					reInitializeStructures(os);
 				}
-				reInitializeStructures(os);
 			}
 			
 			public function reInitializeStructures(os:OwnedStructure):void

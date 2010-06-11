@@ -35,19 +35,35 @@ package rock_on
 			showGroupies();
 		}
 		
+		public function tearDown():void
+		{
+			removeGroupies();
+		}
+		
 		public function showGroupies():void
 		{	
 			// Creating ActiveAssets 2x as much as necessary here...
 			
-			groupies = _creatureManager.getConstructedCreaturesByType("Groupie", 1, 1);
+			groupies = new ArrayCollection();
+			var groupieAssets:ArrayCollection = _creatureManager.getConstructedCreaturesByType("Groupie", 1, 1);
 			
-			for each (var assetStack:AssetStack in groupies)
+			for each (var assetStack:AssetStack in groupieAssets)
 			{
 				var cp:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, _concertStage, _boothManager, assetStack.layerableOrder, assetStack.creature, 0.4);
 				cp.speed = 0.06;
 				_customerPersonManager.add(cp);
+				groupies.addItem(cp);
 			}
 		}		
+		
+		public function removeGroupies():void
+		{
+			for each (var cp:CustomerPerson in groupies)
+			{
+				_customerPersonManager.remove(cp);
+			}
+			groupies.removeAll();
+		}
 		
 	}
 }

@@ -24,6 +24,7 @@ package rock_on
 		public static const BOOTH_CREDITS_MULTIPLIER:int = 50;
 		
 		public var booths:ArrayCollection;
+		public var boothAssets:ArrayCollection;
 		public var _uiLayer:UILayer;
 		public var _myWorld:World;
 		public var friendMirror:Boolean;
@@ -42,6 +43,11 @@ package rock_on
 		{
 			booths = new ArrayCollection();
 			showBooths();
+		}
+		
+		public function tearDown():void
+		{
+			removeBooths();
 		}
 		
 		public function decreaseInventoryCount(booth:Booth, toDecrease:int):void
@@ -136,16 +142,40 @@ package rock_on
 		
 		public function showBooths():void
 		{
+			boothAssets = new ArrayCollection();
 			var boothStructures:ArrayCollection = _structureManager.getStructuresByType("Booth");
 			for each (var os:OwnedStructure in boothStructures)
 			{
 				var booth:Booth = createBooth(os);
 				var asset:ActiveAsset = createBoothAsset(booth);
 				var addTo:Point3D = new Point3D(booth.x, booth.y, booth.z);
-				_myWorld.addStaticAsset(asset, addTo);
+				addBoothsToWorld(asset, addTo);
+				boothAssets.addItem(asset);
 				booth.updateState();
 			}
-		}	
+		}
+		
+		public function addBoothsToWorld(asset:ActiveAsset, addTo:Point3D):void
+		{
+			if (editMirror)
+			{
+				_myWorld.addStaticAsset(asset, addTo);
+			}
+			else
+			{
+				_myWorld.addStaticBitmap(asset, addTo);
+			}
+		}
+		
+		public function removeBooths():void
+		{
+			for each (var asset:ActiveAsset in boothAssets)
+			{
+				_myWorld.removeAsset(asset);
+			}
+			boothAssets.removeAll();
+			booths.removeAll();
+		}
 		
 		public function createBoothAsset(booth:Booth):ActiveAsset
 		{

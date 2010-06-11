@@ -22,7 +22,7 @@ package rock_on
 		public static const HEADTOSTAGE_STATE:int = 6;
 		public static const HEADTODOOR_STATE:int = 7;
 		
-		public static const ENTHRALLED_TIME:int = 30000;
+		public static const ENTHRALLED_TIME:int = 100000 * Math.random();
 		public static const QUEUED_TIME:int = 4000;
 		public static const FAN_CONVERSION_DELAY:int = 2000;
 				
@@ -156,7 +156,7 @@ package rock_on
 			state = ROAM_STATE;
 		}
 		
-		public function timedConverstion(fanIndex:int):void
+		public function timedConversion(fanIndex:int):void
 		{
 			var convertTimer:Timer = new Timer(fanIndex * FAN_CONVERSION_DELAY);
 			convertTimer.addEventListener(TimerEvent.TIMER, onConversionComplete);
@@ -204,7 +204,8 @@ package rock_on
 			state = ENTHRALLED_STATE;
 			
 			var frameNumber:int = 1;
-			standFacingObject(_concertStage, frameNumber);
+			var obj:Object = standFacingObject(_concertStage, frameNumber);
+			_myWorld.assetGenius.evaluateStandActivity(this, true, obj.animation, obj.frameNumber);
 			
 			enthralledTimer = new Timer(CustomerPerson.ENTHRALLED_TIME);
 			enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
@@ -212,18 +213,31 @@ package rock_on
 			numEnthralledTimers++;
 		}
 		
+//		public function evaluateBitmapSwitch():void
+//		{
+//			if (_world.bitmapBlotter.getMatchFromBitmapReferences(this) == null)
+//			{
+//				_world.bitmapBlotter.reIntroduceBitmap(this);
+//			}
+//		}
+		
 		private function routeToQueue(evt:TimerEvent):void
 		{
-			enthralledTimer.stop();
-			enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
-			numEnthralledTimers--;
-			if (state == ENTHRALLED_STATE)
+//			Condition this somehow
+
+			if (Math.random() < 0.1)
 			{
-				advanceState(ROUTE_STATE);			
-			}
-			else
-			{
-				throw new Error("State is not enthralled state");
+				enthralledTimer.stop();
+				enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
+				numEnthralledTimers--;
+				if (state == ENTHRALLED_STATE)
+				{
+					advanceState(ROUTE_STATE);			
+				}
+				else
+				{
+					throw new Error("State is not enthralled state");
+				}
 			}
 		}
 		
@@ -254,7 +268,7 @@ package rock_on
 			}
 			if (queuedTimer)
 			{
-				throw new Error("Queued timer already exists");
+//				throw new Error("Queued timer already exists");
 			}
 			if (currentBoothPosition == 1 && !queuedTimer)
 			{

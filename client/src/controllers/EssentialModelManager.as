@@ -280,7 +280,8 @@ package controllers
 			var className:String = convertToClassCase(um.model);			
 			var newClass:Class = getDefinitionByName('models.'+className) as Class;
 			um.instance = new newClass(um.instanceData);	
-			essentialModelReference.loadedModels[className] = {klass: newClass, applicationDomain: null};					
+//			essentialModelReference.loadedModels[className] = {klass: newClass, applicationDomain: null};	
+			EssentialModelReference.updateLoadedModels(className, newClass, null);
 		}
 		
 		public function instantiateAndAdd(um:UnprocessedModel):void
@@ -388,7 +389,8 @@ package controllers
 			{
 				var loadedClass:Class = appDomain.getDefinition(className) as Class;
 				essentialModelReference.loadedClasses.addItem(loadedClass);
-				essentialModelReference.loadedModels[className] = {klass: loadedClass, applicationDomain: appDomain};			
+//				essentialModelReference.loadedModels[className] = {klass: loadedClass, applicationDomain: appDomain};			
+				EssentialModelReference.updateLoadedModels(className, loadedClass, appDomain);
 				obj.setMovieClipFromClass(loadedClass);
 				
 				updateMovieClipForAnyClassCopies(obj, loadedClass);

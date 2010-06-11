@@ -137,7 +137,8 @@ package views
 								
 			createCreaturePreview();
 
-			constructedCreature = _creature.getConstructedCreature(animation, 1, 1);
+			var layerableOrder:Array = creatureManager.getLayerableOrderByCreatureType(_creature.type);
+			constructedCreature = _creature.getConstructedCreature(layerableOrder, animation, 1, 1);
 			constructedCreature.doAnimation(animation, currentFrame);
 			constructedCreature.x = creaturePreview.width / 2;
 			var uic:ContainerUIC = new ContainerUIC();
@@ -339,9 +340,11 @@ package views
 		
 		private function copyMovieClipForLayerableList(mc:MovieClip, layerName:String):MovieClip
 		{
-			var className:String = flash.utils.getQualifiedClassName(mc);
-			var klass:Class = _creatureManager.essentialModelManager.essentialModelReference.loadedModels[className].klass;
-			var copiedMovieClip:MovieClip = alterAppearanceByLayerName(klass, layerName);	
+//			var className:String = flash.utils.getQualifiedClassName(mc);
+//			var klass:Class = _creatureManager.essentialModelManager.essentialModelReference.loadedModels[className].klass;
+			var copiedMovieClip:MovieClip = EssentialModelReference.getMovieClipCopy(mc);
+//			var copiedMovieClip:MovieClip = alterAppearanceByLayerName(klass, layerName);	
+			copiedMovieClip.stop();
 			return copiedMovieClip;		
 		}
 		

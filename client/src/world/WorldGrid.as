@@ -3,6 +3,7 @@ package world
 	import flash.display.MovieClip;
 	
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
 	
 	public class WorldGrid extends UIComponent
@@ -53,8 +54,8 @@ package world
 		{
 			xGridCoord = Math.sqrt( (_blockSize * _blockSize) / 2 );
 			yGridCoord = xGridCoord * GRID_ANGLE;
-			Application.application.xGridCoord = xGridCoord;
-			Application.application.yGridCoord = yGridCoord;
+			FlexGlobals.topLevelApplication.xGridCoord = xGridCoord;
+			FlexGlobals.topLevelApplication.yGridCoord = yGridCoord;
 			var totalBlocksWide:int = _gridWidth / _blockSize;
 			var totalBlocksHigh:int = _gridHeight / _blockSize;
 			var i:int;

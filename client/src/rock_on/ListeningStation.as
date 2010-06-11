@@ -9,6 +9,7 @@ package rock_on
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	
 	import world.ActiveAsset;
 	import world.Point;
@@ -57,20 +58,9 @@ package rock_on
 				
 		public function setProperties():void
 		{
-			if (_structure.mc is Ticket_01)
-			{
-				stationType = "Gramophone";
-				radius = new Point3D(1, 0, 1);		
-			}
-			else if (_structure.mc is Booth_01)
-			{
-				stationType = "RecordPlayer";
-				radius = new Point3D(2, 0, 1);
-			}
-			else if (_structure.mc is Jukebox)
-			{
-				radius = new Point3D(2, 0, 1);
-			}
+			radius = new Point3D(0, 0, 0);
+			radius.x = structure.capacity;
+			radius.z = structure.depth;
 		}	
 		
 		public function displayCountdown():void
@@ -81,7 +71,7 @@ package rock_on
 			var uiCoordinates:Point = World.worldToActualCoords(new Point3D(x, y, z));
 			counter.counterCanvas.x = uiCoordinates.x;
 			counter.counterCanvas.y = uiCoordinates.y;
-			Application.application.addChild(counter.counterCanvas);
+			FlexGlobals.topLevelApplication.addChild(counter.counterCanvas);
 		}
 		
 		private function onCounterComplete(evt:CounterEvent):void
@@ -153,9 +143,9 @@ package rock_on
 		
 		public function removeCounter():void
 		{
-			if (Application.application.contains(counter.counterCanvas))
+			if (FlexGlobals.topLevelApplication.contains(counter.counterCanvas))
 			{
-				Application.application.removeChild(counter.counterCanvas);
+				FlexGlobals.topLevelApplication.removeChild(counter.counterCanvas);
 			}
 			if (counter)
 			{

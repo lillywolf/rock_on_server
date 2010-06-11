@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="80" creationComplete="onCreationComplete()">
+	<mx:Style source="application.css">
+	</mx:Style>
 	<mx:Script>
 		<![CDATA[
-			import mx.controls.Image;
-			import mx.containers.HBox;
-			import controllers.LevelManager;
-			import mx.controls.Label;
-			import mx.core.UIComponent;
-			import mx.core.Application;
-			import controllers.UserManager;
-			import controllers.ThingerManager;
 			import controllers.CreatureManager;
-			import controllers.StoreManager;
 			import controllers.LayerableManager;
+			import controllers.LevelManager;
+			import controllers.StoreManager;
 			import controllers.StructureManager;
-			import mx.controls.Text;
+			import controllers.ThingerManager;
+			import controllers.UserManager;
+			
 			import models.User;
+			
+			import mx.containers.HBox;
+			import mx.controls.Image;
+			import mx.controls.Label;
+			import mx.controls.Text;
+			import mx.core.Application;
+//			import spark.components.Application;
+		
+			import mx.core.UIComponent;
+			
 			import world.World;
 			public var myWorld:World;
 			[Bindable] public var myUser:User;

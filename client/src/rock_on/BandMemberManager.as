@@ -135,7 +135,7 @@ package rock_on
 		
 		public function getBandMemberAssetCopy(bm:BandMember, animation:String):AssetStack
 		{
-			var asset:AssetStack = bm.creature.getConstructedCreature(animation, 1, 1);
+			var asset:AssetStack = bm.creature.getConstructedCreature(bm.layerableOrder, animation, 1, 1);
 			asset.doAnimation(animation, 39);
 			return asset;
 		}	

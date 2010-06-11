@@ -5,6 +5,7 @@ package controllers
 	import flash.geom.Rectangle;
 	import flash.utils.getQualifiedClassName;
 	
+	import models.EssentialModelReference;
 	import models.Layerable;
 	import models.OwnedLayerable;
 	
@@ -31,9 +32,9 @@ package controllers
 		
 		public function getMovieClipCopy(layerable:Layerable, formatted:Boolean=false, dimensionX:int=100, dimensionY:int=100):UIComponent
 		{
-			var className:String = flash.utils.getQualifiedClassName(layerable.mc);
-			var klass:Class = essentialModelManager.essentialModelReference.loadedModels[className].klass;
-			var copy:MovieClip = new klass() as MovieClip;
+//			var className:String = flash.utils.getQualifiedClassName(layerable.mc);
+//			var klass:Class = essentialModelManager.essentialModelReference.loadedModels[className].klass;
+			var copy:MovieClip = EssentialModelReference.getMovieClipCopy(layerable.mc);
 			if (formatted)
 			{
 				var uic:UIComponent = formatMovieClipByDimensions(copy, dimensionX, dimensionY, 0, 0);

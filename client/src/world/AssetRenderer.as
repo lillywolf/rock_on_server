@@ -1,7 +1,9 @@
 package world
 {
+	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.Rectangle;
 	import flash.system.System;
 	import flash.utils.getTimer;
 	

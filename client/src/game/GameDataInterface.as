@@ -13,13 +13,16 @@ package game
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
+	import flash.utils.getDefinitionByName;
 	
 	import helpers.UnprocessedModel;
 	
+	import models.EssentialModelReference;
 	import models.User;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
+	import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
@@ -199,7 +202,7 @@ package game
 		public function updateProperties(obj:Object):void
 		{
 			var className:String = essentialModelManager.convertToClassCase(obj.model);
-			var klass:Class = essentialModelManager.essentialModelReference.loadedModels[className].klass;
+			var klass:Class = getDefinitionByName('models.'+className) as Class;
 			
 			// This should be improved, first way is better
 			
@@ -239,7 +242,7 @@ package game
 		
 		public function isGameUser(snid:int):Boolean
 		{
-			if (snid == Application.application.facebookInterface.snid)
+			if (snid == FlexGlobals.topLevelApplication.facebookInterface.snid)
 			{
 				return true;
 			}
@@ -288,13 +291,16 @@ package game
 //			Alert.show(pendingRequests.toString() + "::" + loadCounter.toString());
 			if (essentialModelManager.instancesToLoad.length == 0 && pendingRequests == loadCounter)
 			{
-				if (isLoggedInUser())
+//				Use true for testing in non-Facebook environment				
+				
+//				if (isLoggedInUser())
+				if (true)
 				{
-					Application.application.instancesLoadedForGameUser();				
+					FlexGlobals.topLevelApplication.instancesLoadedForGameUser();				
 				}
 				else
 				{
-					Application.application.instancesLoadedForFriend();
+					FlexGlobals.topLevelApplication.instancesLoadedForFriend();
 				}
 				checkForLoadedMovieClips();
 			}			
@@ -306,13 +312,16 @@ package game
 //			Alert.show(structureManager.ownedStructureMovieClipsLoaded.toString() + "::" + structureManager.ownedStructuresLoaded.toString());
 			if (structureManager.ownedStructureMovieClipsLoaded == structureManager.ownedStructuresLoaded)
 			{
+//				Use true for non-Facebook testing				
+				
 				if (isLoggedInUser())
+//				if (true)
 				{
-					Application.application.attemptToInitializeVenueForUser();																
+					FlexGlobals.topLevelApplication.attemptToInitializeVenueForUser();																
 				}
 				else
 				{
-					Application.application.friendGDILoaded(this);
+					FlexGlobals.topLevelApplication.friendGDILoaded(this);
 //					Application.application.attemptToShowFriendVenue(this);
 				}
 			}
@@ -320,7 +329,7 @@ package game
 		
 		public function isLoggedInUser():Boolean
 		{
-			if (Application.application.facebookInterface.snid == user.snid)
+			if (FlexGlobals.topLevelApplication.facebookInterface.snid == user.snid)
 			{
 				return true;				
 			}
