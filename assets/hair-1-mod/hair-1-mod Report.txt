@@ -1,0 +1,68 @@
+hair-1-mod.swf Movie Report
+----------------------------
+
+Metadata
+--------
+Bytes    Value
+-----    -----
+  942    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"> <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/"> <xmp:CreatorTool>Adobe Flash CS4 Professional</xmp:CreatorTool> <xmp:CreateDate>2010-06-03T02:19:14-07:00</xmp:CreateDate> <xmp:MetadataDate>2010-06-10T21:47:57-07:00</xmp:MetadataDate> <xmp:ModifyDate>2010-06-10T21:47:57-07:00</xmp:ModifyDate> </rdf:Description> <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/"> <dc:format>application/x-shockwave-flash</dc:format> </rdf:Description> <rdf:Description rdf:about="" xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/" xmlns:stRef="http://ns.adobe.com/xap/1.0/sType/ResourceRef#"> <xmpMM:DerivedFrom rdf:parseType="Resource"> <stRef:instanceID>xmp.iid:2DA4FA5E0B2068118F62DF5DE5CF99B6</stRef:instanceID> <stRef:documentID>xmp.did:2DA4FA5E0B2068118F62DF5DE5CF99B6</stRef:documentID> <stRef:originalDocumentID>xmp.did:82763414082068118D4ABD90F77BB94C</stRef:originalDocumentID> </xmpMM:DerivedFrom> <xmpMM:DocumentID>xmp.did:3FECBCBB112068118F62DF5DE5CF99B6</xmpMM:DocumentID> <xmpMM:InstanceID>xmp.iid:3FECBCBB112068118F62DF5DE5CF99B6</xmpMM:InstanceID> <xmpMM:OriginalDocumentID>xmp.did:82763414082068118D4ABD90F77BB94C</xmpMM:OriginalDocumentID> </rdf:Description> </rdf:RDF> 
+
+Frame #    Frame Bytes    Total Bytes    Scene
+-------    -----------    -----------    ----------------
+      1          40831          40831    Scene 1 (AS 3.0 Classes Export Frame)
+
+Scene                        Shape Bytes    Text Bytes    ActionScript Bytes
+-------------------------    -----------    ----------    ------------------
+Scene 1                                0             0                  5389
+
+Symbol                       Shape Bytes    Text Bytes    ActionScript Bytes
+-------------------------    -----------    ----------    ------------------
+Egg                                 2428             0                     0
+Hair2RedBack                        1757             0                     0
+Hair2PurpleBack                     1735             0                     0
+Hair2RainbowBack                    2156             0                     0
+Hair2BlueBack                       2106             0                     0
+Hair2BrownBack                      2120             0                     0
+Hair2RedFront                       1796             0                     0
+Hair2PurpleFront                    1794             0                     0
+Hair2RainbowFront                   2083             0                     0
+Hair2BlueFront                      1865             0                     0
+Hair2BrownFront                     1911             0                     0
+hair1BlackBack                       555             0                     0
+hair1PinkBack                        576             0                     0
+hair1RedBldBack                      804             0                     0
+hair1PurpleBlkBack                   791             0                     0
+hair1LimeBack                        811             0                     0
+hair1BlackFront                     1124             0                     0
+hair1PinkFront                      1199             0                     0
+hair1RedBldFront                    1303             0                     0
+hair1PurpleBlkFront                 1268             0                     0
+hair1LimeFront                      1270             0                     0
+Hair2Red                               0             0                     0
+Hair2Blue                              0             0                     0
+Hair2Brown                             0             0                     0
+Hair2Rainbow                           0             0                     0
+Hair2Purple                            0             0                     0
+Hair1Black                             0             0                     0
+Hair1PurpleBlk                         0             0                     0
+Hair1Pink                              0             0                     0
+Hair1Lime                              0             0                     0
+Hair1RedBld                            0             0                     0
+
+ActionScript Bytes    Location
+------------------    --------
+               292    Scene 1:Frame 1:Egg
+               509    Scene 1:Frame 1:Hair1Black
+               508    Scene 1:Frame 1:Hair1Lime
+               508    Scene 1:Frame 1:Hair1Pink
+               515    Scene 1:Frame 1:Hair1PurpleBlk
+               511    Scene 1:Frame 1:Hair1RedBld
+               508    Scene 1:Frame 1:Hair2Blue
+               509    Scene 1:Frame 1:Hair2Brown
+               511    Scene 1:Frame 1:Hair2Purple
+               512    Scene 1:Frame 1:Hair2Rainbow
+               506    Scene 1:Frame 1:Hair2Red
+
+
+
+
