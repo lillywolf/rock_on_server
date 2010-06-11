@@ -17,6 +17,7 @@ package world
 	{
 		public var sortedAssets:ArrayCollection;
 		public var unsortedAssets:ArrayCollection;
+		public var _assetGenius:AssetGenius;
 		private static const DEFAULT_SPEED:Number = .02;
 
 		[Bindable] public var myMemory:Number;
@@ -48,6 +49,8 @@ package world
 			myMemory = System.totalMemory;
 			aux = sortedAssets.length;
 			lastTime = time;
+			
+//			_assetGenius.onEnterFrame();
 			
 			removeExistingAssets();
 			updateSortedAssets(lockedDelta);
@@ -220,6 +223,16 @@ package world
 					removeChild(asset);									
 				}
 			}			
+		}
+		
+		public function set assetGenius(val:AssetGenius):void
+		{
+			_assetGenius = val;
+		}
+		
+		public function get assetGenius():AssetGenius
+		{
+			return _assetGenius;
 		}
 		
 	}

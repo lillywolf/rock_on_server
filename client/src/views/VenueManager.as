@@ -127,5 +127,10 @@ package views
 			return _levelManager;
 		}
 		
+		public function get concertStage():ConcertStage
+		{
+			return _concertStage
+		}
+		
 	}
 }

@@ -2,6 +2,7 @@ package rock_on
 {
 	import flash.display.MovieClip;
 	import flash.events.TimerEvent;
+	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	
 	import models.Creature;
@@ -22,7 +23,7 @@ package rock_on
 		public static const HEADTOSTAGE_STATE:int = 6;
 		public static const HEADTODOOR_STATE:int = 7;
 		
-		public static const ENTHRALLED_TIME:int = 100000 * Math.random();
+		public static const ENTHRALLED_TIME:int = 50000 * Math.random();
 		public static const QUEUED_TIME:int = 4000;
 		public static const FAN_CONVERSION_DELAY:int = 2000;
 				
@@ -205,7 +206,7 @@ package rock_on
 			
 			var frameNumber:int = 1;
 			var obj:Object = standFacingObject(_concertStage, frameNumber);
-			_myWorld.assetGenius.evaluateStandActivity(this, true, obj.animation, obj.frameNumber);
+//			_myWorld.assetGenius.evaluateStandActivity(this, true, obj.animation, obj.frameNumber);
 			
 			enthralledTimer = new Timer(CustomerPerson.ENTHRALLED_TIME);
 			enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
@@ -225,7 +226,7 @@ package rock_on
 		{
 //			Condition this somehow
 
-			if (Math.random() < 0.1)
+			if (Math.random() < 0.05)
 			{
 				enthralledTimer.stop();
 				enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
@@ -369,7 +370,7 @@ package rock_on
 		{
 			state = HEADTOSTAGE_STATE;
 			
-			var destination:Point3D = pickPointNearStructure(_concertStage);
+			var destination:Point3D = pickPointNearStructure(_concertStage, _venue.mainCrowdRect);
 			moveCustomer(destination);
 		}
 		
@@ -434,7 +435,7 @@ package rock_on
 			return ENTHRALLED_TIME;
 		}
 		
-		public function pickPointNearStructure(structure:*):Point3D
+		public function pickPointNearStructure(structure:*, bounds:Rectangle):Point3D
 		{
 			var stagePoint:Point3D;
 			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
@@ -443,7 +444,11 @@ package rock_on
 			{
 				do 
 				{
-					stagePoint = new Point3D(Math.floor(Math.random()*_myWorld.tilesWide), 0, Math.floor(Math.random()*_myWorld.tilesDeep));				
+					var xDimension:int = Math.round(Math.random()*bounds.width);
+					var zDimension:int = _venue.boothsRect.bottom + Math.round(Math.random()*bounds.height);
+//					var xDimension:int = Math.round(Math.random()*_myWorld.tilesWide);
+//					var zDimension:int = Math.round(Math.random()*_myWorld.tilesDeep);
+					stagePoint = new Point3D(xDimension, 0, zDimension);				
 				}
 				while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)));
 			}

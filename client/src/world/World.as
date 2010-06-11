@@ -19,7 +19,6 @@ package world
 		public var tilesDeep:int;
 		public var wg:WorldGrid;
 		public var _bitmapBlotter:BitmapBlotter;
-		public var _assetGenius:AssetGenius;
 		
 		[Bindable] public var assetRenderer:AssetRenderer;
 		[Bindable] public var pathFinder:PathFinder;		
@@ -81,8 +80,8 @@ package world
 			activeAsset.y = 0;
 			activeAsset.x += addTo.x;
 			activeAsset.y += addTo.y;
-			assetGenius.evaluateStandActivity(activeAsset, true, animation, frameNumber);
-//			_bitmapBlotter.addBitmap(activeAsset, animation, frameNumber);
+//			assetGenius.evaluateStandActivity(activeAsset, true, animation, frameNumber);
+			_bitmapBlotter.addBitmap(activeAsset, animation, frameNumber);
 			
 		}
 		
@@ -327,16 +326,6 @@ package world
 		public function get bitmapBlotter():BitmapBlotter
 		{
 			return _bitmapBlotter;
-		}
-		
-		public function set assetGenius(val:AssetGenius):void
-		{
-			_assetGenius = val;
-		}
-		
-		public function get assetGenius():AssetGenius
-		{
-			return _assetGenius;
 		}
 	}
 }

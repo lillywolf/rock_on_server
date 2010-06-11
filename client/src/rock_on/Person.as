@@ -105,7 +105,7 @@ package rock_on
 			return {frameNumber: frameNumber, animation: animationType};
 		}
 		
-		public function moveCustomerLater(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
+		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
 		{
 			if (this.worldCoords.x%1 == 0 && this.worldCoords.y%1 == 0 && this.worldCoords.z%1 == 0)
 			{			
@@ -123,18 +123,17 @@ package rock_on
 			}			
 		}
 		
-		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
-		{	
-			if (this.worldCoords.x%1 == 0 && this.worldCoords.y%1 == 0 && this.worldCoords.z%1 == 0)
-			{			
-//				if (!(_myWorld.assetRenderer.unsortedAssets.contains(this)))
-//				{
-//					_myWorld.addAsset(this, worldCoords);				
-//					_myWorld.bitmapBlotter.removeBitmapFromBlotter(this);
-//				}
-				_myWorld.assetGenius.evaluateMoveActivity(this, true, destination, avoidStructures, avoidPeople);
-			}
-		}	
+//		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
+//		{	
+//			if (this.worldCoords.x%1 == 0 && this.worldCoords.y%1 == 0 && this.worldCoords.z%1 == 0)
+//			{			
+////				if (!(_myWorld.assetRenderer.unsortedAssets.contains(this)))
+////				{
+////					_myWorld.addAsset(this, worldCoords);				
+////					_myWorld.bitmapBlotter.removeBitmapFromBlotter(this);
+////				}
+//			}
+//		}	
 		
 		public function getNextPointAlongPath():Point3D
 		{

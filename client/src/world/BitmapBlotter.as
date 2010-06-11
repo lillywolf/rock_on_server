@@ -24,6 +24,7 @@ package world
 	public class BitmapBlotter extends BitmapData
 	{
 		public static const FOOT_CONSTANT:int = 9;
+		public static const WIDTH_BUFFER:int = 10;
 		public var backgroundCanvas:Canvas;
 		public var bitmapReferences:ArrayCollection;
 		public var incrementX:int;
@@ -145,14 +146,17 @@ package world
 			{
 				if (abd.bitmap)
 				{
-					backgroundCanvas.removeChild(abd.bitmap);
-					var index:int = bitmapReferences.getItemIndex(abd);
-					bitmapReferences.removeItemAt(index);	
+					if (backgroundCanvas.rawChildren.contains(abd.bitmap))
+					{
+						backgroundCanvas.rawChildren.removeChild(abd.bitmap);
+						var index:int = bitmapReferences.getItemIndex(abd);
+						bitmapReferences.removeItemAt(index);	
+					}
 				}
 			}
 			else
 			{
-				throw new Error("Bitmap doesn't exist in array");
+//				throw new Error("Bitmap doesn't exist in array");
 			}
 		}
 		
@@ -190,6 +194,8 @@ package world
 		{
 			// Create new bitmap
 			abd.mc = getNewMovieClip(abd.activeAsset, animation, frameNumber);
+			abd.realCoordX = abd.activeAsset.realCoords.x;
+			abd.realCoordY = abd.activeAsset.realCoords.y;			
 			abd.newBitmap = getNewBitmap(abd);
 			// Get overlaps
 			var overlaps:ArrayCollection = getOverlappingBitmaps(abd);
@@ -209,9 +215,13 @@ package world
 			}
 			for each (abd in overlaps)
 			{
-				backgroundCanvas.rawChildren.addChild(abd.newBitmap);
-				abd.bitmap = abd.newBitmap;
+				if (abd.newBitmap)
+				{
+					abd.bitmap = abd.newBitmap;
+				}
+				backgroundCanvas.rawChildren.addChild(abd.bitmap);
 			}
+		
 		}
 		
 		public function sortOverlaps(overlaps:ArrayCollection):void
@@ -229,10 +239,10 @@ package world
 			var overlaps:ArrayCollection = new ArrayCollection();
 			for each (var abd:AssetBitmapData in bitmapReferences)
 			{
-				if (abd.bitmap.bitmapData.rect.bottom < stander.newBitmap.bitmapData.rect.bottom && 
-					abd.bitmap.bitmapData.rect.top > stander.newBitmap.bitmapData.rect.bottom && 
-					((abd.bitmap.bitmapData.rect.right > stander.newBitmap.bitmapData.rect.left && abd.bitmap.bitmapData.rect.right < stander.newBitmap.bitmapData.rect.right) ||
-						abd.bitmap.bitmapData.rect.left > stander.newBitmap.bitmapData.rect.left && abd.bitmap.bitmapData.rect.left < stander.newBitmap.bitmapData.rect.right))
+				if ((abd.realCoordY - abd.transformedHeight) < (stander.realCoordY - stander.transformedHeight) && 
+					abd.realCoordY > (stander.realCoordY - stander.transformedHeight) && 
+					((abd.realCoordX > stander.realCoordX && abd.realCoordX < stander.realCoordX + stander.transformedWidth*2) ||
+						abd.realCoordX + abd.transformedWidth*2 > stander.realCoordX && abd.realCoordX + abd.transformedWidth*2 < stander.realCoordX + stander.transformedWidth*2))
 				{
 					overlaps.addItem(abd);
 				}			
@@ -242,7 +252,7 @@ package world
 		
 		public function doesBitmapOverlapWithAsset(abd:AssetBitmapData, bitmap:Bitmap):Boolean
 		{
-			var bp:Bitmap = getNewBitmap(abd);
+			var bp:Bitmap = abd.bitmap;
 			if (bitmap.bitmapData.rect.bottom < bp.bitmapData.rect.bottom && 
 				bitmap.bitmapData.rect.top > bp.bitmapData.rect.bottom && 
 				((bitmap.bitmapData.rect.right > bp.bitmapData.rect.left && bitmap.bitmapData.rect.right < bp.bitmapData.rect.right) ||
@@ -296,17 +306,17 @@ package world
 		public function getBitmapForStructure(abd:AssetBitmapData):Bitmap
 		{
 			var bmd:BitmapData = new BitmapData(relWidth, relHeight, true, 0x00000000);
-			var rect:Rectangle = new Rectangle(0, 0, abd.mc.width, abd.mc.height);
-			var matrix:Matrix = new Matrix();
 			var bottomSlice:Number = (abd.mc.transform.pixelBounds.bottom/abd.mc.transform.pixelBounds.height)*abd.mc.height;
+			var rect:Rectangle = new Rectangle(0, 0, abd.mc.width + WIDTH_BUFFER, abd.mc.height + bottomSlice);
+			var matrix:Matrix = new Matrix();
 			matrix.tx = abd.mc.width/2;	
-			matrix.ty = abd.mc.height - bottomSlice;
+			matrix.ty = abd.mc.height;
 			bmd.draw(abd.mc, matrix, new ColorTransform(), null, rect);
 			var bp:Bitmap = new Bitmap();
 			bp.bitmapData = bmd;
 			bp.opaqueBackground = null;				
 			bp.x = abd.realCoordX - abd.mc.width/2;
-			bp.y = abd.realCoordY + (abd.mc.height - bottomSlice);
+			bp.y = relHeight/2 + abd.realCoordY - abd.mc.height;
 			abd.bitmap = bp;
 			return bp;
 		}
@@ -314,20 +324,24 @@ package world
 		public function getBitmapForPerson(abd:AssetBitmapData):Bitmap
 		{
 			var bmd:BitmapData = new BitmapData(relWidth, relHeight, true, 0x00000000);
-			var rect:Rectangle = new Rectangle(0, 0, abd.mc.width, abd.mc.height);
+			abd.mc.scaleX = 0.4;
+			abd.mc.scaleY = 0.4;
+			var rect:Rectangle = new Rectangle(0, 0, abd.mc.width + WIDTH_BUFFER, abd.mc.height + FOOT_CONSTANT);
 			var matrix:Matrix = new Matrix();
 			matrix.scale(0.4, 0.4);
-			matrix.tx = abd.mc.width/2;
+			matrix.tx = abd.mc.width/2 + WIDTH_BUFFER/2;
 			var pb:PeachBody = new PeachBody();
 			var pbHeight:int = pb.height;
 			var heightDiff:int = abd.mc.height - pb.height;
-			matrix.ty = abd.mc.height - heightDiff - FOOT_CONSTANT;
+			matrix.ty = abd.mc.height;
+			abd.transformedHeight = matrix.ty;
+			abd.transformedWidth = matrix.tx;
 			bmd.draw(abd.mc, matrix, new ColorTransform(), null, rect);
 			var bp:Bitmap = new Bitmap();
 			bp.bitmapData = bmd;
 			bp.opaqueBackground = null;				
 			bp.x = abd.realCoordX - abd.mc.width/2;
-			bp.y = abd.realCoordY;
+			bp.y = relHeight/2 + abd.realCoordY - abd.mc.height;
 			abd.bitmap = bp;
 			return bp;
 		}

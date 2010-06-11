@@ -3,6 +3,7 @@ package rock_on
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	
 	import game.Counter;
@@ -15,6 +16,8 @@ package rock_on
 	import mx.controls.Button;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
+	
+	import spark.primitives.Rect;
 	
 	import views.VenueManager;
 	
@@ -36,11 +39,22 @@ package rock_on
 		public static const ENCORE_WAIT_TIME:int = 1800000;
 		public static const VENUE_FILL_FRACTION:Number = 0.5;
 		
+		public static const BOOTH_SECTION_FRACTION:Number = 0.4;
+		public static const STAGE_BUFFER_SQUARES:int = 2;
+		public static const OUTSIDE_SQUARES:int = 10;
+		public static const CROWD_BUFFER_FRACTION:Number = 0.3;
+		
 		public var state:int;
 		public var startShowButton:Button;
 		public var mainEntrance:Point3D;
 		public var entryPoints:ArrayCollection;
 		public var _venueManager:VenueManager;
+		
+		public var mainCrowdRect:Rectangle;
+		public var venueRect:Rectangle;
+		public var boothsRect:Rectangle;
+		public var crowdBufferRect:Rectangle;
+		public var stageBufferRect:Rectangle;
 		
 		public var _myWorld:World;
 		
@@ -54,7 +68,17 @@ package rock_on
 			setEntrance(params);
 			setAdditionalProperties(params);
 			
+			setLayout();
 			updateState();		
+		}
+		
+		public function setLayout():void
+		{
+			venueRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, _myWorld.tilesDeep);
+			boothsRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, Math.round(_myWorld.tilesDeep * BOOTH_SECTION_FRACTION))
+			stageBufferRect = new Rectangle(0, (_myWorld.tilesDeep - _venueManager.concertStage.structure.depth - STAGE_BUFFER_SQUARES), _venueManager.concertStage.structure.width + STAGE_BUFFER_SQUARES, _venueManager.concertStage.structure.depth + STAGE_BUFFER_SQUARES);	
+			crowdBufferRect = new Rectangle(Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width), boothsRect.bottom, venueRect.right - (Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width)), stageBufferRect.top);
+			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom));
 		}
 		
 		public function setAdditionalProperties(params:Object):void

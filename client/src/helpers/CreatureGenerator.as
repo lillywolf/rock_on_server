@@ -38,8 +38,8 @@ package helpers
 		private function initializeLayerableOrder():void
 		{
 			layerableOrder = new Array();
-			layerableOrder['walk_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['walk_toward'] = ["shoes", "bottom", "top", "hair front"];
+			layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
 			layerableOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];
 			

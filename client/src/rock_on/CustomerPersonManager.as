@@ -1,5 +1,7 @@
 package rock_on
 {
+	import flash.geom.Rectangle;
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
@@ -65,7 +67,8 @@ package rock_on
 				
 		private function addToWorld(cp:CustomerPerson):void
 		{
-			var destination:Point3D = cp.pickPointNearStructure(_concertStage);
+			cp.venue = _venue;
+			var destination:Point3D = cp.pickPointNearStructure(_concertStage, _venue.mainCrowdRect);
 //			_myWorld.addAsset(cp, destination);
 			_myWorld.addStaticBitmap(cp, destination, "stand_still_away", 37);
 			this.addItem(cp);
@@ -285,12 +288,12 @@ package rock_on
 			{
 				throw new Error("Don't change this!!");				
 			}
-		}
+		}		
 		
 		public function get myWorld():World
 		{
 			return _myWorld;
-		}
+		}		
 				
 		public function set concertStage(val:ConcertStage):void
 		{
