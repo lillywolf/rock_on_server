@@ -83,7 +83,7 @@ package views
 			}
 			concertGoers.removeAll();
 		}
-		
+				
 		public function onVenueUpdated(method:String, newInstance:OwnedDwelling):void
 		{
 			venue.updateProperties(newInstance);

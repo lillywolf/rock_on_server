@@ -341,7 +341,7 @@ package world
 			bp.bitmapData = bmd;
 			bp.opaqueBackground = null;				
 			bp.x = abd.realCoordX - abd.mc.width/2;
-			bp.y = relHeight/2 + abd.realCoordY - abd.mc.height;
+			bp.y = relHeight/2 + abd.realCoordY - abd.mc.height - 100;
 			abd.bitmap = bp;
 			return bp;
 		}
