@@ -2,10 +2,17 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="1000" clipContent="false" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
+			import com.google.analytics.debug.Alert;
+			
 			import controllers.CreatureManager;
 			import controllers.StructureManager;
 			
 			import flash.utils.getTimer;
+			
+			import mx.controls.Alert;
+			import mx.events.DragEvent;
+			import mx.events.DynamicEvent;
+			import mx.managers.DragManager;
 			
 			import rock_on.BoothManager;
 			import rock_on.ConcertStage;
@@ -30,7 +37,10 @@
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
 			[Bindable] public var aux:Number;	
-			public var lastTime:Number;				
+			public var lastTime:Number;	
+			
+			public var mouseIncrementX:Number;
+			public var mouseIncrementY:Number;
 			
 			private function onCreationComplete():void
 			{
@@ -44,6 +54,17 @@
 				addChild(myStage);
 				stageManager.addStageToWorld(stageManager.stageAsset, concertStage.worldCoords, myStage);	
 			}
+						
+			private function onMouseDrag(evt:DynamicEvent):void
+			{
+				startDrag();
+				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);				
+			}
+			
+			private function onMouseUp(evt:MouseEvent):void
+			{
+				stopDrag();
+			}
 			
 			public function initializeBandManager():void
 			{
@@ -55,17 +76,6 @@
 				stageManager = new StageManager(structureManager, myStage);
 				stageManager.createStage();
 				concertStage = stageManager.concertStage;
-			}	
-			
-			private function onMouseDown(evt:MouseEvent):void
-			{
-				startDrag();
-				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-			}
-			
-			private function onMouseUp(evt:MouseEvent):void
-			{
-				stopDrag();
 			}			
 			
 			private function onEnterFrame(evt:Event):void

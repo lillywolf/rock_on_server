@@ -93,6 +93,7 @@
 			public var backgroundPoint:Point;
 			[Bindable] public var bitmapBlotter:BitmapBlotter;
 			public var backgroundCanvas:Canvas;
+			public var bottomBar:BottomBar;
 			public var assetGenius:AssetGenius;
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
@@ -129,13 +130,14 @@
 			[Bindable] public var aux:Number;	
 			public var lastTime:Number;	
 			
-			public var clickageX:Number;
-			public var clickageY:Number;
+			public var isDragging:Boolean;
+			public var mouseIncrementX:Number;
+			public var mouseIncrementY:Number;
 			
 			private function onCreationComplete():void
 			{
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);				
+				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);	
 			}
 			
 			public function initializer():void
@@ -166,13 +168,37 @@
 			
 			private function onMouseDown(evt:MouseEvent):void
 			{
-				startDrag();
+				isDragging = true;
+				mouseIncrementX = mouseX.valueOf();
+				mouseIncrementY = mouseY.valueOf();
+//				startDrag();
 				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			}
+			
+			private function onMouseClick(evt:MouseEvent):void
+			{
+				for each (var abd:AssetBitmapData in this.bitmapBlotter.bitmapReferences)
+				{
+					var hitRect:Rectangle = new Rectangle(abd.bitmap.x, abd.bitmap.y, abd.mc.width, abd.mc.height);
+					if (hitRect.contains(backgroundCanvas.mouseX, backgroundCanvas.mouseY))
+					{
+						this.bottomBar.replaceCreature((abd.activeAsset as AssetStack).creature);
+					}
+				}			
+			}			
+			
+			private function dragStage():void
+			{		
+				stageView.x = stageView.x + (mouseX - mouseIncrementX);
+				stageView.y = stageView.y + (mouseY - mouseIncrementY);
+				this.x = this.x + (mouseX - mouseIncrementX);
+				this.y = this.y + (mouseY - mouseIncrementY);
 			}
 			
 			private function onMouseUp(evt:MouseEvent):void
 			{
-				stopDrag();
+//				stopDrag();
+				isDragging = false;
 			}
 			
 			public function addBackgroundLayer():void
@@ -203,6 +229,8 @@
 				addChild(backgroundCanvas);
 				backgroundCanvas.cachePolicy = "on";
 				backgroundCanvas.nestLevel = 2;
+				
+				backgroundCanvas.addEventListener(MouseEvent.CLICK, onMouseClick);				
 			}
 			
 			public function addStageLayer():void
@@ -281,6 +309,11 @@
 				fps = 1000/deltaTime;
 				myMemory = System.totalMemory;
 				lastTime = time;
+				
+				if (isDragging)
+				{
+					dragStage();
+				}
 				
 				if (customerPersonManager)
 				{

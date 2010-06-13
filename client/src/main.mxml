@@ -9,14 +9,14 @@
 				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" friendManager="{friendManager}" levelManager="{gdi.levelManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="stageView" basedOn="worldView">
+		<mx:State name="stageViewer" basedOn="worldView">
 			<mx:AddChild position="before" relativeTo="worldView">
 				<views:StageView id="stageView" customerPersonManager="{worldView.customerPersonManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}"/>
 			</mx:AddChild>			
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
 			<mx:AddChild position="after">
-				<views:WorldView id="worldView" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}" levelManager="{gdi.levelManager}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandManager="{stageView.bandManager}"/>
+				<views:WorldView id="worldView" bottomBar="{bottomBarView}" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}" levelManager="{gdi.levelManager}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandManager="{stageView.bandManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="friendView" basedOn="topBar">
@@ -87,13 +87,13 @@
 				gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	
 				gdi.addEventListener(ServerDataEvent.UPDATE_COMPLETE, onUpdateComplete);
 				
-				initializeFriendManager();
+//				initializeFriendManager();
 				
 				gameMagicManager = new GameMagicManager(gdi.levelManager, gdi.userManager);
 
 //				Call when in non-Facebook test mode
 				
-//				onFacebookUserLoaded(202357);
+				onFacebookUserLoaded(202357);
 			}
 			private function initializeFriendManager():void
 			{
@@ -102,8 +102,8 @@
 			}	
 			private function onApplicationComplete():void
 			{
-				initializeFacebookInterface();				
-				currentState = "stageView";
+//				initializeFacebookInterface();				
+				currentState = "stageViewer";
 				gdi.storeManager.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
 			}
 			private function initializeFacebookInterface():void
@@ -111,19 +111,19 @@
 				facebookInterface = new FacebookFunTime();
 				addEventListener("facebookDataLoaded", onFacebookDataLoaded);				
 			}
-			public function onFacebookUserLoaded(uid:int, evt:FacebookEvent):void
-			{
-				gdi.getStaticGameContent();
-				gdi.getUserContent(uid);
-			}
-			
-// 			Only for non-Facebook version
-			
-//			public function onFacebookUserLoaded(uid:int):void
+//			public function onFacebookUserLoaded(uid:int, evt:FacebookEvent):void
 //			{
 //				gdi.getStaticGameContent();
 //				gdi.getUserContent(uid);
 //			}
+			
+// 			Only for non-Facebook version
+			
+			public function onFacebookUserLoaded(uid:int):void
+			{
+				gdi.getStaticGameContent();
+				gdi.getUserContent(uid);
+			}
 			
 //			Only for non-Facebook version			
 			

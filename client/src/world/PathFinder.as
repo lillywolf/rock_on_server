@@ -8,6 +8,8 @@ package world
 	import mx.core.FlexGlobals;
 	
 	import rock_on.Person;
+	
+	import views.AssetBitmapData;
 
 	public class PathFinder extends ArrayCollection
 	{
@@ -259,10 +261,52 @@ package world
 		
 		public function establishStructureOccupiedSpaces(exemptStructures:ArrayCollection=null):ArrayCollection
 		{
+			var structureOccupiedSpaces:ArrayCollection = getStructureOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets, exemptStructures);
+			structureOccupiedSpaces.addAll(getStructureOccupiedSpacesForBitmap(_world.bitmapBlotter.bitmapReferences, exemptStructures));
+			return structureOccupiedSpaces;
+		}
+		
+		private function getStructureOccupiedSpacesForBitmap(sourceArray:ArrayCollection, exemptStructures:ArrayCollection):ArrayCollection
+		{
 			var structureOccupiedSpaces:ArrayCollection = new ArrayCollection();
-			var structureSpaces:ArrayCollection;			
+			var structureSpaces:ArrayCollection;	
 			
-			for each (var asset:ActiveAsset in _world.assetRenderer.unsortedAssets)
+			for each (var abd:AssetBitmapData in sourceArray)
+			{				
+				// Check if the owned structures in exemptStructures equal asset.thinger; if so, do not add them
+				
+				var asset:ActiveAsset = abd.activeAsset;
+				if (asset.thinger is OwnedStructure)
+				{
+					if (!exemptStructures)
+					{
+						structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);						
+					}
+					else
+					{
+						for each (var os:OwnedStructure in exemptStructures)
+						{
+							if (!(os.id == (asset.thinger as OwnedStructure).id && os.structure == (asset.thinger as OwnedStructure).structure))
+							{
+								structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);							
+							}
+						}
+					}		
+					for each (var pt:Point3D in structureSpaces)
+					{
+						structureOccupiedSpaces.addItem(pt);
+					}
+				}
+			}
+			return structureOccupiedSpaces;			
+		}
+		
+		private function getStructureOccupiedSpacesForArray(sourceArray:ArrayCollection, exemptStructures:ArrayCollection=null):ArrayCollection
+		{	
+			var structureOccupiedSpaces:ArrayCollection = new ArrayCollection();
+			var structureSpaces:ArrayCollection;	
+			
+			for each (var asset:ActiveAsset in sourceArray)
 			{				
 				// Check if the owned structures in exemptStructures equal asset.thinger; if so, do not add them
 				
@@ -281,14 +325,14 @@ package world
 								structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);							
 							}
 						}
-					}
+					}		
 					for each (var pt:Point3D in structureSpaces)
 					{
 						structureOccupiedSpaces.addItem(pt);
-					}				
+					}
 				}
 			}
-			return structureOccupiedSpaces;	
+			return structureOccupiedSpaces;
 		}
 		
 		private function addToOccupiedSpaces(os:OwnedStructure):ArrayCollection

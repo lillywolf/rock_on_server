@@ -3,10 +3,13 @@ package world
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.MovieClip;
+	import flash.events.MouseEvent;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.ui.Mouse;
+	import flash.ui.MouseCursor;
 	
 	import models.EssentialModelReference;
 	import models.OwnedStructure;
@@ -25,7 +28,7 @@ package world
 	{
 		public static const FOOT_CONSTANT:int = 9;
 		public static const WIDTH_BUFFER:int = 10;
-		public var backgroundCanvas:Canvas;
+		public var _backgroundCanvas:Canvas;
 		public var bitmapReferences:ArrayCollection;
 		public var incrementX:int;
 		public var incrementY:int;
@@ -146,9 +149,9 @@ package world
 			{
 				if (abd.bitmap)
 				{
-					if (backgroundCanvas.rawChildren.contains(abd.bitmap))
+					if (_backgroundCanvas.rawChildren.contains(abd.bitmap))
 					{
-						backgroundCanvas.rawChildren.removeChild(abd.bitmap);
+						_backgroundCanvas.rawChildren.removeChild(abd.bitmap);
 						var index:int = bitmapReferences.getItemIndex(abd);
 						bitmapReferences.removeItemAt(index);	
 					}
@@ -208,9 +211,9 @@ package world
 			var abd:AssetBitmapData;
 			for each (abd in overlaps)
 			{
-				if (backgroundCanvas.rawChildren.contains(abd.bitmap))
+				if (_backgroundCanvas.rawChildren.contains(abd.bitmap))
 				{
-					backgroundCanvas.rawChildren.removeChild(abd.bitmap);
+					_backgroundCanvas.rawChildren.removeChild(abd.bitmap);
 				}
 			}
 			for each (abd in overlaps)
@@ -219,7 +222,7 @@ package world
 				{
 					abd.bitmap = abd.newBitmap;
 				}
-				backgroundCanvas.rawChildren.addChild(abd.bitmap);
+				_backgroundCanvas.rawChildren.addChild(abd.bitmap);
 			}
 		
 		}
@@ -284,7 +287,7 @@ package world
 					{
 						bp = getBitmapForStructure(abd);
 					}
-					backgroundCanvas.rawChildren.addChild(bp);			
+					_backgroundCanvas.rawChildren.addChild(bp);			
 				}
 			}			
 		}
@@ -341,17 +344,36 @@ package world
 			bp.bitmapData = bmd;
 			bp.opaqueBackground = null;				
 			bp.x = abd.realCoordX - abd.mc.width/2;
-			bp.y = relHeight/2 + abd.realCoordY - abd.mc.height - 100;
+			bp.y = relHeight/2 + abd.realCoordY - abd.mc.height;
 			abd.bitmap = bp;
 			return bp;
 		}
 		
 		public function undrawPreviousBitmaps():void
 		{
-			var totalChildren:int = backgroundCanvas.rawChildren.numChildren.valueOf();
+			var totalChildren:int = _backgroundCanvas.rawChildren.numChildren.valueOf();
 			for (var i:int = 0; i < totalChildren; i++)
 			{
-				backgroundCanvas.rawChildren.removeChildAt(0);
+				_backgroundCanvas.rawChildren.removeChildAt(0);
+			}
+		}
+		
+		private function onMouseMove(evt:MouseEvent):void
+		{
+			for each (var abd:AssetBitmapData in bitmapReferences)
+			{
+				var hitRect:Rectangle = new Rectangle(abd.bitmap.x, abd.bitmap.y, abd.mc.width, abd.mc.height);
+				if (hitRect.contains(_backgroundCanvas.mouseX, _backgroundCanvas.mouseY))
+				{
+//					Mouse.cursor = MouseCursor.BUTTON;
+					backgroundCanvas.buttonMode = true;
+					break;
+				}
+				else
+				{
+//					Mouse.cursor = MouseCursor.ARROW;
+					backgroundCanvas.buttonMode = false;
+				}
 			}
 		}
 		
@@ -368,6 +390,17 @@ package world
 		public function set myWorld(val:World):void
 		{
 			_myWorld = val;
+		}
+		
+		public function set backgroundCanvas(val:Canvas):void
+		{
+			_backgroundCanvas = val;
+			_backgroundCanvas.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+		}
+		
+		public function get backgroundCanvas():Canvas
+		{
+			return _backgroundCanvas;
 		}
 	}
 }
