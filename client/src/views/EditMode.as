@@ -42,9 +42,9 @@ package views
 			super();
 			_myWorld = world;
 			_editView = editView;
-			_myWorld.addEventListener(MouseEvent.CLICK, onWorldClicked);
+			_editView.addEventListener(MouseEvent.CLICK, onWorldClicked);
 
-			enableMouseDetection();
+//			enableMouseDetection();
 
 			addEventListener(Event.ADDED, onAdded);
 		}
@@ -129,6 +129,10 @@ package views
 					locked = true;
 					(assetParent.thinger as OwnedStructure).editing = true;
 				}
+				else if (assetParent.thinger is OwnedStructure && (isFurnitureOutOfBounds() || isFurnitureOnInvalidPoint()))
+				{
+					this.deactivateStructureWithoutSaving();
+				}
 				else if (assetParent.thinger is OwnedStructure)
 				{
 					deactivateMoveableStructure();
@@ -156,9 +160,9 @@ package views
 		
 		public function removeListenersFromWorld():void
 		{
-			if (_myWorld.hasEventListener(MouseEvent.MOUSE_MOVE))
+			if (_editView.hasEventListener(MouseEvent.MOUSE_MOVE))
 			{
-				_myWorld.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+				_editView.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			}
 		}
 		
@@ -194,8 +198,10 @@ package views
 			if (currentAsset)
 			{
 				var os:OwnedStructure = currentAsset.thinger as OwnedStructure;
+				var structureCoords:Point3D = new Point3D(os.x, os.y, os.z);
+				currentAsset.transform.colorTransform = NORMAL_COLOR;											
+				_myWorld.moveAssetTo(currentAsset, structureCoords, false);				
 				os.editing = false;
-//				_myWorld.removeAsset(currentAsset);			
 			}
 			removeListenersFromWorld();		
 		}
@@ -231,7 +237,8 @@ package views
 		
 		public function moveButtonClicked():void
 		{
-			_myWorld.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+			_editView.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+//			_myWorld.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			currentAsset.speed = 1;			
 		}
 		
@@ -255,9 +262,10 @@ package views
 			{
 				saveCurrentPlacement();			
 			}
-			if (_myWorld.hasEventListener(MouseEvent.MOUSE_MOVE))
+			if (_editView.hasEventListener(MouseEvent.MOUSE_MOVE))
 			{
-				_myWorld.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);			
+				_editView.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+//				_myWorld.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);			
 			}
 		}
 		
@@ -293,12 +301,36 @@ package views
 		
 		public function isFurnitureOutOfBounds():Boolean
 		{
-			if (currentAsset.worldCoords.x + (currentAsset.thinger as OwnedStructure).structure.width / 2 > _myWorld.tilesWide || 
-			currentAsset.worldCoords.x - (currentAsset.thinger as OwnedStructure).structure.width / 2 < 0 || 
-			currentAsset.worldCoords.z + (currentAsset.thinger as OwnedStructure).structure.depth / 2 > _myWorld.tilesDeep || 
-			currentAsset.worldCoords.z - (currentAsset.thinger as OwnedStructure).structure.depth / 2 < 0)
+			var os:OwnedStructure = currentAsset.thinger as OwnedStructure;
+			if (os.structure.structure_type == "Booth")
 			{
-				return true;
+				if (currentAsset.worldCoords.x + os.structure.width / 2 > _editView.venueManager.venue.boothsRect.right || 
+					currentAsset.worldCoords.x - os.structure.width / 2 < _editView.venueManager.venue.boothsRect.left ||
+					currentAsset.worldCoords.z + os.structure.depth / 2 > _editView.venueManager.venue.boothsRect.bottom ||
+					currentAsset.worldCoords.z - os.structure.depth / 2 < _editView.venueManager.venue.boothsRect.top)
+				{
+					return true;
+				}
+			}
+			else if (os.structure.structure_type == "ListeningStation")
+			{
+				if (currentAsset.worldCoords.x + os.structure.width / 2 > _myWorld.tilesWide || 
+					currentAsset.worldCoords.x - os.structure.width / 2 < _editView.venueManager.venue.venueRect.right ||
+					currentAsset.worldCoords.z + os.structure.depth / 2 > _myWorld.tilesDeep ||
+					currentAsset.worldCoords.z - os.structure.depth / 2 < 0)
+				{
+					return true;
+				}				
+			}
+			else if (os.structure.structure_type == "Decoration")
+			{
+				if (currentAsset.worldCoords.x + os.structure.width / 2 > _myWorld.tilesWide|| 
+					currentAsset.worldCoords.x - os.structure.width / 2 < 0 ||
+					currentAsset.worldCoords.z + os.structure.depth / 2 > _myWorld.tilesDeep ||
+					currentAsset.worldCoords.z - os.structure.depth / 2 < 0)
+				{
+					return true;
+				}				
 			}
 			return false;
 		}

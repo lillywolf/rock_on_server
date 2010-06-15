@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="1000" clipContent="false" creationComplete="onCreationComplete()">
+	<mx:Script>
+		<![CDATA[
+			import com.google.analytics.debug.Alert;
+			
+			import controllers.CreatureManager;
+			import controllers.StructureManager;
+			
+			import flash.utils.getTimer;
+			
+			import mx.controls.Alert;
+			import mx.events.DragEvent;
+			import mx.events.DynamicEvent;
+			import mx.managers.DragManager;
+			
+			import rock_on.BoothManager;
+			import rock_on.ConcertStage;
+			import rock_on.CustomerPersonManager;
+			import rock_on.StageManager;
+			
+			import world.World;
+			
+			public var stageWidth:int = 1200;
+			public var stageHeight:int = 1200;
+			public var tileSize:int = 40;
+			
+			public var myStage:World;
+			public var customerPersonManager:CustomerPersonManager;
+			[Bindable] public var bandManager:BandManager;
+			[Bindable] public var concertStage:ConcertStage;
+			[Bindable] public var stageManager:StageManager;
+			[Bindable] public var structureManager:StructureManager;
+			[Bindable] public var creatureManager:CreatureManager;
+			[Bindable] public var boothManager:BoothManager;
+			
+			[Bindable] public var myMemory:Number;
+			[Bindable] public var fps:Number;
+			[Bindable] public var aux:Number;	
+			public var lastTime:Number;	
+			
+			public var mouseIncrementX:Number;
+			public var mouseIncrementY:Number;
+			
+			private function onCreationComplete():void
+			{
+				addEventListener(Event.ENTER_FRAME, onEnterFrame);	
+			}
+			
+			public function setInMotion():void
+			{				
+				createStage();
+				myStage = new World(stageWidth, stageHeight, tileSize);
+				addChild(myStage);
+				stageManager.addStageToWorld(stageManager.stageAsset, concertStage.worldCoords, myStage);	
+			}
+						
+			private function onMouseDrag(evt:DynamicEvent):void
+			{
+				startDrag();
+				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);				
+			}
+			
+			private function onMouseUp(evt:MouseEvent):void
+			{
+				stopDrag();
+			}
+			
+			public function initializeBandManager():void
+			{
+				bandManager = new BandManager(creatureManager, boothManager.booths, concertStage, myStage);								
+			}
+			
+			public function createStage():void
+			{
+				stageManager = new StageManager(structureManager, myStage);
+				stageManager.createStage();
+				concertStage = stageManager.concertStage;
+			}			
+			
+			private function onEnterFrame(evt:Event):void
+			{
+				var time:Number = getTimer();
+				var deltaTime:Number = time - lastTime;
+				var lockedDelta:Number = Math.min(100, deltaTime);
+				fps = 1000/deltaTime;
+				myMemory = System.totalMemory;
+				lastTime = time;
+				
+				if (customerPersonManager)
+				{
+					customerPersonManager.update(lockedDelta);				
+				}
+				
+				if (bandManager)
+				{	
+					bandManager.update(lockedDelta);
+				}				
+			}
+		]]>
+	</mx:Script>
+</mx:Canvas>

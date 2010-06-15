@@ -67,23 +67,6 @@ package world
 			addChild(_movieClip);
 		}
 		
-		public function startMoveDelayTimer():void
-		{
-			var t:Timer = new Timer(MOVE_DELAY_TIME);
-			t.addEventListener(TimerEvent.TIMER, onMoveDelayTimer);
-			t.start();
-		}
-		
-		private function onMoveDelayTimer(evt:TimerEvent):void
-		{
-			var t:Timer = evt.currentTarget as Timer;
-			t.stop();
-			t.removeEventListener(TimerEvent.TIMER, onMoveDelayTimer);
-			t = null;
-			var worldEvt:WorldEvent = new WorldEvent(WorldEvent.MOVE_DELAY_COMPLETE, this, true, true);
-			dispatchEvent(worldEvt);
-		}
-		
 		public function set world(val:World):void
 		{
 			_world = val;

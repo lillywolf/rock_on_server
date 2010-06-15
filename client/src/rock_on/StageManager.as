@@ -16,22 +16,22 @@ package rock_on
 	{
 		public var _structureManager:StructureManager;
 		public var _myWorld:World;
+		public var _myStage:World;
 		public var editMirror:Boolean;
 		public var stageAsset:ActiveAsset;
 		public var stages:ArrayCollection;
 		public var concertStage:ConcertStage;
 		
-		public function StageManager(structureManager:StructureManager, myWorld:World, target:IEventDispatcher=null)
+		public function StageManager(structureManager:StructureManager, target:IEventDispatcher=null)
 		{
 			super(target);
 			_structureManager = structureManager;
-			_myWorld = myWorld;
 			stages = new ArrayCollection();
 		}
 		
 		public function setInMotion():void
 		{
-			addStage();
+			createStage();
 		}
 		
 		public function tearDown():void
@@ -39,7 +39,7 @@ package rock_on
 			removeStage();
 		}
 		
-		private function addStage():void
+		public function createStage():void
 		{
 			var stageStructures:ArrayCollection = _structureManager.getStructuresByType("ConcertStage");
 			concertStage = new ConcertStage(stageStructures[0]);
@@ -48,24 +48,25 @@ package rock_on
 			stageAsset.thinger = stageStructures[0];
 			var addTo:Point3D = new Point3D(concertStage.x, concertStage.y, concertStage.z);
 			concertStage.worldCoords = addTo;
-			addStageToWorld(stageAsset, addTo);
 		}
 		
-		public function addStageToWorld(asset:ActiveAsset, addTo:Point3D):void
+		public function addStageToWorld(asset:ActiveAsset, addTo:Point3D, myStage:World):void
 		{
+			_myStage = myStage;
+			
 			if (editMirror)
 			{
-				_myWorld.addAsset(asset, addTo);
+				_myStage.addAsset(asset, addTo);
 			}
 			else
 			{
-				_myWorld.addStaticBitmap(asset, addTo);
+				_myStage.addAsset(asset, addTo);
 			}
 		}
 		
 		public function removeStage():void
 		{
-			_myWorld.removeAsset(stageAsset);
+			_myStage.removeAsset(stageAsset);
 			stageAsset = null;
 			concertStage = null;
 		}

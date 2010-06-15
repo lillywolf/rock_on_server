@@ -19,6 +19,8 @@ package views
 		public var standing:Boolean;
 		public var rendered:Boolean;
 		public var newBitmap:Bitmap;
+		public var transformedWidth:Number;
+		public var transformedHeight:Number;
 		
 		public function AssetBitmapData()
 		{

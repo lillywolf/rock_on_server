@@ -23,7 +23,8 @@ package views
 
 	public class VenueManager extends EventDispatcher
 	{
-		public static const PERSON_SCALE:Number = 0.4;		
+		public static const PERSON_SCALE:Number = 0.4;	
+		public static const MOVING_CUSTOMER_FRACTION:Number = 0.1;
 		
 		public var venue:Venue;
 		public var concertGoers:ArrayCollection;
@@ -37,6 +38,9 @@ package views
 		public var _boothManager:BoothManager;
 		public var _levelManager:LevelManager;
 		
+		public var numStaticCustomers:int;
+		public var numMovingCustomers:int;
+		
 		public function VenueManager(creatureGenerator:CreatureGenerator, customerPersonManager:CustomerPersonManager, dwellingManager:DwellingManager, levelManager:LevelManager, bandManager:BandManager, boothManager:BoothManager, concertStage:ConcertStage, myWorld:World, target:IEventDispatcher=null)
 		{
 			super(target);
@@ -49,6 +53,8 @@ package views
 			_booths = _boothManager.booths;
 			_concertStage = concertStage;
 			_myWorld = myWorld;
+			
+			concertGoers = new ArrayCollection();		
 		}
 		
 		public function getVenue():void
@@ -56,6 +62,9 @@ package views
 			var venues:ArrayCollection = _dwellingManager.getDwellingsByType("Venue");
 			venue = new Venue(this, _myWorld, venues[0] as OwnedDwelling);	
 			venue.addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);
+			
+			numStaticCustomers = Math.floor(venue.fancount * (1 - VenueManager.MOVING_CUSTOMER_FRACTION));
+			numMovingCustomers = venue.fancount - numStaticCustomers;			
 		}
 		
 		public function onBoothUnstocked(evt:VenueEvent):void
@@ -63,16 +72,26 @@ package views
 			_customerPersonManager.removeBoothFromAvailable(evt.booth);
 		}
 		
-		public function addCustomersToVenue():void
+		public function addStaticCustomersToVenue():void
 		{
-			concertGoers = new ArrayCollection();
-			for (var i:int = 0; i < venue.fancount; i++)
+			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
 				var cp:CustomerPerson = _creatureGenerator.createCustomer("Concert Goer", "walk_toward", _concertStage, _boothManager);
 				cp.speed = 0.06;
 				_customerPersonManager.add(cp);
 				concertGoers.addItem(cp);
 			}
+		}
+		
+		public function addMovingCustomersToVenue():void
+		{
+			for (var i:int = 0; i < numMovingCustomers; i++)
+			{
+				var cp:CustomerPerson = _creatureGenerator.createCustomer("Concert Goer", "walk_toward", _concertStage, _boothManager);
+				cp.speed = 0.06;
+				_customerPersonManager.add(cp, true);
+				concertGoers.addItem(cp);
+			}			
 		}
 		
 		public function removeCustomersFromVenue():void
@@ -83,7 +102,7 @@ package views
 			}
 			concertGoers.removeAll();
 		}
-		
+				
 		public function onVenueUpdated(method:String, newInstance:OwnedDwelling):void
 		{
 			venue.updateProperties(newInstance);
@@ -125,6 +144,11 @@ package views
 		public function get levelManager():LevelManager
 		{
 			return _levelManager;
+		}
+		
+		public function get concertStage():ConcertStage
+		{
+			return _concertStage
 		}
 		
 	}

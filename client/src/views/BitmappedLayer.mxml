@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
+<mx:Script>
+	<![CDATA[
+		import mx.events.DynamicEvent;
+		
+		import world.BitmapBlotter;
+		
+		[Bindable] public var bitmapLayer:Bitmap;
+		[Bindable] public var worldView:WorldView;
+		
+		private function onCreationComplete():void
+		{
+			this.worldView.addEventListener("bitmapBlotterCreated", onBlotterCreated);
+		}
+		
+		private function onBlotterCreated(evt:DynamicEvent):void
+		{
+			this.rawChildren.addChild(bitmapLayer);			
+		}
+	]]>
+</mx:Script>	
+</mx:Canvas>

@@ -35,7 +35,7 @@ package world
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);			
 		}
 		
-		private function onEnterFrame(evt:Event):void
+		public function onEnterFrame():void
 		{
 			var abd:AssetBitmapData;
 			var overlaps:ArrayCollection = new ArrayCollection();
@@ -64,13 +64,18 @@ package world
 			{
 				if (!(isInAssetRenderer(abd.activeAsset)) && isInBitmapBlotter(abd.activeAsset))
 				{
-					_bitmapBlotter.removeBitmapFromBlotter(abd.activeAsset);
+					_bitmapBlotter.removeBitmapFromBlotter(abd);
 					_assetRenderer.unsortedAssets.addItem(abd.activeAsset);
 					abd.rendered = true;
 				}
 				else if (isInAssetRenderer(abd.activeAsset) && isInBitmapBlotter(abd.activeAsset))
 				{
-					throw new Error("What in the sam hill?");
+//					throw new Error("What in the sam hill?");
+				}
+				else if (!(isInBitmapBlotter(abd.activeAsset)))
+				{
+					_assetRenderer.unsortedAssets.addItem(abd.activeAsset);
+					abd.rendered = true;					
 				}
 			}
 		}	
@@ -78,6 +83,7 @@ package world
 		public function getNewOverlappingAssets(abd:AssetBitmapData):ArrayCollection
 		{
 			var overlaps:ArrayCollection = new ArrayCollection();
+			overlaps.addItem(abd);
 			
 			for each (var bitmappedABD:AssetBitmapData in _bitmapBlotter.bitmapReferences)
 			{
@@ -105,7 +111,7 @@ package world
 			}
 			else
 			{
-				(asset as Person).moveCustomerLater(destination, avoidStructures, avoidPeople);
+				(asset as Person).moveCustomer(destination, avoidStructures, avoidPeople);
 			}
 		}
 		
@@ -138,12 +144,16 @@ package world
 			{
 				if (_assetRenderer.unsortedAssets.contains(asset))
 				{
-					throw new Error("Assets are in both blotter and renderer");
+//					throw new Error("Assets are in both blotter and renderer");
 				}
 				else
 				{
 					moveFromBlotterToRenderer(abd, destination, avoidStructures, avoidPeople);
 				}
+			}
+			else
+			{
+				(abd.activeAsset as Person).moveCustomer(destination, avoidStructures, avoidPeople);
 			}
 		}
 		
@@ -185,15 +195,17 @@ package world
 		
 		public function moveFromBlotterToRenderer(abd:AssetBitmapData, destination:Point3D=null, avoidStructures:Boolean=true, avoidPeople:Boolean=true):void
 		{
-			abd.activeAsset.addEventListener(WorldEvent.MOVE_DELAY_COMPLETE, onMoveDelayComplete);
-			abd.activeAsset.startMoveDelayTimer();
+//			abd.activeAsset.addEventListener(WorldEvent.MOVE_DELAY_COMPLETE, onMoveDelayComplete);
+//			abd.activeAsset.startMoveDelayTimer();
 			abd.moving = true;
 			abd.standing = false;
 			abd.rendered = true;
+			_myWorld.addAsset(abd.activeAsset, abd.activeAsset.worldCoords);
 			if (abd.activeAsset is Person)
 			{
-				(abd.activeAsset as Person).moveCustomerLater(destination, avoidStructures, avoidPeople);
+				(abd.activeAsset as Person).moveCustomer(destination, avoidStructures, avoidPeople);
 			}
+			removeAssetFromBlotter(abd.activeAsset);
 		}
 		
 		public function standFromRendererToBlotter(abd:AssetBitmapData, animation:String, frameNumber:int=0):void
@@ -224,8 +236,9 @@ package world
 		
 		public function removeAssetFromRenderer(abd:AssetBitmapData):void
 		{
-			var index:int = _assetRenderer.unsortedAssets.getItemIndex(abd.activeAsset);
-			_assetRenderer.unsortedAssets.removeItemAt(index);
+//			var index:int = _assetRenderer.unsortedAssets.getItemIndex(abd.activeAsset);
+//			_assetRenderer.unsortedAssets.removeItemAt(index);
+			_myWorld.removeAsset(abd.activeAsset);
 			abd.rendered = false;
 		}
 		
@@ -284,7 +297,7 @@ package world
 		
 		public function removeAssetFromBlotter(asset:ActiveAsset):void
 		{
-			_bitmapBlotter.removeBitmapFromBlotter(asset);
+//			_bitmapBlotter.removeBitmapFromBlotter(asset);
 		}		
 		
 		public function isInAssetRenderer(asset:ActiveAsset):Boolean

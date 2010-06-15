@@ -8,10 +8,18 @@
 			<mx:AddChild position="after">
 				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" friendManager="{friendManager}" levelManager="{gdi.levelManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
 			</mx:AddChild>
+			<mx:AddChild position="after">
+				<views:UILayer id="uiLayer"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="stageViewer" basedOn="worldView">
+			<mx:AddChild position="before" relativeTo="worldView">
+				<views:StageView id="stageView" customerPersonManager="{worldView.customerPersonManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}"/>
+			</mx:AddChild>			
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
-			<mx:AddChild>
-				<views:WorldView id="worldView" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}" levelManager="{gdi.levelManager}"/>
+			<mx:AddChild position="after">
+				<views:WorldView id="worldView" bottomBar="{bottomBarView}" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}" levelManager="{gdi.levelManager}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandManager="{stageView.bandManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="friendView" basedOn="topBar">
@@ -21,7 +29,7 @@
 		</mx:State>
 		<mx:State name="editView" basedOn="topBar">
 			<mx:AddChild>
-				<views:EditView id="editView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" boothManager="{worldView.boothManager}" venueManager="{worldView.venueManager}" dwellingManager="{gdi.dwellingManager}"/>
+				<views:EditView id="editView" myUser="{gdi.user}" stageView="{stageView}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" boothManager="{worldView.boothManager}" venueManager="{worldView.venueManager}" dwellingManager="{gdi.dwellingManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="twoDimensional">
@@ -98,7 +106,7 @@
 			private function onApplicationComplete():void
 			{
 				initializeFacebookInterface();				
-				currentState = "worldView";
+				currentState = "stageViewer";
 				gdi.storeManager.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
 			}
 			private function initializeFacebookInterface():void
@@ -157,6 +165,7 @@
 				if (!userLoaded)
 				{
 					userLoaded = true;
+					stageView.setInMotion();
 					worldView.setInMotion();	
 					getBasicFriendInfo();			
 				}

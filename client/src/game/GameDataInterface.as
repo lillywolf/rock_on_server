@@ -293,8 +293,8 @@ package game
 			{
 //				Use true for testing in non-Facebook environment				
 				
-//				if (isLoggedInUser())
-				if (true)
+				if (isLoggedInUser())
+//				if (true)
 				{
 					FlexGlobals.topLevelApplication.instancesLoadedForGameUser();				
 				}
