@@ -292,12 +292,13 @@
 						totalStructures++;
 					}
 				}
-				bitmapBlotter.expectedAssetCount = venueManager.venue.fancount + totalStructures;				
+				bitmapBlotter.expectedAssetCount = venueManager.numStaticCustomers + totalStructures;				
 			}
 			
 			private function showVenue():void
 			{
-				venueManager.addCustomersToVenue();
+				venueManager.addStaticCustomersToVenue();
+				venueManager.addMovingCustomersToVenue();
 			}
 			
 			private function showListeningStations():void

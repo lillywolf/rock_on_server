@@ -37,12 +37,19 @@ package rock_on
 			}
 		}
 		
-		public function add(cp:CustomerPerson):void
+		public function add(cp:CustomerPerson, isMoving:Boolean=false):void
 		{
 			if(_myWorld)
 			{			
 				cp.myWorld = _myWorld;
-				addToWorld(cp);
+				if (isMoving)
+				{
+					addToWorldAsMoving(cp);
+				}
+				else
+				{
+					addToWorld(cp);				
+				}
 				addEventListeners(cp);
 				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
 			}
@@ -64,12 +71,20 @@ package rock_on
 				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
 			}
 		}
+		
+		private function addToWorldAsMoving(cp:CustomerPerson):void
+		{
+			cp.venue = _venue;
+			var destination:Point3D = cp.pickPointNearStructure(_venue.boothsRect);
+			_myWorld.addAsset(cp, destination);
+			this.addItem(cp);			
+		}
 				
 		private function addToWorld(cp:CustomerPerson):void
 		{
 			cp.venue = _venue;
-			var destination:Point3D = cp.pickPointNearStructure(_concertStage, _venue.mainCrowdRect);
-//			_myWorld.addAsset(cp, destination);
+			cp.isBitmapped = true;
+			var destination:Point3D = cp.pickPointNearStructure(_venue.mainCrowdRect);
 			_myWorld.addStaticBitmap(cp, destination, "stand_still_away", 37);
 			this.addItem(cp);
 		}	

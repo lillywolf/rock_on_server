@@ -36,6 +36,7 @@ package rock_on
 		public var currentBooth:Booth;
 		public var currentBoothPosition:int;
 		public var activityTimer:Timer;
+		public var isBitmapped:Boolean;
 		public var _concertStage:ConcertStage;
 		public var _boothManager:BoothManager;
 		public var _venue:Venue;
@@ -226,7 +227,7 @@ package rock_on
 		{
 //			Condition this somehow
 
-			if (Math.random() < 0.0)
+			if (Math.random() < 0.2 && !isBitmapped)
 			{
 				enthralledTimer.stop();
 				enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
@@ -370,7 +371,7 @@ package rock_on
 		{
 			state = HEADTOSTAGE_STATE;
 			
-			var destination:Point3D = pickPointNearStructure(_concertStage, _venue.mainCrowdRect);
+			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
 			moveCustomer(destination);
 		}
 		
@@ -435,7 +436,7 @@ package rock_on
 			return ENTHRALLED_TIME;
 		}
 		
-		public function pickPointNearStructure(structure:*, bounds:Rectangle):Point3D
+		public function pickPointNearStructure(bounds:Rectangle):Point3D
 		{
 			var stagePoint:Point3D;
 			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
@@ -445,7 +446,7 @@ package rock_on
 				do 
 				{
 					var xDimension:int = Math.round(Math.random()*bounds.width);
-					var zDimension:int = _venue.boothsRect.bottom + Math.round(Math.random()*bounds.height);
+					var zDimension:int = bounds.top + Math.round(Math.random()*bounds.height);
 //					var xDimension:int = Math.round(Math.random()*_myWorld.tilesWide);
 //					var zDimension:int = Math.round(Math.random()*_myWorld.tilesDeep);
 					stagePoint = new Point3D(xDimension, 0, zDimension);				

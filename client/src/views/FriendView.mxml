@@ -264,7 +264,7 @@
 			
 			private function showVenue():void
 			{
-				venueManager.addCustomersToVenue();
+				venueManager.addStaticCustomersToVenue();
 			}			
 			
 			private function addStaticAsset(asset:ActiveAsset, addTo:Point3D):void

@@ -192,6 +192,7 @@ package rock_on
 		public function createBoothAsset(booth:Booth):ActiveAsset
 		{
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(booth.structure.mc);
+			mc.cacheAsBitmap = true;
 			var asset:ActiveAsset = new ActiveAsset(mc);			
 			asset.thinger = booth;	
 			return asset;		

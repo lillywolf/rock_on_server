@@ -77,7 +77,7 @@ package rock_on
 			venueRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, _myWorld.tilesDeep);
 			boothsRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, Math.round(_myWorld.tilesDeep * BOOTH_SECTION_FRACTION))
 			stageBufferRect = new Rectangle(0, (_myWorld.tilesDeep - _venueManager.concertStage.structure.depth - STAGE_BUFFER_SQUARES), _venueManager.concertStage.structure.width + STAGE_BUFFER_SQUARES, _venueManager.concertStage.structure.depth + STAGE_BUFFER_SQUARES);	
-			crowdBufferRect = new Rectangle(Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width), boothsRect.bottom, venueRect.right - (Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width)), stageBufferRect.top);
+			crowdBufferRect = new Rectangle(Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width), boothsRect.bottom, venueRect.right - (Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width)), venueRect.height - boothsRect.height);
 			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom));
 		}
 		
