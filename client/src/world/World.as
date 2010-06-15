@@ -8,6 +8,9 @@ package world
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
+	
+	import views.AssetBitmapData;
+	import views.WorldView;
 
 	public class World extends UIComponent
 	{
@@ -80,9 +83,7 @@ package world
 			activeAsset.y = 0;
 			activeAsset.x += addTo.x;
 			activeAsset.y += addTo.y;
-//			assetGenius.evaluateStandActivity(activeAsset, true, animation, frameNumber);
-			_bitmapBlotter.addBitmap(activeAsset, animation, frameNumber);
-			
+			_bitmapBlotter.addBitmap(activeAsset, animation, frameNumber);		
 		}
 		
 		public function getRectForStaticAsset(mc:MovieClip, realCoordX:int, realCoordY:int):Rectangle
@@ -102,7 +103,7 @@ package world
 			}
 			else if (bitmapBlotter.getMatchingBitmap(activeAsset) != null)
 			{
-				bitmapBlotter.removeBitmapFromBlotter(activeAsset);
+				bitmapBlotter.removeRenderedBitmap(activeAsset);
 			}
 		}
 		
@@ -279,16 +280,34 @@ package world
 					}
 				}
 			}
+			for each (var abd:AssetBitmapData in this.bitmapBlotter.bitmapReferences)
+			{
+				if (abd.activeAsset.thinger)
+				{
+					if (abd.activeAsset.thinger.id == thinger.id)
+					{
+						return abd.activeAsset;
+					}
+				}
+			}
 			return null;
 		}
 		
-		public function updateAssetCoords(asset:ActiveAsset, newCoords:Point3D):void
+		public function updateAssetCoords(asset:ActiveAsset, newCoords:Point3D, bitmapped:Boolean):void
 		{
 			asset.worldCoords.x = newCoords.x;
 			asset.worldCoords.y = newCoords.y;
 			asset.worldCoords.z = newCoords.z;
-			removeAsset(asset);
-			addAsset(asset, asset.worldCoords);
+			if (bitmapped)
+			{
+				this.removeAsset(asset);
+				this.addStaticBitmap(asset, asset.worldCoords);
+			}
+			else
+			{
+				removeAsset(asset);
+				addAsset(asset, asset.worldCoords);
+			}
 //			var evt:WorldEvent = new WorldEvent(WorldEvent.STRUCTURE_PLACED, asset, true, true);
 //			dispatchEvent(evt);			
 		}

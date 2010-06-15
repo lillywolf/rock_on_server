@@ -129,7 +129,7 @@ package rock_on
 			}
 		}
 		
-		public function reInitializeBooths():void
+		public function reInitializeBooths(bitmapped:Boolean):void
 		{
 			for each (var booth:Booth in booths)
 			{
@@ -137,6 +137,10 @@ package rock_on
 				booth.actualQueue = 0;
 				booth.proxiedQueue.removeAll();
 				booth.hasCustomerEnRoute = false;
+			}
+			if (bitmapped)
+			{
+				removeRenderedBooths();
 			}
 		}
 		
@@ -165,6 +169,14 @@ package rock_on
 			{
 				_myWorld.addStaticBitmap(asset, addTo);
 			}
+		}
+		
+		public function removeRenderedBooths():void
+		{
+			for each (var asset:ActiveAsset in boothAssets)
+			{
+				_myWorld.removeAsset(asset);
+			}			
 		}
 		
 		public function removeBooths():void

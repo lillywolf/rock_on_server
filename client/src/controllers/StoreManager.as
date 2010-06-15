@@ -10,6 +10,7 @@ package controllers
 	import models.User;
 	
 	import mx.collections.ArrayCollection;
+	import mx.containers.Canvas;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
@@ -110,7 +111,7 @@ package controllers
 		
 		public function buyThinger(sot:StoreOwnedThinger, storeUI:StoreUIComponent):void
 		{
-			FlexGlobals.topLevelApplication.removeChild(storeUI);
+			(storeUI.parent as Canvas).removeChild(storeUI);
 			
 			var model:String;
 			

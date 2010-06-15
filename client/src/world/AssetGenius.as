@@ -64,7 +64,7 @@ package world
 			{
 				if (!(isInAssetRenderer(abd.activeAsset)) && isInBitmapBlotter(abd.activeAsset))
 				{
-					_bitmapBlotter.removeBitmapFromBlotter(abd.activeAsset);
+					_bitmapBlotter.removeBitmapFromBlotter(abd);
 					_assetRenderer.unsortedAssets.addItem(abd.activeAsset);
 					abd.rendered = true;
 				}
@@ -297,7 +297,7 @@ package world
 		
 		public function removeAssetFromBlotter(asset:ActiveAsset):void
 		{
-			_bitmapBlotter.removeBitmapFromBlotter(asset);
+//			_bitmapBlotter.removeBitmapFromBlotter(asset);
 		}		
 		
 		public function isInAssetRenderer(asset:ActiveAsset):Boolean

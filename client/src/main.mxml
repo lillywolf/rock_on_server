@@ -8,6 +8,9 @@
 			<mx:AddChild position="after">
 				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" friendManager="{friendManager}" levelManager="{gdi.levelManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
 			</mx:AddChild>
+			<mx:AddChild position="after">
+				<views:UILayer id="uiLayer"/>
+			</mx:AddChild>
 		</mx:State>
 		<mx:State name="stageViewer" basedOn="worldView">
 			<mx:AddChild position="before" relativeTo="worldView">
@@ -26,7 +29,7 @@
 		</mx:State>
 		<mx:State name="editView" basedOn="topBar">
 			<mx:AddChild>
-				<views:EditView id="editView" myUser="{gdi.user}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" boothManager="{worldView.boothManager}" venueManager="{worldView.venueManager}" dwellingManager="{gdi.dwellingManager}"/>
+				<views:EditView id="editView" myUser="{gdi.user}" stageView="{stageView}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" boothManager="{worldView.boothManager}" venueManager="{worldView.venueManager}" dwellingManager="{gdi.dwellingManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="twoDimensional">
@@ -87,13 +90,13 @@
 				gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	
 				gdi.addEventListener(ServerDataEvent.UPDATE_COMPLETE, onUpdateComplete);
 				
-//				initializeFriendManager();
+				initializeFriendManager();
 				
 				gameMagicManager = new GameMagicManager(gdi.levelManager, gdi.userManager);
 
 //				Call when in non-Facebook test mode
 				
-				onFacebookUserLoaded(202357);
+//				onFacebookUserLoaded(202357);
 			}
 			private function initializeFriendManager():void
 			{
@@ -102,7 +105,7 @@
 			}	
 			private function onApplicationComplete():void
 			{
-//				initializeFacebookInterface();				
+				initializeFacebookInterface();				
 				currentState = "stageViewer";
 				gdi.storeManager.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
 			}
@@ -111,19 +114,19 @@
 				facebookInterface = new FacebookFunTime();
 				addEventListener("facebookDataLoaded", onFacebookDataLoaded);				
 			}
-//			public function onFacebookUserLoaded(uid:int, evt:FacebookEvent):void
-//			{
-//				gdi.getStaticGameContent();
-//				gdi.getUserContent(uid);
-//			}
-			
-// 			Only for non-Facebook version
-			
-			public function onFacebookUserLoaded(uid:int):void
+			public function onFacebookUserLoaded(uid:int, evt:FacebookEvent):void
 			{
 				gdi.getStaticGameContent();
 				gdi.getUserContent(uid);
 			}
+			
+// 			Only for non-Facebook version
+			
+//			public function onFacebookUserLoaded(uid:int):void
+//			{
+//				gdi.getStaticGameContent();
+//				gdi.getUserContent(uid);
+//			}
 			
 //			Only for non-Facebook version			
 			

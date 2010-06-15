@@ -226,7 +226,7 @@ package rock_on
 		{
 //			Condition this somehow
 
-			if (Math.random() < 0.05)
+			if (Math.random() < 0.0)
 			{
 				enthralledTimer.stop();
 				enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);

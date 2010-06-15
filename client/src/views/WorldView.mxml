@@ -83,9 +83,9 @@
 			public static const WINDOW_WIDTH:int = 1000;
 			public static const WINDOW_HEIGHT:int = 1000;
 			
-			public var worldWidth:int = 1200;
-			public var worldHeight:int = 1200;
-			public var tileSize:int = 40;
+			public static var worldWidth:int = 1200;
+			public static var worldHeight:int = 1200;
+			public static var tileSize:int = 40;
 			
 			public var stageView:StageView;
 			[Bindable] public var bitmapLayer:Bitmap;
@@ -171,7 +171,6 @@
 				isDragging = true;
 				mouseIncrementX = mouseX.valueOf();
 				mouseIncrementY = mouseY.valueOf();
-//				startDrag();
 				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			}
 			
@@ -179,10 +178,13 @@
 			{
 				for each (var abd:AssetBitmapData in this.bitmapBlotter.bitmapReferences)
 				{
-					var hitRect:Rectangle = new Rectangle(abd.bitmap.x, abd.bitmap.y, abd.mc.width, abd.mc.height);
-					if (hitRect.contains(backgroundCanvas.mouseX, backgroundCanvas.mouseY))
+					if (abd.bitmap)
 					{
-						this.bottomBar.replaceCreature((abd.activeAsset as AssetStack).creature);
+						var hitRect:Rectangle = new Rectangle(abd.bitmap.x, abd.bitmap.y, abd.mc.width, abd.mc.height);
+						if (hitRect.contains(backgroundCanvas.mouseX, backgroundCanvas.mouseY))
+						{
+							this.bottomBar.replaceCreature((abd.activeAsset as AssetStack).creature);
+						}
 					}
 				}			
 			}			
@@ -197,7 +199,6 @@
 			
 			private function onMouseUp(evt:MouseEvent):void
 			{
-//				stopDrag();
 				isDragging = false;
 			}
 			
@@ -283,7 +284,15 @@
 			
 			private function getNumberOfBitmaps():void
 			{
-				bitmapBlotter.expectedAssetCount = venueManager.venue.fancount + structureManager.owned_structures.length - 1;				
+				var totalStructures:int = 0;
+				for each (var os:OwnedStructure in structureManager.owned_structures)
+				{
+					if (os.structure.structure_type == "Booth")
+					{
+						totalStructures++;
+					}
+				}
+				bitmapBlotter.expectedAssetCount = venueManager.venue.fancount + totalStructures;				
 			}
 			
 			private function showVenue():void
@@ -310,20 +319,30 @@
 				myMemory = System.totalMemory;
 				lastTime = time;
 				
-				if (isDragging)
-				{
-					dragStage();
-				}
+				checkDrag();
+				checkCustomerPersonManager(lockedDelta);
 				
-				if (customerPersonManager)
-				{
-					customerPersonManager.update(lockedDelta);				
-				}
 				
 //				if (bandManager)
 //				{	
 //					bandManager.update(lockedDelta);
 //				}
+			}
+			
+			public function checkCustomerPersonManager(lockedDelta:Number):void
+			{
+				if (customerPersonManager)
+				{
+					customerPersonManager.update(lockedDelta);				
+				}				
+			}
+			
+			public function checkDrag():void
+			{
+				if (isDragging)
+				{
+					dragStage();
+				}				
 			}
 			
 			public function onUserLoaded():void
@@ -381,7 +400,7 @@
 			
 			public function boothPlaced():void
 			{
-				boothManager.reInitializeBooths();
+				boothManager.reInitializeBooths(true);
 			}
 			
 			public function showGroupies():void
@@ -409,7 +428,7 @@
 				}
 				if (method == "save_placement")
 				{
-					myWorld.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z));
+					myWorld.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z), true);
 					reInitializeStructures(os);					
 				}
 				if (method == "create_new")
@@ -426,8 +445,9 @@
 			{				
 				if (os.structure.structure_type == "Booth")
 				{
-					boothManager.reInitializeBooths();
+					boothManager.reInitializeBooths(true);
 					customerPersonManager.redrawAllCustomers();
+					this.bitmapBlotter.renderReplacedBitmaps();
 				}
 				else if (os.structure.structure_type == "ListeningStation")
 				{

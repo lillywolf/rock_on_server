@@ -7,88 +7,23 @@ package views
 	
 	public class DraggableCanvas extends Canvas
 	{
-		private var orgX:Number;
-		private var orgY:Number;
-		private var orgHScrollPosition:Number;
-		private var orgVScrollPosition:Number;
-		private var _childrenDoDrag:Boolean = true;
-
+		public var isDragging:Boolean;
+		public var mouseIncrementX:Number;
+		public var mouseIncrementY:Number;
+		
 		public function DraggableCanvas()
 		{
 			super();
+			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);				
 		}
 		
-		public function get childrenDoDrag():Boolean 
+		private function onMouseDown(evt:MouseEvent):void
 		{
-			return _childrenDoDrag;
-		}
+			isDragging = true;
+			mouseIncrementX = mouseX.valueOf();
+			mouseIncrementY = mouseY.valueOf();
+			addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+		}	
 		
-		public function set childrenDoDrag(val:Boolean):void 
-		{
-			_childrenDoDrag = val;
-		}
-		
-		override protected function createChildren():void 
-		{
-			super.createChildren();
-			addEventListener(MouseEvent.MOUSE_DOWN, startDragging);
-		}
-		
-		protected function startDragging(evt:MouseEvent):void
-		{		
-			if (evt.target.parent == verticalScrollBar || evt.target.parent == horizontalScrollBar) 
-			{
-				return;
-			}
-			
-			if (_childrenDoDrag || evt.target == this) 
-			{
-//				orgX = evt.stageX;
-//				orgY = evt.stageY;
-//				
-//				orgHScrollPosition = this.horizontalScrollPosition;
-//				orgVScrollPosition = this.verticalScrollPosition;
-				
-				addEventListener(MouseEvent.MOUSE_DOWN, onMouseMove, true);
-				
-				addEventListener(MouseEvent.MOUSE_UP, onMouseUp, true);
-				
-				stage.addEventListener(Event.MOUSE_LEAVE, onMouseLeave);
-			}
-		}
-		
-		private function onMouseMove(evt:MouseEvent):void
-		{	
-			evt.stopImmediatePropagation();
-			
-//			verticalScrollPosition = orgVScrollPosition - (evt.stageY - orgY);
-//			horizontalScrollPosition = orgHScrollPosition - (evt.stageX - orgX);
-			this.y = mouseY;
-			this.x = mouseX;
-		}
-		
-		private function onMouseUp(evt:MouseEvent):void
-		{
-			if (!isNaN(orgX))
-				stopDragging();
-		}
-		
-		private function onMouseLeave(evt:Event):void
-		{
-			if (!isNaN(orgX))
-				stopDragging();
-		}
-		
-		protected function stopDragging():void
-		{
-			removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, true);
-			
-			removeEventListener(MouseEvent.MOUSE_UP, onMouseUp, true);
-			
-			stage.removeEventListener(Event.MOUSE_LEAVE, onMouseLeave);
-			
-			orgX = NaN;
-			orgY = NaN;
-		}
 	}
 }

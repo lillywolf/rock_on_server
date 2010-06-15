@@ -214,9 +214,33 @@ package world
 		
 		public function establishPeopleOccupiedSpaces():ArrayCollection
 		{
-			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
-			for each (var asset:ActiveAsset in _world.assetRenderer.unsortedAssets)
+			var peopleOccupiedSpaces:ArrayCollection = getPeopleOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets);
+			if (_world.bitmapBlotter)
 			{
+				peopleOccupiedSpaces.addAll(getPeopleOccupiedSpacesForBitmap(_world.bitmapBlotter.bitmapReferences));			
+			}
+			return peopleOccupiedSpaces;
+		}
+		
+		public function getPeopleOccupiedSpacesForArray(sourceArray:ArrayCollection):ArrayCollection
+		{
+			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
+			for each (var asset:ActiveAsset in sourceArray)
+			{
+				if (asset is Person)
+				{
+					peopleOccupiedSpaces.addItem(getPoint3DForPerson(asset));
+				}
+			}
+			return peopleOccupiedSpaces;
+		}
+		
+		public function getPeopleOccupiedSpacesForBitmap(sourceArray:ArrayCollection):ArrayCollection
+		{
+			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
+			for each (var abd:AssetBitmapData in sourceArray)
+			{
+				var asset:ActiveAsset = abd.activeAsset;
 				if (asset is Person)
 				{
 					peopleOccupiedSpaces.addItem(getPoint3DForPerson(asset));
@@ -262,7 +286,10 @@ package world
 		public function establishStructureOccupiedSpaces(exemptStructures:ArrayCollection=null):ArrayCollection
 		{
 			var structureOccupiedSpaces:ArrayCollection = getStructureOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets, exemptStructures);
-			structureOccupiedSpaces.addAll(getStructureOccupiedSpacesForBitmap(_world.bitmapBlotter.bitmapReferences, exemptStructures));
+			if (_world.bitmapBlotter)
+			{
+				structureOccupiedSpaces.addAll(getStructureOccupiedSpacesForBitmap(_world.bitmapBlotter.bitmapReferences, exemptStructures));			
+			}
 			return structureOccupiedSpaces;
 		}
 		
