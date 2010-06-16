@@ -54,7 +54,7 @@ package rock_on
 		
 		public function setInMotion():void
 		{
-			passerbyManager = new PasserbyManager(this, _myWorld, creatureGenerator);
+			passerbyManager = new PasserbyManager(this, _myWorld, creatureGenerator, _venue);
 			showListeningStations();
 			showPassersby();			
 		}

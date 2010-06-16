@@ -45,6 +45,8 @@ package rock_on
 		public static const CROWD_BUFFER_FRACTION:Number = 0.3;
 		
 		public var state:int;
+		public var assignedSeats:ArrayCollection;
+		public var numAssignedSeats:int;
 		public var startShowButton:Button;
 		public var mainEntrance:Point3D;
 		public var entryPoints:ArrayCollection;
@@ -55,6 +57,7 @@ package rock_on
 		public var boothsRect:Rectangle;
 		public var crowdBufferRect:Rectangle;
 		public var stageBufferRect:Rectangle;
+		public var audienceRect:Rectangle;
 		
 		public var _myWorld:World;
 		
@@ -79,6 +82,9 @@ package rock_on
 			stageBufferRect = new Rectangle(0, (_myWorld.tilesDeep - _venueManager.concertStage.structure.depth - STAGE_BUFFER_SQUARES), _venueManager.concertStage.structure.width + STAGE_BUFFER_SQUARES, _venueManager.concertStage.structure.depth + STAGE_BUFFER_SQUARES);	
 			crowdBufferRect = new Rectangle(Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width), boothsRect.bottom, venueRect.right - (Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width)), venueRect.height - boothsRect.height);
 			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom));
+			audienceRect = new Rectangle(0, boothsRect.bottom, venueRect.width, venueRect.height - boothsRect.height);
+			
+			assignedSeats = _myWorld.pathFinder.createSeatingArrangement(audienceRect, stageBufferRect, this.dwelling.capacity);
 		}
 		
 		public function setAdditionalProperties(params:Object):void

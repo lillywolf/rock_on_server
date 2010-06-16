@@ -74,17 +74,25 @@ package views
 		
 		public function addStaticCustomersToVenue():void
 		{
+			if (!_customerPersonManager.concertStage)
+			{
+				_customerPersonManager.concertStage = _concertStage;
+			}
 			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
 				var cp:CustomerPerson = _creatureGenerator.createCustomer("Concert Goer", "walk_toward", _concertStage, _boothManager);
 				cp.speed = 0.06;
-				_customerPersonManager.add(cp);
+				_customerPersonManager.add(cp, false, i);
 				concertGoers.addItem(cp);
 			}
 		}
 		
 		public function addMovingCustomersToVenue():void
 		{
+			if (!_customerPersonManager.concertStage)
+			{
+				_customerPersonManager.concertStage = _concertStage;
+			}
 			for (var i:int = 0; i < numMovingCustomers; i++)
 			{
 				var cp:CustomerPerson = _creatureGenerator.createCustomer("Concert Goer", "walk_toward", _concertStage, _boothManager);

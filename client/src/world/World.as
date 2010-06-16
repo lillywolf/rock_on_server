@@ -71,7 +71,7 @@ package world
 			assetRenderer.unsortedAssets.addItem(activeAsset);
 		}
 		
-		public function addStaticBitmap(activeAsset:ActiveAsset, worldCoords:Point3D, animation:String=null, frameNumber:int=0):void
+		public function addStaticBitmap(activeAsset:ActiveAsset, worldCoords:Point3D, animation:String=null, frameNumber:int=0, reflection:Boolean=false):void
 		{
 			activeAsset.world = this;
 			activeAsset.worldCoords = worldCoords;
@@ -83,7 +83,7 @@ package world
 			activeAsset.y = 0;
 			activeAsset.x += addTo.x;
 			activeAsset.y += addTo.y;
-			_bitmapBlotter.addBitmap(activeAsset, animation, frameNumber);		
+			_bitmapBlotter.addBitmap(activeAsset, animation, frameNumber, reflection);		
 		}
 		
 		public function getRectForStaticAsset(mc:MovieClip, realCoordX:int, realCoordY:int):Rectangle
@@ -92,7 +92,16 @@ package world
 			mc.x = realCoordX;
 			var rect:Rectangle = mc.getBounds(this.assetRenderer);
 			return rect;
-		}		
+		}	
+		
+		public function removeAssetFromWorld(asset:ActiveAsset):void
+		{
+			if (assetRenderer.unsortedAssets.contains(asset))
+			{
+				var index:int = assetRenderer.unsortedAssets.getItemIndex(asset);
+				assetRenderer.unsortedAssets.removeItemAt(index);
+			}			
+		}
 		
 		public function removeAsset(activeAsset:ActiveAsset):void
 		{

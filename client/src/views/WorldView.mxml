@@ -279,7 +279,7 @@
 				boothManager.venue = venueManager.venue;
 				listeningStationManager.venue = venueManager.venue;
 				customerPersonManager.venue = venueManager.venue;
-				bandManager.venue = venueManager.venue;				
+				bandManager.venue = venueManager.venue;	
 			}
 			
 			private function getNumberOfBitmaps():void

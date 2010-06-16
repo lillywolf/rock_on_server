@@ -64,11 +64,11 @@ package rock_on
 			var verticalRelationship:String;
 			
 			var cornerMatrix:Dictionary = structure.getCornerMatrix();
-			if (worldCoords.x < (cornerMatrix["bottomLeft"] as Point3D).x)
+			if (worldCoords.x < (cornerMatrix["topLeft"] as Point3D).x)
 			{
 				verticalRelationship = "bottom";
 			}
-			else if (worldCoords.x > (cornerMatrix["topLeft"] as Point3D).x)
+			else if (worldCoords.x > (cornerMatrix["bottomLeft"] as Point3D).x)
 			{
 				verticalRelationship = "top";
 			}
@@ -101,8 +101,22 @@ package rock_on
 				animationType = "stand_still_toward";
 			}
 			
+			var reflection:Boolean = false;
+
+			if (horizontalRelationship == "center" && verticalRelationship == "top")
+			{
+				reflection = true;
+			}
+			else if (horizontalRelationship != "center" && verticalRelationship == "top")
+			{
+				if (Math.random() < 0.5)
+				{
+					reflection = true;
+				}
+			}
+			
 			stand(frameNumber, animationType);
-			return {frameNumber: frameNumber, animation: animationType};
+			return {frameNumber: frameNumber, animation: animationType, reflection: reflection};
 		}
 		
 		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void

@@ -10,6 +10,8 @@ package rock_on
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
 	
+	import views.AssetBitmapData;
+	
 	import world.Point3D;
 	import world.WorldEvent;
 
@@ -22,6 +24,7 @@ package rock_on
 		public static const GONE_STATE:int = 5;
 		public static const HEADTOSTAGE_STATE:int = 6;
 		public static const HEADTODOOR_STATE:int = 7;
+		public static const BITMAPPED_ENTHRALLED_STATE:int = 8;
 		
 		public static const ENTHRALLED_TIME:int = 50000 * Math.random();
 		public static const QUEUED_TIME:int = 4000;
@@ -79,7 +82,10 @@ package rock_on
 					break;
 				case ENTHRALLED_STATE:
 					doEnthralledState(deltaTime);
-					break;					
+					break;	
+				case BITMAPPED_ENTHRALLED_STATE:
+					doBitmappedEnthralledState(deltaTime);
+					break;
 				case QUEUED_STATE:
 					doQueuedState(deltaTime);
 					break;
@@ -110,6 +116,9 @@ package rock_on
 				case ENTHRALLED_STATE:
 					endEnthralledState();				
 					break;	
+				case BITMAPPED_ENTHRALLED_STATE:
+					endBitmappedEnthralledState();
+					break;
 				case ROUTE_STATE:
 					endRouteState();
 					break;	
@@ -133,6 +142,9 @@ package rock_on
 					break;
 				case ENTHRALLED_STATE:
 					startEnthralledState();
+					break;
+				case BITMAPPED_ENTHRALLED_STATE:
+					startBitmappedEnthralledState();
 					break;
 				case QUEUED_STATE:
 					startQueuedState();
@@ -174,6 +186,16 @@ package rock_on
 			advanceState(HEADTODOOR_STATE);
 		}
 		
+		public function endBitmappedEnthralledState():void
+		{
+			
+		}
+		
+		public function doBitmappedEnthralledState(deltaTime:Number):void
+		{
+			
+		}
+		
 		public function startHeadToDoorState():void
 		{
 			state = HEADTODOOR_STATE;
@@ -207,12 +229,21 @@ package rock_on
 			
 			var frameNumber:int = 1;
 			var obj:Object = standFacingObject(_concertStage, frameNumber);
-//			_myWorld.assetGenius.evaluateStandActivity(this, true, obj.animation, obj.frameNumber);
 			
 			enthralledTimer = new Timer(CustomerPerson.ENTHRALLED_TIME);
 			enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
 			enthralledTimer.start();
 			numEnthralledTimers++;
+		}
+		
+		public function startBitmappedEnthralledState():void
+		{
+			state = BITMAPPED_ENTHRALLED_STATE;
+			
+			var frameNumber:int = 1;
+			var obj:Object = standFacingObject(_concertStage, frameNumber);
+			_world.removeAssetFromWorld(this);
+			_world.addStaticBitmap(this, this.worldCoords, obj.animation, obj.frameNumber, obj.reflection);
 		}
 		
 //		public function evaluateBitmapSwitch():void
@@ -371,7 +402,9 @@ package rock_on
 		{
 			state = HEADTOSTAGE_STATE;
 			
-			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
+//			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
+			var destination:Point3D = _venue.assignedSeats[_venue.numAssignedSeats];
+			_venue.numAssignedSeats++;
 			moveCustomer(destination);
 		}
 		

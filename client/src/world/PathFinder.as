@@ -1,5 +1,7 @@
 package world
 {
+	import flash.geom.Rectangle;
+	
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
@@ -154,6 +156,65 @@ package world
 				}
 			}
 			return false;
+		}
+		
+		public function createSeatingArrangement(bounds:Rectangle, stageBounds:Rectangle, totalSeats:int):ArrayCollection
+		{
+			var seats:ArrayCollection = new ArrayCollection();
+			var totalPoints:int = bounds.height * bounds.width;
+			if (totalSeats < totalPoints)
+			{
+				var dimension:int = stageBounds.top - bounds.top;
+				var seatsPerRow:int = Math.ceil(totalSeats / dimension);
+				for (var i:int = 0; i < dimension; i++)
+				{
+					var rowSeats:ArrayCollection = new ArrayCollection();
+					for (var j:int = 0; j < seatsPerRow; j++)
+					{
+						var seatX:int;
+						var seatY:int;
+						do
+						{
+							if (Math.random() < 0.5)
+							{
+								seatX = stageBounds.top - i;
+								seatY = bounds.bottom - Math.round(Math.random() * (stageBounds.height + i));
+							}
+							else
+							{
+								seatY = stageBounds.top - i;
+								seatX = bounds.left + Math.round(Math.random() * (stageBounds.width + i));
+							}	
+							var reference:Point3D = this.pathGrid[seatX][0][seatY];
+						}
+						while (rowSeats.contains(reference));
+								
+						rowSeats.addItem(reference);
+						seats.addItem(reference);
+					}
+//					seats.addItem(rowSeats);
+				}
+			}
+			else
+			{
+				throw new Error("Exceeds max capacity");
+			}
+			return seats;		
+		}
+		
+		public function getOuterPoints(selectedPoint:Point3D, bounds:Rectangle):int
+		{
+			var outsidePoints:int = 0;
+			outsidePoints = ((bounds.right - selectedPoint.x) * bounds.height) + ((selectedPoint.z - bounds.top) * bounds.width);
+			if (Math.abs(bounds.right - selectedPoint.x) > Math.abs(bounds.top - selectedPoint.z))
+			{
+				outsidePoints += bounds.right - selectedPoint.x;
+			}
+			else if (Math.abs(bounds.right - selectedPoint.x) < Math.abs(bounds.top - selectedPoint.z))
+			{
+				outsidePoints += bounds.top - selectedPoint.z;
+			}
+			return outsidePoints;
 		}
 		
 		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutStructureOccupiedSpaces:Boolean=true, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null):ArrayCollection

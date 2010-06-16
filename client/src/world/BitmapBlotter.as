@@ -54,7 +54,7 @@ package world
 			}
 		}
 		
-		public function addBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int = 0):void
+		public function addBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int = 0, reflect:Boolean=false):void
 		{
 			var abd:AssetBitmapData = this.getMatchFromBitmapReferences(asset);
 			if (abd)
@@ -63,7 +63,7 @@ package world
 			}
 			else
 			{
-				abd = createNewAssetBitmapData(asset, animation, frameNumber);
+				abd = createNewAssetBitmapData(asset, animation, frameNumber, reflect);
 				bitmapReferences.addItem(abd);
 			}
 		}
@@ -90,11 +90,12 @@ package world
 			abd.realCoordY = asset.realCoords.y;
 		}
 		
-		public function createNewAssetBitmapData(asset:ActiveAsset, animation:String=null, frameNumber:int=0):AssetBitmapData
+		public function createNewAssetBitmapData(asset:ActiveAsset, animation:String=null, frameNumber:int=0, reflect:Boolean=false):AssetBitmapData
 		{
 			var abd:AssetBitmapData = new AssetBitmapData();
 			var newMc:MovieClip = getNewMovieClip(asset, animation, frameNumber);
 			abd.mc = newMc;
+			abd.reflected = reflect;
 			abd.activeAsset = asset;
 			abd.realCoordX = asset.realCoords.x;
 			abd.realCoordY = asset.realCoords.y;	
@@ -420,7 +421,14 @@ package world
 			abd.mc.scaleY = 0.4;
 			var rect:Rectangle = new Rectangle(0, 0, abd.mc.width + WIDTH_BUFFER, abd.mc.height + FOOT_CONSTANT);
 			var matrix:Matrix = new Matrix();
-			matrix.scale(0.4, 0.4);
+			if (abd.reflected)
+			{
+				matrix.scale(-0.4, 0.4);
+			}
+			else
+			{
+				matrix.scale(0.4, 0.4);			
+			}
 			matrix.tx = abd.mc.width/2 + WIDTH_BUFFER/2;
 			var pb:PeachBody = new PeachBody();
 			var pbHeight:int = pb.height;

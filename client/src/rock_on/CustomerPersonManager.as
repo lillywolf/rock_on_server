@@ -37,7 +37,7 @@ package rock_on
 			}
 		}
 		
-		public function add(cp:CustomerPerson, isMoving:Boolean=false):void
+		public function add(cp:CustomerPerson, isMoving:Boolean=false, seatNumber:int=-1):void
 		{
 			if(_myWorld)
 			{			
@@ -48,7 +48,7 @@ package rock_on
 				}
 				else
 				{
-					addToWorld(cp);				
+					addToWorld(cp, seatNumber);				
 				}
 				addEventListeners(cp);
 				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
@@ -80,12 +80,23 @@ package rock_on
 			this.addItem(cp);			
 		}
 				
-		private function addToWorld(cp:CustomerPerson):void
+		private function addToWorld(cp:CustomerPerson, seatNumber:int = -1):void
 		{
 			cp.venue = _venue;
 			cp.isBitmapped = true;
-			var destination:Point3D = cp.pickPointNearStructure(_venue.mainCrowdRect);
-			_myWorld.addStaticBitmap(cp, destination, "stand_still_away", 37);
+			var destination:Point3D;
+			if (seatNumber != -1)
+			{
+				destination = _venue.assignedSeats[seatNumber];
+				_venue.numAssignedSeats++;
+			}
+			else
+			{
+				destination = cp.pickPointNearStructure(_venue.mainCrowdRect);			
+			}
+			cp.worldCoords = destination;
+			var standAnimation:Object = cp.standFacingObject(_concertStage, 0, true);
+			_myWorld.addStaticBitmap(cp, destination, standAnimation.animation, standAnimation.frameNumber, standAnimation.reflection);
 			this.addItem(cp);
 		}	
 		
@@ -204,7 +215,8 @@ package rock_on
 				}
 				else if (cp.state == CustomerPerson.HEADTOSTAGE_STATE)
 				{
-					cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
+//					cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
+					cp.advanceState(CustomerPerson.BITMAPPED_ENTHRALLED_STATE);
 				}
 				else if (cp.state == CustomerPerson.ENTHRALLED_STATE)
 				{

@@ -13,6 +13,7 @@ package views
 		public var _mc:MovieClip;
 		public var _bitmap:Bitmap;
 		public var _reference:Object;
+		public var reflected:Boolean;
 		public var realCoordX:int;
 		public var realCoordY:int;
 		public var moving:Boolean;

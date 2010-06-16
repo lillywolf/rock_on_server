@@ -25,9 +25,9 @@ package rock_on
 		public var enthralledTimer:Timer;
 		public var isStatic:Boolean;
 				
-		public function StationListener(movieClipStack:MovieClip, listeningStationManager:ListeningStationManager, passerbyManager:PasserbyManager, myWorld:World, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public function StationListener(movieClipStack:MovieClip, listeningStationManager:ListeningStationManager, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
 		{
-			super(movieClipStack, listeningStationManager, passerbyManager, myWorld, layerableOrder, creature, personScale, source);
+			super(movieClipStack, listeningStationManager, passerbyManager, myWorld, venue, layerableOrder, creature, personScale, source);
 		}	
 		
 		override public function startRouteState():void
@@ -180,11 +180,11 @@ package rock_on
 			var leaveDestination:Point3D;
 			if (Math.random() < 0.5)
 			{
-				leaveDestination = new Point3D(Math.round(PasserbyManager.VENUE_BOUND_X + Math.random()*(_myWorld.tilesWide - PasserbyManager.VENUE_BOUND_X)), 0, 0);
+				leaveDestination = new Point3D(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right)), 0, 0);
 			}
 			else
 			{
-				leaveDestination = new Point3D(Math.round(PasserbyManager.VENUE_BOUND_X + Math.random()*(_myWorld.tilesWide - PasserbyManager.VENUE_BOUND_X)), 0, _myWorld.tilesDeep);
+				leaveDestination = new Point3D(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right)), 0, _myWorld.tilesDeep);
 			}
 			return leaveDestination;
 		}
