@@ -534,12 +534,12 @@ package world
 			var osPt3D:Point3D;
 			if (asset.worldDestination)
 			{
-				osPt3D = pathGrid[asset.worldDestination.x][0][asset.worldDestination.z];
+				osPt3D = pathGrid[asset.worldDestination.x][asset.worldDestination.y][asset.worldDestination.z];
 				return osPt3D;
 			}
 			else if (asset.worldCoords)
 			{
-				osPt3D = pathGrid[asset.worldCoords.x][0][asset.worldCoords.z];
+				osPt3D = pathGrid[asset.worldCoords.x][asset.worldCoords.y][asset.worldCoords.z];
 				return osPt3D;
 			}
 			return null;
