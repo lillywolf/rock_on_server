@@ -5,6 +5,7 @@ package views
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.ColorTransform;
+	import flash.geom.Point;
 	
 	import game.ImposterOwnedStructure;
 	
@@ -12,6 +13,7 @@ package views
 	import models.Structure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.controls.Button;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
@@ -21,7 +23,6 @@ package views
 	import stores.StoreEvent;
 	
 	import world.ActiveAsset;
-	import world.Point;
 	import world.Point3D;
 	import world.World;
 
@@ -105,7 +106,7 @@ package views
 			if (thinger is OwnedStructure)
 			{
 				asset = _structureManager.generateAssetFromOwnedStructure(thinger as OwnedStructure);
-				var currentPoint:Point = new Point(_myWorld.mouseX, _myWorld.mouseY);
+				var currentPoint:flash.geom.Point = new Point(_myWorld.mouseX, _myWorld.mouseY);
 				_myWorld.addStaticAsset(asset, World.actualToWorldCoords(currentPoint));
 				return asset;
 			}
@@ -117,31 +118,71 @@ package views
 			_myWorld.assetRenderer.removeOwnedThinger(evt.thinger);
 		}
 		
-		public function evaluateClickedAsset(asset:Object):void
+//		public function evaluateClickedAsset(asset:Object):void
+//		{			
+//			if (asset is ActiveAsset)
+//			{
+//				var assetParent:ActiveAsset = asset as ActiveAsset;
+//				if (!locked && (assetParent.thinger as OwnedStructure).editing == false)
+//				{
+//					resetEditMode();			
+//					activateMoveableStructure(assetParent);
+//					locked = true;
+//					(assetParent.thinger as OwnedStructure).editing = true;
+//				}
+//				else if (locked && (isFurnitureOutOfBounds() || isFurnitureOnInvalidPoint()))
+//				{
+//					locked = false;
+//					this.deactivateStructureWithoutSaving();
+//				}
+//				else if (locked)
+//				{
+//					deactivateMoveableStructure();
+//					locked = false;
+//					(assetParent.thinger as OwnedStructure).editing = false;
+//					if (assetParent.thinger is ImposterOwnedStructure)
+//					{
+//						saveNewOwnedStructure(assetParent.thinger as OwnedStructure, assetParent);
+//					}
+//				}
+//			}			
+//		}
+//		
+//		public function resetEditMode():void
+//		{
+//			if (locked)
+//			{
+//				removeListenersFromWorld();
+//				resetAssetColor();
+//				updateCurrentAssetCoordinates();
+//				updateCurrentAssetMode(false);
+//				removeAllOwnedStructureEditOptions();
+//			}
+//		}
+
+		public function evaluateClickedAsset(clickedParent:Object, clickedObject:Object):void
 		{			
-			if (asset is ActiveAsset)
+			var assetParent:ActiveAsset = clickedParent as ActiveAsset;
+			if (!locked && clickedParent is ActiveAsset && (assetParent.thinger as OwnedStructure).editing == false)
 			{
-				var assetParent:ActiveAsset = asset as ActiveAsset;
-				if (assetParent.thinger is OwnedStructure && (assetParent.thinger as OwnedStructure).editing == false)
+				resetEditMode();			
+				activateMoveableStructure(assetParent);
+//				locked = true;
+				(assetParent.thinger as OwnedStructure).editing = true;
+			}
+			else if (locked && (isFurnitureOutOfBounds() || isFurnitureOnInvalidPoint()) && !(clickedObject is Button))
+			{
+				locked = false;
+				this.deactivateStructureWithoutSaving();
+			}
+			else if (locked && !(clickedObject is Button))
+			{
+				deactivateMoveableStructure();
+				locked = false;
+				(currentAsset.thinger as OwnedStructure).editing = false;
+				if (currentAsset.thinger is ImposterOwnedStructure)
 				{
-					resetEditMode();			
-					activateMoveableStructure(assetParent);
-					locked = true;
-					(assetParent.thinger as OwnedStructure).editing = true;
-				}
-				else if (assetParent.thinger is OwnedStructure && (isFurnitureOutOfBounds() || isFurnitureOnInvalidPoint()))
-				{
-					this.deactivateStructureWithoutSaving();
-				}
-				else if (assetParent.thinger is OwnedStructure)
-				{
-					deactivateMoveableStructure();
-					locked = false;
-					(assetParent.thinger as OwnedStructure).editing = false;
-					if (assetParent.thinger is ImposterOwnedStructure)
-					{
-						saveNewOwnedStructure(assetParent.thinger as OwnedStructure, assetParent);
-					}
+					saveNewOwnedStructure(currentAsset.thinger as OwnedStructure, currentAsset);
 				}
 			}			
 		}
@@ -213,7 +254,7 @@ package views
 		
 		public function onWorldClicked(evt:MouseEvent):void
 		{
-			evaluateClickedAsset(evt.target.parent);
+			evaluateClickedAsset(evt.target.parent, evt.target);
 		}		
 		
 		public function showOwnedStructureEditOptions():void
@@ -237,6 +278,7 @@ package views
 		
 		public function moveButtonClicked():void
 		{
+			locked = true;
 			_editView.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 //			_myWorld.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			currentAsset.speed = 1;			
@@ -279,15 +321,50 @@ package views
 			dispatchEvent(evt);
 		}
 		
+		private function getHeightBase(asset:ActiveAsset):int
+		{
+			var heightBase:int = 0;
+			if ((currentAsset.thinger as OwnedStructure).structure.structure_type == "StageDecoration")
+			{
+				heightBase = _editView.concertStage.structure.height;
+			}
+			return heightBase;
+		}
+		
+		private function inStageArea(asset:ActiveAsset):Boolean
+		{
+			if (asset.worldCoords.x > _editView.venueManager.venue.stageRect.left &&
+				asset.worldCoords.x < _editView.venueManager.venue.stageRect.right &&
+				asset.worldCoords.z > _editView.venueManager.venue.stageRect.top &&
+				asset.worldCoords.z < _editView.venueManager.venue.stageRect.bottom)
+			{
+				return true;
+			}
+			return false;
+		}
+		
 		private function onMouseMove(evt:Event):void
 		{
 			var currentPoint:Point = new Point(_myWorld.mouseX, _myWorld.mouseY);
-			var worldDestination:Point3D = World.actualToWorldCoords(currentPoint);
+			var heightBase:int = getHeightBase(currentAsset);
+			var worldDestination:Point3D = World.actualToWorldCoords(currentPoint, heightBase);
 			worldDestination.x = Math.round(worldDestination.x);
 			worldDestination.z = Math.round(worldDestination.z);
 			
 //			worldDestination = keepPointInBounds(worldDestination);
-			_myWorld.moveAssetTo(currentAsset, worldDestination, false);
+			
+			if (inStageArea(currentAsset))
+			{
+				var exemptStructures:ArrayCollection = new ArrayCollection();
+				exemptStructures.addItem(_editView.concertStage);
+				currentAsset.worldCoords.y = _editView.concertStage.structure.height;
+				worldDestination.y = _editView.concertStage.structure.height;
+				_myWorld.moveAssetTo(currentAsset, worldDestination, false, true, false, exemptStructures);
+			}
+			else
+			{
+				_myWorld.moveAssetTo(currentAsset, worldDestination, false);			
+			}
 			
 			if (isFurnitureOutOfBounds() || isFurnitureOnInvalidPoint())
 			{
@@ -328,6 +405,16 @@ package views
 					currentAsset.worldCoords.x - os.structure.width / 2 < 0 ||
 					currentAsset.worldCoords.z + os.structure.depth / 2 > _myWorld.tilesDeep ||
 					currentAsset.worldCoords.z - os.structure.depth / 2 < 0)
+				{
+					return true;
+				}				
+			}
+			else if (os.structure.structure_type == "StageDecoration")
+			{
+				if (currentAsset.worldCoords.x + os.structure.width / 2 > _editView.venueManager.venue.stageRect.right || 
+					currentAsset.worldCoords.x - os.structure.width / 2 < _editView.venueManager.venue.stageRect.left ||
+					currentAsset.worldCoords.z + os.structure.depth / 2 > _editView.venueManager.venue.stageRect.bottom ||
+					currentAsset.worldCoords.z - os.structure.depth / 2 < _editView.venueManager.venue.stageRect.top)
 				{
 					return true;
 				}				

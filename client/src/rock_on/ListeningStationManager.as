@@ -7,6 +7,7 @@ package rock_on
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
 	
 	import game.GameClock;
 	
@@ -21,7 +22,6 @@ package rock_on
 	import views.VenueManager;
 	
 	import world.ActiveAsset;
-	import world.Point;
 	import world.Point3D;
 	import world.World;
 
@@ -93,7 +93,7 @@ package rock_on
 			var btn:SpecialButton = new SpecialButton();
 			btn.station = station;
 			btn.addEventListener(MouseEvent.CLICK, onFanButtonClicked);
-			var actualCoords:Point = World.worldToActualCoords(new Point3D(station.x, station.y, station.z));
+			var actualCoords:flash.geom.Point = World.worldToActualCoords(new Point3D(station.x, station.y, station.z));
 			btn.x = actualCoords.x + _myWorld.x;
 			btn.y = actualCoords.y + _myWorld.y;
 			if (!friendMirror && !editMirror)

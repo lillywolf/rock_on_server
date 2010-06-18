@@ -113,6 +113,7 @@
 			public var creatureGenerator:CreatureGenerator;
 			public var creditsBox:Text;
 			public var myStage:World;
+			public var creaturesAdded:Boolean;
 			
 			[Bindable] public var gameMagicManager:GameMagicManager;
 			
@@ -138,6 +139,16 @@
 			{
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
 				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);	
+				this.addEventListener(MouseEvent.CLICK, onViewClicked);
+			}
+			
+			private function onViewClicked(evt:MouseEvent):void
+			{
+				var bitmapClicked:Boolean = bitmapClicked(evt);
+				if (!bitmapClicked)
+				{
+					checkIfStageViewClicked(this.mouseX - myWorld.x, this.mouseY, stageView.height);				
+				}
 			}
 			
 			public function initializer():void
@@ -159,9 +170,35 @@
 				creatureGenerator = new CreatureGenerator(layerableManager);
 				generateManagers();				
 				initializeVenue();	
-				
+				addStructuresToVenue();
+				checkForCreaturesAdded();
+			}
+			
+			private function checkForCreaturesAdded():void
+			{
+				if (creaturesAdded)
+				{
+					addCreaturesToVenue();
+				}
+				else
+				{
+					creaturesAdded = true;	
+				}				
+			}
+			
+			private function onAssetsDrawn(evt:WorldEvent):void
+			{
+				checkForCreaturesAdded();
+			}
+			
+			public function addStructuresToVenue():void
+			{
 				showBooths();
-				showListeningStations();
+				showListeningStations();				
+			}
+			
+			public function addCreaturesToVenue():void
+			{
 				showVenue();		
 //				showGroupies();	
 			}
@@ -174,8 +211,9 @@
 				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			}
 			
-			private function onMouseClick(evt:MouseEvent):void
+			private function bitmapClicked(evt:MouseEvent):Boolean
 			{
+				var clicked:Boolean = false;
 				for each (var abd:AssetBitmapData in this.bitmapBlotter.bitmapReferences)
 				{
 					if (abd.bitmap)
@@ -184,10 +222,27 @@
 						if (hitRect.contains(backgroundCanvas.mouseX, backgroundCanvas.mouseY))
 						{
 							this.bottomBar.replaceCreature((abd.activeAsset as AssetStack).creature);
+							clicked = true;
 						}
 					}
-				}			
-			}			
+				}
+				return clicked;
+//				checkIfStageViewClicked(backgroundCanvas.mouseX, backgroundCanvas.mouseY);			
+			}	
+			
+			private function checkIfStageViewClicked(currentMouseX:Number, currentMouseY:Number, viewHeight:Number):void
+			{
+				var adjustedY:Number;
+				if (currentMouseY <= viewHeight/2)
+				{
+					adjustedY = currentMouseY - viewHeight/2;
+				}
+				else
+				{
+					adjustedY = -(viewHeight/2 - currentMouseY);
+				}
+				this.stageView.stageClicked(currentMouseX, adjustedY);				
+			}
 			
 			private function dragStage():void
 			{		
@@ -229,15 +284,13 @@
 				
 				addChild(backgroundCanvas);
 				backgroundCanvas.cachePolicy = "on";
-				backgroundCanvas.nestLevel = 2;
-				
-				backgroundCanvas.addEventListener(MouseEvent.CLICK, onMouseClick);				
+				backgroundCanvas.nestLevel = 2;				
 			}
 			
 			public function addStageLayer():void
 			{
 				createStage();
-				myStage = new World(concertStage.structure.width*tileSize, concertStage.structure.height*tileSize, tileSize);
+				myStage = new World(concertStage.structure.width*tileSize, concertStage.structure.height*tileSize, tileSize, concertStage.structure.height);
 				myStage.nestLevel = 1;
 				addChild(myStage);
 				stageManager.addStageToWorld(stageManager.stageAsset, concertStage.worldCoords, myStage);
@@ -245,10 +298,11 @@
 			
 			public function addWorld():void
 			{
-				myWorld = new World(worldWidth, worldHeight, tileSize);	
+				myWorld = new World(worldWidth, worldHeight, tileSize, concertStage.structure.height);	
 				myWorld.nestLevel = 3;
 				addBackgroundLayer();
-				addChild(myWorld);								
+				addChild(myWorld);	
+				myWorld.assetRenderer.addEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);
 //				myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);				
 			}
 			
@@ -259,7 +313,7 @@
 				groupieManager = new GroupieManager(customerPersonManager, boothManager, concertStage, creatureManager, myWorld);
 				stageView.initializeBandManager();
 //				bandManager = new BandManager(creatureManager, booths, concertStage, myWorld);
-				venueManager = new VenueManager(creatureGenerator, customerPersonManager, dwellingManager, levelManager, bandManager, boothManager, concertStage, myWorld);
+				venueManager = new VenueManager(creatureGenerator, customerPersonManager, dwellingManager, levelManager, bandManager, boothManager, stageManager, myWorld);
 			}
 			
 			private function addUILayer():void
@@ -298,6 +352,7 @@
 			private function showVenue():void
 			{
 				venueManager.addStaticCustomersToVenue();
+				venueManager.addSuperCustomersToVenue(stageView.myStage);
 				venueManager.addMovingCustomersToVenue();
 			}
 			
@@ -421,25 +476,42 @@
 			
 			public function updateRenderedStructures(os:OwnedStructure, method:String):void
 			{
-				var asset:ActiveAsset = myWorld.findAssetByThinger(os);
-				if (method == "sell")
+				if (isValidWorldStructure(os))
 				{
-					myWorld.assetRenderer.removeAsset(asset);
-					reInitializeStructures(os);					
+					var asset:ActiveAsset = myWorld.findAssetByThinger(os);
+					if (asset && method == "sell")
+					{
+						myWorld.assetRenderer.removeAsset(asset);
+						reInitializeStructures(os);					
+					}
+					if (asset && method == "save_placement")
+					{
+						myWorld.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z), true);
+						reInitializeStructures(os);					
+					}
+					if (method == "create_new")
+					{
+						addNewOwnedStructure(os);
+					}
 				}
-				if (method == "save_placement")
+			}
+			
+			public function isValidWorldStructure(os:OwnedStructure):Boolean
+			{
+				if (os.structure.structure_type == "Booth" || os.structure.structure_type == "ListeningStation")
 				{
-					myWorld.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z), true);
-					reInitializeStructures(os);					
+					return true;
 				}
-				if (method == "create_new")
-				{
-					var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
-					asset = new ActiveAsset(mc);
-					var addTo:Point3D = new Point3D(os.x, os.y, os.z);					
-					myWorld.addStaticAsset(asset, addTo);
-					reInitializeStructures(os);
-				}
+				return false;
+			}
+			
+			public function addNewOwnedStructure(os:OwnedStructure):void
+			{
+				var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+				var asset:ActiveAsset = new ActiveAsset(mc);
+				var addTo:Point3D = new Point3D(os.x, os.y, os.z);					
+				myWorld.addStaticAsset(asset, addTo);
+				reInitializeStructures(os);					
 			}
 			
 			public function reInitializeStructures(os:OwnedStructure):void

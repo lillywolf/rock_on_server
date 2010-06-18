@@ -430,7 +430,9 @@ package rock_on
 				_myWorld = val;
 			}
 			else
-				throw new Error("Where's the world?");
+			{	
+//				throw new Error("Where's the world?");
+			}	
 		}
 		
 		public function get myWorld():World

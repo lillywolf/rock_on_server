@@ -18,6 +18,7 @@ package world
 		public var sortedAssets:ArrayCollection;
 		public var unsortedAssets:ArrayCollection;
 		public var _assetGenius:AssetGenius;
+		public var initialDraw:Boolean;
 		private static const DEFAULT_SPEED:Number = .02;
 
 		[Bindable] public var myMemory:Number;
@@ -63,7 +64,19 @@ package world
 			{
 				var asset:ActiveAsset = sortedAssets[i];
 				addChild(asset);
+				asset.actualBounds = asset.getBounds(this).clone();
 			}
+			if (!initialDraw)
+			{
+				initialDraw = true;
+				dispatchInitialDrawEvent();
+			}
+		}
+		
+		public function dispatchInitialDrawEvent():void
+		{
+			var evt:WorldEvent = new WorldEvent(WorldEvent.ASSETS_DRAWN, null, true, true);
+			dispatchEvent(evt);
 		}
 		
 		private function updateCoords(lockedDelta:Number):void
@@ -176,11 +189,8 @@ package world
 				tempArray.addItemAt(a, index);
 			}
 			updateCoords(lockedDelta);	
-			var dataSortField:SortField = new SortField("realCoordY");
-			dataSortField.numeric = true;
-			var numericDataSort:Sort = new Sort();
-			numericDataSort.fields = [dataSortField];
-			tempArray.sort = numericDataSort;
+			var sort:Sort = getYSort();
+			tempArray.sort = sort;
 			tempArray.refresh();
 			sortedAssets = new ArrayCollection();
 			for (var i:int = 0; i<tempArray.length; i++)
@@ -188,6 +198,15 @@ package world
 				var asset:ActiveAsset = tempArray.getItemAt(i) as ActiveAsset;
 				sortedAssets.addItemAt(asset, i);
 			}
+		}
+		
+		public function getYSort():Sort
+		{
+			var sortField:SortField = new SortField("realCoordY");
+			sortField.numeric = true;
+			var sort:Sort = new Sort();
+			sort.fields = [sortField];	
+			return sort;
 		}
 		
 		private function updateUnsortedAssets(evt:CollectionEvent):void

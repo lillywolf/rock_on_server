@@ -58,6 +58,7 @@ package rock_on
 		public var crowdBufferRect:Rectangle;
 		public var stageBufferRect:Rectangle;
 		public var audienceRect:Rectangle;
+		public var stageRect:Rectangle;
 		
 		public var _myWorld:World;
 		
@@ -80,9 +81,10 @@ package rock_on
 			venueRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, _myWorld.tilesDeep);
 			boothsRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, Math.round(_myWorld.tilesDeep * BOOTH_SECTION_FRACTION))
 			stageBufferRect = new Rectangle(0, (_myWorld.tilesDeep - _venueManager.concertStage.structure.depth - STAGE_BUFFER_SQUARES), _venueManager.concertStage.structure.width + STAGE_BUFFER_SQUARES, _venueManager.concertStage.structure.depth + STAGE_BUFFER_SQUARES);	
+			stageRect = new Rectangle(0, (_myWorld.tilesDeep - _venueManager.concertStage.structure.depth), _venueManager.concertStage.structure.width, _venueManager.concertStage.structure.depth);	
 			crowdBufferRect = new Rectangle(Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width), boothsRect.bottom, venueRect.right - (Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width)), venueRect.height - boothsRect.height);
-			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom));
-			audienceRect = new Rectangle(0, boothsRect.bottom, venueRect.width, venueRect.height - boothsRect.height);
+			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom - 1));
+			audienceRect = new Rectangle(0, boothsRect.bottom, venueRect.width, venueRect.height - boothsRect.height - 1);
 			
 			assignedSeats = _myWorld.pathFinder.createSeatingArrangement(audienceRect, stageBufferRect, this.dwelling.capacity);
 		}

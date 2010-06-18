@@ -14,7 +14,7 @@
 		</mx:State>
 		<mx:State name="stageViewer" basedOn="worldView">
 			<mx:AddChild position="before" relativeTo="worldView">
-				<views:StageView id="stageView" customerPersonManager="{worldView.customerPersonManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}"/>
+				<views:StageView id="stageView" bottomBar="{bottomBarView}" customerPersonManager="{worldView.customerPersonManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}"/>
 			</mx:AddChild>			
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
@@ -41,30 +41,41 @@
 	<mx:Script>
 		<![CDATA[
 			import com.facebook.data.users.FacebookUser;
-			import mx.events.CollectionEvent;
+			import com.facebook.events.FacebookEvent;
+			
 			import controllers.CreatureManager;
-			import world.AssetStack;
-			import models.OwnedLayerable;
-			import mx.events.StateChangeEvent;
-			import game.ImposterOwnedStructure;
-			import world.ActiveAsset;
-			import stores.StoreEvent;
-			import models.User;
-			import models.OwnedStructure;
-			import models.OwnedDwelling;
-			import rock_on.ContentIndex;
+			import controllers.FriendManager;
+			
+			import facebook.FacebookFunTime;
+			
+			import game.GameDataInterface;
 			import game.GameMagicManager;
+			import game.ImposterOwnedStructure;
+			
+			import models.Creature;
+			import models.OwnedDwelling;
+			import models.OwnedLayerable;
+			import models.OwnedStructure;
+			import models.User;
+			
+			import mx.events.CollectionEvent;
 			import mx.events.DynamicEvent;
 			import mx.events.FlexEvent;
-			import controllers.FriendManager;
-			import com.facebook.events.FacebookEvent;
-			import facebook.FacebookFunTime;
-			import user.UserEvent;
-			import models.Creature;
-			import views.CreatureCustomizer;
-			import server.ServerDataEvent;
-			import game.GameDataInterface;
+			import mx.events.StateChangeEvent;
+			
+			import rock_on.ContentIndex;
+			
 			import server.ServerController;
+			import server.ServerDataEvent;
+			
+			import stores.StoreEvent;
+			
+			import user.UserEvent;
+			
+			import views.CreatureCustomizer;
+			
+			import world.ActiveAsset;
+			import world.AssetStack;
 						
 			[Bindable] public var gdi:GameDataInterface;
 			[Bindable] public var loadedModels:Dictionary;
@@ -107,7 +118,7 @@
 			{
 				initializeFacebookInterface();				
 				currentState = "stageViewer";
-				gdi.storeManager.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
+				gdi.storeManager.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);				
 			}
 			private function initializeFacebookInterface():void
 			{
@@ -273,6 +284,7 @@
 			{
 				gdi.structureManager.updateOwnedStructureOnServerResponse(os, method, worldView);
 				worldView.updateRenderedStructures(os, method);
+				stageView.updateRenderedStructures(os, method, stageView.myStage);
 				
 				if (editView)
 				{

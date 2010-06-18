@@ -5,6 +5,7 @@ package rock_on
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
+	import mx.core.FlexGlobals;
 	import mx.events.DynamicEvent;
 	
 	import world.ActiveAsset;
@@ -37,14 +38,14 @@ package rock_on
 			}
 		}
 		
-		public function add(cp:CustomerPerson, isMoving:Boolean=false, seatNumber:int=-1):void
+		public function add(cp:CustomerPerson, isMoving:Boolean=false, seatNumber:int=-1, bounds:Rectangle=null, avoid:Rectangle=null, worldToUpdate:World=null):void
 		{
 			if(_myWorld)
 			{			
 				cp.myWorld = _myWorld;
 				if (isMoving)
 				{
-					addToWorldAsMoving(cp);
+					addToWorldAsMoving(cp, bounds, avoid, worldToUpdate);
 				}
 				else
 				{
@@ -72,11 +73,18 @@ package rock_on
 			}
 		}
 		
-		private function addToWorldAsMoving(cp:CustomerPerson):void
+		private function addToWorldAsMoving(cp:CustomerPerson, bounds:Rectangle, avoid:Rectangle=null, worldToUpdate:World=null):void
 		{
 			cp.venue = _venue;
-			var destination:Point3D = cp.pickPointNearStructure(_venue.boothsRect);
-			_myWorld.addAsset(cp, destination);
+			var destination:Point3D = cp.pickPointNearStructure(bounds, avoid, worldToUpdate);
+			if (worldToUpdate)
+			{
+				worldToUpdate.addAsset(cp, destination);
+			}
+			else
+			{
+				_myWorld.addAsset(cp, destination);			
+			}
 			this.addItem(cp);			
 		}
 				

@@ -6,6 +6,7 @@ package rock_on
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
 	
 	import models.EssentialModelReference;
 	import models.OwnedStructure;
@@ -15,7 +16,6 @@ package rock_on
 	import views.UILayer;
 	
 	import world.ActiveAsset;
-	import world.Point;
 	import world.Point3D;
 	import world.World;
 
@@ -209,7 +209,7 @@ package rock_on
 		
 		public function addBoothCollectionButtonToUILayer(booth:Booth):void
 		{
-			var actualCoords:Point = World.worldToActualCoords(new Point3D(booth.x, booth.y, booth.z));
+			var actualCoords:flash.geom.Point = World.worldToActualCoords(new Point3D(booth.x, booth.y, booth.z));
 			booth.collectionButton.x = actualCoords.x + _myWorld.x;
 			booth.collectionButton.y = actualCoords.y + _myWorld.y;
 			if (!friendMirror && !editMirror)

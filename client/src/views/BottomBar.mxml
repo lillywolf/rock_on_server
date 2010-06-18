@@ -478,6 +478,10 @@
 			
 			public function switchToWorldView():void
 			{
+				FlexGlobals.topLevelApplication.stageView.x = worldView.x;
+				FlexGlobals.topLevelApplication.stageView.y = worldView.y;
+				FlexGlobals.topLevelApplication.stageView.myStage.x = worldView.myWorld.x;
+				FlexGlobals.topLevelApplication.stageView.myStage.y = worldView.myWorld.y;
 				FlexGlobals.topLevelApplication.currentState = "stageViewer";
 			}
 			

@@ -54,7 +54,7 @@ package world
 			}
 		}
 		
-		public function addBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int = 0, reflect:Boolean=false):void
+		public function addBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int = 0, reflect:Boolean=false):AssetBitmapData
 		{
 			var abd:AssetBitmapData = this.getMatchFromBitmapReferences(asset);
 			if (abd)
@@ -66,6 +66,14 @@ package world
 				abd = createNewAssetBitmapData(asset, animation, frameNumber, reflect);
 				bitmapReferences.addItem(abd);
 			}
+			return abd;
+		}
+		
+		public function addRenderedBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int = 0, reflect:Boolean=false):void
+		{
+			var abd:AssetBitmapData = addBitmap(asset, animation, frameNumber, reflect);
+			this.getBitmapForPerson(abd);
+			_backgroundCanvas.rawChildren.addChild(abd.bitmap);
 		}
 		
 		public function addInitialBitmap(abd:AssetBitmapData, animation:String, frameNumber:int=0):void
@@ -385,15 +393,18 @@ package world
 		
 		public function moveRenderedBitmap(abd:AssetBitmapData):void
 		{
-			var bmd:BitmapData = abd.bitmap.bitmapData;
-			var bp:Bitmap = new Bitmap();
-			bp.bitmapData = bmd;
-			bp.opaqueBackground = null;				
-			bp.x = abd.realCoordX - abd.mc.width/2;
-			bp.y = relHeight/2 + abd.realCoordY - abd.mc.height;			
-//			abd.bitmap.transform.matrix.tx = (abd.realCoordX - abd.mc.width/2) - abd.bitmap.x;
-//			abd.bitmap.transform.matrix.ty = (relHeight/2 + abd.realCoordY - abd.mc.height) - abd.bitmap.y;	
-			abd.bitmap = bp;
+			if (abd.bitmap)
+			{
+				var bmd:BitmapData = abd.bitmap.bitmapData;
+				var bp:Bitmap = new Bitmap();
+				bp.bitmapData = bmd;
+				bp.opaqueBackground = null;				
+				bp.x = abd.realCoordX - abd.mc.width/2;
+				bp.y = relHeight/2 + abd.realCoordY - abd.mc.height;			
+	//			abd.bitmap.transform.matrix.tx = (abd.realCoordX - abd.mc.width/2) - abd.bitmap.x;
+	//			abd.bitmap.transform.matrix.ty = (relHeight/2 + abd.realCoordY - abd.mc.height) - abd.bitmap.y;	
+				abd.bitmap = bp;
+			}
 		}
 		
 		public function getBitmapForStructure(abd:AssetBitmapData):Bitmap

@@ -2,6 +2,7 @@ package rock_on
 {
 	import flash.events.IEventDispatcher;
 	import flash.events.TimerEvent;
+	import flash.geom.Point;
 	import flash.utils.Timer;
 	
 	import game.Counter;
@@ -12,7 +13,6 @@ package rock_on
 	import mx.core.FlexGlobals;
 	
 	import world.ActiveAsset;
-	import world.Point;
 	import world.Point3D;
 	import world.World;
 
@@ -68,7 +68,7 @@ package rock_on
 			counter = new Counter(secondsRemaining*1000);
 			counter.addEventListener(CounterEvent.COUNTER_COMPLETE, onCounterComplete);
 			counter.displayCounter();
-			var uiCoordinates:Point = World.worldToActualCoords(new Point3D(x, y, z));
+			var uiCoordinates:flash.geom.Point = World.worldToActualCoords(new Point3D(x, y, z));
 			counter.counterCanvas.x = uiCoordinates.x;
 			counter.counterCanvas.y = uiCoordinates.y;
 			FlexGlobals.topLevelApplication.addChild(counter.counterCanvas);

@@ -13,6 +13,7 @@ package rock_on
 	import views.AssetBitmapData;
 	
 	import world.Point3D;
+	import world.World;
 	import world.WorldEvent;
 
 	public class CustomerPerson extends Person
@@ -243,7 +244,7 @@ package rock_on
 			var frameNumber:int = 1;
 			var obj:Object = standFacingObject(_concertStage, frameNumber);
 			_world.removeAssetFromWorld(this);
-			_world.addStaticBitmap(this, this.worldCoords, obj.animation, obj.frameNumber, obj.reflection);
+			_world.bitmapBlotter.addRenderedBitmap(this, obj.animation, obj.frameNumber, obj.reflection);
 		}
 		
 //		public function evaluateBitmapSwitch():void
@@ -469,22 +470,44 @@ package rock_on
 			return ENTHRALLED_TIME;
 		}
 		
-		public function pickPointNearStructure(bounds:Rectangle):Point3D
+		public function pickPointNearStructure(bounds:Rectangle, avoid:Rectangle=null, worldToUpdate:World=null):Point3D
 		{
 			var stagePoint:Point3D;
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
+			var occupiedSpaces:ArrayCollection;
+			if (worldToUpdate)
+			{
+				occupiedSpaces = worldToUpdate.pathFinder.updateOccupiedSpaces(true, true);
+			}
+			else
+			{
+				occupiedSpaces = _myWorld.pathFinder.updateOccupiedSpaces(true, true);			
+			}
 			
 			if (availableSpaces(occupiedSpaces))
 			{
-				do 
+				var xDimension:int;
+				var zDimension:int;
+				if (avoid)
 				{
-					var xDimension:int = Math.round(Math.random()*bounds.width);
-					var zDimension:int = bounds.top + Math.round(Math.random()*bounds.height);
-//					var xDimension:int = Math.round(Math.random()*_myWorld.tilesWide);
-//					var zDimension:int = Math.round(Math.random()*_myWorld.tilesDeep);
-					stagePoint = new Point3D(xDimension, 0, zDimension);				
+					do 
+					{
+						xDimension = Math.round(Math.random()*bounds.width);
+						zDimension = bounds.top + Math.round(Math.random()*bounds.height);
+						stagePoint = new Point3D(xDimension, 0, zDimension);				
+					}
+					while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)) || 
+						(xDimension >= avoid.left && xDimension <= avoid.right && zDimension >= avoid.top && zDimension <= avoid.bottom));					
 				}
-				while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)));
+				else
+				{
+					do 
+					{
+						xDimension = Math.round(Math.random()*bounds.width);
+						zDimension = bounds.top + Math.round(Math.random()*bounds.height);
+						stagePoint = new Point3D(xDimension, 0, zDimension);				
+					}
+					while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)));
+				}
 			}
 			else
 			{

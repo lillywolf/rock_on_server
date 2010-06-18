@@ -154,7 +154,7 @@
 				boothManager.setInMotion();
 				listeningStationManager.editMirror = true;
 				listeningStationManager.showListeningStations();
-			}
+			} 
 			
 			private function onEnterFrame(evt:Event):void
 			{
@@ -185,6 +185,7 @@
 				stageManager.editMirror = true;
 				stageManager.setInMotion();
 				concertStage = stageManager.concertStage;
+				stageManager.addStageDecorations(myWorld);
 			}			
 			
 			private function onStructurePlaced(evt:DynamicEvent):void
