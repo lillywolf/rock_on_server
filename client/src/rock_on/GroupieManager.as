@@ -17,6 +17,7 @@ package rock_on
 		public var _customerPersonManager:CustomerPersonManager;
 		public var _creatureManager:CreatureManager;
 		public var _myWorld:World;
+		public var _venue:Venue;
 		public var _boothManager:BoothManager;
 		public var _concertStage:ConcertStage;
 		
@@ -51,7 +52,7 @@ package rock_on
 			{
 				var cp:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, _concertStage, _boothManager, assetStack.layerableOrder, assetStack.creature, 0.4);
 				cp.speed = 0.06;
-				_customerPersonManager.add(cp);
+				_customerPersonManager.add(cp, true, -1, _venue.boothsRect);
 				groupies.addItem(cp);
 			}
 		}		
@@ -63,6 +64,16 @@ package rock_on
 				_customerPersonManager.remove(cp);
 			}
 			groupies.removeAll();
+		}
+		
+		public function set venue(val:Venue):void
+		{
+			_venue = val;
+		}
+		
+		public function get venue():Venue
+		{
+			return _venue;
 		}
 		
 	}

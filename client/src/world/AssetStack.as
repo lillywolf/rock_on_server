@@ -31,6 +31,7 @@ package world
 			_movieClipStack.x = 0;
 			_movieClipStack.y = 0;
 			_movieClipStack.addEventListener(MouseEvent.CLICK, onMovieClipStackClicked);
+			_movieClipStack.addEventListener(MouseEvent.MOUSE_MOVE, onMovieClipStackHover);
 //			this.addChild(_movieClipStack);
 			
 			if (layerableOrder)
@@ -151,6 +152,14 @@ package world
 			trace(evt.target.name, flash.utils.getQualifiedClassName(evt.target));	
 			var event:CreatureEvent = new CreatureEvent(CreatureEvent.CREATURE_CLICKED, evt.currentTarget.parent as AssetStack, true, true);
 			FlexGlobals.topLevelApplication.bottomBarView.dispatchEvent(event);
+		}
+		
+		private function onMovieClipStackHover(evt:MouseEvent):void
+		{
+			trace(evt.target.name, flash.utils.getQualifiedClassName(evt.target));	
+			var event:CreatureEvent = new CreatureEvent(CreatureEvent.CREATURE_HOVER, evt.currentTarget.parent as AssetStack, true, true);
+//			var cursorClip:MovieClip = FlexGlobals.topLevelApplication.wbi.checkCreatureHover(this);		
+//			FlexGlobals.topLevelApplication.wbi.handleCursorClip(cursorClip);
 		}
 		
 		public function stand(frameNumber:int, animationType:String):void

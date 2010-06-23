@@ -93,7 +93,7 @@
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
 				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);					
 				
-				myWorld = new World(WorldView.worldWidth, WorldView.worldHeight, WorldView.tileSize);				
+				myWorld = new World(WorldView.worldWidth, WorldView.worldHeight, WorldView.tileSize, stageView.concertStage.structure.height);				
 				addChild(myWorld);	
 												
 				editMode = new EditMode(myWorld, this);

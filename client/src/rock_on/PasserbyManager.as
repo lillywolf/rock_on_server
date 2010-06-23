@@ -150,7 +150,6 @@ package rock_on
 		{
 			if (person is StationListener)
 			{
-//				(person as StationListener).selectStationActivity();
 				person.startRouteState();
 			}
 			else

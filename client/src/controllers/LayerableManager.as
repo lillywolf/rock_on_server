@@ -11,6 +11,8 @@ package controllers
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
+	import mx.events.CollectionEvent;
+	import mx.events.DynamicEvent;
 	
 	import views.ContainerUIC;
 
@@ -18,6 +20,10 @@ package controllers
 	{
 		public var _layerables:ArrayCollection;
 		public var _owned_layerables:ArrayCollection;
+		public var ownedLayerableMovieClipsLoaded:int;
+		public var ownedLayerablesLoaded:int;
+		public var layerablesLoaded:int;
+		public var fullyLoaded:Boolean;
 		
 		public static const EYE_SCALE:Number = 1;
 		public static const INSTRUMENT_SCALE:Number = 0.4;
@@ -28,7 +34,50 @@ package controllers
 			super(essentialModelManager, target);
 			_layerables = essentialModelManager.layerables;
 			_owned_layerables = essentialModelManager.owned_layerables;
+			_owned_layerables.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedLayerablesCollectionChange);
+			essentialModelManager.addEventListener(EssentialEvent.INSTANCE_LOADED, onInstanceLoaded);
+			essentialModelManager.addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);			
+			
+			ownedLayerableMovieClipsLoaded = 0;
+			ownedLayerablesLoaded = 0;
+			layerablesLoaded = 0;
 		}
+		
+		private function onOwnedLayerablesCollectionChange(evt:CollectionEvent):void
+		{
+			(evt.items[0] as OwnedLayerable).addEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
+			(evt.items[0] as OwnedLayerable).addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);			
+		}
+		
+		private function onParentAssigned(evt:EssentialEvent):void
+		{
+			var ol:OwnedLayerable = evt.currentTarget as OwnedLayerable;
+			ol.removeEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
+			if (ol.layerable.mc)
+			{
+				ownedLayerableMovieClipsLoaded++;
+			}		
+		}	
+		
+		private function onParentMovieClipAssigned(evt:DynamicEvent):void
+		{
+			(evt.target as OwnedLayerable).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
+			ownedLayerableMovieClipsLoaded++;
+			essentialModelManager.checkIfAllLoadingComplete();
+		}
+		
+		private function onInstanceLoaded(evt:EssentialEvent):void
+		{
+			if (evt.instance is Layerable)
+			{
+				layerablesLoaded++;
+			}
+			else if (evt.instance is OwnedLayerable)
+			{
+				ownedLayerablesLoaded++;
+			}
+			essentialModelManager.checkIfAllLoadingComplete();
+		}		
 		
 		public function getMovieClipCopy(layerable:Layerable, formatted:Boolean=false, dimensionX:int=100, dimensionY:int=100):UIComponent
 		{

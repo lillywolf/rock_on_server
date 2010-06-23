@@ -34,6 +34,7 @@ package controllers
 		public var ownedStructureMovieClipsLoaded:int;
 		public var ownedStructuresLoaded:int;
 		public var structuresLoaded:int;
+		public var fullyLoaded:Boolean;
 		public var _serverController:ServerController;
 		
 		public function StructureManager(essentialModelManager:EssentialModelManager, target:IEventDispatcher=null)

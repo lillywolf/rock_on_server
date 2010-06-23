@@ -4,7 +4,12 @@ package rock_on
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	
+	import game.Leftover;
+	
 	import models.Creature;
+	import models.EssentialModelReference;
+	
+	import mx.collections.ArrayCollection;
 	
 	import world.Point3D;
 	import world.World;
@@ -21,6 +26,7 @@ package rock_on
 		public static const QUEUED_STATE:int = 4;
 		public static const GONE_STATE:int = 5;
 		public static const LEAVING_STATE:int = 6;
+		public static const MAX_LEFTOVERS:int = 2;
 		
 		public var enthralledTimer:Timer;
 		public var isStatic:Boolean;
@@ -128,7 +134,7 @@ package rock_on
 			
 			if (currentStation.isPermanentSlotAvailable() || isStatic)
 			{
-				var thinger:int = 0;
+				addLeftovers();
 			}
 			else
 			{
@@ -144,6 +150,22 @@ package rock_on
 			var index:int = currentStation.currentListeners.getItemIndex(this);
 			currentStation.currentListeners.removeItemAt(index);
 		}
+		
+		private function addLeftovers():void
+		{
+			var setLeftovers:ArrayCollection = EssentialModelReference.getSetLeftovers("Listening Station");
+			var randomLeftovers:ArrayCollection = EssentialModelReference.getRandomLeftovers("Listening Station");
+			var numExtras:int = Math.round(Math.random()*MAX_LEFTOVERS);
+			
+			for each (var leftover:Leftover in setLeftovers)
+			{
+				this.currentStation.addLeftoverToStation(leftover);
+			}
+			for (var i:int = 0; i < numExtras; i++)
+			{
+				this.currentStation.addLeftoverToStation(randomLeftovers[Math.floor(Math.random()*randomLeftovers.length)]);
+			}
+		}	
 		
 		public function selectStationActivity():void
 		{

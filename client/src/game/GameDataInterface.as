@@ -18,6 +18,7 @@ package game
 	import helpers.UnprocessedModel;
 	
 	import models.EssentialModelReference;
+	import models.OwnedDwelling;
 	import models.User;
 	
 	import mx.collections.ArrayCollection;
@@ -308,23 +309,48 @@ package game
 		
 		public function checkForLoadedMovieClips():void
 		{
-			// This number is currently adjusted for stages without MCs!! CHANGE LATER!!
-//			Alert.show(structureManager.ownedStructureMovieClipsLoaded.toString() + "::" + structureManager.ownedStructuresLoaded.toString());
+			checkForLoadedStructures();
+			checkForLoadedLayerables();
+		}
+		
+		private function checkForLoadedStructures():void
+		{
+// 			This number is currently adjusted for stages without MCs!! CHANGE LATER!!
+//			trace (structureManager.ownedStructureMovieClipsLoaded.toString() + "::" + structureManager.ownedStructuresLoaded.toString());
 			if (structureManager.ownedStructureMovieClipsLoaded == structureManager.ownedStructuresLoaded)
 			{
-//				Use true for non-Facebook testing				
-				
-				if (isLoggedInUser())
+//				Use true for non-Facebook testing					
+				if (isLoggedInUser() && !structureManager.fullyLoaded && (dwellingManager.owned_dwellings[0] as OwnedDwelling).dwelling)
 //				if (true)
 				{
-					FlexGlobals.topLevelApplication.attemptToInitializeVenueForUser();																
+					FlexGlobals.topLevelApplication.attemptToInitializeVenueForUser();	
+					structureManager.fullyLoaded = true;
+				}
+				else if (isLoggedInUser() && !structureManager.fullyLoaded && !(dwellingManager.owned_dwellings[0] as OwnedDwelling).dwelling)
+				{
+					throw new Error("Dwelling not set");
 				}
 				else
 				{
 					FlexGlobals.topLevelApplication.friendGDILoaded(this);
-//					Application.application.attemptToShowFriendVenue(this);
 				}
-			}
+			}	
+		}
+		
+		private function checkForLoadedLayerables():void
+		{
+			if (layerableManager.ownedLayerableMovieClipsLoaded == layerableManager.ownedLayerablesLoaded)
+			{
+				if (isLoggedInUser() && !layerableManager.fullyLoaded)
+				{
+					FlexGlobals.topLevelApplication.attemptToPopulateVenueForUser();
+					layerableManager.fullyLoaded = true;
+				}
+				else
+				{
+//					Code for friend creature initialization
+				}
+			}			
 		}
 		
 		public function isLoggedInUser():Boolean

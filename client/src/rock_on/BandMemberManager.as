@@ -2,7 +2,9 @@ package rock_on
 {
 	import customizer.CustomizerEvent;
 	
+	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
+	import flash.filters.GlowFilter;
 	
 	import models.Creature;
 	import models.OwnedLayerable;
@@ -52,6 +54,14 @@ package rock_on
 				throw new Error("you have to fill your pool before you dive");
 			}
 		}
+		
+		public function clearFilters():void
+		{
+			for each (var bm:BandMember in this)
+			{
+				bm.filters = null;
+			}
+		}	
 		
 		public function updateAllBandMemberStates(state:int):void
 		{

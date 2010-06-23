@@ -1,12 +1,15 @@
 package rock_on
 {
+	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
 	import flash.events.TimerEvent;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	
 	import game.Counter;
 	import game.CounterEvent;
+	import game.Leftover;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
@@ -247,7 +250,15 @@ package rock_on
 			}
 			return false;
 		}	
-		
+			
+		public function addLeftoverToStation(leftover:Leftover):void
+		{
+			var asset:ActiveAsset = new ActiveAsset(leftover);
+			asset.thinger = leftover;
+			var destination:Point3D = new Point3D(this.x + this.structure.width/2 + Math.random()*this.radius.x + 2, 0, this.z - this.radius.z + Math.random()*(this.radius.z*2));
+			_venue.myWorld.addAsset(asset, destination);		
+		}		
+
 		private function startFanCollectionState():void
 		{
 			state = FAN_COLLECTION_STATE;

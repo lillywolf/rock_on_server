@@ -313,9 +313,12 @@ package world
 			{
 				if (asset.thinger)
 				{
-					if (asset.thinger.id == thinger.id)
+					if (asset.thinger.id)
 					{
-						return asset;					
+						if (asset.thinger.id == thinger.id)
+						{
+							return asset;					
+						}
 					}
 				}
 			}

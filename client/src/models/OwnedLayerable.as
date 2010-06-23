@@ -43,7 +43,24 @@ package models
 			var evt:DynamicEvent = new DynamicEvent('parentLoaded', true, true);
 			evt.thinger = val;
 			dispatchEvent(evt);
+			
+			if (_layerable.mc)
+			{
+				var event:DynamicEvent = new DynamicEvent('parentMovieClipAssigned', true, true);
+				dispatchEvent(event);
+			}
+			else
+			{
+				_layerable.addEventListener('movieClipLoaded', onLayerableMovieClipAssigned);	
+			}			
 		}
+		
+		private function onLayerableMovieClipAssigned(evt:DynamicEvent):void
+		{
+			_layerable.removeEventListener('movieClipLoaded', onLayerableMovieClipAssigned);
+			var evt:DynamicEvent = new DynamicEvent('parentMovieClipAssigned', true, true);
+			dispatchEvent(evt);
+		}		
 		
 		public function get layerable():Layerable
 		{

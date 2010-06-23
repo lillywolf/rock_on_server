@@ -18,10 +18,13 @@
 			import mx.events.DragEvent;
 			import mx.events.DynamicEvent;
 			import mx.managers.DragManager;
+			import mx.skins.halo.ActivatorSkin;
 			
+			import rock_on.BandMember;
 			import rock_on.BoothManager;
 			import rock_on.ConcertStage;
 			import rock_on.CustomerPersonManager;
+			import rock_on.Person;
 			import rock_on.StageManager;
 			
 			import world.ActiveAsset;
@@ -44,6 +47,7 @@
 			[Bindable] public var creatureManager:CreatureManager;
 			[Bindable] public var boothManager:BoothManager;
 			public var bottomBar:BottomBar;
+			[Bindable] public var wbi:WorldBitmapInterface;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
@@ -58,7 +62,7 @@
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);	
 			}
 			
-			public function setInMotion():void
+			public function initializeStructures():void
 			{				
 				createStage();
 				myStage = new World(stageWidth, stageHeight, tileSize, concertStage.structure.height);
@@ -71,22 +75,23 @@
 			public function onAssetsDrawn(evt:WorldEvent):void
 			{
 				
-			}
+			}		
 						
-			private function onMouseDrag(evt:DynamicEvent):void
-			{
-				startDrag();
-				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);				
-			}
-			
-			private function onMouseUp(evt:MouseEvent):void
-			{
-				stopDrag();
-			}
+//			private function onMouseDrag(evt:DynamicEvent):void
+//			{
+//				startDrag();
+//				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);				
+//			}
+//			
+//			private function onMouseUp(evt:MouseEvent):void
+//			{
+//				stopDrag();
+//			}
 			
 			public function initializeBandManager():void
 			{
-				bandManager = new BandManager(creatureManager, boothManager.booths, concertStage, myStage);								
+				bandManager = new BandManager(creatureManager, boothManager.booths, concertStage, myStage);		
+				wbi.bandManager = bandManager;
 			}
 			
 			public function createStage():void
@@ -104,7 +109,7 @@
 				fps = 1000/deltaTime;
 				myMemory = System.totalMemory;
 				lastTime = time;
-								
+												
 				if (customerPersonManager)
 				{
 					customerPersonManager.update(lockedDelta);				
@@ -114,30 +119,6 @@
 				{	
 					bandManager.update(lockedDelta);
 				}					
-			}
-			
-			public function stageClicked(currentMouseX:int, currentMouseY:int):void
-			{
-				var sort:Sort = myStage.assetRenderer.getYSort();
-				var sortedArray:ArrayCollection = new ArrayCollection();
-				for each (var asset:ActiveAsset in myStage.assetRenderer.unsortedAssets)
-				{
-					sortedArray.addItem(asset);
-				}
-				sortedArray.sort = sort;
-				sortedArray.refresh();
-				
-				for each (asset in sortedArray)				
-				{
-					if (asset is AssetStack)
-					{
-						var hitRect:Rectangle = new Rectangle(asset.x - asset.width/2, asset.y - asset.height, asset.width, asset.height);
-						if (hitRect.contains(currentMouseX, currentMouseY))
-						{
-							this.bottomBar.replaceCreature((asset as AssetStack).creature);
-						}
-					}
-				}
 			}
 			
 			public function updateRenderedStructures(os:OwnedStructure, method:String, worldToUpdate:World):void

@@ -29,6 +29,7 @@ package world
 	{
 		public static const FOOT_CONSTANT:int = 9;
 		public static const WIDTH_BUFFER:int = 10;
+		public static const HEIGHT_BUFFER:int = 20;
 		public var _backgroundCanvas:Canvas;
 		public var bitmapReferences:ArrayCollection;
 		public var incrementX:int;
@@ -423,6 +424,23 @@ package world
 			bp.y = relHeight/2 + abd.realCoordY - abd.mc.height;
 			abd.bitmap = bp;
 			return bp;
+		}
+		
+		public static function getBitmapForMovieClip(mc:MovieClip):Bitmap
+		{
+			var bmd:BitmapData = new BitmapData(mc.width, mc.height, true, 0x00000000);
+			var bottomSlice:Number = (mc.transform.pixelBounds.bottom/mc.transform.pixelBounds.height)*mc.height;
+			var rect:Rectangle = new Rectangle(0, 0, mc.width + WIDTH_BUFFER, mc.height + bottomSlice);
+			var matrix:Matrix = new Matrix();
+			matrix.tx = mc.width/2;	
+			matrix.ty = mc.height - bottomSlice;
+			bmd.draw(mc, matrix, new ColorTransform(), null, rect);
+			var bp:Bitmap = new Bitmap();
+			bp.bitmapData = bmd;
+			bp.opaqueBackground = null;				
+			bp.x = mc.width/2;
+			bp.y = -mc.height/2;
+			return bp;			
 		}
 
 		public function getBitmapForPerson(abd:AssetBitmapData):Bitmap

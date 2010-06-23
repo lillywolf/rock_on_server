@@ -1,11 +1,14 @@
 package rock_on
 {
+	import flash.display.MovieClip;
+	import flash.filters.GlowFilter;
 	import flash.geom.Rectangle;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
 	import mx.core.FlexGlobals;
+	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
 	import world.ActiveAsset;
@@ -70,6 +73,14 @@ package rock_on
 				addToWorld(cp);
 				cp.reInitialize();
 				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
+			}
+		}
+		
+		public function clearFilters():void
+		{
+			for each (var cp:CustomerPerson in this)
+			{
+				cp.filters = null;
 			}
 		}
 		
@@ -234,6 +245,10 @@ package rock_on
 				{
 					cp.advanceState(CustomerPerson.HEADTOSTAGE_STATE);
 				}
+				else if (cp.state == CustomerPerson.ROAM_STATE)
+				{
+					cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
+				}
 				else
 				{
 					throw new Error("This doesn't really make sense");
@@ -298,7 +313,7 @@ package rock_on
 					(asset as CustomerPerson).setDirection(nextPoint);
 				}
 			}
-		}	
+		}		
 		
 		public function removeBoothFromAvailable(booth:Booth):void
 		{

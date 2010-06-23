@@ -103,6 +103,7 @@ package views
 			{
 				var cp:CustomerPerson = _creatureGenerator.createCustomer("Concert Goer", "walk_toward", _concertStage, _boothManager);
 				cp.speed = 0.06;
+				cp.isSuperFan = true;
 				_customerPersonManager.add(cp, true, -1, this.venue.stageBufferRect, this.venue.stageRect, worldToUpdate);
 				concertGoers.addItem(cp);
 			}					

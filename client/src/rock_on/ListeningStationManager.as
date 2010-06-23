@@ -56,7 +56,6 @@ package rock_on
 		{
 			passerbyManager = new PasserbyManager(this, _myWorld, creatureGenerator, _venue);
 			showListeningStations();
-			showPassersby();			
 		}
 		
 		public function tearDown():void
@@ -148,11 +147,19 @@ package rock_on
 				var listeningStation:ListeningStation = createListeningStation(os);
 				var asset:ActiveAsset = createListeningStationAsset(listeningStation);
 				listeningStation.activeAsset = asset;
-				listeningStation.setInMotion();
+//				listeningStation.setInMotion();
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				addListeningStationToWorld(asset, addTo);
 				listeningStationAssets.addItem(asset);
 			}
+		}
+		
+		public function addStaticStationListeners():void
+		{
+			for each (var ls:ListeningStation in this.listeningStations)
+			{
+				ls.setInMotion();
+			}			
 		}
 		
 		public function addListeningStationToWorld(asset:ActiveAsset, addTo:Point3D):void

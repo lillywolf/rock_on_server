@@ -9,6 +9,7 @@ package helpers
 	public class CreatureEvent extends Event
 	{
 		public static const CREATURE_CLICKED:String = "CreatureEvent:CreatureClicked";
+		public static const CREATURE_HOVER:String = "CreatureEvent:CreatureHover";
 		public var _creature:Creature;
 		public var _asset:AssetStack;
 				

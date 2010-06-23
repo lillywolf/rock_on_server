@@ -153,7 +153,7 @@
 			
 			public function onUserAndFriendsLoaded():void
 			{
-				if (parentApplication.userLoaded && parentApplication.friendsLoaded)
+				if (FlexGlobals.topLevelApplication.userLoaded && FlexGlobals.topLevelApplication.friendsLoaded)
 				{
 					showFacebookFriends();	
 					showInitialCreature();			

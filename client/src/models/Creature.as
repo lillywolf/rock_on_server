@@ -19,6 +19,8 @@ package models
 		public var _name:String;
 		public var location:Point3D;
 		public var _layerableOrder:Array;
+		public var _last_fed:String;
+		public var has_moods:Boolean;
 		
 		public function Creature(params:Object, target:IEventDispatcher=null)
 		{
@@ -57,6 +59,11 @@ package models
 			if (params.name)
 			{
 				_name = params.name;
+			}
+			if (params.last_fed)
+			{
+				_last_fed = params.last_fed;
+				has_moods = true;
 			}
 		}
 		
@@ -173,6 +180,16 @@ package models
 		public function get layerableOrder():Array
 		{
 			return _layerableOrder;
+		}
+		
+		public function set last_fed(val:String):void
+		{
+			_last_fed = val;
+		}
+		
+		public function get last_fed():String
+		{
+			return _last_fed;
 		}
 				
 	}
