@@ -85,7 +85,7 @@ package views
 			var uic:UIComponent = new UIComponent();
 			uic.addChild(cfg);
 			var mask:Canvas = new Canvas();
-			mask.width = barWidth;
+			mask.width = barWidth + 2;
 			mask.height = barHeight;
 			mask.setStyle("cornerRadius", 8);
 			mask.setStyle("borderStyle", "solid");

@@ -220,11 +220,6 @@
 				img2.y = 5;
 				img2.filters = [grayFilter];
 				canvas.addChild(img2);
-//				var img3:Image = new Image();
-//				img3.source = musicNotesButton;
-//				img3.x = 110;
-//				img3.y = 35;
-//				canvas.addChild(img3);
 				canvas.y = 85;
 				return canvas;
 			}

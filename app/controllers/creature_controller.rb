@@ -4,8 +4,11 @@ class CreatureController < ApplicationController
     array = Array.new
     Creature.find_each(:conditions => ["user_id = ?", params[:user_id]]) do |creature|
       hash = Hash.new
+      creature_group_reference = creature.creature_group_id
       hash["instance"] = creature
       hash["has_many"] = ["owned_layerable"]
+      hash["belongs_to"] = ["creature_group"]
+      hash["belongs_to_id"] = [creature_group_reference]
       hash["model"] = "creature"
       array.push hash
     end  

@@ -19,8 +19,6 @@
 			import mx.controls.Label;
 			import mx.controls.Text;
 			import mx.core.Application;
-//			import spark.components.Application;
-		
 			import mx.core.UIComponent;
 			
 			import world.World;
@@ -28,6 +26,8 @@
 			[Bindable] public var myUser:User;
 			
 			[Bindable] public var creditsBox:Text;
+			[Bindable] public var musicCreditsBox:Text;
+			[Bindable] public var fanHeartsBox:Text;
 			[Bindable] public var xpBox:Text;
 			[Bindable] public var levelBox:Text;
 			[Bindable] public var mainHBox:HBox;
@@ -52,8 +52,16 @@
 			
 			[Embed(source="../libs/icons/guitar.png")]
 			public var guitarIconClass:Class;					
+			[Embed(source="../libs/icons/heart.png")]
+			public var heartIconClass:Class;					
 			[Embed(source="../libs/icons/headphones.png")]
-			public var headphonesIconClass:Class;					
+			public var headphonesIconClass:Class;	
+			[Embed(source="../libs/Museo_Slab_900.otf",
+                    fontFamily="Museo_Slab_900",
+                    mimeType="application/x-font",
+                    embedAsCFF="true")]
+			public const Museo_Slab_900_Font:Class;
+			
 					
 			private function onCreationComplete():void
 			{
@@ -75,7 +83,9 @@
 			{
 				setBarSkeleton();
 				showCredits();
-				showPremiumCredits();	
+//				showPremiumCredits();	
+				showMusicCredits();
+				showFanHearts();
 				showLevel();			
 			}
 			
@@ -119,7 +129,7 @@
 				xpBox.text = myUser.xp.toString() + "/" + levelManager.getNextXpThreshold(myUser).toString();
 				xpBox.setStyle("color", 0xffffff);
 				xpBox.setStyle("fontSize", fontSize);
-				xpBox.setStyle("fontFamily", "Museo-Slab-900");
+				xpBox.setStyle("fontFamily", "Museo_Slab_900");
 				xpBox.x = 27;
 				xpBox.y = 3;
 				xpBox.filters = [textFilter];
@@ -146,6 +156,51 @@
 				canvas.addChild(icon);
 				setFontStyle(creditsBox, 16);
 				canvas.addChild(creditsBox);
+				mainHBox.addChild(canvas);					
+			}
+			
+			public function showMusicCredits():void
+			{
+				var textFilter:GlowFilter = createGrayFilter();
+				var canvas:Canvas = createGreenCanvas();
+				canvas.y = 4;
+				canvas.height = 27;
+				musicCreditsBox = new Text();
+				musicCreditsBox.text = myUser.music_credits.toString();
+				musicCreditsBox.setStyle("color", 0xd3ffa4);
+				musicCreditsBox.x = 35;
+				musicCreditsBox.y = 3;
+				musicCreditsBox.filters = [textFilter];
+				var icon:Image = new Image();
+				icon.source = headphonesIconClass;
+				icon.x = -9;
+				icon.y = -12;
+				canvas.addChild(icon);
+				setFontStyle(musicCreditsBox, 16);
+				canvas.addChild(musicCreditsBox);
+				mainHBox.addChild(canvas);					
+			}
+
+			public function showFanHearts():void
+			{
+				var textFilter:GlowFilter = createGrayFilter();
+				var canvas:Canvas = createGreenCanvas();
+				canvas.x = 4;
+				canvas.y = 4;
+				canvas.height = 27;
+				fanHeartsBox = new Text();
+				fanHeartsBox.text = myUser.fan_hearts.toString();
+				fanHeartsBox.setStyle("color", 0xd3ffa4);
+				fanHeartsBox.x = 35;
+				fanHeartsBox.y = 3;
+				fanHeartsBox.filters = [textFilter];
+				var icon:Image = new Image();
+				icon.source = heartIconClass;
+				icon.x = -9;
+				icon.y = -12;
+				canvas.addChild(icon);
+				setFontStyle(fanHeartsBox, 16);
+				canvas.addChild(fanHeartsBox);
 				mainHBox.addChild(canvas);					
 			}
 			
@@ -241,7 +296,7 @@
 			{
 				textBox.setStyle("paddingLeft", 6);
 				textBox.setStyle("paddingRight", 6);
-				textBox.setStyle("fontFamily", "Museo-Slab-900");
+				textBox.setStyle("fontFamily", "Museo_Slab_900");
 				textBox.setStyle("fontSize", fontSize);
 				textBox.setStyle("color", 0xffffff);				
 			}
@@ -257,21 +312,15 @@
 				creditsBox.id = 'myCredits';
 				creditsBox.filters = [textFilter];
 				creditsBox.text = myUser.credits.toString();
-				creditsBox.x = 35;
+				creditsBox.x = 33;
 				creditsBox.y = 3;
 				setFontStyle(creditsBox, 16);
-//				var coinIcon:CoinIcon = new CoinIcon();
-//				coinIcon.scaleX = 0.4;
-//				coinIcon.scaleY = 0.4;
-//				var uic:UIComponent = new UIComponent();
-//				uic.addChild(coinIcon);
-//				uic.x = 6;
-//				uic.y = 5;
-//				canvas.addChild(uic);
 				var icon:Image = new Image();
-				icon.source = headphonesIconClass;
-				icon.x = -9;
-				icon.y = -12;
+				icon.source = new CoinsLeftover();
+//				icon.x = -9;
+//				icon.y = -12;
+				icon.x = 10;
+				icon.y = 32;
 				canvas.addChild(icon);
 				canvas.addChild(creditsBox);
 //				backCanvas.addChild(creditsCanvas);

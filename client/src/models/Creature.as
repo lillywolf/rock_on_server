@@ -14,6 +14,7 @@ package models
 		public var _id:int;
 		public var _user_id:int;
 		public var _type:String;
+		public var _creature_group_id:int;
 		public var _owned_layerables:ArrayCollection;
 		public var _additional_info:String;
 		public var _name:String;
@@ -190,6 +191,16 @@ package models
 		public function get last_fed():String
 		{
 			return _last_fed;
+		}
+		
+		public function set creature_group_id(val:int):void
+		{
+			_creature_group_id = val;
+		}
+		
+		public function get creature_group_id():int
+		{
+			return _creature_group_id;
 		}
 				
 	}

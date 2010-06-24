@@ -11,6 +11,7 @@ package controllers
 	
 	import models.BoothStructure;
 	import models.Creature;
+	import models.CreatureGroup;
 	import models.Dwelling;
 	import models.EssentialModelReference;
 	import models.FriendUser;
@@ -56,12 +57,14 @@ package controllers
 		[Bindable] public var owned_dwellings:ArrayCollection;
 		[Bindable] public var booth_structures:ArrayCollection;
 		[Bindable] public var friend_users:ArrayCollection;
+		[Bindable] public var creature_groups:ArrayCollection;
 		
 		public var layerable:Layerable;
 		public var creature:Creature;
 		public var owned_thinger:OwnedThinger;
 		public var user:User;
 		public var store:Store;
+		public var creature_group:CreatureGroup;
 		public var store_owned_thinger:StoreOwnedThinger;
 		public var structure:Structure;
 		public var owned_structure:OwnedStructure;
@@ -87,6 +90,7 @@ package controllers
 			layerables = new ArrayCollection();
 			owned_layerables = new ArrayCollection();
 			creatures = new ArrayCollection();	
+			creature_groups = new ArrayCollection();
 			thingers = new ArrayCollection();	
 			structures = new ArrayCollection();
 			owned_structures = new ArrayCollection();
