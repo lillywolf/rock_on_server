@@ -293,13 +293,8 @@ package rock_on
 		
 		public function displayStartShowButton():void
 		{
-			startShowButton = new Button();
-			startShowButton.width = 50;
-			startShowButton.height = 50;
-			startShowButton.x = 400;
-			startShowButton.y = 0;
+			var startShowButton:Button = FlexGlobals.topLevelApplication.topBarView.enableStartShowButton();
 			startShowButton.addEventListener(MouseEvent.CLICK, onStartShowButtonClicked);
-			FlexGlobals.topLevelApplication.addChild(startShowButton);
 		}
 		
 		private function onStartShowButtonClicked(evt:MouseEvent):void

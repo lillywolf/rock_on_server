@@ -182,6 +182,7 @@
 					userLoaded = true;
 					stageView.initializeStructures();
 					worldView.initializeStructures();
+					topBarView.onVenueLoaded();
 					getBasicFriendInfo();			
 				}
 			}

@@ -352,7 +352,7 @@
 				creatureCanvas.height = 105;
 				creatureCanvas.y = 510;
 				creatureCanvas.x = 10;
-				creatureCanvas.alpha = 0.4;
+				creatureCanvas.alpha = 0.6;
 				creatureCanvas.setStyle("backgroundColor", 0xffffff);
 				creatureCanvas.setStyle("cornerRadius", 12);
 				creatureCanvas.setStyle("borderStyle", "solid");
@@ -653,7 +653,7 @@
 				canvas.setStyle("cornerRadius", 14);
 				canvas.setStyle("borderStyle", "solid");
 				canvas.setStyle("borderColor", backingColor);
-				canvas.alpha = 0.4;
+				canvas.alpha = 0.6;
 				canvas.height = 88;
 				canvas.width = 72;
 				renderer.height = 58;

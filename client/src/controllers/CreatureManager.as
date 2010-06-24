@@ -3,6 +3,7 @@ package controllers
 	import flash.events.IEventDispatcher;
 	
 	import models.Creature;
+	import models.CreatureGroup;
 	import models.OwnedLayerable;
 	
 	import mx.collections.ArrayCollection;
@@ -18,12 +19,14 @@ package controllers
 		public var _creatures:ArrayCollection;
 		public var _owned_layerables:ArrayCollection;
 		public var _serverController:ServerController;
+		public var _creature_groups:ArrayCollection;
 		
 		public function CreatureManager(essentialModelManager:EssentialModelManager, target:IEventDispatcher=null)
 		{
 			super(essentialModelManager, target);
 			_creatures = essentialModelManager.creatures;
 			_owned_layerables = essentialModelManager.owned_layerables;
+			_creature_groups = essentialModelManager.creature_groups;
 		}
 		
 		public function addInstantiatedCreatures():void
@@ -160,7 +163,19 @@ package controllers
 		{
 			var creatureCustomizer:CreatureCustomizer = new CreatureCustomizer(creature, this);
 			return creatureCustomizer;
-		}		
+		}	
+		
+		public function getCreatureGroupByOwnedDwellingId(odId:int):CreatureGroup
+		{
+			for each (var cg:CreatureGroup in this.creature_groups)
+			{
+				if (cg.owned_dwelling_id == odId)
+				{
+					return cg;
+				}
+			}
+			return null;
+		}
 		
 		public function add(creature:Creature):void
 		{
@@ -185,6 +200,11 @@ package controllers
 		public function get owned_layerables():ArrayCollection
 		{
 			return _owned_layerables;
+		}
+		
+		public function get creature_groups():ArrayCollection
+		{
+			return _creature_groups;
 		}
 			
 	}
