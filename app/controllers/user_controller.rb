@@ -6,7 +6,7 @@ class UserController < ApplicationController
     user = User.first(:conditions => ["snid = ?", params[:snid]]) 
     level_reference = user.level_id   
     hash["instance"] = user
-    hash["has_many"] = ["owned_structure", "owned_layerable", "creature_group", "creature", "owned_dwelling"]
+    hash["has_many"] = ["owned_structure", "owned_layerable", "creature_group", "creature", "owned_dwelling", "owned_song"]
     hash["belongs_to"] = ["level"]
     hash["belongs_to_id"] = [level_reference]
     hash["model"] = "user"
@@ -19,7 +19,7 @@ class UserController < ApplicationController
     hash = Hash.new    
     user = User.find(params[:id])
     hash["instance"] = user
-    hash["has_many"] = ["owned_structure", "owned_layerable", "creature_group", "creature", "owned_dwelling"]
+    hash["has_many"] = ["owned_structure", "owned_layerable", "creature_group", "creature", "owned_dwelling", "owned_song"]
     hash["model"] = "user"
     array.push hash    
     render :json => array.to_json  

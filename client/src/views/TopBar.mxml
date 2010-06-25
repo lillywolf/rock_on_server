@@ -136,7 +136,7 @@
 				vbox.y = 19;
 				return vbox;
 			}
-			
+						
 			public function setBarSkeleton():void
 			{
 				mainHBox = new HBox();

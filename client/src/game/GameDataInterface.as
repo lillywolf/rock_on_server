@@ -6,6 +6,7 @@ package game
 	import controllers.LayerableManager;
 	import controllers.LevelManager;
 	import controllers.OwnedLayerableManager;
+	import controllers.SongManager;
 	import controllers.StoreManager;
 	import controllers.StructureManager;
 	import controllers.ThingerManager;
@@ -32,6 +33,7 @@ package game
 	
 	public class GameDataInterface extends EventDispatcher
 	{
+		[Bindable] public var songManager:SongManager;
 		[Bindable] public var layerableManager:LayerableManager;
 		[Bindable] public var ownedLayerableManager:OwnedLayerableManager;
 		[Bindable] public var creatureManager:CreatureManager;
@@ -64,6 +66,7 @@ package game
 		public function createManagers(preLoadedContent:Dictionary):void
 		{
 			essentialModelManager = new EssentialModelManager();
+			songManager = new SongManager(essentialModelManager);
 			layerableManager = new LayerableManager(essentialModelManager);
 			ownedLayerableManager = new OwnedLayerableManager(essentialModelManager);
 			creatureManager = new CreatureManager(essentialModelManager);
@@ -121,7 +124,12 @@ package game
 			{
 				essentialModelManager.levels = preLoadedContent["levels"];
 				levelManager.levels = essentialModelManager.levels;
-			}									
+			}
+			if (preLoadedContent["songs"])
+			{
+				essentialModelManager.songs = preLoadedContent["songs"];
+				songManager.songs = essentialModelManager.songs;
+			}
 		}
 		
 		public function setUser(evt:CollectionEvent):void
