@@ -19,6 +19,8 @@ package models
 		public var _premium_credits:int;
 		public var _level_id:int;
 		public var _level:Level;
+		public var _music_credits:int;
+		public var _fan_hearts:int;
 		
 		public var _owned_layerables:ArrayCollection;
 		public var _owned_structures:ArrayCollection;
@@ -48,6 +50,8 @@ package models
 			_xp = params.xp;
 			_credits = params.credits;
 			_premium_credits = params.premium_credits;	
+			_music_credits = params.music_credits;
+			_fan_hearts = params.fan_hearts;
 			_snid = params.snid;		
 			_last_showtime = params.last_showtime;
 			_level_id = params.level_id;			
@@ -182,6 +186,26 @@ package models
 		public function get premium_credits():int
 		{
 			return _premium_credits;
+		}
+		
+		public function set music_credits(val:int):void
+		{
+			_music_credits = val;
+		}
+		
+		public function get music_credits():int
+		{
+			return _music_credits;
+		}
+		
+		public function set fan_hearts(val:int):void
+		{
+			_fan_hearts = val;
+		}
+		
+		public function get fan_hearts():int
+		{
+			return _fan_hearts;
 		}
 		
 		public function set snid(val:Number):void

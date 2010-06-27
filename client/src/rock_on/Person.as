@@ -2,11 +2,25 @@ package rock_on
 {
 	import flash.display.MovieClip;
 	import flash.events.TimerEvent;
+	import flash.filters.GlowFilter;
+	import flash.ui.Mouse;
+	import flash.ui.MouseCursor;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
+	import game.GameClock;
+	
 	import models.Creature;
+	import models.EssentialModelReference;
 	import models.OwnedStructure;
+	
+	import mx.collections.ArrayCollection;
+	import mx.containers.Canvas;
+	import mx.containers.HBox;
+	import mx.managers.CursorManager;
+	
+	import views.ContainerUIC;
+	import views.ExpandingMovieclip;
 	
 	import world.AssetStack;
 	import world.Point3D;
@@ -19,10 +33,18 @@ package rock_on
 		public static const STOP_STATE:int = 3;
 		public static const LEAVING_STATE:int = 2;
 		public static const GONE_STATE:int = 5;
-
+		
 		private static const ENTER_TIME:int = 1000;
 		private static const ROAM_TIME:int = Math.random()*20000 + 3000;
 		private static const STOP_TIME:int = 5000;
+		private static const HUNGER_DELAY:int = 360000;
+//		private static const HUNGER_DELAY:int = 720000 + 360000 * Math.random();
+		
+		public static const IS_HUNGRY:String = "hungry";	
+		public static const IS_THIRSTY:String = "thirsty";
+		public static const MOOD_WIDTH:int = 28;
+		public var moods:ArrayCollection;	
+		public var moodCursorID:int;
 		
 		public var stopTime:Timer;	
 		public var enterTime:Timer;
@@ -43,6 +65,7 @@ package rock_on
 			movieClipStack.scaleY = orientation;		
 			
 			setOptionalProperties(layerableOrder, creature);
+			setMoods();			
 		}
 		
 		public function setOptionalProperties(layerableOrder:Array=null, creature:Creature=null):void
@@ -58,17 +81,84 @@ package rock_on
 			}						
 		}
 		
+		public function setMoods():void
+		{
+			if (this.creature.has_moods)
+			{
+				moods = new ArrayCollection();
+				var index:int = 0;
+				var timeSinceLastMeal:Number = new Date().getTime() - GameClock.convertStringTimeToUnixTime(this.creature.last_fed);
+				if (Math.random() < 0.5)
+				{
+					moods.addItem(Person.IS_THIRSTY);
+				}
+				if (timeSinceLastMeal > Person.HUNGER_DELAY)
+				{
+					moods.addItem(Person.IS_HUNGRY);
+				}
+//				for each (var mood:int in moods)
+//				{
+					startMood(moods[0], index, moods.length);
+					index++;
+//				}
+			}
+		}
+		
+		public function generateMoodCursor(mood:String):MovieClip
+		{
+			var cursorClass:Class = EssentialModelReference.getCursorClassForMood(mood);
+			var mc:MovieClip = new cursorClass() as MovieClip;
+			mc.cacheAsBitmap = true;
+			return mc;
+		}
+
+		public function startHungryMood(index:int, numMoods:int):void
+		{
+			var hungryIcon:Hamburger = new Hamburger();
+			var emc:ExpandingMovieclip = new ExpandingMovieclip(0.6, hungryIcon);
+			emc.y = -(this.movieClipStack.height + 5);
+//			emc.x = -(numMoods * MOOD_WIDTH/2) + MOOD_WIDTH * index + MOOD_WIDTH/2;
+			this.addChild(emc);
+		}
+		
+		public function startThirstyMood(index:int, numMoods:int):void
+		{
+			var thirstyIcon:CoffeeLeftover = new CoffeeLeftover();
+			var emc:ExpandingMovieclip = new ExpandingMovieclip(0.6, thirstyIcon);
+			emc.y = -(this.movieClipStack.height + 5);
+//			emc.x = -(numMoods * MOOD_WIDTH/2) + MOOD_WIDTH * index + MOOD_WIDTH/2;
+			this.addChild(emc);
+		}
+		
+		public function doHungryMood():void
+		{
+			
+		}		
+		
+		public function startMood(mood:String, index:int, numMoods:int):void
+		{
+			switch (mood)
+			{
+				case IS_HUNGRY:
+					startHungryMood(index, numMoods);
+					break;
+				case IS_THIRSTY:
+					startThirstyMood(index, numMoods);
+					break;
+			}
+		}		
+		
 		public function standFacingObject(structure:OwnedStructure, frameNumber:int=0, strictFacing:Boolean=true):Object
 		{
 			var horizontalRelationship:String;
 			var verticalRelationship:String;
 			
 			var cornerMatrix:Dictionary = structure.getCornerMatrix();
-			if (worldCoords.x < (cornerMatrix["bottomLeft"] as Point3D).x)
+			if (worldCoords.x < (cornerMatrix["topLeft"] as Point3D).x)
 			{
 				verticalRelationship = "bottom";
 			}
-			else if (worldCoords.x > (cornerMatrix["topLeft"] as Point3D).x)
+			else if (worldCoords.x > (cornerMatrix["bottomLeft"] as Point3D).x)
 			{
 				verticalRelationship = "top";
 			}
@@ -101,8 +191,22 @@ package rock_on
 				animationType = "stand_still_toward";
 			}
 			
+			var reflection:Boolean = false;
+
+			if (horizontalRelationship == "center" && verticalRelationship == "top")
+			{
+				reflection = true;
+			}
+			else if (horizontalRelationship != "center" && verticalRelationship == "top")
+			{
+				if (Math.random() < 0.5)
+				{
+					reflection = true;
+				}
+			}
+			
 			stand(frameNumber, animationType);
-			return {frameNumber: frameNumber, animation: animationType};
+			return {frameNumber: frameNumber, animation: animationType, reflection: reflection};
 		}
 		
 		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
@@ -347,8 +451,20 @@ package rock_on
 			advanceState(ROAM_STATE);
 		}
 		
+		public function updateMoods():void
+		{
+			for each (var i:int in moods)
+			{
+
+			}
+		}		
+		
 		public function update(deltaTime:Number):Boolean
 		{
+			if (creature.has_moods)
+			{
+				updateMoods();			
+			}			
 			switch (state)
 			{
 				case ENTER_STATE:
@@ -367,7 +483,7 @@ package rock_on
 					doGoneState(deltaTime);	
 					return true;
 				default: throw new Error('oh noes!');
-			}
+			}			
 			return false;
 		}
 		
@@ -416,7 +532,9 @@ package rock_on
 				_myWorld = val;
 			}
 			else
-				throw new Error("Where's the world?");
+			{	
+//				throw new Error("Where's the world?");
+			}	
 		}
 		
 		public function get myWorld():World

@@ -1,6 +1,7 @@
 package world
 {
 	import flash.display.MovieClip;
+	import flash.geom.Rectangle;
 	
 	import mx.core.Application;
 	import mx.core.FlexGlobals;

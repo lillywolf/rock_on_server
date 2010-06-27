@@ -23,20 +23,21 @@ package rock_on
 	{
 		private var _myWorld:World;	
 		public var _creatureGenerator:CreatureGenerator;	
+		public var _venue:Venue;
 		public var spawnLocation:Point3D;
 		public var spawnInterval:int;
 		public var spawnTimer:Timer;
 		public var _listeningStationManager:ListeningStationManager;
-		public static const VENUE_BOUND_X:int = 14;	
 		public static const STATIONLISTENER_CONVERSION_PROBABILITY:Number = 0.3;
 		public static const SPAWN_INTERVAL_BASE:int = 2000;
 		public static const SPAWN_INTERVAL_MULTIPLIER:int = 5000;
 				
-		public function PasserbyManager(listeningStationManager:ListeningStationManager, myWorld:World, creatureGenerator:CreatureGenerator, source:Array=null)
+		public function PasserbyManager(listeningStationManager:ListeningStationManager, myWorld:World, creatureGenerator:CreatureGenerator, venue:Venue, source:Array=null)
 		{
 			super(source);
 			_listeningStationManager = listeningStationManager;
 			_creatureGenerator = creatureGenerator;
+			_venue = venue;
 			setWorld(myWorld);
 		}
 		
@@ -70,14 +71,14 @@ package rock_on
 		private function generatePasserby():Passerby
 		{
 			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "Passerby");
-			var passerby:Passerby = new Passerby(asset.movieClipStack, _listeningStationManager, this, _myWorld, asset.layerableOrder, asset.creature, 0.4);			
+			var passerby:Passerby = new Passerby(asset.movieClipStack, _listeningStationManager, this, _myWorld, _venue, asset.layerableOrder, asset.creature, 0.4);			
 			return passerby;		
 		}
 		
 		private function generateStationListener():StationListener
 		{
 			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "StationListener");
-			var sl:StationListener = new StationListener(asset.movieClipStack, _listeningStationManager, this, _myWorld, asset.layerableOrder, asset.creature, 0.4);			
+			var sl:StationListener = new StationListener(asset.movieClipStack, _listeningStationManager, this, _myWorld, _venue, asset.layerableOrder, asset.creature, 0.4);			
 			return sl;		
 		}
 		
@@ -149,7 +150,6 @@ package rock_on
 		{
 			if (person is StationListener)
 			{
-//				(person as StationListener).selectStationActivity();
 				person.startRouteState();
 			}
 			else
@@ -225,11 +225,11 @@ package rock_on
 		{
 			if (Math.random() < 0.5)
 			{
-				spawnLocation = new Point3D(Math.floor(VENUE_BOUND_X + Math.random()*(_myWorld.tilesWide - VENUE_BOUND_X)), 0, 0);			
+				spawnLocation = new Point3D(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right)), 0, 0);			
 			}
 			else
 			{
-				spawnLocation = new Point3D(Math.floor(VENUE_BOUND_X + Math.random()*(_myWorld.tilesWide - VENUE_BOUND_X)), 0, _myWorld.tilesDeep);							
+				spawnLocation = new Point3D(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right)), 0, _myWorld.tilesDeep);							
 			}
 		}
 		
@@ -305,7 +305,7 @@ package rock_on
 		{
 			return _myWorld;
 		}
-		
+				
 		public function getStyles(creatureId:int):ArrayCollection
 		{
 			var myStyles:ArrayCollection = new ArrayCollection();

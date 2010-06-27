@@ -11,6 +11,7 @@ package controllers
 	
 	import models.BoothStructure;
 	import models.Creature;
+	import models.CreatureGroup;
 	import models.Dwelling;
 	import models.EssentialModelReference;
 	import models.FriendUser;
@@ -18,8 +19,10 @@ package controllers
 	import models.Level;
 	import models.OwnedDwelling;
 	import models.OwnedLayerable;
+	import models.OwnedSong;
 	import models.OwnedStructure;
 	import models.OwnedThinger;
+	import models.Song;
 	import models.Store;
 	import models.StoreOwnedThinger;
 	import models.Structure;
@@ -56,12 +59,18 @@ package controllers
 		[Bindable] public var owned_dwellings:ArrayCollection;
 		[Bindable] public var booth_structures:ArrayCollection;
 		[Bindable] public var friend_users:ArrayCollection;
+		[Bindable] public var creature_groups:ArrayCollection;
+		[Bindable] public var songs:ArrayCollection;
+		[Bindable] public var owned_songs:ArrayCollection;
 		
 		public var layerable:Layerable;
 		public var creature:Creature;
+		public var song:Song;
+		public var owned_song:OwnedSong;
 		public var owned_thinger:OwnedThinger;
 		public var user:User;
 		public var store:Store;
+		public var creature_group:CreatureGroup;
 		public var store_owned_thinger:StoreOwnedThinger;
 		public var structure:Structure;
 		public var owned_structure:OwnedStructure;
@@ -85,8 +94,11 @@ package controllers
 			instancesToLoad = new ArrayCollection();
 			instancesLoaded = new ArrayCollection();			
 			layerables = new ArrayCollection();
+			songs = new ArrayCollection();
+			owned_songs = new ArrayCollection();
 			owned_layerables = new ArrayCollection();
 			creatures = new ArrayCollection();	
+			creature_groups = new ArrayCollection();
 			thingers = new ArrayCollection();	
 			structures = new ArrayCollection();
 			owned_structures = new ArrayCollection();

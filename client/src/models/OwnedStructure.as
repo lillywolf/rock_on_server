@@ -43,7 +43,7 @@ package models
 			}
 			
 			setOptionalProperties(params);
-		}		
+		}	
 		
 		public function setOptionalProperties(params:Object):void
 		{

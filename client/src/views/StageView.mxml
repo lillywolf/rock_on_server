@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="1000" clipContent="false" creationComplete="onCreationComplete()">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="1000" x="0" y="0" clipContent="false" creationComplete="onCreationComplete()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	<mx:Script>
 		<![CDATA[
 			import com.google.analytics.debug.Alert;
@@ -9,17 +9,30 @@
 			
 			import flash.utils.getTimer;
 			
+			import models.EssentialModelReference;
+			import models.OwnedStructure;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.Sort;
 			import mx.controls.Alert;
 			import mx.events.DragEvent;
 			import mx.events.DynamicEvent;
 			import mx.managers.DragManager;
+			import mx.skins.halo.ActivatorSkin;
 			
+			import rock_on.BandMember;
 			import rock_on.BoothManager;
 			import rock_on.ConcertStage;
 			import rock_on.CustomerPersonManager;
+			import rock_on.Person;
 			import rock_on.StageManager;
 			
+			import world.ActiveAsset;
+			import world.AssetStack;
+			import world.BitmapBlotter;
+			import world.Point3D;
 			import world.World;
+			import world.WorldEvent;
 			
 			public var stageWidth:int = 1200;
 			public var stageHeight:int = 1200;
@@ -33,6 +46,8 @@
 			[Bindable] public var structureManager:StructureManager;
 			[Bindable] public var creatureManager:CreatureManager;
 			[Bindable] public var boothManager:BoothManager;
+			public var bottomBar:BottomBar;
+			[Bindable] public var wbi:WorldBitmapInterface;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
@@ -47,28 +62,36 @@
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);	
 			}
 			
-			public function setInMotion():void
+			public function initializeStructures():void
 			{				
 				createStage();
-				myStage = new World(stageWidth, stageHeight, tileSize);
+				myStage = new World(stageWidth, stageHeight, tileSize, concertStage.structure.height);
 				addChild(myStage);
-				stageManager.addStageToWorld(stageManager.stageAsset, concertStage.worldCoords, myStage);	
-			}
-						
-			private function onMouseDrag(evt:DynamicEvent):void
-			{
-				startDrag();
-				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);				
+				myStage.assetRenderer.addEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);
+				stageManager.addStageToWorld(stageManager.stageAsset, concertStage.worldCoords, myStage);
+				stageManager.addStageDecorations(this.myStage);				
 			}
 			
-			private function onMouseUp(evt:MouseEvent):void
+			public function onAssetsDrawn(evt:WorldEvent):void
 			{
-				stopDrag();
-			}
+				
+			}		
+						
+//			private function onMouseDrag(evt:DynamicEvent):void
+//			{
+//				startDrag();
+//				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);				
+//			}
+//			
+//			private function onMouseUp(evt:MouseEvent):void
+//			{
+//				stopDrag();
+//			}
 			
 			public function initializeBandManager():void
 			{
-				bandManager = new BandManager(creatureManager, boothManager.booths, concertStage, myStage);								
+				bandManager = new BandManager(creatureManager, boothManager.booths, concertStage, myStage);		
+				wbi.bandManager = bandManager;
 			}
 			
 			public function createStage():void
@@ -86,7 +109,7 @@
 				fps = 1000/deltaTime;
 				myMemory = System.totalMemory;
 				lastTime = time;
-				
+												
 				if (customerPersonManager)
 				{
 					customerPersonManager.update(lockedDelta);				
@@ -95,8 +118,60 @@
 				if (bandManager)
 				{	
 					bandManager.update(lockedDelta);
-				}				
+				}					
 			}
+			
+			public function updateRenderedStructures(os:OwnedStructure, method:String, worldToUpdate:World):void
+			{
+				if (isValidWorldStructure(os))
+				{
+					var asset:ActiveAsset = worldToUpdate.findAssetByThinger(os);
+					if (asset && method == "sell")
+					{
+						worldToUpdate.assetRenderer.removeAsset(asset);
+						reInitializeStructures(os, worldToUpdate);					
+					}
+					if (asset && method == "save_placement")
+					{
+						worldToUpdate.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z), false);
+						reInitializeStructures(os, worldToUpdate);					
+					}
+					if (method == "create_new")
+					{
+						addNewOwnedStructure(os, worldToUpdate);
+					}
+				}
+			}
+			
+			public function addNewOwnedStructure(os:OwnedStructure, worldToUpdate:World):void
+			{
+				var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+				var asset:ActiveAsset = new ActiveAsset(mc);
+				var addTo:Point3D = new Point3D(os.x, os.y, os.z);					
+				worldToUpdate.addStaticAsset(asset, addTo);
+				reInitializeStructures(os, worldToUpdate);					
+			}			
+			
+			public function isValidWorldStructure(os:OwnedStructure):Boolean
+			{
+				if (os.structure.structure_type == "StageDecoration")
+				{
+					return true;
+				}
+				return false;
+			}
+			
+			public function reInitializeStructures(os:OwnedStructure, worldToUpdate:World):void
+			{				
+				if (os.structure.structure_type == "StageDecoration")
+				{
+					this.bandManager.bandMemberManager.redrawAllBandMembers();
+				}
+				else
+				{
+					throw new Error("Not a relevant structure type");
+				}
+			}			
 		]]>
 	</mx:Script>
 </mx:Canvas>

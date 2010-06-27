@@ -19,12 +19,14 @@ package rock_on
 		
 		public var _listeningStationManager:ListeningStationManager;
 		public var _passerbyManager:PasserbyManager;
+		public var _venue:Venue;
 				
-		public function Passerby(movieClipStack:MovieClip, listeningStationManager:ListeningStationManager, passerbyManager:PasserbyManager, myWorld:World, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public function Passerby(movieClipStack:MovieClip, listeningStationManager:ListeningStationManager, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
 		{
 			super(movieClipStack, layerableOrder, creature, personScale, source);
 			_listeningStationManager = listeningStationManager;
 			_passerbyManager = passerbyManager;
+			_venue = venue;
 			_myWorld = myWorld;
 		}
 		
@@ -158,11 +160,11 @@ package rock_on
 			var destinationLocation:Point3D;
 			if (worldCoords.z == 0)
 			{
-				destinationLocation = new Point3D(Math.floor(PasserbyManager.VENUE_BOUND_X + Math.random()*(_myWorld.tilesWide - PasserbyManager.VENUE_BOUND_X)), 0, _myWorld.tilesDeep);			
+				destinationLocation = new Point3D(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right)), 0, _myWorld.tilesDeep);			
 			}
 			else
 			{
-				destinationLocation = new Point3D(Math.floor(PasserbyManager.VENUE_BOUND_X + Math.random()*(_myWorld.tilesWide - PasserbyManager.VENUE_BOUND_X)), 0, 0)
+				destinationLocation = new Point3D(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right)), 0, 0)
 			}
 			return destinationLocation;	
 		}			

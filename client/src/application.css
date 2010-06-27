@@ -1,5 +1,7 @@
 /* CSS file */
 @namespace mx "library://ns.adobe.com/flex/mx";
+@namespace s "library://ns.adobe.com/flex/spark";
+
 @font-face {
 	src: url("../libs/Gotham-Bold.otf");
     font-family: Gotham-Bold;
@@ -29,4 +31,5 @@
 @font-face {
 	src: url("../libs/Museo_Slab_900.otf");
 	font-family: Museo-Slab-900;
+	embedAsCFF: true;
 }

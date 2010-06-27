@@ -6,6 +6,7 @@ package game
 	import controllers.LayerableManager;
 	import controllers.LevelManager;
 	import controllers.OwnedLayerableManager;
+	import controllers.SongManager;
 	import controllers.StoreManager;
 	import controllers.StructureManager;
 	import controllers.ThingerManager;
@@ -18,6 +19,7 @@ package game
 	import helpers.UnprocessedModel;
 	
 	import models.EssentialModelReference;
+	import models.OwnedDwelling;
 	import models.User;
 	
 	import mx.collections.ArrayCollection;
@@ -31,6 +33,7 @@ package game
 	
 	public class GameDataInterface extends EventDispatcher
 	{
+		[Bindable] public var songManager:SongManager;
 		[Bindable] public var layerableManager:LayerableManager;
 		[Bindable] public var ownedLayerableManager:OwnedLayerableManager;
 		[Bindable] public var creatureManager:CreatureManager;
@@ -63,6 +66,7 @@ package game
 		public function createManagers(preLoadedContent:Dictionary):void
 		{
 			essentialModelManager = new EssentialModelManager();
+			songManager = new SongManager(essentialModelManager);
 			layerableManager = new LayerableManager(essentialModelManager);
 			ownedLayerableManager = new OwnedLayerableManager(essentialModelManager);
 			creatureManager = new CreatureManager(essentialModelManager);
@@ -120,7 +124,12 @@ package game
 			{
 				essentialModelManager.levels = preLoadedContent["levels"];
 				levelManager.levels = essentialModelManager.levels;
-			}									
+			}
+			if (preLoadedContent["songs"])
+			{
+				essentialModelManager.songs = preLoadedContent["songs"];
+				songManager.songs = essentialModelManager.songs;
+			}
 		}
 		
 		public function setUser(evt:CollectionEvent):void
@@ -308,23 +317,48 @@ package game
 		
 		public function checkForLoadedMovieClips():void
 		{
-			// This number is currently adjusted for stages without MCs!! CHANGE LATER!!
-//			Alert.show(structureManager.ownedStructureMovieClipsLoaded.toString() + "::" + structureManager.ownedStructuresLoaded.toString());
+			checkForLoadedStructures();
+			checkForLoadedLayerables();
+		}
+		
+		private function checkForLoadedStructures():void
+		{
+// 			This number is currently adjusted for stages without MCs!! CHANGE LATER!!
+//			trace (structureManager.ownedStructureMovieClipsLoaded.toString() + "::" + structureManager.ownedStructuresLoaded.toString());
 			if (structureManager.ownedStructureMovieClipsLoaded == structureManager.ownedStructuresLoaded)
 			{
-//				Use true for non-Facebook testing				
-				
-				if (isLoggedInUser())
+//				Use true for non-Facebook testing					
+				if (isLoggedInUser() && !structureManager.fullyLoaded && (dwellingManager.owned_dwellings[0] as OwnedDwelling).dwelling)
 //				if (true)
 				{
-					FlexGlobals.topLevelApplication.attemptToInitializeVenueForUser();																
+					FlexGlobals.topLevelApplication.attemptToInitializeVenueForUser();	
+					structureManager.fullyLoaded = true;
+				}
+				else if (isLoggedInUser() && !structureManager.fullyLoaded && !(dwellingManager.owned_dwellings[0] as OwnedDwelling).dwelling)
+				{
+					throw new Error("Dwelling not set");
 				}
 				else
 				{
 					FlexGlobals.topLevelApplication.friendGDILoaded(this);
-//					Application.application.attemptToShowFriendVenue(this);
 				}
-			}
+			}	
+		}
+		
+		private function checkForLoadedLayerables():void
+		{
+			if (layerableManager.ownedLayerableMovieClipsLoaded == layerableManager.ownedLayerablesLoaded)
+			{
+				if (isLoggedInUser() && !layerableManager.fullyLoaded)
+				{
+					FlexGlobals.topLevelApplication.attemptToPopulateVenueForUser();
+					layerableManager.fullyLoaded = true;
+				}
+				else
+				{
+//					Code for friend creature initialization
+				}
+			}			
 		}
 		
 		public function isLoggedInUser():Boolean

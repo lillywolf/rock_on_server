@@ -14,11 +14,14 @@ package models
 		public var _id:int;
 		public var _user_id:int;
 		public var _type:String;
+		public var _creature_group_id:int;
 		public var _owned_layerables:ArrayCollection;
 		public var _additional_info:String;
 		public var _name:String;
 		public var location:Point3D;
 		public var _layerableOrder:Array;
+		public var _last_fed:String;
+		public var has_moods:Boolean;
 		
 		public function Creature(params:Object, target:IEventDispatcher=null)
 		{
@@ -57,6 +60,11 @@ package models
 			if (params.name)
 			{
 				_name = params.name;
+			}
+			if (params.last_fed)
+			{
+				_last_fed = params.last_fed;
+				has_moods = true;
 			}
 		}
 		
@@ -173,6 +181,26 @@ package models
 		public function get layerableOrder():Array
 		{
 			return _layerableOrder;
+		}
+		
+		public function set last_fed(val:String):void
+		{
+			_last_fed = val;
+		}
+		
+		public function get last_fed():String
+		{
+			return _last_fed;
+		}
+		
+		public function set creature_group_id(val:int):void
+		{
+			_creature_group_id = val;
+		}
+		
+		public function get creature_group_id():int
+		{
+			return _creature_group_id;
 		}
 				
 	}

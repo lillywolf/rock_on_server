@@ -4,7 +4,12 @@ package rock_on
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	
+	import game.Leftover;
+	
 	import models.Creature;
+	import models.EssentialModelReference;
+	
+	import mx.collections.ArrayCollection;
 	
 	import world.Point3D;
 	import world.World;
@@ -21,13 +26,14 @@ package rock_on
 		public static const QUEUED_STATE:int = 4;
 		public static const GONE_STATE:int = 5;
 		public static const LEAVING_STATE:int = 6;
+		public static const MAX_LEFTOVERS:int = 2;
 		
 		public var enthralledTimer:Timer;
 		public var isStatic:Boolean;
 				
-		public function StationListener(movieClipStack:MovieClip, listeningStationManager:ListeningStationManager, passerbyManager:PasserbyManager, myWorld:World, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public function StationListener(movieClipStack:MovieClip, listeningStationManager:ListeningStationManager, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
 		{
-			super(movieClipStack, listeningStationManager, passerbyManager, myWorld, layerableOrder, creature, personScale, source);
+			super(movieClipStack, listeningStationManager, passerbyManager, myWorld, venue, layerableOrder, creature, personScale, source);
 		}	
 		
 		override public function startRouteState():void
@@ -128,7 +134,7 @@ package rock_on
 			
 			if (currentStation.isPermanentSlotAvailable() || isStatic)
 			{
-				var thinger:int = 0;
+				addLeftovers();
 			}
 			else
 			{
@@ -144,6 +150,22 @@ package rock_on
 			var index:int = currentStation.currentListeners.getItemIndex(this);
 			currentStation.currentListeners.removeItemAt(index);
 		}
+		
+		private function addLeftovers():void
+		{
+			var setLeftovers:ArrayCollection = EssentialModelReference.getSetLeftovers("Listening Station");
+			var randomLeftovers:ArrayCollection = EssentialModelReference.getRandomLeftovers("Listening Station");
+			var numExtras:int = Math.round(Math.random()*MAX_LEFTOVERS);
+			
+			for each (var leftover:Leftover in setLeftovers)
+			{
+				this.currentStation.addLeftoverToStation(leftover);
+			}
+			for (var i:int = 0; i < numExtras; i++)
+			{
+				this.currentStation.addLeftoverToStation(randomLeftovers[Math.floor(Math.random()*randomLeftovers.length)]);
+			}
+		}	
 		
 		public function selectStationActivity():void
 		{
@@ -180,11 +202,11 @@ package rock_on
 			var leaveDestination:Point3D;
 			if (Math.random() < 0.5)
 			{
-				leaveDestination = new Point3D(Math.round(PasserbyManager.VENUE_BOUND_X + Math.random()*(_myWorld.tilesWide - PasserbyManager.VENUE_BOUND_X)), 0, 0);
+				leaveDestination = new Point3D(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right)), 0, 0);
 			}
 			else
 			{
-				leaveDestination = new Point3D(Math.round(PasserbyManager.VENUE_BOUND_X + Math.random()*(_myWorld.tilesWide - PasserbyManager.VENUE_BOUND_X)), 0, _myWorld.tilesDeep);
+				leaveDestination = new Point3D(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right)), 0, _myWorld.tilesDeep);
 			}
 			return leaveDestination;
 		}

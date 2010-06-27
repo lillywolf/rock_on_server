@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100531181007) do
+ActiveRecord::Schema.define(:version => 20100624021949) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -30,6 +30,14 @@ ActiveRecord::Schema.define(:version => 20100531181007) do
     t.integer  "item_price"
   end
 
+  create_table "creature_groups", :force => true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "owned_dwelling_id"
+    t.integer  "user_id"
+  end
+
   create_table "creatures", :force => true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -40,6 +48,8 @@ ActiveRecord::Schema.define(:version => 20100531181007) do
     t.integer  "y"
     t.integer  "z"
     t.string   "name"
+    t.datetime "last_fed"
+    t.integer  "creature_group_id"
   end
 
   create_table "dwellings", :force => true do |t|
@@ -200,6 +210,8 @@ ActiveRecord::Schema.define(:version => 20100531181007) do
     t.integer  "premium_credits"
     t.datetime "last_showtime"
     t.integer  "level_id"
+    t.integer  "fan_hearts"
+    t.integer  "music_credits"
   end
 
 end

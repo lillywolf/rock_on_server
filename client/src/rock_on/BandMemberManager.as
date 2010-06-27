@@ -2,13 +2,18 @@ package rock_on
 {
 	import customizer.CustomizerEvent;
 	
+	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
+	import flash.filters.GlowFilter;
 	
 	import models.Creature;
 	import models.OwnedLayerable;
+	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
 	
+	import views.BandManager;
 	import views.ContainerUIC;
 	import views.UICanvas;
 	
@@ -35,20 +40,28 @@ package rock_on
 			super(source);
 		}
 		
-		public function add(person:BandMember):void
+		public function add(bm:BandMember):void
 		{
 			if(_myWorld)
 			{			
-				setSpawnLocation();
-				_myWorld.addAsset(person, spawnLocation);				
-				addItem(person);
-				person.myWorld = _myWorld;
+				var destination:Point3D = setSpawnLocation();
+				_myWorld.addAsset(bm, destination);				
+				addItem(bm);
+				bm.myWorld = _myWorld;
 			}
 			else
 			{
 				throw new Error("you have to fill your pool before you dive");
 			}
 		}
+		
+		public function clearFilters():void
+		{
+			for each (var bm:BandMember in this)
+			{
+				bm.filters = null;
+			}
+		}	
 		
 		public function updateAllBandMemberStates(state:int):void
 		{
@@ -99,11 +112,51 @@ package rock_on
 			return null;
 		}
 		
-		public function setSpawnLocation():void
+		public function setSpawnLocation():Point3D
 		{
-			spawnLocation = new Point3D(Math.floor(_concertStage.structure.width - (Math.random()*_concertStage.structure.width)), 0, Math.floor(_myWorld.tilesDeep - Math.random()*(_concertStage.structure.depth)));	
+			var destination:Point3D = pickPointWithinStructure(_concertStage);
+			return destination;
 		}
 		
+		public function pickPointWithinStructure(os:OwnedStructure):Point3D
+		{
+			var destination:Point3D;
+			var exemptStructures:ArrayCollection = new ArrayCollection();
+			exemptStructures.addItem(os);
+			var occupiedSpaces:ArrayCollection = new ArrayCollection();
+			var structureOccupiedSpaces:ArrayCollection = _myWorld.pathFinder.establishStructureOccupiedSpaces(exemptStructures);
+			var peopleOccupiedSpaces:ArrayCollection = _myWorld.pathFinder.establishPeopleOccupiedSpaces();
+			occupiedSpaces.addAll(structureOccupiedSpaces);
+			occupiedSpaces.addAll(peopleOccupiedSpaces);
+			do
+			{		
+				destination = new Point3D(Math.floor(os.structure.width - (Math.random()*os.structure.width)), os.structure.height, Math.ceil(_myWorld.tilesDeep - Math.random()*(os.structure.depth)));	
+			}
+			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(destination)));	
+			return destination;
+		}
+		
+		public function redrawAllBandMembers():void
+		{
+			var numMembers:int = length;
+			for (var i:int = (numMembers - 1); i >= 0; i--)
+			{
+				var bm:BandMember = this[i] as BandMember;
+				remove(bm);				
+				addAfterInitializing(bm);				
+			}
+		}		
+		
+		public function addAfterInitializing(bm:BandMember):void
+		{
+			if (_myWorld)
+			{
+				bm.lastWorldPoint = null;
+				bm.worldCoords = null;
+				add(bm);
+//				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
+			}
+		}		
 		
 		public function putBandMembersInCustomizer(animation:String):UICanvas
 		{
@@ -165,9 +218,7 @@ package rock_on
 		{
 			if(_myWorld)
 			{
-				_myWorld.removeChild(person);
-				var movingSkinIndex:Number = _myWorld.assetRenderer.sortedAssets.getItemIndex(person);
-				_myWorld.assetRenderer.sortedAssets.removeItemAt(movingSkinIndex);
+				_myWorld.removeAsset(person);
 				var personIndex:Number = getItemIndex(person);
 				removeItemAt(personIndex);
 			}

@@ -7,6 +7,7 @@ package rock_on
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
 	
 	import game.GameClock;
 	
@@ -21,7 +22,6 @@ package rock_on
 	import views.VenueManager;
 	
 	import world.ActiveAsset;
-	import world.Point;
 	import world.Point3D;
 	import world.World;
 
@@ -54,9 +54,8 @@ package rock_on
 		
 		public function setInMotion():void
 		{
-			passerbyManager = new PasserbyManager(this, _myWorld, creatureGenerator);
+			passerbyManager = new PasserbyManager(this, _myWorld, creatureGenerator, _venue);
 			showListeningStations();
-			showPassersby();			
 		}
 		
 		public function tearDown():void
@@ -93,7 +92,7 @@ package rock_on
 			var btn:SpecialButton = new SpecialButton();
 			btn.station = station;
 			btn.addEventListener(MouseEvent.CLICK, onFanButtonClicked);
-			var actualCoords:Point = World.worldToActualCoords(new Point3D(station.x, station.y, station.z));
+			var actualCoords:flash.geom.Point = World.worldToActualCoords(new Point3D(station.x, station.y, station.z));
 			btn.x = actualCoords.x + _myWorld.x;
 			btn.y = actualCoords.y + _myWorld.y;
 			if (!friendMirror && !editMirror)
@@ -148,11 +147,19 @@ package rock_on
 				var listeningStation:ListeningStation = createListeningStation(os);
 				var asset:ActiveAsset = createListeningStationAsset(listeningStation);
 				listeningStation.activeAsset = asset;
-				listeningStation.setInMotion();
+//				listeningStation.setInMotion();
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				addListeningStationToWorld(asset, addTo);
 				listeningStationAssets.addItem(asset);
 			}
+		}
+		
+		public function addStaticStationListeners():void
+		{
+			for each (var ls:ListeningStation in this.listeningStations)
+			{
+				ls.setInMotion();
+			}			
 		}
 		
 		public function addListeningStationToWorld(asset:ActiveAsset, addTo:Point3D):void

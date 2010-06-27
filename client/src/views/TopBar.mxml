@@ -15,12 +15,12 @@
 			import models.User;
 			
 			import mx.containers.HBox;
+			import mx.containers.VBox;
+			import mx.controls.Button;
 			import mx.controls.Image;
 			import mx.controls.Label;
 			import mx.controls.Text;
 			import mx.core.Application;
-//			import spark.components.Application;
-		
 			import mx.core.UIComponent;
 			
 			import world.World;
@@ -28,11 +28,17 @@
 			[Bindable] public var myUser:User;
 			
 			[Bindable] public var creditsBox:Text;
+			[Bindable] public var musicCreditsBox:Text;
+			[Bindable] public var fanHeartsBox:Text;
 			[Bindable] public var xpBox:Text;
 			[Bindable] public var levelBox:Text;
+			[Bindable] public var bandNameBox:Text;
 			[Bindable] public var mainHBox:HBox;
+			[Bindable] public var capacityBox:Text;
 			
 			public var textFilter:GlowFilter;
+			public var startShowButton:Button;
+			public var startEncoreButton:Button;
 			
 			[Bindable] public var layerableManager:LayerableManager;
 			[Bindable] public var structureManager:StructureManager;
@@ -52,13 +58,43 @@
 			
 			[Embed(source="../libs/icons/guitar.png")]
 			public var guitarIconClass:Class;					
+			[Embed(source="../libs/icons/heart.png")]
+			public var heartIconClass:Class;					
 			[Embed(source="../libs/icons/headphones.png")]
-			public var headphonesIconClass:Class;					
+			public var headphonesIconClass:Class;	
+			[Embed(source="../libs/Museo_Slab_900.otf",
+                    fontFamily="Museo_Slab_900",
+                    mimeType="application/x-font",
+                    embedAsCFF="true")]
+			public const Museo_Slab_900_Font:Class;
+			
 					
 			private function onCreationComplete():void
 			{
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);	
-				clipContent = false;		
+				clipContent = false;
+//				addBackCanvas();
+			}
+			
+			private function createTransparentFilter():GlowFilter
+			{
+				var filter:GlowFilter = new GlowFilter(0xffffff, 0.5, 4, 4, 30, 50);
+				return filter;
+			}
+			
+			private function addBackCanvas():void
+			{
+				var c:Canvas = new Canvas();
+				c.setStyle("backgroundColor", 0xffffff);
+				c.alpha = 0.6;
+				c.setStyle("cornerRadius", 14);
+				c.setStyle("borderStyle", "solid");
+				c.setStyle("borderColor", 0xffffff);
+				c.height = 90;
+				c.y = -10;
+				c.width = 740;
+				c.x = 10;
+				addChild(c);
 			}
 			
 			private function onEnterFrame(evt:Event):void
@@ -75,10 +111,32 @@
 			{
 				setBarSkeleton();
 				showCredits();
-				showPremiumCredits();	
-				showLevel();			
+//				showPremiumCredits();	
+				showMusicCredits();
+				showFanHearts();
+				showLevel();
 			}
 			
+			public function onVenueLoaded():void
+			{
+				var vbox:VBox = createBandInfoVBox();
+				showBandInfo(vbox);		
+				showVenueInfo(vbox);
+				addShowButtons(vbox);
+				addChild(vbox);
+			}
+			
+			public function createBandInfoVBox():VBox
+			{
+				var vbox:VBox = new VBox();
+				vbox.right = 0;
+				vbox.setStyle("verticalGap", 4);
+				vbox.clipContent = false;
+				vbox.setStyle("horizontalAlign", "right");
+				vbox.y = 19;
+				return vbox;
+			}
+						
 			public function setBarSkeleton():void
 			{
 				mainHBox = new HBox();
@@ -119,7 +177,7 @@
 				xpBox.text = myUser.xp.toString() + "/" + levelManager.getNextXpThreshold(myUser).toString();
 				xpBox.setStyle("color", 0xffffff);
 				xpBox.setStyle("fontSize", fontSize);
-				xpBox.setStyle("fontFamily", "Museo-Slab-900");
+				xpBox.setStyle("fontFamily", "Museo_Slab_900");
 				xpBox.x = 27;
 				xpBox.y = 3;
 				xpBox.filters = [textFilter];
@@ -129,6 +187,7 @@
 			public function showPremiumCredits():void
 			{
 				var textFilter:GlowFilter = createGrayFilter();
+				var backFilter:GlowFilter = createTransparentFilter();
 				var canvas:Canvas = createGreenCanvas();
 				canvas.x = 4;
 				canvas.y = 4;
@@ -138,14 +197,131 @@
 				creditsBox.setStyle("color", 0xd3ffa4);
 				creditsBox.x = 27;
 				creditsBox.y = 3;
-				creditsBox.filters = [textFilter];
+				creditsBox.filters = [textFilter, backFilter];
 				var icon:Image = new Image();
+				icon.filters = [backFilter];
 				icon.source = guitarIconClass;
 				icon.x = -9;
 				icon.y = -12;
 				canvas.addChild(icon);
 				setFontStyle(creditsBox, 16);
 				canvas.addChild(creditsBox);
+				mainHBox.addChild(canvas);					
+			}
+			
+			public function showBandInfo(vbox:VBox):void
+			{
+				var textFilter:GlowFilter = createGrayFilter();
+				var canvas:Canvas = createGreenCanvas();
+				var editButton:Button = new Button();
+				editButton.width = 26;
+				editButton.height = 26;
+				editButton.right = 0;
+				canvas.right = 0;
+				bandNameBox = new Text();
+				bandNameBox.right = 30;
+				bandNameBox.text = worldView.creatureManager.getCreatureGroupByOwnedDwellingId(worldView.venueManager.venue.id).name;
+				bandNameBox.setStyle("color", 0xd3ffa4);
+				bandNameBox.x = 0;
+				bandNameBox.y = 3;
+				bandNameBox.filters = [textFilter];				
+				setFontStyle(bandNameBox, 18);
+				canvas.addChild(bandNameBox);
+				canvas.addChild(editButton);
+				vbox.addChild(canvas);
+			}
+			
+			public function showVenueInfo(vbox:VBox):void
+			{
+				var textFilter:GlowFilter = createGrayFilter();
+				var canvas:Canvas = createGreenCanvas();
+				canvas.right = 0;
+//				canvas.y = 53;
+				var capacityHBox:HBox = new HBox();
+				var capacityLabel:Text = new Text();
+				capacityHBox.setStyle("horizontalGap", 0);
+				capacityLabel.text = "Fan Capacity:";
+				capacityLabel.filters = [textFilter];
+				capacityLabel.setStyle("color", 0xd3ffa4);
+				setFontStyle(capacityLabel, 14);
+				capacityHBox.addChild(capacityLabel);
+				capacityBox = new Text();
+				capacityBox.text = this.worldView.venueManager.venue.fancount.toString() + "/" + this.worldView.venueManager.venue.dwelling.capacity.toString();
+				capacityBox.filters = [textFilter];
+				capacityBox.x = 3;
+				capacityBox.setStyle("fontFamily", "Museo_Slab_900");
+				capacityBox.setStyle("fontSize", 14);
+				capacityBox.setStyle("color", 0xffffff);					
+				capacityHBox.addChild(capacityBox);
+				canvas.addChild(capacityHBox);
+				vbox.addChild(canvas);
+			}
+			
+			public function addShowButtons(vbox:VBox):void
+			{
+				var canvas:Canvas = createGreenCanvas();
+				startEncoreButton = new Button();
+				startEncoreButton.width = 36;
+				startEncoreButton.height = 36;
+				startEncoreButton.right = 0;
+				startEncoreButton.y = 3;
+				startShowButton = new Button();
+				startShowButton.width = 36;
+				startShowButton.height = 36;
+				startShowButton.right = 42;
+				startShowButton.y = 3;
+				canvas.addChild(startShowButton);				
+				canvas.addChild(startEncoreButton);		
+				vbox.addChild(canvas);
+			}
+			
+			public function enableStartShowButton():Button
+			{
+				return startShowButton;
+			}
+
+			public function showMusicCredits():void
+			{
+				var textFilter:GlowFilter = createGrayFilter();
+				var canvas:Canvas = createGreenCanvas();
+				canvas.y = 4;
+				canvas.height = 27;
+				musicCreditsBox = new Text();
+				musicCreditsBox.text = myUser.music_credits.toString();
+				musicCreditsBox.setStyle("color", 0xd3ffa4);
+				musicCreditsBox.x = 35;
+				musicCreditsBox.y = 3;
+				musicCreditsBox.filters = [textFilter];
+				var icon:Image = new Image();
+				icon.source = headphonesIconClass;
+				icon.x = -9;
+				icon.y = -12;
+				canvas.addChild(icon);
+				setFontStyle(musicCreditsBox, 16);
+				canvas.addChild(musicCreditsBox);
+				mainHBox.addChild(canvas);					
+			}
+
+			public function showFanHearts():void
+			{
+				var textFilter:GlowFilter = createGrayFilter();
+				var canvas:Canvas = createGreenCanvas();
+				canvas.x = 4;
+				canvas.y = 4;
+				canvas.height = 27;
+				fanHeartsBox = new Text();
+				fanHeartsBox.text = myUser.fan_hearts.toString();
+				fanHeartsBox.setStyle("color", 0xd3ffa4);
+				fanHeartsBox.x = 35;
+				fanHeartsBox.y = 3;
+				fanHeartsBox.filters = [textFilter];
+				var icon:Image = new Image();
+				icon.source = heartIconClass;
+				icon.x = -9;
+				icon.y = -12;
+				canvas.addChild(icon);
+				setFontStyle(fanHeartsBox, 16);
+				canvas.addChild(fanHeartsBox);
 				mainHBox.addChild(canvas);					
 			}
 			
@@ -241,7 +417,7 @@
 			{
 				textBox.setStyle("paddingLeft", 6);
 				textBox.setStyle("paddingRight", 6);
-				textBox.setStyle("fontFamily", "Museo-Slab-900");
+				textBox.setStyle("fontFamily", "Museo_Slab_900");
 				textBox.setStyle("fontSize", fontSize);
 				textBox.setStyle("color", 0xffffff);				
 			}
@@ -257,21 +433,15 @@
 				creditsBox.id = 'myCredits';
 				creditsBox.filters = [textFilter];
 				creditsBox.text = myUser.credits.toString();
-				creditsBox.x = 35;
+				creditsBox.x = 33;
 				creditsBox.y = 3;
 				setFontStyle(creditsBox, 16);
-//				var coinIcon:CoinIcon = new CoinIcon();
-//				coinIcon.scaleX = 0.4;
-//				coinIcon.scaleY = 0.4;
-//				var uic:UIComponent = new UIComponent();
-//				uic.addChild(coinIcon);
-//				uic.x = 6;
-//				uic.y = 5;
-//				canvas.addChild(uic);
 				var icon:Image = new Image();
-				icon.source = headphonesIconClass;
-				icon.x = -9;
-				icon.y = -12;
+				icon.source = new CoinsLeftover();
+//				icon.x = -9;
+//				icon.y = -12;
+				icon.x = 10;
+				icon.y = 32;
 				canvas.addChild(icon);
 				canvas.addChild(creditsBox);
 //				backCanvas.addChild(creditsCanvas);
@@ -292,7 +462,7 @@
 		]]>
 	</mx:Script>
 	<!--mx:Button x="60" click="showCustomizer()"/-->
-	<mx:Canvas right="0" width="200">
+	<mx:Canvas left="10" y="300" width="200">
 		<mx:Label text="MEM: {this.myMemory}"/>
 		<mx:Label y="20" text="FPS: {this.fps}"/>
 	</mx:Canvas>		

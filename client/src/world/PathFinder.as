@@ -1,8 +1,12 @@
 package world
 {
+	import flash.geom.Rectangle;
+	
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.collections.Sort;
+	import mx.collections.SortField;
 	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
@@ -16,11 +20,11 @@ package world
 		public var pathGrid:ArrayCollection;
 		[Bindable] public var _world:World;
 		
-		public function PathFinder(world:World, source:Array=null)
+		public function PathFinder(world:World, worldHeight:int=0, source:Array=null)
 		{
 			super(source);
 			_world = world;
-			createPathGrid();
+			createPathGrid(worldHeight);
 		}
 		
 		public function add(asset:ActiveAsset, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null):ArrayCollection
@@ -37,17 +41,22 @@ package world
 			removeItemAt(index);
 		}
 		
-		public function createPathGrid():void
+		public function createPathGrid(worldHeight:int=0):void
 		{
 			pathGrid = new ArrayCollection();
-			
-			var depthRow:ArrayCollection = new ArrayCollection();
-			var heightRow:ArrayCollection = new ArrayCollection();
+			addPlanesToPathGrid(worldHeight);
+		}
 		
+		private function addPlanesToPathGrid(worldHeight:int=0):void
+		{
+			var depthRow:ArrayCollection = new ArrayCollection();
+			var widthRow:ArrayCollection = new ArrayCollection();
+			var heightRow:ArrayCollection = new ArrayCollection();
+			
 			for (var i:int = 0; i<=_world.tilesWide; i++)
-			{
-				heightRow = new ArrayCollection();
-				for (var j:int = 0; j<1; j++)
+			{			
+				widthRow = new ArrayCollection();
+				for (var j:int = 0; j <= worldHeight; j++)
 				{
 					depthRow = new ArrayCollection();
 					for (var k:int = 0; k<=_world.tilesDeep; k++)
@@ -55,11 +64,11 @@ package world
 						var pt:Point3D = new Point3D(i, j, k);
 						depthRow.addItem(pt);						
 					}
-					heightRow.addItem(depthRow);
+					widthRow.addItem(depthRow);
 				}
-				pathGrid.addItem(heightRow);
-			}
-		}	
+				pathGrid.addItem(widthRow);			
+			}	
+		}
 		
 		private function initializePath(destination:Point3D):ArrayCollection
 		{
@@ -156,6 +165,81 @@ package world
 			return false;
 		}
 		
+		public function createSeatingArrangement(bounds:Rectangle, stageBounds:Rectangle, totalSeats:int):ArrayCollection
+		{
+			var seats:ArrayCollection = new ArrayCollection();
+			var totalPoints:int = bounds.height * bounds.width;
+			if (totalSeats < totalPoints)
+			{
+				// Subtract 2 to prevent overlap
+				var dimension:int = stageBounds.top - bounds.top - 2;
+				var seatsPerRow:int = Math.ceil(totalSeats / dimension);
+				for (var i:int = 0; i < dimension; i++)
+				{
+					var rowSeats:ArrayCollection = new ArrayCollection();
+					var orderedRowSeats:ArrayCollection = new ArrayCollection();
+					var dist:int;
+					for (var j:int = 0; j < seatsPerRow; j++)
+					{
+						var seatX:int;
+						var seatY:int;
+						do
+						{
+							if (Math.random() < 0.5)
+							{
+								seatX = stageBounds.right + 1 + i;
+								seatY = bounds.bottom - Math.round(Math.random() * (stageBounds.height + i + 1));
+								dist = seatY;
+							}
+							else
+							{
+								seatY = stageBounds.top - 1 - i;
+								seatX = bounds.left + Math.round(Math.random() * (stageBounds.width + i + 1));
+								dist = seatX;
+							}	
+							var reference:Point3D = this.pathGrid[seatX][0][seatY];
+						}
+						while (rowSeats.contains(reference));
+								
+						rowSeats.addItem(reference);
+						orderedRowSeats.addItem({reference: reference, distance: dist});
+//						seats.addItem(reference);
+					}
+					var sortField:SortField = new SortField("distance");
+					sortField.numeric = true;
+					var sort:Sort = new Sort();
+					sort.fields = [sortField];
+					orderedRowSeats.sort = sort;
+					orderedRowSeats.refresh();
+					for each (var obj:Object in orderedRowSeats)
+					{
+						seats.addItem(obj.reference);
+					}
+//					seats.addItem(rowSeats);
+				}
+			}
+			else
+			{
+				throw new Error("Exceeds max capacity");
+			}
+			return seats;		
+		}
+		
+		public function getOuterPoints(selectedPoint:Point3D, bounds:Rectangle):int
+		{
+			var outsidePoints:int = 0;
+			outsidePoints = ((bounds.right - selectedPoint.x) * bounds.height) + ((selectedPoint.z - bounds.top) * bounds.width);
+			if (Math.abs(bounds.right - selectedPoint.x) > Math.abs(bounds.top - selectedPoint.z))
+			{
+				outsidePoints += bounds.right - selectedPoint.x;
+			}
+			else if (Math.abs(bounds.right - selectedPoint.x) < Math.abs(bounds.top - selectedPoint.z))
+			{
+				outsidePoints += bounds.top - selectedPoint.z;
+			}
+			return outsidePoints;
+		}
+		
 		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutStructureOccupiedSpaces:Boolean=true, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null):ArrayCollection
 		{
 			var pathGridComplete:Boolean = false;
@@ -205,9 +289,15 @@ package world
 		public function establishOwnedStructures():ArrayCollection
 		{
 			var occupiedStructures:ArrayCollection = new ArrayCollection();
-			for each (var os:OwnedStructure in FlexGlobals.topLevelApplication.gdi.structureManager.owned_structures)
+			for each (var asset:ActiveAsset in _world.assetRenderer.unsortedAssets)
 			{
-				addToOccupiedSpaces(os);
+				if (asset.thinger)
+				{
+					if (asset.thinger is OwnedStructure)
+					{
+						addToOccupiedSpaces(asset);				
+					}
+				}
 			}
 			return occupiedStructures;
 		}
@@ -288,7 +378,7 @@ package world
 			var structureOccupiedSpaces:ArrayCollection = getStructureOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets, exemptStructures);
 			if (_world.bitmapBlotter)
 			{
-				structureOccupiedSpaces.addAll(getStructureOccupiedSpacesForBitmap(_world.bitmapBlotter.bitmapReferences, exemptStructures));			
+//				structureOccupiedSpaces.addAll(getStructureOccupiedSpacesForBitmap(_world.bitmapBlotter.bitmapReferences, exemptStructures));			
 			}
 			return structureOccupiedSpaces;
 		}
@@ -307,7 +397,7 @@ package world
 				{
 					if (!exemptStructures)
 					{
-						structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);						
+						structureSpaces = addToOccupiedSpaces(asset);						
 					}
 					else
 					{
@@ -315,7 +405,7 @@ package world
 						{
 							if (!(os.id == (asset.thinger as OwnedStructure).id && os.structure == (asset.thinger as OwnedStructure).structure))
 							{
-								structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);							
+								structureSpaces = addToOccupiedSpaces(asset);							
 							}
 						}
 					}		
@@ -341,7 +431,7 @@ package world
 				{
 					if (!exemptStructures)
 					{
-						structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);						
+						structureSpaces = addToOccupiedSpaces(asset);						
 					}
 					else
 					{
@@ -349,7 +439,7 @@ package world
 						{
 							if (!(os.id == (asset.thinger as OwnedStructure).id && os.structure == (asset.thinger as OwnedStructure).structure))
 							{
-								structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);							
+								structureSpaces = addToOccupiedSpaces(asset);							
 							}
 						}
 					}		
@@ -362,21 +452,53 @@ package world
 			return structureOccupiedSpaces;
 		}
 		
-		private function addToOccupiedSpaces(os:OwnedStructure):ArrayCollection
+		private function addToOccupiedSpaces(asset:ActiveAsset):ArrayCollection
 		{
-			var structureSpaces:ArrayCollection = new ArrayCollection();			
-			structureSpaces = getPoint3DForStructure(os, structureSpaces);
+			var structureSpaces:ArrayCollection = new ArrayCollection();
+			if (asset.movieClip.height == 0)
+			{
+				structureSpaces = getEstimatedPoint3DForStructure(asset, structureSpaces);
+			}
+			else
+			{
+				structureSpaces = getPoint3DForStructure(asset, structureSpaces);			
+			}
 			return structureSpaces;
 		}
 		
-		public function getPoint3DForStructure(os:OwnedStructure, structureSpaces:ArrayCollection):ArrayCollection
+		public function getEstimatedPoint3DForStructure(asset:ActiveAsset, structureSpaces:ArrayCollection):ArrayCollection
 		{
-			// Does not count height			
-			for (var xPt:int = 0; xPt < os.structure.width; xPt++)
+			// Does not count height
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			
+			for (var xPt:int = Math.floor(os.x - os.structure.width/2); xPt < Math.ceil(os.x + os.structure.width/2); xPt++)
 			{
-				for (var zPt:int = 0; zPt < os.structure.depth; zPt++)
+				for (var zPt:int = Math.floor(os.z - os.structure.depth/2); zPt < Math.ceil(os.z + os.structure.depth/2); zPt++)
 				{
-					var osPt3D:Point3D = pathGrid[os.x + xPt][0][os.z + zPt];
+					var osPt3D:Point3D = pathGrid[xPt][os.y][zPt];
+					structureSpaces.addItem(osPt3D);										
+				}
+			}
+			if (!os.structure.width || !os.structure.depth)
+			{
+				throw new Error("No dimensions specified for structure");
+			} 
+			
+			return structureSpaces;
+		}
+
+		public function getPoint3DForStructure(asset:ActiveAsset, structureSpaces:ArrayCollection):ArrayCollection
+		{
+			// Does not count height	
+			
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			var bottomLeft:Point3D = _world.getWorldBoundsForAsset(asset);
+			
+			for (var xPt:int = bottomLeft.x; xPt < (bottomLeft.x + os.structure.width); xPt++)
+			{
+				for (var zPt:int = bottomLeft.z; zPt < (bottomLeft.z + os.structure.depth); zPt++)
+				{
+					var osPt3D:Point3D = pathGrid[xPt][os.y][zPt];
 					structureSpaces.addItem(osPt3D);										
 				}
 			}
@@ -412,12 +534,12 @@ package world
 			var osPt3D:Point3D;
 			if (asset.worldDestination)
 			{
-				osPt3D = pathGrid[asset.worldDestination.x][0][asset.worldDestination.z];
+				osPt3D = pathGrid[asset.worldDestination.x][asset.worldDestination.y][asset.worldDestination.z];
 				return osPt3D;
 			}
 			else if (asset.worldCoords)
 			{
-				osPt3D = pathGrid[asset.worldCoords.x][0][asset.worldCoords.z];
+				osPt3D = pathGrid[asset.worldCoords.x][asset.worldCoords.y][asset.worldCoords.z];
 				return osPt3D;
 			}
 			return null;

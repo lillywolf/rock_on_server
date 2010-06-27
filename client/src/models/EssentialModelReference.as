@@ -6,6 +6,8 @@ package models
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
+	import game.Leftover;
+	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
@@ -200,6 +202,129 @@ package models
 			var newMc:MovieClip = new klass() as MovieClip;
 			return newMc;
 		}
+		
+		public static function getCursorClassForMood(type:String):Class
+		{
+			switch (type)
+			{
+				case "hungry":
+					return getDefinitionByName("Hamburger") as Class;
+				case "thirsty":
+					return getDefinitionByName("CoffeeLeftover") as Class;
+			}
+			return null;
+		}
+		
+		public static function getSetLeftovers(type:String):ArrayCollection
+		{
+			var leftovers:ArrayCollection = new ArrayCollection();
+			switch (type)
+			{
+				case "Listening Station":
+					leftovers.addItem(EssentialModelReference.getCoinsLeftover(false));
+					break;
+				case "Show":
+					break;
+			}
+			return leftovers;			
+		}
+		
+		public static function getRandomLeftovers(type:String):ArrayCollection
+		{
+			var leftovers:ArrayCollection = new ArrayCollection();
+			switch (type)
+			{
+				case "Listening Station":
+					leftovers.addItem(EssentialModelReference.getFoodLeftover(false));
+//					leftovers.addItem(EssentialModelReference.getEggLeftover(false));
+//					leftovers.addItem(EssentialModelReference.getShoesLeftover(false));
+//					leftovers.addItem(EssentialModelReference.getCoffeeLeftover(false));
+//					leftovers.addItem(EssentialModelReference.getRoseLeftover(false));
+					leftovers.addItem(EssentialModelReference.getCoinsLeftover(false));
+//					leftovers.addItem(EssentialModelReference.getShirtLeftover(false));
+					break;
+				case "Show":
+					break;
+			}
+			return leftovers;
+		}
+		
+		public static function getFoodLeftover(clickable:Boolean):Leftover
+		{
+			var mc:Hamburger = new Hamburger();
+			mc.cacheAsBitmap = true;
+			mc.scaleX = 0.8;
+			mc.scaleY = 0.8;
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;			
+			leftover.type = "food";
+			return leftover;
+		}
+		
+		public static function getShirtLeftover(clickable:Boolean):Leftover
+		{
+			var mc:ShirtOnGround = new ShirtOnGround();
+			mc.cacheAsBitmap = true;
+			mc.scaleX = 0.7;
+			mc.scaleY = 0.7;
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;			
+			leftover.type = "cred";
+			return leftover;
+		}
+		
+		public static function getRoseLeftover(clickable:Boolean):Leftover
+		{
+			var mc:Rose = new Rose();
+			mc.cacheAsBitmap = true;
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;			
+			leftover.type = "cred";
+			return leftover;
+		}
+		
+		public static function getShoesLeftover(clickable:Boolean):Leftover
+		{
+			var mc:ShoesOnGround = new ShoesOnGround();
+			mc.cacheAsBitmap = true;
+			mc.scaleX = 0.8;
+			mc.scaleY = 0.8;
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;			
+			leftover.type = "cred";
+			return leftover;
+		}
+		
+		public static function getCoinsLeftover(clickable:Boolean):Leftover
+		{
+			var mc:CoinsLeftover = new CoinsLeftover();
+			mc.cacheAsBitmap = true;
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;			
+			leftover.type = "coins";
+			return leftover;
+		}
+		
+		public static function getCoffeeLeftover(clickable:Boolean):Leftover
+		{
+			var mc:CoffeeLeftover = new CoffeeLeftover();
+			mc.cacheAsBitmap = true;
+			mc.scaleX = 1.1;
+			mc.scaleY = 1.1;
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;
+			leftover.type = "food";
+			return leftover;
+		}
+		
+		public static function getEggLeftover(clickable:Boolean):Leftover
+		{
+			var mc:EggLeftover = new EggLeftover();
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;
+			leftover.type = "rare";
+			return leftover;
+		}		
 		
 	}
 }

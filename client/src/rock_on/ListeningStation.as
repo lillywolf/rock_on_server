@@ -1,18 +1,21 @@
 package rock_on
 {
+	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
 	import flash.events.TimerEvent;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	
 	import game.Counter;
 	import game.CounterEvent;
+	import game.Leftover;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
 	
 	import world.ActiveAsset;
-	import world.Point;
 	import world.Point3D;
 	import world.World;
 
@@ -68,7 +71,7 @@ package rock_on
 			counter = new Counter(secondsRemaining*1000);
 			counter.addEventListener(CounterEvent.COUNTER_COMPLETE, onCounterComplete);
 			counter.displayCounter();
-			var uiCoordinates:Point = World.worldToActualCoords(new Point3D(x, y, z));
+			var uiCoordinates:flash.geom.Point = World.worldToActualCoords(new Point3D(x, y, z));
 			counter.counterCanvas.x = uiCoordinates.x;
 			counter.counterCanvas.y = uiCoordinates.y;
 			FlexGlobals.topLevelApplication.addChild(counter.counterCanvas);
@@ -247,7 +250,15 @@ package rock_on
 			}
 			return false;
 		}	
-		
+			
+		public function addLeftoverToStation(leftover:Leftover):void
+		{
+			var asset:ActiveAsset = new ActiveAsset(leftover);
+			asset.thinger = leftover;
+			var destination:Point3D = new Point3D(this.x + this.structure.width/2 + Math.random()*this.radius.x + 2, 0, this.z - this.radius.z + Math.random()*(this.radius.z*2));
+			_venue.myWorld.addAsset(asset, destination);		
+		}		
+
 		private function startFanCollectionState():void
 		{
 			state = FAN_COLLECTION_STATE;

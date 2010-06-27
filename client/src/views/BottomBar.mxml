@@ -153,7 +153,7 @@
 			
 			public function onUserAndFriendsLoaded():void
 			{
-				if (parentApplication.userLoaded && parentApplication.friendsLoaded)
+				if (FlexGlobals.topLevelApplication.userLoaded && FlexGlobals.topLevelApplication.friendsLoaded)
 				{
 					showFacebookFriends();	
 					showInitialCreature();			
@@ -220,11 +220,6 @@
 				img2.y = 5;
 				img2.filters = [grayFilter];
 				canvas.addChild(img2);
-//				var img3:Image = new Image();
-//				img3.source = musicNotesButton;
-//				img3.x = 110;
-//				img3.y = 35;
-//				canvas.addChild(img3);
 				canvas.y = 85;
 				return canvas;
 			}
@@ -357,7 +352,7 @@
 				creatureCanvas.height = 105;
 				creatureCanvas.y = 510;
 				creatureCanvas.x = 10;
-				creatureCanvas.alpha = 0.4;
+				creatureCanvas.alpha = 0.6;
 				creatureCanvas.setStyle("backgroundColor", 0xffffff);
 				creatureCanvas.setStyle("cornerRadius", 12);
 				creatureCanvas.setStyle("borderStyle", "solid");
@@ -478,6 +473,10 @@
 			
 			public function switchToWorldView():void
 			{
+				FlexGlobals.topLevelApplication.stageView.x = worldView.x;
+				FlexGlobals.topLevelApplication.stageView.y = worldView.y;
+				FlexGlobals.topLevelApplication.stageView.myStage.x = worldView.myWorld.x;
+				FlexGlobals.topLevelApplication.stageView.myStage.y = worldView.myWorld.y;
 				FlexGlobals.topLevelApplication.currentState = "stageViewer";
 			}
 			
@@ -654,7 +653,7 @@
 				canvas.setStyle("cornerRadius", 14);
 				canvas.setStyle("borderStyle", "solid");
 				canvas.setStyle("borderColor", backingColor);
-				canvas.alpha = 0.4;
+				canvas.alpha = 0.6;
 				canvas.height = 88;
 				canvas.width = 72;
 				renderer.height = 58;

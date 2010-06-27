@@ -2,7 +2,10 @@ package world
 {
 	import flash.display.MovieClip;
 	import flash.events.Event;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	
+	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
@@ -26,7 +29,7 @@ package world
 		[Bindable] public var assetRenderer:AssetRenderer;
 		[Bindable] public var pathFinder:PathFinder;		
 		
-		public function World(worldWidth:int, worldDepth:int, blockSize:int)
+		public function World(worldWidth:int, worldDepth:int, blockSize:int, maxHeight:int=0)
 		{
 			super();
 			_worldWidth = worldWidth;
@@ -36,7 +39,7 @@ package world
 			assetRenderer = new AssetRenderer();
 			assetRenderer.addEventListener(WorldEvent.DESTINATION_REACHED, onDestinationReached);
 			addEventListener(WorldEvent.DIRECTION_CHANGED, onDirectionChanged);
-			pathFinder = new PathFinder(this);
+			pathFinder = new PathFinder(this, maxHeight);
 			addChild(assetRenderer);
 			addEventListener(Event.ADDED, onAdded);			
 		}
@@ -47,6 +50,11 @@ package world
 //			addChild(wg);
 			tilesWide = _worldWidth/_blockSize;
 			tilesDeep = _worldDepth/_blockSize;
+		}
+		
+		public function getActualHeight():Number
+		{
+			return wg.mc.height;
 		}
 		
 		private function onAdded(evt:Event):void
@@ -69,9 +77,9 @@ package world
 			activeAsset.x += addTo.x;
 			activeAsset.y += addTo.y;
 			assetRenderer.unsortedAssets.addItem(activeAsset);
-		}
+		}		
 		
-		public function addStaticBitmap(activeAsset:ActiveAsset, worldCoords:Point3D, animation:String=null, frameNumber:int=0):void
+		public function addStaticBitmap(activeAsset:ActiveAsset, worldCoords:Point3D, animation:String=null, frameNumber:int=0, reflection:Boolean=false):void
 		{
 			activeAsset.world = this;
 			activeAsset.worldCoords = worldCoords;
@@ -83,16 +91,60 @@ package world
 			activeAsset.y = 0;
 			activeAsset.x += addTo.x;
 			activeAsset.y += addTo.y;
-			_bitmapBlotter.addBitmap(activeAsset, animation, frameNumber);		
+			_bitmapBlotter.addBitmap(activeAsset, animation, frameNumber, reflection);		
 		}
 		
+		public function addStaticRenderedBitmap(activeAsset:ActiveAsset, worldCoords:Point3D, animation:String=null, frameNumber:int=0, reflection:Boolean=false):void
+		{
+			activeAsset.world = this;
+			activeAsset.worldCoords = worldCoords;			
+			var addTo:Point = worldToActualCoords(worldCoords);
+			activeAsset.realCoords = addTo;
+			activeAsset.x = addTo.x;
+			activeAsset.y = addTo.y;	
+			this.bitmapBlotter.addRenderedBitmap(activeAsset, animation, frameNumber, reflection);
+		}
+
+			
 		public function getRectForStaticAsset(mc:MovieClip, realCoordX:int, realCoordY:int):Rectangle
 		{
 			mc.y = realCoordY;
 			mc.x = realCoordX;
 			var rect:Rectangle = mc.getBounds(this.assetRenderer);
 			return rect;
-		}		
+		}	
+		
+		public function getWorldBoundsForAsset(asset:ActiveAsset):Point3D
+		{
+			var bottomLeft:Point = new Point(asset.actualBounds.left, asset.actualBounds.bottom);
+			var worldBound:Point3D = World.actualToWorldCoords(bottomLeft, asset.worldCoords.y);
+			worldBound = new Point3D(Math.round(worldBound.x), Math.round(worldBound.y), Math.round(worldBound.z));
+			return worldBound;
+		}
+		
+		public function getMatchingStaticAsset(thinger:Object):ActiveAsset
+		{
+			for each (var asset:ActiveAsset in this.assetRenderer.unsortedAssets)
+			{
+				if (asset.thinger)
+				{
+					if (asset.thinger.id == thinger.id)
+					{
+						return asset;
+					}
+				}
+			}
+			return null;
+		}
+		
+		public function removeAssetFromWorld(asset:ActiveAsset):void
+		{
+			if (assetRenderer.unsortedAssets.contains(asset))
+			{
+				var index:int = assetRenderer.unsortedAssets.getItemIndex(asset);
+				assetRenderer.unsortedAssets.removeItemAt(index);
+			}			
+		}
 		
 		public function removeAsset(activeAsset:ActiveAsset):void
 		{
@@ -107,19 +159,6 @@ package world
 			}
 		}
 		
-//		public function switchFromMovieClipToBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int=0):void
-//		{
-//			if (assetRenderer.unsortedAssets.contains(asset))
-//			{
-//				var index:int = assetRenderer.unsortedAssets.getItemIndex(asset);
-//				assetRenderer.unsortedAssets.removeItemAt(index);
-//			}
-//			if (bitmapBlotter.getMatchFromBitmapReferences(asset) == null)
-//			{
-//				bitmapBlotter.reIntroduceBitmap(asset, animation, frameNumber);			
-//			}
-//		}
-		
 		public static function worldToActualCoords(worldCoords:Point3D):Point
 		{
 			var x:Number = worldCoords.x;
@@ -131,13 +170,13 @@ package world
 			return actualCoords;
 		}
 		
-		public static function actualToWorldCoords(actualCoords:Point):Point3D
+		public static function actualToWorldCoords(actualCoords:Point, heightBase:int=0):Point3D
 		{
 			var ratio:Number = FlexGlobals.topLevelApplication.xGridCoord / FlexGlobals.topLevelApplication.yGridCoord;			
 			var starter:Number = actualCoords.x / (FlexGlobals.topLevelApplication.xGridCoord * 2);
-			var worldX:Number = starter + (actualCoords.y / (FlexGlobals.topLevelApplication.yGridCoord * ratio));
-			var worldZ:Number = starter - (actualCoords.y / (FlexGlobals.topLevelApplication.yGridCoord * ratio));
-			var worldY:Number = 0;
+			var worldX:Number = starter + (actualCoords.y / (FlexGlobals.topLevelApplication.yGridCoord * ratio)) + heightBase;
+			var worldZ:Number = starter - (actualCoords.y / (FlexGlobals.topLevelApplication.yGridCoord * ratio)) - heightBase;
+			var worldY:Number = heightBase;
 			return new Point3D(worldX, worldY, worldZ);
 		}
 		
@@ -149,7 +188,7 @@ package world
 			activeAsset.lastWorldPoint.z = (activeAsset.worldCoords.z.valueOf());
 		}
 		
-		public function moveAssetTo(activeAsset:ActiveAsset, destination:Point3D, fourDirectional:Boolean = false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null):void
+		public function moveAssetTo(activeAsset:ActiveAsset, destination:Point3D, fourDirectional:Boolean = false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0):void
 		{	
 			validateDestination(destination);
 			updatePointReferences(activeAsset, destination);
@@ -274,9 +313,12 @@ package world
 			{
 				if (asset.thinger)
 				{
-					if (asset.thinger.id == thinger.id)
+					if (asset.thinger.id)
 					{
-						return asset;					
+						if (asset.thinger.id == thinger.id)
+						{
+							return asset;					
+						}
 					}
 				}
 			}

@@ -1,5 +1,6 @@
 package views
 {
+	import flash.display.Bitmap;
 	import flash.display.MovieClip;
 	
 	import mx.core.UIComponent;
@@ -8,6 +9,7 @@ package views
 	{
 		public var _mc:MovieClip;
 		public var _thinger:Object;
+		public var _bitmap:Bitmap;
 		
 		public function ContainerUIC(params:Object=null)
 		{
@@ -40,6 +42,16 @@ package views
 		public function get mc():MovieClip
 		{
 			return _mc;
+		}
+		
+		public function set bitmap(val:Bitmap):void
+		{
+			_bitmap = val;
+		}
+		
+		public function get bitmap():Bitmap
+		{
+			return _bitmap;
 		}
 		
 	}

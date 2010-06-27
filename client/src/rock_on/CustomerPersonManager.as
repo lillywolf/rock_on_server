@@ -1,10 +1,14 @@
 package rock_on
 {
+	import flash.display.MovieClip;
+	import flash.filters.GlowFilter;
 	import flash.geom.Rectangle;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
+	import mx.core.FlexGlobals;
+	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
 	import world.ActiveAsset;
@@ -37,18 +41,18 @@ package rock_on
 			}
 		}
 		
-		public function add(cp:CustomerPerson, isMoving:Boolean=false):void
+		public function add(cp:CustomerPerson, isMoving:Boolean=false, seatNumber:int=-1, bounds:Rectangle=null, avoid:Rectangle=null, worldToUpdate:World=null):void
 		{
 			if(_myWorld)
 			{			
 				cp.myWorld = _myWorld;
 				if (isMoving)
 				{
-					addToWorldAsMoving(cp);
+					addToWorldAsMoving(cp, bounds, avoid, worldToUpdate);
 				}
 				else
 				{
-					addToWorld(cp);				
+					addToWorld(cp, seatNumber);				
 				}
 				addEventListeners(cp);
 				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
@@ -72,20 +76,46 @@ package rock_on
 			}
 		}
 		
-		private function addToWorldAsMoving(cp:CustomerPerson):void
+		public function clearFilters():void
+		{
+			for each (var cp:CustomerPerson in this)
+			{
+				cp.filters = null;
+			}
+		}
+		
+		private function addToWorldAsMoving(cp:CustomerPerson, bounds:Rectangle, avoid:Rectangle=null, worldToUpdate:World=null):void
 		{
 			cp.venue = _venue;
-			var destination:Point3D = cp.pickPointNearStructure(_venue.boothsRect);
-			_myWorld.addAsset(cp, destination);
+			var destination:Point3D = cp.pickPointNearStructure(bounds, avoid, worldToUpdate);
+			if (worldToUpdate)
+			{
+				worldToUpdate.addAsset(cp, destination);
+			}
+			else
+			{
+				_myWorld.addAsset(cp, destination);			
+			}
 			this.addItem(cp);			
 		}
 				
-		private function addToWorld(cp:CustomerPerson):void
+		private function addToWorld(cp:CustomerPerson, seatNumber:int = -1):void
 		{
 			cp.venue = _venue;
 			cp.isBitmapped = true;
-			var destination:Point3D = cp.pickPointNearStructure(_venue.mainCrowdRect);
-			_myWorld.addStaticBitmap(cp, destination, "stand_still_away", 37);
+			var destination:Point3D;
+			if (seatNumber != -1)
+			{
+				destination = _venue.assignedSeats[seatNumber];
+				_venue.numAssignedSeats++;
+			}
+			else
+			{
+				destination = cp.pickPointNearStructure(_venue.mainCrowdRect);			
+			}
+			cp.worldCoords = destination;
+			var standAnimation:Object = cp.standFacingObject(_concertStage, 0, true);
+			_myWorld.addStaticBitmap(cp, destination, standAnimation.animation, standAnimation.frameNumber, standAnimation.reflection);
 			this.addItem(cp);
 		}	
 		
@@ -204,7 +234,8 @@ package rock_on
 				}
 				else if (cp.state == CustomerPerson.HEADTOSTAGE_STATE)
 				{
-					cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
+//					cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
+					cp.advanceState(CustomerPerson.BITMAPPED_ENTHRALLED_STATE);
 				}
 				else if (cp.state == CustomerPerson.ENTHRALLED_STATE)
 				{
@@ -213,6 +244,10 @@ package rock_on
 				else if (cp.state == CustomerPerson.HEADTODOOR_STATE)
 				{
 					cp.advanceState(CustomerPerson.HEADTOSTAGE_STATE);
+				}
+				else if (cp.state == CustomerPerson.ROAM_STATE)
+				{
+					cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
 				}
 				else
 				{
@@ -278,7 +313,7 @@ package rock_on
 					(asset as CustomerPerson).setDirection(nextPoint);
 				}
 			}
-		}	
+		}		
 		
 		public function removeBoothFromAvailable(booth:Booth):void
 		{

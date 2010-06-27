@@ -5,6 +5,8 @@ package world
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	import flash.utils.getQualifiedClassName;
 	
@@ -27,8 +29,7 @@ package world
 		public var _walkProgress:Number;
 		public var _isMoving:Boolean;
 		public var _fourDirectional:Boolean;
-		public var imageEnabled:Boolean;
-		public var enabledImage:Canvas;
+		public var _actualBounds:Rectangle;
 		
 		public var realCoordY:Number;
 		public var realCoordX:Number;
@@ -230,6 +231,16 @@ package world
 		public function get fourDirectional():Boolean
 		{
 			return _fourDirectional;
+		}
+		
+		public function set actualBounds(val:Rectangle):void
+		{
+			_actualBounds = val;
+		}
+		
+		public function get actualBounds():Rectangle
+		{
+			return _actualBounds;
 		}
 		
 	}

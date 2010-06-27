@@ -1,15 +1,21 @@
 package views
 {
+	import com.facebook.commands.events.CreateEvent;
+	
 	import controllers.CreatureManager;
 	
+	import flash.display.MovieClip;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
+	
+	import helpers.CreatureEvent;
 	
 	import mx.collections.ArrayCollection;
 	
 	import rock_on.BandMember;
 	import rock_on.BandMemberManager;
 	import rock_on.ConcertStage;
+	import rock_on.Person;
 	import rock_on.Venue;
 	
 	import world.AssetStack;
@@ -32,7 +38,7 @@ package views
 			_creatureManager = creatureManager;
 			_booths = booths;
 			_concertStage = concertStage;	
-			_myWorld = myWorld;		
+			_myWorld = myWorld;					
 		}
 		
 		public function setInMotion():void
@@ -69,7 +75,7 @@ package views
 			{
 				throw new Error("Not a legitimate state");
 			}
-		}
+		}	
 		
 		private function showBandMembers():void
 		{

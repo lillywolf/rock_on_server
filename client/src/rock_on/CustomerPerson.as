@@ -5,16 +5,23 @@ package rock_on
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	
+	import game.GameClock;
+	
 	import models.Creature;
 	
 	import mx.collections.ArrayCollection;
+	import mx.containers.HBox;
 	import mx.events.DynamicEvent;
 	
+	import views.AssetBitmapData;
+	
 	import world.Point3D;
+	import world.World;
 	import world.WorldEvent;
 
 	public class CustomerPerson extends Person
 	{
+		public static const INITIALIZED_STATE:int = 0;
 		public static const ENTHRALLED_STATE:int = 1;
 		public static const ROAM_STATE:int = 2;
 		public static const ROUTE_STATE:int = 3;
@@ -22,10 +29,17 @@ package rock_on
 		public static const GONE_STATE:int = 5;
 		public static const HEADTOSTAGE_STATE:int = 6;
 		public static const HEADTODOOR_STATE:int = 7;
+		public static const BITMAPPED_ENTHRALLED_STATE:int = 8;
+		
+		public static const IS_CHILLIN:String = "chillin";
+		public static const IS_HUNGRY:String = "hungry";
+		public static const WANTS_MUSIC:String = "music";
 		
 		public static const ENTHRALLED_TIME:int = 50000 * Math.random();
 		public static const QUEUED_TIME:int = 4000;
 		public static const FAN_CONVERSION_DELAY:int = 2000;
+		public static const HUNGER_DELAY:int = 720000 + 360000 * Math.random();
+		public static const MUSIC_DELAY:int = 2000000 + 1000000 * Math.random();
 				
 		public var enthralledTimer:Timer;
 		public var queuedTimer:Timer;
@@ -37,6 +51,7 @@ package rock_on
 		public var currentBoothPosition:int;
 		public var activityTimer:Timer;
 		public var isBitmapped:Boolean;
+		public var isSuperFan:Boolean;
 		public var _concertStage:ConcertStage;
 		public var _boothManager:BoothManager;
 		public var _venue:Venue;
@@ -47,7 +62,23 @@ package rock_on
 			super(movieClipStack, layerableOrder, creature, personScale, source);
 			_concertStage = concertStage;
 			_boothManager = boothManager;
-			startRoamState();
+			startInitializedState();
+			setMoods();
+		}
+		
+		override public function updateMoods():void
+		{
+			for each (var s:String in moods)
+			{
+				if (s == CustomerPerson.IS_HUNGRY)
+				{
+					doHungryMood();
+				}
+				if (s == CustomerPerson.WANTS_MUSIC)
+				{
+					doWantsMusicMood();
+				}
+			}
 		}
 		
 		public function reInitialize():void
@@ -72,14 +103,24 @@ package rock_on
 		
 		override public function update(deltaTime:Number):Boolean
 		{
+			if (creature.has_moods)
+			{
+				updateMoods();			
+			}
 			switch (state)
 			{
+				case INITIALIZED_STATE:
+					doInitializedState(deltaTime);
+					break;
 				case ROAM_STATE:
 					doRoamState(deltaTime);
 					break;
 				case ENTHRALLED_STATE:
 					doEnthralledState(deltaTime);
-					break;					
+					break;	
+				case BITMAPPED_ENTHRALLED_STATE:
+					doBitmappedEnthralledState(deltaTime);
+					break;
 				case QUEUED_STATE:
 					doQueuedState(deltaTime);
 					break;
@@ -97,6 +138,8 @@ package rock_on
 					return true;	
 				default: throw new Error('oh noes!');
 			}
+			
+			
 			return false;
 		}
 		
@@ -104,12 +147,18 @@ package rock_on
 		{
 			switch (state)
 			{	
+				case INITIALIZED_STATE:
+					endInitializedState();
+					break;
 				case ROAM_STATE:
 					endRoamState();
 					break;
 				case ENTHRALLED_STATE:
 					endEnthralledState();				
 					break;	
+				case BITMAPPED_ENTHRALLED_STATE:
+					endBitmappedEnthralledState();
+					break;
 				case ROUTE_STATE:
 					endRouteState();
 					break;	
@@ -134,6 +183,9 @@ package rock_on
 				case ENTHRALLED_STATE:
 					startEnthralledState();
 					break;
+				case BITMAPPED_ENTHRALLED_STATE:
+					startBitmappedEnthralledState();
+					break;
 				case QUEUED_STATE:
 					startQueuedState();
 					break;
@@ -151,11 +203,41 @@ package rock_on
 					break;	
 				default: throw new Error('no state to advance to!');	
 			}
-		}		
+		}	
+		
+		public function startInitializedState():void
+		{
+			state = INITIALIZED_STATE;
+		}
+
+		override public function startMood(mood:String, index:int, numMoods:int):void
+		{
+			switch (mood)
+			{
+				case IS_HUNGRY:
+					startHungryMood(index, numMoods);
+					break;
+				case WANTS_MUSIC:
+					startWantsMusicMood(index, numMoods);
+					break;
+			}
+		}
+		
+		public function doInitializedState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function endInitializedState():void
+		{
+			
+		}
 		
 		override public function startRoamState():void
 		{
 			state = ROAM_STATE;
+			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
+			moveCustomer(destination);
 		}
 		
 		public function timedConversion(fanIndex:int):void
@@ -172,6 +254,16 @@ package rock_on
 			convertTimer.stop();
 			
 			advanceState(HEADTODOOR_STATE);
+		}
+		
+		public function endBitmappedEnthralledState():void
+		{
+			
+		}
+		
+		public function doBitmappedEnthralledState(deltaTime:Number):void
+		{
+			
 		}
 		
 		public function startHeadToDoorState():void
@@ -207,12 +299,21 @@ package rock_on
 			
 			var frameNumber:int = 1;
 			var obj:Object = standFacingObject(_concertStage, frameNumber);
-//			_myWorld.assetGenius.evaluateStandActivity(this, true, obj.animation, obj.frameNumber);
 			
 			enthralledTimer = new Timer(CustomerPerson.ENTHRALLED_TIME);
 			enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
 			enthralledTimer.start();
 			numEnthralledTimers++;
+		}
+		
+		public function startBitmappedEnthralledState():void
+		{
+			state = BITMAPPED_ENTHRALLED_STATE;
+			
+			var frameNumber:int = 1;
+			var obj:Object = standFacingObject(_concertStage, frameNumber);
+			_world.removeAssetFromWorld(this);
+			_world.bitmapBlotter.addRenderedBitmap(this, obj.animation, obj.frameNumber, obj.reflection);
 		}
 		
 //		public function evaluateBitmapSwitch():void
@@ -227,7 +328,7 @@ package rock_on
 		{
 //			Condition this somehow
 
-			if (Math.random() < 0.2 && !isBitmapped)
+			if (Math.random() < 0.2 && !isBitmapped && !isSuperFan)
 			{
 				enthralledTimer.stop();
 				enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
@@ -320,7 +421,8 @@ package rock_on
 				trace("Queued Timers: " + numQueuedTimers.toString());		
 				trace("Enthralled Timers: " + numEnthralledTimers.toString());				
 				
-				advanceState(HEADTOSTAGE_STATE);
+//				advanceState(HEADTOSTAGE_STATE);
+				advanceState(ROAM_STATE);
 			}
 			else
 			{
@@ -371,7 +473,9 @@ package rock_on
 		{
 			state = HEADTOSTAGE_STATE;
 			
-			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
+//			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
+			var destination:Point3D = _venue.assignedSeats[_venue.numAssignedSeats];
+			_venue.numAssignedSeats++;
 			moveCustomer(destination);
 		}
 		
@@ -436,22 +540,44 @@ package rock_on
 			return ENTHRALLED_TIME;
 		}
 		
-		public function pickPointNearStructure(bounds:Rectangle):Point3D
+		public function pickPointNearStructure(bounds:Rectangle, avoid:Rectangle=null, worldToUpdate:World=null):Point3D
 		{
 			var stagePoint:Point3D;
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
+			var occupiedSpaces:ArrayCollection;
+			if (worldToUpdate)
+			{
+				occupiedSpaces = worldToUpdate.pathFinder.updateOccupiedSpaces(true, true);
+			}
+			else
+			{
+				occupiedSpaces = _myWorld.pathFinder.updateOccupiedSpaces(true, true);			
+			}
 			
 			if (availableSpaces(occupiedSpaces))
 			{
-				do 
+				var xDimension:int;
+				var zDimension:int;
+				if (avoid)
 				{
-					var xDimension:int = Math.round(Math.random()*bounds.width);
-					var zDimension:int = bounds.top + Math.round(Math.random()*bounds.height);
-//					var xDimension:int = Math.round(Math.random()*_myWorld.tilesWide);
-//					var zDimension:int = Math.round(Math.random()*_myWorld.tilesDeep);
-					stagePoint = new Point3D(xDimension, 0, zDimension);				
+					do 
+					{
+						xDimension = Math.round(Math.random()*bounds.width);
+						zDimension = bounds.top + Math.round(Math.random()*bounds.height);
+						stagePoint = new Point3D(xDimension, 0, zDimension);				
+					}
+					while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)) || 
+						(xDimension >= avoid.left && xDimension <= avoid.right && zDimension >= avoid.top && zDimension <= avoid.bottom));					
 				}
-				while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)));
+				else
+				{
+					do 
+					{
+						xDimension = Math.round(Math.random()*bounds.width);
+						zDimension = bounds.top + Math.round(Math.random()*bounds.height);
+						stagePoint = new Point3D(xDimension, 0, zDimension);				
+					}
+					while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)));
+				}
 			}
 			else
 			{
@@ -486,6 +612,16 @@ package rock_on
 			{
 				throw new Error("Should not be updating booth front when not in route state");
 			}
+		}
+		
+		public function startWantsMusicMood(index:int, numMoods:int):void
+		{
+			
+		}
+		
+		public function doWantsMusicMood():void
+		{
+			
 		}
 		
 		private function updateDestination(newDestination:Point3D):void

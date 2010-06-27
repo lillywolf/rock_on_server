@@ -29,6 +29,7 @@ package world
 	{
 		public static const FOOT_CONSTANT:int = 9;
 		public static const WIDTH_BUFFER:int = 10;
+		public static const HEIGHT_BUFFER:int = 20;
 		public var _backgroundCanvas:Canvas;
 		public var bitmapReferences:ArrayCollection;
 		public var incrementX:int;
@@ -54,7 +55,7 @@ package world
 			}
 		}
 		
-		public function addBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int = 0):void
+		public function addBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int = 0, reflect:Boolean=false):AssetBitmapData
 		{
 			var abd:AssetBitmapData = this.getMatchFromBitmapReferences(asset);
 			if (abd)
@@ -63,9 +64,17 @@ package world
 			}
 			else
 			{
-				abd = createNewAssetBitmapData(asset, animation, frameNumber);
+				abd = createNewAssetBitmapData(asset, animation, frameNumber, reflect);
 				bitmapReferences.addItem(abd);
 			}
+			return abd;
+		}
+		
+		public function addRenderedBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int = 0, reflect:Boolean=false):void
+		{
+			var abd:AssetBitmapData = addBitmap(asset, animation, frameNumber, reflect);
+			this.getBitmapForPerson(abd);
+			_backgroundCanvas.rawChildren.addChild(abd.bitmap);
 		}
 		
 		public function addInitialBitmap(abd:AssetBitmapData, animation:String, frameNumber:int=0):void
@@ -90,11 +99,12 @@ package world
 			abd.realCoordY = asset.realCoords.y;
 		}
 		
-		public function createNewAssetBitmapData(asset:ActiveAsset, animation:String=null, frameNumber:int=0):AssetBitmapData
+		public function createNewAssetBitmapData(asset:ActiveAsset, animation:String=null, frameNumber:int=0, reflect:Boolean=false):AssetBitmapData
 		{
 			var abd:AssetBitmapData = new AssetBitmapData();
 			var newMc:MovieClip = getNewMovieClip(asset, animation, frameNumber);
 			abd.mc = newMc;
+			abd.reflected = reflect;
 			abd.activeAsset = asset;
 			abd.realCoordX = asset.realCoords.x;
 			abd.realCoordY = asset.realCoords.y;	
@@ -384,15 +394,18 @@ package world
 		
 		public function moveRenderedBitmap(abd:AssetBitmapData):void
 		{
-			var bmd:BitmapData = abd.bitmap.bitmapData;
-			var bp:Bitmap = new Bitmap();
-			bp.bitmapData = bmd;
-			bp.opaqueBackground = null;				
-			bp.x = abd.realCoordX - abd.mc.width/2;
-			bp.y = relHeight/2 + abd.realCoordY - abd.mc.height;			
-//			abd.bitmap.transform.matrix.tx = (abd.realCoordX - abd.mc.width/2) - abd.bitmap.x;
-//			abd.bitmap.transform.matrix.ty = (relHeight/2 + abd.realCoordY - abd.mc.height) - abd.bitmap.y;	
-			abd.bitmap = bp;
+			if (abd.bitmap)
+			{
+				var bmd:BitmapData = abd.bitmap.bitmapData;
+				var bp:Bitmap = new Bitmap();
+				bp.bitmapData = bmd;
+				bp.opaqueBackground = null;				
+				bp.x = abd.realCoordX - abd.mc.width/2;
+				bp.y = relHeight/2 + abd.realCoordY - abd.mc.height;			
+	//			abd.bitmap.transform.matrix.tx = (abd.realCoordX - abd.mc.width/2) - abd.bitmap.x;
+	//			abd.bitmap.transform.matrix.ty = (relHeight/2 + abd.realCoordY - abd.mc.height) - abd.bitmap.y;	
+				abd.bitmap = bp;
+			}
 		}
 		
 		public function getBitmapForStructure(abd:AssetBitmapData):Bitmap
@@ -412,6 +425,23 @@ package world
 			abd.bitmap = bp;
 			return bp;
 		}
+		
+		public static function getBitmapForMovieClip(mc:MovieClip):Bitmap
+		{
+			var bmd:BitmapData = new BitmapData(mc.width, mc.height, true, 0x00000000);
+			var bottomSlice:Number = (mc.transform.pixelBounds.bottom/mc.transform.pixelBounds.height)*mc.height;
+			var rect:Rectangle = new Rectangle(0, 0, mc.width + WIDTH_BUFFER, mc.height + bottomSlice);
+			var matrix:Matrix = new Matrix();
+			matrix.tx = mc.width/2;	
+			matrix.ty = mc.height - bottomSlice;
+			bmd.draw(mc, matrix, new ColorTransform(), null, rect);
+			var bp:Bitmap = new Bitmap();
+			bp.bitmapData = bmd;
+			bp.opaqueBackground = null;				
+			bp.x = mc.width/2;
+			bp.y = -mc.height/2;
+			return bp;			
+		}
 
 		public function getBitmapForPerson(abd:AssetBitmapData):Bitmap
 		{
@@ -420,7 +450,14 @@ package world
 			abd.mc.scaleY = 0.4;
 			var rect:Rectangle = new Rectangle(0, 0, abd.mc.width + WIDTH_BUFFER, abd.mc.height + FOOT_CONSTANT);
 			var matrix:Matrix = new Matrix();
-			matrix.scale(0.4, 0.4);
+			if (abd.reflected)
+			{
+				matrix.scale(-0.4, 0.4);
+			}
+			else
+			{
+				matrix.scale(0.4, 0.4);			
+			}
 			matrix.tx = abd.mc.width/2 + WIDTH_BUFFER/2;
 			var pb:PeachBody = new PeachBody();
 			var pbHeight:int = pb.height;

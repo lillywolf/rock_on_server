@@ -45,6 +45,8 @@ package rock_on
 		public static const CROWD_BUFFER_FRACTION:Number = 0.3;
 		
 		public var state:int;
+		public var assignedSeats:ArrayCollection;
+		public var numAssignedSeats:int;
 		public var startShowButton:Button;
 		public var mainEntrance:Point3D;
 		public var entryPoints:ArrayCollection;
@@ -55,6 +57,8 @@ package rock_on
 		public var boothsRect:Rectangle;
 		public var crowdBufferRect:Rectangle;
 		public var stageBufferRect:Rectangle;
+		public var audienceRect:Rectangle;
+		public var stageRect:Rectangle;
 		
 		public var _myWorld:World;
 		
@@ -77,8 +81,12 @@ package rock_on
 			venueRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, _myWorld.tilesDeep);
 			boothsRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, Math.round(_myWorld.tilesDeep * BOOTH_SECTION_FRACTION))
 			stageBufferRect = new Rectangle(0, (_myWorld.tilesDeep - _venueManager.concertStage.structure.depth - STAGE_BUFFER_SQUARES), _venueManager.concertStage.structure.width + STAGE_BUFFER_SQUARES, _venueManager.concertStage.structure.depth + STAGE_BUFFER_SQUARES);	
+			stageRect = new Rectangle(0, (_myWorld.tilesDeep - _venueManager.concertStage.structure.depth), _venueManager.concertStage.structure.width, _venueManager.concertStage.structure.depth);	
 			crowdBufferRect = new Rectangle(Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width), boothsRect.bottom, venueRect.right - (Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width)), venueRect.height - boothsRect.height);
-			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom));
+			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom - 1));
+			audienceRect = new Rectangle(0, boothsRect.bottom, venueRect.width, venueRect.height - boothsRect.height - 1);
+			
+			assignedSeats = _myWorld.pathFinder.createSeatingArrangement(audienceRect, stageBufferRect, this.dwelling.capacity);
 		}
 		
 		public function setAdditionalProperties(params:Object):void
@@ -285,13 +293,8 @@ package rock_on
 		
 		public function displayStartShowButton():void
 		{
-			startShowButton = new Button();
-			startShowButton.width = 50;
-			startShowButton.height = 50;
-			startShowButton.x = 400;
-			startShowButton.y = 0;
+			var startShowButton:Button = FlexGlobals.topLevelApplication.topBarView.enableStartShowButton();
 			startShowButton.addEventListener(MouseEvent.CLICK, onStartShowButtonClicked);
-			FlexGlobals.topLevelApplication.addChild(startShowButton);
 		}
 		
 		private function onStartShowButtonClicked(evt:MouseEvent):void

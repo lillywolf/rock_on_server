@@ -14,12 +14,12 @@
 		</mx:State>
 		<mx:State name="stageViewer" basedOn="worldView">
 			<mx:AddChild position="before" relativeTo="worldView">
-				<views:StageView id="stageView" customerPersonManager="{worldView.customerPersonManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}"/>
+				<views:StageView id="stageView" wbi="{wbi}" bottomBar="{bottomBarView}" customerPersonManager="{worldView.customerPersonManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}"/>
 			</mx:AddChild>			
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
 			<mx:AddChild position="after">
-				<views:WorldView id="worldView" bottomBar="{bottomBarView}" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}" levelManager="{gdi.levelManager}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandManager="{stageView.bandManager}"/>
+				<views:WorldView id="worldView" wbi="{wbi}" bottomBar="{bottomBarView}" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}" levelManager="{gdi.levelManager}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandManager="{stageView.bandManager}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="friendView" basedOn="topBar">
@@ -41,30 +41,42 @@
 	<mx:Script>
 		<![CDATA[
 			import com.facebook.data.users.FacebookUser;
-			import mx.events.CollectionEvent;
+			import com.facebook.events.FacebookEvent;
+			
 			import controllers.CreatureManager;
-			import world.AssetStack;
-			import models.OwnedLayerable;
-			import mx.events.StateChangeEvent;
-			import game.ImposterOwnedStructure;
-			import world.ActiveAsset;
-			import stores.StoreEvent;
-			import models.User;
-			import models.OwnedStructure;
-			import models.OwnedDwelling;
-			import rock_on.ContentIndex;
+			import controllers.FriendManager;
+			
+			import facebook.FacebookFunTime;
+			
+			import game.GameDataInterface;
 			import game.GameMagicManager;
+			import game.ImposterOwnedStructure;
+			
+			import models.Creature;
+			import models.OwnedDwelling;
+			import models.OwnedLayerable;
+			import models.OwnedStructure;
+			import models.User;
+			
+			import mx.events.CollectionEvent;
 			import mx.events.DynamicEvent;
 			import mx.events.FlexEvent;
-			import controllers.FriendManager;
-			import com.facebook.events.FacebookEvent;
-			import facebook.FacebookFunTime;
-			import user.UserEvent;
-			import models.Creature;
-			import views.CreatureCustomizer;
-			import server.ServerDataEvent;
-			import game.GameDataInterface;
+			import mx.events.StateChangeEvent;
+			
+			import rock_on.ContentIndex;
+			
 			import server.ServerController;
+			import server.ServerDataEvent;
+			
+			import stores.StoreEvent;
+			
+			import user.UserEvent;
+			
+			import views.CreatureCustomizer;
+			import views.WorldBitmapInterface;
+			
+			import world.ActiveAsset;
+			import world.AssetStack;
 						
 			[Bindable] public var gdi:GameDataInterface;
 			[Bindable] public var loadedModels:Dictionary;
@@ -78,6 +90,7 @@
 			public var userLoaded:Boolean;
 			public var friendsLoaded:Boolean;
 			public var facebookDataLoaded:Boolean;
+			[Bindable] public var wbi:WorldBitmapInterface;
 			
 			private function onPreInitialize():void
 			{
@@ -108,6 +121,8 @@
 				initializeFacebookInterface();				
 				currentState = "stageViewer";
 				gdi.storeManager.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
+				
+				wbi = new WorldBitmapInterface(worldView, stageView, editView, bottomBarView);
 			}
 			private function initializeFacebookInterface():void
 			{
@@ -165,10 +180,16 @@
 				if (!userLoaded)
 				{
 					userLoaded = true;
-					stageView.setInMotion();
-					worldView.setInMotion();	
+					stageView.initializeStructures();
+					worldView.initializeStructures();
+					topBarView.onVenueLoaded();
 					getBasicFriendInfo();			
 				}
+			}
+			
+			public function attemptToPopulateVenueForUser():void
+			{
+				worldView.initializeCreatures();
 			}
 			public function friendGDILoaded(friendGDI:GameDataInterface):void
 			{
@@ -273,6 +294,7 @@
 			{
 				gdi.structureManager.updateOwnedStructureOnServerResponse(os, method, worldView);
 				worldView.updateRenderedStructures(os, method);
+				stageView.updateRenderedStructures(os, method, stageView.myStage);
 				
 				if (editView)
 				{
