@@ -12,6 +12,13 @@ package views
 	public class UserInfoRenderer extends UIComponent
 	{
 		public var _myUser:User;
+		
+		[Embed(source="../libs/Museo_Slab_900.otf",
+                    fontFamily="Museo_Slab_900",
+                    mimeType="application/x-font",
+                    embedAsCFF="true")]
+		public const Museo_Slab_900_Font:Class;			
+		
 		public function UserInfoRenderer(myUser:User)
 		{
 			super();

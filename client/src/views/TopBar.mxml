@@ -7,12 +7,15 @@
 			import controllers.CreatureManager;
 			import controllers.LayerableManager;
 			import controllers.LevelManager;
+			import controllers.SongManager;
 			import controllers.StoreManager;
 			import controllers.StructureManager;
 			import controllers.ThingerManager;
 			import controllers.UserManager;
 			
 			import models.User;
+			
+			import music.MusicPlayer;
 			
 			import mx.containers.HBox;
 			import mx.containers.VBox;
@@ -35,6 +38,7 @@
 			[Bindable] public var bandNameBox:Text;
 			[Bindable] public var mainHBox:HBox;
 			[Bindable] public var capacityBox:Text;
+			[Bindable] public var musicPlayer:MusicPlayer;
 			
 			public var textFilter:GlowFilter;
 			public var startShowButton:Button;
@@ -47,6 +51,7 @@
 			[Bindable] public var thingerManager:ThingerManager;
 			[Bindable] public var userManager:UserManager;
 			[Bindable] public var levelManager:LevelManager;
+			[Bindable] public var songManager:SongManager;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
@@ -122,8 +127,15 @@
 				var vbox:VBox = createBandInfoVBox();
 				showBandInfo(vbox);		
 				showVenueInfo(vbox);
+				showMusicInfo();
 				addShowButtons(vbox);
 				addChild(vbox);
+			}
+			
+			public function showMusicInfo():void
+			{
+				musicPlayer = new MusicPlayer(songManager);
+				addChild(musicPlayer);
 			}
 			
 			public function createBandInfoVBox():VBox

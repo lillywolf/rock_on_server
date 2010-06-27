@@ -6,9 +6,11 @@ package models
 	
 	public class OwnedSong extends EssentialModel
 	{
+		public var _id:int;
 		public var _user_id:int;
 		public var _song_id:int;
-		public var _band_id:int;
+		public var _creature_group_id:int;
+		public var _points_when_acquired:int;
 		public var _song:Song;
 		
 		public function OwnedSong(params:Object=null, target:IEventDispatcher=null)
@@ -19,8 +21,9 @@ package models
 		
 		public function setProperties(params:Object):void
 		{
+			_id = params.id;
 			_user_id = params.user_id;
-			_band_id = params.band_id;
+			_creature_group_id = params.creature_group_id;
 			_song_id = params.song_id;
 		}
 		
@@ -42,14 +45,14 @@ package models
 			return _user_id;
 		}
 		
-		public function set band_id(val:int):void
+		public function set creature_group_id(val:int):void
 		{
-			_band_id = val;
+			_creature_group_id = val;
 		}
 		
-		public function get band_id():int
+		public function get creature_group_id():int
 		{
-			return _band_id;
+			return _creature_group_id;
 		}
 
 		public function set song_id(val:int):void
@@ -60,6 +63,26 @@ package models
 		public function get song_id():int
 		{
 			return _song_id;
+		}
+
+		public function set points_when_acquired(val:int):void
+		{
+			_points_when_acquired = val;
+		}
+		
+		public function get points_when_acquired():int
+		{
+			return _points_when_acquired;
+		}
+		
+		public function get song():Song
+		{
+			return _song;
+		}
+		
+		public function get id():int
+		{
+			return _id;
 		}
 	}
 

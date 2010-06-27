@@ -24,11 +24,6 @@
 }
 
 @font-face {
-	src: url("../libs/Museo_Slab_500.otf");
-	font-family: Museo-Slab-500;
-}
-
-@font-face {
 	src: url("../libs/Museo_Slab_900.otf");
 	font-family: Museo-Slab-900;
 	embedAsCFF: true;

@@ -159,6 +159,7 @@ package game
 			getDataForModel({}, "structure", "get_all");
 			getDataForModel({}, "dwelling", "get_all");
 			getDataForModel({}, "store", "get_all");
+			getDataForModel({}, "song", "get_all");
 		}
 		
 		public function getDataForModel(params:Object, modelName:String, methodName:String):void

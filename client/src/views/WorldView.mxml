@@ -6,6 +6,7 @@
 			import controllers.DwellingManager;
 			import controllers.LayerableManager;
 			import controllers.LevelManager;
+			import controllers.SongManager;
 			import controllers.StoreManager;
 			import controllers.StructureManager;
 			import controllers.ThingerManager;
@@ -126,6 +127,7 @@
 			[Bindable] public var userManager:UserManager;
 			[Bindable] public var dwellingManager:DwellingManager;
 			[Bindable] public var levelManager:LevelManager;
+			[Bindable] public var songManager:SongManager;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;

@@ -4,6 +4,7 @@ package models
 	
 	public class Song extends EssentialModel
 	{
+		public var _id:int;
 		public var _title:String;
 		public var _artist_name:String;
 		public var _band_id:int;
@@ -19,6 +20,7 @@ package models
 		
 		public function setProperties(params:Object):void
 		{
+			_id = params.id;
 			_title = params.title;
 			_artist_name = params.artist_name;
 			_band_id = params.id;
@@ -84,6 +86,11 @@ package models
 		public function get user_id():int
 		{
 			return _user_id;
+		}
+		
+		public function get id():int
+		{
+			return _id;
 		}
 	}
 }

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100624021949) do
+ActiveRecord::Schema.define(:version => 20100625180755) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -110,6 +110,15 @@ ActiveRecord::Schema.define(:version => 20100624021949) do
     t.integer  "creature_id"
   end
 
+  create_table "owned_songs", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "user_id"
+    t.integer  "creature_group_id"
+    t.integer  "song_id"
+    t.integer  "points_when_acquired"
+  end
+
   create_table "owned_structures", :force => true do |t|
     t.float    "x"
     t.float    "y"
@@ -149,6 +158,16 @@ ActiveRecord::Schema.define(:version => 20100624021949) do
     t.integer  "x"
     t.integer  "y"
     t.integer  "z"
+    t.integer  "user_id"
+  end
+
+  create_table "songs", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "artist_name"
+    t.string   "title"
+    t.string   "genre"
+    t.integer  "points"
     t.integer  "user_id"
   end
 
