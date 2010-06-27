@@ -1,0 +1,33 @@
+Songs
+  Infamous
+  Commented
+  Newest
+  Fast Growing
+  Most Added
+  Tips
+Artists
+  Unsolicited Press Kits
+  Fast Growing
+  Newest
+  Most Added
+  Available
+My Picks
+  Songs
+    Infamous
+    Recent
+    Most Points
+    Watching
+  Artists
+    Recent
+    Most Points
+    Watching(?)
+
+Signing a band is the same as picking each of their songs?
+Artist view:
+  Band pic
+  Artist name
+  Song: ""
+  Total Adds
+  Diamond Cost
+  Links: All Songs, Watch, Sign
+  

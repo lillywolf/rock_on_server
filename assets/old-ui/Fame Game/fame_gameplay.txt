@@ -1,0 +1,79 @@
+I customize an avatar
+I add application
+I get a song in my song inbox
+I listen to the song, evaluate
+I find out I can go to the charts to pick songs to listen to
+I continue getting songs in my inbox
+I get some action points every time I heart a song
+  # of action points changes based on some criteria
+  Sometimes I get other things too, like special bonuses
+    First time hearts get something
+  Songs get put into rotation at (fake) radio stations, giving me action points
+I start getting feedback
+  Negative:
+    "WKBR: Passed up your songs"
+    "[Promoter image]: Not interested"
+    "[Fan]: No purchase"
+    "[Band]: Too tired to rehearse"
+    "[Critic]: No review"
+    "[Booker]: Not interested in your artists for yyy"
+  Positive:
+    "KQD: Put xxx into their rotation" +1 [frequency dependent on "nurture"]
+    "[Promoter image]: Agreed to promote xxx" +2
+    "[Fan]: Bought the song xxx" +1
+    "[Fan]: Bought the album xxx" +3
+    "xxx was hearted!" +2 +$5
+    "Someone played xxx" +1 +$2
+    "[Critic]: Reviewed xxx positively" +[variable]
+    "[Booker]: Wants to book xxx for yyy" +[variable]
+    "[Fan]: Wants an autograph" +4
+    "[Fan]: Bought a poster" +$5
+    "[xx]: Wants to help sell merch!"
+I level up
+  "You've reached a new level!"
+  I get/unlock something, like:
+    More radio stations
+    Distribution in record stores
+    Bigger venue access
+    Additional worker [which automatically do something]
+      PR (access to critics/reviews -- allows you to submit artists to reviewers [part of nurture])
+      Advertising (spend $$ to advertise band, band goes into featured chart; this also unlocks featured sort)
+      Receptionist?
+      Artist (creates in-house merchandise)
+      Street team
+      Charts access
+        Fast growing sort page
+        New genre
+        Friend preferences sort page
+      Better office
+      More rooms
+      "Sends"
+      More $$$
+I'm doing well! I have lots of money. 
+  Buy stuff
+    Items [non-functioal]
+    Rooms [non-functional]
+  Buy more artists 
+  Nurture artists 
+    Buying energy drinks, espresso, pizza etc. [once/x hours]
+    Buying "advertising" on featured chart [once/x hours]
+    Buying "sends" [a single send to someone's songbox] [once/x hours]
+  Buy clothing?
+  Buy locations [e.g. new office, start from beginning?]
+My bands are so cool. I want people to see them!
+  Visit friends' offices and bands
+  Send songs to friends
+  Trading something?
+  Friend rating system?
+  Chart topping?
+I don't sign in for a while...
+  Offices/rooms get messy
+  Artists stop earning you action points
+  Feedback slows down, positive feedback goes down as a %
+  Miss window of opportunity to do something
+    E.g. bands signable for free
+    Critics 
+    
+        
+    
+    

@@ -1,0 +1,57 @@
+-- THE FAME GAME --
+
+"Music at its Finest"
+
+Can YOU find great unknown music? Show off your musical authority!
+
+
+
+Get started: Pick your first 10 songs!
+[Search for songs] --> iTunes search
+[Browse songs] --> manual uploads library
+Select --> puts them on your selections page
+
+
+In a band? Enter your songs into the Fame Game! Collect votes from friends and rise to the top of the charts!
+Have a great song? Enter it in the Fame Game. Collect votes and rise to the top of the charts!
+Bands: enter your songs into the music database!
+Each band gets a photo, a description, and a list of songs
+
+
+
+You can choose up to x songs per day.
+
+Rules:
+1. You can choose up to x songs per day
+2. You gain points as others add the songs you've chosen to their 'best' list
+3. You lose points if others add your chosen songs to their 'worst' list
+4. The fewer adds a song has when you select it, the more points you get for each additional add
+5. If you reach x points, you will be given authority status
+6. All Top 40 songs are currently off-limits (you won't be able to add them)
+
+UI:
+*Song selector pages - search, browse
+*Selections pages for fans
+  Album art
+  Song name
+  # of votes
+*Band pages for artists
+  Picture
+  Description
+  Songs + # of votes/adds
+*Charts / all votes page
+  Song name
+  Album art
+  # of votes
+  % growth
+  
+Nujabes
+
+Fame or Shame?
+
+
+total # of hits you've helped make
+
+
+  
+  

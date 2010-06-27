@@ -1,0 +1,90 @@
+MODES
+
+A&R
+  Songs
+    Friends
+    Most Commented
+    Newest
+    Most Adds
+    Infamous
+    Fastest Growing / Hot Now
+  Artists
+    Friends
+    Newest
+    Most Adds
+    Most Signed
+    Hot Now
+  My Picks
+    Most Recent
+    Most Adds
+    Fastest Growing
+    Infamous
+    Watching
+  Get Cash
+    Battle Competing Label
+    Sort Game
+    Demo Game
+    Monetize
+  Friend Bar
+    Money
+    Awards?
+    Logo
+    Picture
+    Name
+    Studio Name?
+    Click -> Label Home (theirs)
+  Hot Buttons
+    Label Home (mine)
+    Incoming / Messages
+    Play Game?
+
+Home/Label
+  Name & Logo
+  Hot Buttons
+    Edit
+    All Artists
+    Picks
+    A&R
+  Artists
+    See All
+    Hover Details
+  Room w/ Clickables
+    Challenge History
+    Charts (You & Friends)
+    Tips
+    Workers
+    Unsolicited Recordings
+    Competing Labels
+
+Edit Label
+  Edit Info
+  Buy Stuff
+  
+Friend Label
+  Name & Logo
+  Hot Buttons
+    All Artists
+    Picks
+    Challenge
+  Artists
+    See All
+    Hover Details
+  Room w/ Clickables
+    Challenge History
+    Tips (You to Them)
+    Unsolicited Recordings
+    Workers (Overview?)
+
+PopUps
+  New Funding
+  Challenged
+  Low on Cash?
+  First Time Pick
+  Level Up
+  Blacklisting Available
+  Friend Likes Your Tip?
+  New Unsolicited Recording
+  Band Signing Available
+  New Award?
+  
+Extra Rooms / Money Sinks
