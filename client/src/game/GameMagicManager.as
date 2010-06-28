@@ -1,7 +1,7 @@
 package game
 {
-	import controllers.LevelManager;
-	import controllers.UserManager;
+	import controllers.LevelController;
+	import controllers.UserController;
 	
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -12,15 +12,15 @@ package game
 
 	public class GameMagicManager extends EventDispatcher
 	{
-		public var _levelManager:LevelManager;
-		public var _userManager:UserManager;
+		public var _levelController:LevelController;
+		public var _userController:UserController;
 		public var contentIndex:ContentIndex;		
 		
-		public function GameMagicManager(levelManager:LevelManager, userManager:UserManager, target:IEventDispatcher=null)
+		public function GameMagicManager(levelController:LevelController, userController:UserController, target:IEventDispatcher=null)
 		{
 			super(target);
-			_levelManager = levelManager;
-			_userManager = userManager;
+			_levelController = levelController;
+			_userController = userController;
 			contentIndex = new ContentIndex();
 		}
 		
@@ -29,20 +29,20 @@ package game
 			var neededXp:int = 0;
 			var i:int = 0;
 			
-			_levelManager.sortLevels();
+			_levelController.sortLevels();
 			
 			do
 			{
-				neededXp = neededXp + (_levelManager.levels[i] as Level).xp_diff;
+				neededXp = neededXp + (_levelController.levels[i] as Level).xp_diff;
 				i++;								
 			}
-			while (_userManager.user.xp + xpToAdd > neededXp);
+			while (_userController.user.xp + xpToAdd > neededXp);
 			
-			_userManager.user.increaseXp(xpToAdd);			
+			_userController.user.increaseXp(xpToAdd);			
 			
-			if (_userManager.user.level.rank < i)
+			if (_userController.user.level.rank < i)
 			{
-				_userManager.user.incrementLevel(i);
+				_userController.user.incrementLevel(i);
 			}	
 		}		
 		

@@ -40,12 +40,12 @@ package server
 		public function generateModelToManagerMap():void
 		{
 			modelToManagerMap = new Dictionary();
-			modelToManagerMap['layerable'] = 'layerableManager';
-			modelToManagerMap['owned_layerable'] = 'ownedLayerableManager';
-			modelToManagerMap['thinger'] = 'thingerManager';
-			modelToManagerMap['owned_thinger'] = 'thingerManager';
-			modelToManagerMap['creature'] = 'creatureManager';
-			modelToManagerMap['dwelling'] = 'dwellingManager';
+			modelToManagerMap['layerable'] = 'layerableController';
+			modelToManagerMap['owned_layerable'] = 'ownedlayerableController';
+			modelToManagerMap['thinger'] = 'thingerController';
+			modelToManagerMap['owned_thinger'] = 'thingerController';
+			modelToManagerMap['creature'] = 'creatureController';
+			modelToManagerMap['dwelling'] = 'dwellingController';
 		}
 		
 		public function sendRequest(params:Object, controller:String, action:String, method:String = 'GET'):void

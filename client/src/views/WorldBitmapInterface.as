@@ -25,7 +25,7 @@ package views
 	
 	public class WorldBitmapInterface extends EventDispatcher
 	{
-		[Bindable] public var _bandManager:BandManager;
+		[Bindable] public var _bandBoss:BandBoss;
 		[Bindable] public var _customerPersonManager:CustomerPersonManager;
 		[Bindable] public var _worldView:WorldView;
 		[Bindable] public var _stageView:StageView;
@@ -70,9 +70,9 @@ package views
 		{
 			if (_worldView)
 			{
-				if (_worldView.creaturesAdded && _stageView.bandManager)
+				if (_worldView.creaturesAdded && _stageView.bandBoss)
 				{
-					if (_stageView.bandManager.bandMemberManager)
+					if (_stageView.bandBoss.bandMemberManager)
 					{
 						updateCursor();									
 					}
@@ -101,7 +101,7 @@ package views
 					}
 				}
 			}
-			for each (var bm:BandMember in _bandManager.bandMemberManager)
+			for each (var bm:BandMember in _bandBoss.bandMemberManager)
 			{
 				if (bm == asset && bm.moods)
 				{
@@ -262,9 +262,9 @@ package views
 			{
 				_customerPersonManager.clearFilters();			
 			}
-			if (_bandManager)
+			if (_bandBoss)
 			{
-				_bandManager.bandMemberManager.clearFilters();			
+				_bandBoss.bandMemberManager.clearFilters();			
 			}
 		}
 		
@@ -407,14 +407,14 @@ package views
 			isDragging = false;
 		}		
 		
-		public function set bandManager(val:BandManager):void
+		public function set bandBoss(val:BandBoss):void
 		{
-			_bandManager = val;
+			_bandBoss = val;
 		}
 		
-		public function get bandManager():BandManager
+		public function get bandBoss():BandBoss
 		{
-			return _bandManager;
+			return _bandBoss;
 		}
 		
 		public function set customerPersonManager(val:CustomerPersonManager):void

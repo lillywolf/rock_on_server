@@ -1,6 +1,6 @@
 package helpers
 {
-	import controllers.LayerableManager;
+	import controllers.LayerableController;
 	
 	import flash.display.MovieClip;
 	import flash.events.EventDispatcher;
@@ -14,7 +14,7 @@ package helpers
 	import models.Layerable;
 	import models.OwnedLayerable;
 	
-	import rock_on.BoothManager;
+	import rock_on.BoothBoss;
 	import rock_on.ConcertStage;
 	import rock_on.CustomerPerson;
 	
@@ -23,32 +23,36 @@ package helpers
 	public class CreatureGenerator extends EventDispatcher
 	{
 		public var layerableOrder:Array;
-		public var _layerableManager:LayerableManager;
+		public var _layerableController:LayerableController;
 		public var sortedLayerables:Dictionary;
 		public static const GENERIC_X:Number = 1;
 		public static const GENERIC_Y:Number = 1;
 		
-		public function CreatureGenerator(layerableManager:LayerableManager, target:IEventDispatcher=null)
+		public function CreatureGenerator(layerableController:LayerableController, target:IEventDispatcher=null)
 		{
 			super(target);
-			_layerableManager = layerableManager;
+			_layerableController = layerableController;
 			initializeLayerableOrder();
 		}
 		
 		private function initializeLayerableOrder():void
 		{
 			layerableOrder = new Array();
-			layerableOrder['walk_toward'] = ["shoes", "bottom", "top", "hair front"];
-			layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
+//			layerableOrder['walk_toward'] = ["shoes", "bottom", "top", "hair front"];
+//			layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
+//			layerableOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
+//			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['walk_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['walk_away'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
 			layerableOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['stand_still_away'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
 			
 			sortedLayerables = new Dictionary();
 			
 			for each (var str:String in layerableOrder["walk_toward"])
 			{
 				sortedLayerables[str] = new Array();
-				for each (var layerable:Layerable in _layerableManager.layerables)
+				for each (var layerable:Layerable in _layerableController.layerables)
 				{
 					if (layerable.layer_name == str)
 					{
@@ -95,13 +99,13 @@ package helpers
 			asset.movieClipStack.addChild(mc);			
 		}
 		
-		public function createCustomer(type:String, animation:String, concertStage:ConcertStage, boothManager:BoothManager):CustomerPerson
+		public function createCustomer(type:String, animation:String, concertStage:ConcertStage, boothBoss:BoothBoss):CustomerPerson
 		{
 			var imposter:ImposterCreature = createImposterCreature(type);
 			var asset:AssetStack = addLayersToCreatureByType(type, animation, imposter);
 			asset.movieClipStack.buttonMode = true;	
 			asset.creature = imposter;
-			var cp:CustomerPerson = new CustomerPerson(asset.movieClipStack, concertStage, boothManager, layerableOrder, imposter, 0.4);
+			var cp:CustomerPerson = new CustomerPerson(asset.movieClipStack, concertStage, boothBoss, layerableOrder, imposter, 0.4);
 			return cp;		
 		}
 		

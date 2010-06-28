@@ -27,15 +27,15 @@ package rock_on
 		public var spawnLocation:Point3D;
 		public var spawnInterval:int;
 		public var spawnTimer:Timer;
-		public var _listeningStationManager:ListeningStationManager;
+		public var _listeningStationBoss:ListeningStationBoss;
 		public static const STATIONLISTENER_CONVERSION_PROBABILITY:Number = 0.3;
-		public static const SPAWN_INTERVAL_BASE:int = 2000;
-		public static const SPAWN_INTERVAL_MULTIPLIER:int = 5000;
+		public static const SPAWN_INTERVAL_BASE:int = 200;
+		public static const SPAWN_INTERVAL_MULTIPLIER:int = 100;
 				
-		public function PasserbyManager(listeningStationManager:ListeningStationManager, myWorld:World, creatureGenerator:CreatureGenerator, venue:Venue, source:Array=null)
+		public function PasserbyManager(listeningStationBoss:ListeningStationBoss, myWorld:World, creatureGenerator:CreatureGenerator, venue:Venue, source:Array=null)
 		{
 			super(source);
-			_listeningStationManager = listeningStationManager;
+			_listeningStationBoss = listeningStationBoss;
 			_creatureGenerator = creatureGenerator;
 			_venue = venue;
 			setWorld(myWorld);
@@ -43,10 +43,15 @@ package rock_on
 		
 		public function startSpawning():void
 		{
-			spawnInterval = SPAWN_INTERVAL_BASE + Math.floor(Math.random()*SPAWN_INTERVAL_MULTIPLIER);
+			resetSpawnInterval();
 			spawnTimer = new Timer(spawnInterval);
 			spawnTimer.addEventListener(TimerEvent.TIMER, onSpawnTimer);
 			spawnTimer.start();			
+		}
+		
+		public function resetSpawnInterval():void
+		{			
+			spawnInterval = SPAWN_INTERVAL_BASE + Math.floor(Math.random()*SPAWN_INTERVAL_MULTIPLIER);
 		}
 		
 		public function stopSpawning():void
@@ -71,21 +76,21 @@ package rock_on
 		private function generatePasserby():Passerby
 		{
 			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "Passerby");
-			var passerby:Passerby = new Passerby(asset.movieClipStack, _listeningStationManager, this, _myWorld, _venue, asset.layerableOrder, asset.creature, 0.4);			
+			var passerby:Passerby = new Passerby(asset.movieClipStack, _listeningStationBoss, this, _myWorld, _venue, asset.layerableOrder, asset.creature, 0.4);			
 			return passerby;		
 		}
 		
 		private function generateStationListener():StationListener
 		{
 			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "StationListener");
-			var sl:StationListener = new StationListener(asset.movieClipStack, _listeningStationManager, this, _myWorld, _venue, asset.layerableOrder, asset.creature, 0.4);			
+			var sl:StationListener = new StationListener(asset.movieClipStack, _listeningStationBoss, this, _myWorld, _venue, asset.layerableOrder, asset.creature, 0.4);			
 			return sl;		
 		}
 		
 		private function getOpenStation():ListeningStation
 		{
 			var openStations:ArrayCollection = new ArrayCollection();
-			for each (var station:ListeningStation in _listeningStationManager.listeningStations)
+			for each (var station:ListeningStation in _listeningStationBoss.listeningStations)
 			{
 				if (!station.hasCustomerEnRoute)
 				{
@@ -108,7 +113,7 @@ package rock_on
 		{			
 			// Criteria for making someone go to stations
 			
-			if (Math.random()*_listeningStationManager.listeningStations.length > (1 - STATIONLISTENER_CONVERSION_PROBABILITY) && _listeningStationManager.isAnyStationAvailable())
+			if (Math.random()*_listeningStationBoss.listeningStations.length > (1 - STATIONLISTENER_CONVERSION_PROBABILITY) && _listeningStationBoss.isAnyStationAvailable())
 			{
 				var sl:StationListener = generateStationListener();
 				sl.speed = 0.07;
@@ -312,7 +317,7 @@ package rock_on
 			var bodyLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 2, creature_id: creatureId, in_use: true});
 			var eyeLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 1, creature_id: creatureId, in_use:true});
 			var bottomLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 6, creature_id: creatureId, in_use: true});
-			for each (var layerable:Layerable in FlexGlobals.topLevelApplication.gdi.layerableManager.layerables)
+			for each (var layerable:Layerable in FlexGlobals.topLevelApplication.gdi.layerableController.layerables)
 			{
 				if (layerable.symbol_name == "PeachBody")
 				{

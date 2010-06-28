@@ -1,6 +1,8 @@
 package rock_on
 {
 	import flash.display.MovieClip;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
 	
 	import models.Creature;
 	
@@ -16,15 +18,20 @@ package rock_on
 		public static const ROUTE_STATE:int = 2;
 		public static const GONE_STATE:int = 3;
 		public static const ENTHRALLED_STATE:int = 4;
+		public static const REMOVE_STATE:int = 5;
 		
-		public var _listeningStationManager:ListeningStationManager;
+		public var _listeningStationBoss:ListeningStationBoss;
 		public var _passerbyManager:PasserbyManager;
 		public var _venue:Venue;
+		
+		public var testTimer:Timer;
+		public var testTime:int = 500;
+		public var slatedForRemoval:Boolean;
 				
-		public function Passerby(movieClipStack:MovieClip, listeningStationManager:ListeningStationManager, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public function Passerby(movieClipStack:MovieClip, listeningStationBoss:ListeningStationBoss, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
 		{
 			super(movieClipStack, layerableOrder, creature, personScale, source);
-			_listeningStationManager = listeningStationManager;
+			_listeningStationBoss = listeningStationBoss;
 			_passerbyManager = passerbyManager;
 			_venue = venue;
 			_myWorld = myWorld;
@@ -46,6 +53,8 @@ package rock_on
 				case GONE_STATE:
 					doGoneState(deltaTime);
 					return true;	
+				case REMOVE_STATE:
+					return true;	
 				default: throw new Error('oh noes!');
 			}
 			return false;
@@ -66,6 +75,8 @@ package rock_on
 					break;		
 				case GONE_STATE:
 					break;					
+				case REMOVE_STATE:
+					break;					
 				default: throw new Error('no state to advance from!');
 			}
 			switch (destinationState)
@@ -82,6 +93,9 @@ package rock_on
 				case GONE_STATE:
 					startGoneState();
 					break;	
+				case REMOVE_STATE:
+					startRemoveState();
+					break;	
 				default: throw new Error('no state to advance to!');	
 			}
 		}				
@@ -91,7 +105,21 @@ package rock_on
 			state = ROUTE_STATE;
 			
 			var destination:Point3D = setInitialDestination();
-			moveCustomer(destination);				
+			moveCustomer(destination);		
+			
+//			testTimer = new Timer(testTime);
+//			testTimer.start();
+//			testTimer.addEventListener(TimerEvent.TIMER, onTestComplete);
+		}
+		
+		public function onTestComplete(evt:TimerEvent):void
+		{
+			advanceState(REMOVE_STATE);
+		}
+		
+		public function startRemoveState():void
+		{
+			state = REMOVE_STATE;
 		}
 		
 		public function endRouteState():void

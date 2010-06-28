@@ -90,7 +90,7 @@ package rock_on
 			var myStyles:ArrayCollection = new ArrayCollection();
 			var bodyLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 2, creature_id: creatureId, in_use: true});
 			var eyeLayer:OwnedLayerable = new OwnedLayerable({id: -1, layerable_id: 1, creature_id: creatureId, in_use:true});
-			for each (var layerable:Layerable in Application.application.gdi.layerableManager.layerables)
+			for each (var layerable:Layerable in Application.application.gdi.layerableController.layerables)
 			{
 				if (layerable.symbol_name == "PeachBody")
 				{

@@ -5,11 +5,11 @@
 			import com.facebook.commands.events.CancelEvent;
 			import com.facebook.data.users.FacebookUser;
 			
-			import controllers.FriendManager;
-			import controllers.LevelManager;
-			import controllers.StoreManager;
-			import controllers.ThingerManager;
-			import controllers.UserManager;
+			import controllers.FriendController;
+			import controllers.LevelController;
+			import controllers.StoreController;
+			import controllers.ThingerController;
+			import controllers.UserController;
 			
 			import customizer.CustomizerEvent;
 			
@@ -59,11 +59,11 @@
 			[Bindable] public var facebookFriends:Array;
 			[Bindable] public var facebookUser:FacebookUser;
 			
-			[Bindable] public var storeManager:StoreManager;
-			[Bindable] public var thingerManager:ThingerManager;
-			[Bindable] public var userManager:UserManager;
-			[Bindable] public var friendManager:FriendManager;
-			[Bindable] public var levelManager:LevelManager;
+			[Bindable] public var storeController:StoreController;
+			[Bindable] public var thingerController:ThingerController;
+			[Bindable] public var userController:UserController;
+			[Bindable] public var friendManager:FriendController;
+			[Bindable] public var levelController:LevelController;
 			
 			public static const USER_PIC_DIMENSION:int = 92;
 			public static const FRIEND_PIC_DIMENSION:int = 50;
@@ -145,9 +145,8 @@
 				addEventListener(MouseEvent.CLICK, onBottomBarClicked);
 			}		
 		
-			public function onUserLoaded():void
+			public function onUserObjectLoaded():void
 			{
-				myUser.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);	
 				onUserAndFriendsLoaded();
 			}
 			
@@ -445,21 +444,21 @@
 			
 			private function showCustomizerOptions():void
 			{
-				var customizerUI:UICanvas = worldView.bandManager.bandMemberManager.putBandMembersInCustomizer("walk_toward");
-				worldView.bandManager.bandMemberManager.addEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
+				var customizerUI:UICanvas = worldView.bandBoss.bandMemberManager.putBandMembersInCustomizer("walk_toward");
+				worldView.bandBoss.bandMemberManager.addEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
 				worldView.uiLayer.addChild(customizerUI);
 			}
 			
 			private function onBandMemberSelected(evt:CustomizerEvent):void
 			{
-				worldView.bandManager.bandMemberManager.removeEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
+				worldView.bandBoss.bandMemberManager.removeEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
 				worldView.uiLayer.removeChild(evt.selectedCreatureAsset.parent.parent);
 				showCustomizer(evt.selectedCreatureAsset);
 			}
 			
 			private function showCustomizer(asset:AssetStack):void
 			{
-				var customizer:CreatureCustomizer = new CreatureCustomizer(asset.creature as Creature, worldView.creatureManager);
+				var customizer:CreatureCustomizer = new CreatureCustomizer(asset.creature as Creature, worldView.creatureController);
 				var canvas:UICanvas = new UICanvas();
 				canvas.setStyles(0xffffff, 0x333333, 14, 500, 400);
 				canvas.addChild(customizer);
@@ -482,22 +481,12 @@
 			
 			public function showStore():void
 			{
-				var store:Store = storeManager.getStoreByName("Structure Store");
-				var uic:UIComponent = storeManager.getStoreUIComponent(store);
+				var store:Store = storeController.getStoreByName("Structure Store");
+				var uic:UIComponent = storeController.getStoreUIComponent(store);
 				uic.x = WorldView.WINDOW_WIDTH/2 - uic.width/2;
 				uic.y = 100;
 			  	FlexGlobals.topLevelApplication.uiLayer.addChild(uic);
 			}						
-			
-			private function onThingerPurchased(evt:StoreEvent):void
-			{
-//				var thingerRenderer:InventoryItemRenderer = new InventoryItemRenderer();
-//				thingerRenderer.uic = thingerManager.getMovieClipCopy(evt.thinger, true, 62, 62, 70, 70);
-//				var thingerIndex:int = inventoryIndex;
-//				thingerRenderer.thingerIndex = thingerIndex;
-//				inventoryCanvas.addChild(thingerRenderer);
-//				inventoryIndex++;
-			}
 			
 			public function friendDataLoaded(evt:DynamicEvent):void
 			{
@@ -561,7 +550,7 @@
 					var obj:Object = orderedUsers[j-1];
 					var friend:FacebookUser = obj.user;
 					var friendGDI:GameDataInterface = friendManager.getFriendGDI(Number(friend.uid));
-					friendRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, levelManager.getLevelByXp(friendGDI.user.xp));
+					friendRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, levelController.getLevelByXp(friendGDI.user.xp));
 					friendRenderer.renderRightToLeft = true;
 					addFriendRendererStyle(friendGDI, friendRenderer, 0xffffff);
 //					var icon:Image = addIcon(friendRenderer);
@@ -635,7 +624,7 @@
 				for each (var facebooker:FacebookUser in facebookFriends)
 				{
 					var friendGDI:GameDataInterface = friendManager.getFriendGDI(Number(facebooker.uid));
-					var level:Level = levelManager.getLevelByXp(friendGDI.user.xp);
+					var level:Level = levelController.getLevelByXp(friendGDI.user.xp);
 					orderedUsers.addItem({user: facebooker, rank: level});
 				}
 				var sortField:SortField = new SortField("rank");
@@ -711,7 +700,7 @@
 			{
 				if (friendGDI)
 				{
-					var constructedCreatures:ArrayCollection = friendGDI.creatureManager.getConstructedCreaturesByType("BandMember", dimension, dimension);
+					var constructedCreatures:ArrayCollection = friendGDI.creatureController.getConstructedCreaturesByType("BandMember", dimension, dimension);
 					if (constructedCreatures.length > 0)
 					{
 						var selectedCreature:AssetStack = constructedCreatures[0];
@@ -730,7 +719,7 @@
 			
 			public function showFacebookUser(facebookUser:FacebookUser):void
 			{
-				var userRenderer:InventoryItemRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, levelManager.getLevelByXp(myUser.xp) as Level);
+				var userRenderer:InventoryItemRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, levelController.getLevelByXp(myUser.xp) as Level);
 				addFriendRendererStyle(friendManager.mainGDI, userRenderer, 0xffffff);
 				userRenderer.x = 10;				
 				var pic:Image = new Image();

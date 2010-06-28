@@ -1,7 +1,7 @@
 package views
 {
-	import controllers.CreatureManager;
-	import controllers.LayerableManager;
+	import controllers.CreatureController;
+	import controllers.LayerableController;
 	
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
@@ -22,7 +22,7 @@ package views
 
 	public class CreatureCustomizer extends UIComponent
 	{
-		public var _creatureManager:CreatureManager;
+		public var _creatureController:CreatureController;
 		public var _creature:Creature;
 		
 		public var constructedCreature:AssetStack;
@@ -45,11 +45,11 @@ package views
 		public static const ITEM_PADDING:int = 10;
 		public static const ITEMS_PER_ROW:int = 4;
 		
-		public function CreatureCustomizer(creature:Creature, creatureManager:CreatureManager)
+		public function CreatureCustomizer(creature:Creature, creatureController:CreatureController)
 		{
 			super();
 			_creature = creature;
-			_creatureManager = creatureManager;
+			_creatureController = creatureController;
 			
 			currentAnimation = "walk_toward";
 			currentFrame = 39;
@@ -120,7 +120,7 @@ package views
 					discardedLayerables.addItem(ol);
 				}
 			}
-			creatureManager.saveCustomLayers(_creature, currentLayerables, discardedLayerables);
+			creatureController.saveCustomLayers(_creature, currentLayerables, discardedLayerables);
 		}
 		
 		private function onCloseButtonClicked(evt:MouseEvent):void
@@ -137,7 +137,7 @@ package views
 								
 			createCreaturePreview();
 
-			var layerableOrder:Array = creatureManager.getLayerableOrderByCreatureType(_creature.type);
+			var layerableOrder:Array = creatureController.getLayerableOrderByCreatureType(_creature.type);
 			constructedCreature = _creature.getConstructedCreature(layerableOrder, animation, 1, 1);
 			constructedCreature.doAnimation(animation, currentFrame);
 			constructedCreature.x = creaturePreview.width / 2;
@@ -227,7 +227,7 @@ package views
 		public function createLayerableOption(ol:OwnedLayerable):ContainerUIC
 		{
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
-			var uic:ContainerUIC = LayerableManager.formatMovieClipByDimensions(mc, ITEM_WIDTH, ITEM_HEIGHT, ITEM_PADDING, ITEM_PADDING);
+			var uic:ContainerUIC = LayerableController.formatMovieClipByDimensions(mc, ITEM_WIDTH, ITEM_HEIGHT, ITEM_PADDING, ITEM_PADDING);
 			uic.thinger = ol;
 			uic.addEventListener(MouseEvent.CLICK, onLayerableClicked);
 			return uic;	
@@ -341,7 +341,7 @@ package views
 		private function copyMovieClipForLayerableList(mc:MovieClip, layerName:String):MovieClip
 		{
 //			var className:String = flash.utils.getQualifiedClassName(mc);
-//			var klass:Class = _creatureManager.essentialModelManager.essentialModelReference.loadedModels[className].klass;
+//			var klass:Class = _creatureController.essentialModelController.essentialModelReference.loadedModels[className].klass;
 			var copiedMovieClip:MovieClip = EssentialModelReference.getMovieClipCopy(mc);
 //			var copiedMovieClip:MovieClip = alterAppearanceByLayerName(klass, layerName);	
 			copiedMovieClip.stop();
@@ -399,14 +399,14 @@ package views
 			return null;
 		}		
 		
-		public function set creatureManager(val:CreatureManager):void
+		public function set creatureController(val:CreatureController):void
 		{
-			_creatureManager = val;
+			_creatureController = val;
 		}
 		
-		public function get creatureManager():CreatureManager
+		public function get creatureController():CreatureController
 		{
-			return _creatureManager;
+			return _creatureController;
 		}
 		
 		public function set creature(val:Creature):void

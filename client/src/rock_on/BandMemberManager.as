@@ -13,7 +13,7 @@ package rock_on
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	
-	import views.BandManager;
+	import views.BandBoss;
 	import views.ContainerUIC;
 	import views.UICanvas;
 	
@@ -33,12 +33,31 @@ package rock_on
 			
 		private var _myWorld:World;		
 		private var _concertStage:ConcertStage;
+		public var _venue:Venue;
 		public var spawnLocation:Point3D;				
 		
-		public function BandMemberManager(source:Array=null)
+		public function BandMemberManager(venue:Venue, source:Array=null)
 		{
 			super(source);
+			_venue = venue;
 		}
+		
+		public function showBandMembers():void
+		{
+			var bandMembers:ArrayCollection = _venue.creatureController.getConstructedCreaturesByType("BandMember", 1, 1);
+			
+			for each (var assetStack:AssetStack in bandMembers)
+			{
+				var bandMember:BandMember = new BandMember(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
+				bandMember.concertStage = _venue.stageManager.concertStage;
+				bandMember.addExemptStructures();
+				bandMember.speed = 0.06;
+				add(bandMember);
+				
+				var newState:int = mapVenueStateToBandMemberState();
+				bandMember.advanceState(newState);
+			}
+		}		
 		
 		public function add(bm:BandMember):void
 		{
@@ -54,6 +73,34 @@ package rock_on
 				throw new Error("you have to fill your pool before you dive");
 			}
 		}
+		
+		public function mapVenueStateToBandMemberState():int
+		{
+			if (_venue.state == Venue.EMPTY_STATE)
+			{
+				return BandMember.WAIT_STATE;
+			}
+			else if (_venue.state == Venue.ENCORE_STATE)
+			{
+				return BandMember.ENTER_STATE;
+			}
+			else if (_venue.state == Venue.ENCORE_WAIT_STATE)
+			{
+				return BandMember.WAIT_STATE;
+			}
+			else if (_venue.state == Venue.SHOW_STATE)
+			{
+				return BandMember.ENTER_STATE;
+			}
+			else if (_venue.state == Venue.SHOW_WAIT_STATE)
+			{
+				return BandMember.WAIT_STATE;
+			}
+			else
+			{
+				throw new Error("Not a legitimate state");
+			}
+		}			
 		
 		public function clearFilters():void
 		{

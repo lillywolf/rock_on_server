@@ -27,14 +27,14 @@ package rock_on
 		public var friendMirror:Boolean;
 		public var editMirror:Boolean;
 		
-		public var _boothManager:BoothManager;
+		public var _boothBoss:BoothBoss;
 		[Bindable] public var _venue:Venue;
 				
-		public function Booth(boothManager:BoothManager, venue:Venue, params:Object=null, target:IEventDispatcher=null)
+		public function Booth(boothBoss:BoothBoss, venue:Venue, params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
 			
-			_boothManager = boothManager;
+			_boothBoss = boothBoss;
 			_venue = venue;
 			
 			currentQueue = 0;	
@@ -118,7 +118,7 @@ package rock_on
 			
 			if (!friendMirror)
 			{
-				_boothManager.addBoothCollectionButton(this);
+				_boothBoss.addBoothCollectionButton(this);
 				var evt:VenueEvent = new VenueEvent(VenueEvent.BOOTH_UNSTOCKED, true, true);
 				evt.venue = _venue;
 				evt.booth = this;
@@ -170,13 +170,13 @@ package rock_on
 							
 				if (numPurchases > inventory_count)
 				{
-					_boothManager.decreaseInventoryCount(this, inventory_count);
+					_boothBoss.decreaseInventoryCount(this, inventory_count);
 					inventory_count = 0;
 				}
 				else
 				{
 					inventory_count = inventory_count - numPurchases;
-					_boothManager.decreaseInventoryCount(this, numPurchases);
+					_boothBoss.decreaseInventoryCount(this, numPurchases);
 				}
 			}
 		}
@@ -186,9 +186,9 @@ package rock_on
 			_venue = val;
 		}
 		
-		public function get boothManager():BoothManager
+		public function get boothBoss():BoothBoss
 		{
-			return _boothManager;
+			return _boothBoss;
 		}
 		
 	}

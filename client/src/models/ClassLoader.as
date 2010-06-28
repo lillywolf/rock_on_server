@@ -1,6 +1,6 @@
 package models
 {
-	import controllers.Manager;
+	import controllers.Controller;
 	
 	import flash.display.*;
 	import flash.errors.*;

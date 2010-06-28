@@ -1,6 +1,6 @@
 package music
 {
-	import controllers.SongManager;
+	import controllers.SongController;
 	
 	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
@@ -25,7 +25,7 @@ package music
 		
 	public class MusicPlayer extends UIComponent
 	{
-		public var _songManager:SongManager;
+		public var _songController:SongController;
 		public var musicButton:SpecialButton;
 		public var musicRollout:Canvas;
 		public var boxHeight:int;
@@ -64,10 +64,10 @@ package music
 		public static const MAX_SONGS:int = 5;
 		public static const BOX_WIDTH:int = 430;
 		
-		public function MusicPlayer(songManager:SongManager)
+		public function MusicPlayer(songController:SongController)
 		{
 			super();
-			_songManager = songManager;
+			_songController = songController;
 			createMusicRollout();
 			addSongsInfo();
 			addMusicButton();
@@ -78,7 +78,7 @@ package music
 			songsText = new Label();
 			songsText.width = BOX_WIDTH;
 			songsText.height = 22;
-			numSongs = _songManager.owned_songs.length;
+			numSongs = _songController.owned_songs.length;
 			songsText.text = numSongs.toString() + " Songs";
 			MusicPlayer.setTextStyle(songsText, 16, 0xffffff, true);
 			songsText.x = DISTANCE_FROM_LEFT;
@@ -93,7 +93,7 @@ package music
 			backCanvas.setStyle("cornerRadius", 12);
 			backCanvas.setStyle("borderStyle", "solid");
 			backCanvas.width = BOX_WIDTH;
-			var shownSongs:Number = Math.min(_songManager.owned_songs.length, MAX_SONGS);
+			var shownSongs:Number = Math.min(_songController.owned_songs.length, MAX_SONGS);
 			boxHeight = shownSongs * (SONG_HEIGHT) + (shownSongs - 1) * SONG_EXTERNAL_PADDING + 2 * TOP_PADDING;
 			backCanvas.height = boxHeight;
 			musicRollout.addChild(backCanvas);
@@ -124,7 +124,7 @@ package music
 			songVBox = new VBox();
 			setVBoxStyles(songVBox);
 			var index:int = 0;
-			for each (var os:OwnedSong in _songManager.owned_songs)
+			for each (var os:OwnedSong in _songController.owned_songs)
 			{
 				var c:Canvas = initializeSong(os, index);
 				songVBox.addChild(c);

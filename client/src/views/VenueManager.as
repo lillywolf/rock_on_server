@@ -1,7 +1,10 @@
 package views
 {
-	import controllers.DwellingManager;
-	import controllers.LevelManager;
+	import controllers.CreatureController;
+	import controllers.DwellingController;
+	import controllers.LayerableController;
+	import controllers.LevelController;
+	import controllers.StructureController;
 	
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -12,14 +15,17 @@ package views
 	
 	import mx.collections.ArrayCollection;
 	
-	import rock_on.BoothManager;
+	import rock_on.BoothBoss;
 	import rock_on.ConcertStage;
 	import rock_on.CustomerPerson;
 	import rock_on.CustomerPersonManager;
+	import rock_on.GroupieBoss;
+	import rock_on.ListeningStationBoss;
 	import rock_on.StageManager;
 	import rock_on.Venue;
 	import rock_on.VenueEvent;
 	
+	import world.BitmapBlotter;
 	import world.World;
 
 	public class VenueManager extends EventDispatcher
@@ -30,107 +36,42 @@ package views
 		
 		public var venue:Venue;
 		public var concertGoers:ArrayCollection;
-		public var _dwellingManager:DwellingManager;
-		public var _customerPersonManager:CustomerPersonManager;
-		public var _stageManager:StageManager;
+		public var _wbi:WorldBitmapInterface;
+		public var _dwellingController:DwellingController;
+		public var _levelController:LevelController;
+		public var _structureController:StructureController;
+		public var _creatureController:CreatureController;
+		public var _layerableController:LayerableController;
+		
+		public var _bitmapBlotter:BitmapBlotter;
 		public var _myWorld:World;
-		public var _creatureGenerator:CreatureGenerator;
 		public var _booths:ArrayCollection;
-		public var _concertStage:ConcertStage;
-		public var _bandManager:BandManager;
-		public var _boothManager:BoothManager;
-		public var _levelManager:LevelManager;
 		
-		public var numSuperCustomers:int;
-		public var numStaticCustomers:int;
-		public var numMovingCustomers:int;
+		public var bandBoss:BandBoss;
 		
-		public function VenueManager(creatureGenerator:CreatureGenerator, customerPersonManager:CustomerPersonManager, dwellingManager:DwellingManager, levelManager:LevelManager, bandManager:BandManager, boothManager:BoothManager, stageManager:StageManager, myWorld:World, target:IEventDispatcher=null)
+		public function VenueManager(wbi:WorldBitmapInterface, structureController:StructureController, layerableController:LayerableController, dwellingController:DwellingController, levelController:LevelController, creatureController:CreatureController, target:IEventDispatcher=null)
 		{
 			super(target);
-			_creatureGenerator = creatureGenerator;
-			_customerPersonManager = customerPersonManager;
-			_dwellingManager = dwellingManager;
-			_levelManager = levelManager;
-			_bandManager = bandManager;
-			_boothManager = boothManager;
-			_booths = _boothManager.booths;
-			_stageManager = stageManager;
-			_concertStage = stageManager.concertStage;
-			_myWorld = myWorld;
-			
-			concertGoers = new ArrayCollection();		
+			_wbi = wbi;
+			_layerableController = layerableController;
+			_dwellingController = dwellingController;
+			_levelController = levelController;
+			_structureController = structureController;
+			_creatureController = creatureController;			
 		}
 		
 		public function getVenue():void
 		{
-			var venues:ArrayCollection = _dwellingManager.getDwellingsByType("Venue");
-			venue = new Venue(this, _myWorld, venues[0] as OwnedDwelling);	
-			venue.addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);
-			
-			numStaticCustomers = Math.floor(venue.fancount * VenueManager.STATIC_CUSTOMER_FRACTION);
-			numSuperCustomers = Math.floor(venue.fancount * VenueManager.SUPER_CUSTOMER_FRACTION);
-			numMovingCustomers = venue.fancount - numStaticCustomers - numSuperCustomers;			
+			var venues:ArrayCollection = _dwellingController.getDwellingsByType("Venue");
+			venue = new Venue(_wbi, this, _dwellingController, _creatureController, _layerableController, _structureController, bandBoss, venues[0] as OwnedDwelling);				
 		}
 		
-		public function onBoothUnstocked(evt:VenueEvent):void
+		public function update(deltaTime:Number):void
 		{
-			_customerPersonManager.removeBoothFromAvailable(evt.booth);
-		}
-		
-		public function addStaticCustomersToVenue():void
-		{
-			if (!_customerPersonManager.concertStage)
+			if (venue)
 			{
-				_customerPersonManager.concertStage = _concertStage;
+				venue.update(deltaTime);			
 			}
-			for (var i:int = 0; i < numStaticCustomers; i++)
-			{
-				var cp:CustomerPerson = _creatureGenerator.createCustomer("Concert Goer", "walk_toward", _concertStage, _boothManager);
-				cp.speed = 0.06;
-				_customerPersonManager.add(cp, false, i);
-				concertGoers.addItem(cp);
-			}
-		}
-		
-		public function addSuperCustomersToVenue(worldToUpdate:World):void
-		{
-			if (!_customerPersonManager.concertStage)
-			{
-				_customerPersonManager.concertStage = _concertStage;
-			}
-			for (var i:int = 0; i < numSuperCustomers; i++)
-			{
-				var cp:CustomerPerson = _creatureGenerator.createCustomer("Concert Goer", "walk_toward", _concertStage, _boothManager);
-				cp.speed = 0.06;
-				cp.isSuperFan = true;
-				_customerPersonManager.add(cp, true, -1, this.venue.stageBufferRect, this.venue.stageRect, worldToUpdate);
-				concertGoers.addItem(cp);
-			}					
-		}
-		
-		public function addMovingCustomersToVenue():void
-		{
-			if (!_customerPersonManager.concertStage)
-			{
-				_customerPersonManager.concertStage = _concertStage;
-			}
-			for (var i:int = 0; i < numMovingCustomers; i++)
-			{
-				var cp:CustomerPerson = _creatureGenerator.createCustomer("Concert Goer", "walk_toward", _concertStage, _boothManager);
-				cp.speed = 0.06;
-				_customerPersonManager.add(cp, true, -1, this.venue.boothsRect);
-				concertGoers.addItem(cp);
-			}			
-		}
-		
-		public function removeCustomersFromVenue():void
-		{
-			for each (var cp:CustomerPerson in concertGoers)
-			{
-				_customerPersonManager.remove(cp);
-			}
-			concertGoers.removeAll();
 		}
 				
 		public function onVenueUpdated(method:String, newInstance:OwnedDwelling):void
@@ -144,7 +85,7 @@ package views
 				if (venue.state == 0)
 				{
 					venue.advanceState(destinationState);
-					_bandManager.setInMotion();				
+					bandBoss.setInMotion();				
 				}
 				else if (venue.state != destinationState)
 				{
@@ -159,26 +100,42 @@ package views
 					venue.advanceState(destinationState);				
 				}
 			}				
-		}		
-		
-		public function get bandManager():BandManager
-		{
-			return _bandManager;
 		}
 		
-		public function get dwellingManager():DwellingManager
+		public function set myWorld(val:World):void
 		{
-			return _dwellingManager;
+			_myWorld = val;
+			venue.myWorld = val;
 		}
 		
-		public function get levelManager():LevelManager
+		public function updateWorld(myWorld:World, bitmapBlotter:BitmapBlotter):void
 		{
-			return _levelManager;
+			_myWorld = myWorld;
+			venue.myWorld = myWorld;
+			_bitmapBlotter = bitmapBlotter;
+			venue.bitmapBlotter = bitmapBlotter;
+			initializeBandBoss();
 		}
 		
-		public function get concertStage():ConcertStage
+		public function initializeBandBoss():void
+		{			
+			bandBoss = new BandBoss(this, _creatureController, _myWorld);									
+		}
+		
+		public function set bitmapBlotter(val:BitmapBlotter):void
 		{
-			return _concertStage
+			_bitmapBlotter = val;
+			venue.bitmapBlotter = val;
+		}
+		
+		public function get dwellingController():DwellingController
+		{
+			return _dwellingController;
+		}
+		
+		public function get levelController():LevelController
+		{
+			return _levelController;
 		}
 		
 	}

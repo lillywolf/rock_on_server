@@ -1,6 +1,6 @@
 package stores
 {
-	import controllers.LayerableManager;
+	import controllers.LayerableController;
 	
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
@@ -34,7 +34,7 @@ package stores
 			{
 				_mc.gotoAndPlay(1);
 				_mc.stop();
-				var uic:UIComponent = LayerableManager.formatMovieClipByDimensions(_mc, CONTAINER_WIDTH, CONTAINER_HEIGHT, CONTAINER_PADDING_X, CONTAINER_PADDING_Y);
+				var uic:UIComponent = LayerableController.formatMovieClipByDimensions(_mc, CONTAINER_WIDTH, CONTAINER_HEIGHT, CONTAINER_PADDING_X, CONTAINER_PADDING_Y);
 				container.addChild(uic);
 				addChild(container);
 			}

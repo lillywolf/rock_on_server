@@ -1,6 +1,6 @@
 package views
 {
-	import controllers.LevelManager;
+	import controllers.LevelController;
 	
 	import models.Level;
 	import models.User;
@@ -48,7 +48,7 @@ package views
 			return levelBox;
 		}	
 		
-		public static function getLevelText(myUser:User, levelManager:LevelManager, fontSize:int, filters:Array):Label
+		public static function getLevelText(myUser:User, levelController:LevelController, fontSize:int, filters:Array):Label
 		{
 			var levelText:Label = new Label();
 			levelText.filters = filters;
@@ -62,7 +62,7 @@ package views
 			return levelText;			
 		}
 		
-		public static function createLevelProgressBar(myUser:User, levelManager:LevelManager, barWidth:int, barHeight:int, backgroundColor:Object, borderColor:Object, progressColor:Object):Canvas
+		public static function createLevelProgressBar(myUser:User, levelController:LevelController, barWidth:int, barHeight:int, backgroundColor:Object, borderColor:Object, progressColor:Object):Canvas
 		{
 			var canvas:Canvas = new Canvas();
 			canvas.height = barHeight;
@@ -76,7 +76,7 @@ package views
 			backing.width = barWidth + 2;
 			backing.height = barHeight;
 			var progress:Canvas = new Canvas();
-			var xpFraction:Number = levelManager.getLevelProgressPercentage(myUser.level, myUser.xp);
+			var xpFraction:Number = levelController.getLevelProgressPercentage(myUser.level, myUser.xp);
 			progress.width = barWidth * xpFraction;
 			progress.height = barHeight;
 			progress.setStyle("backgroundColor", progressColor);

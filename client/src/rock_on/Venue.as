@@ -1,5 +1,11 @@
 package rock_on
 {
+	import controllers.CreatureController;
+	import controllers.DwellingController;
+	import controllers.LayerableController;
+	import controllers.LevelController;
+	import controllers.StructureController;
+	
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
@@ -10,7 +16,10 @@ package rock_on
 	import game.CounterEvent;
 	import game.GameClock;
 	
+	import helpers.CreatureGenerator;
+	
 	import models.OwnedDwelling;
+	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Button;
@@ -19,8 +28,11 @@ package rock_on
 	
 	import spark.primitives.Rect;
 	
+	import views.BandBoss;
 	import views.VenueManager;
+	import views.WorldBitmapInterface;
 	
+	import world.BitmapBlotter;
 	import world.Point3D;
 	import world.World;
 
@@ -60,34 +72,119 @@ package rock_on
 		public var audienceRect:Rectangle;
 		public var stageRect:Rectangle;
 		
-		public var _myWorld:World;
+		public var _bandBoss:BandBoss;
 		
-		public function Venue(venueManager:VenueManager, myWorld:World, params:Object=null, target:IEventDispatcher=null)
+		public var creatureGenerator:CreatureGenerator;
+		public var boothBoss:BoothBoss;
+		public var groupieBoss:GroupieBoss;
+		public var customerPersonManager:CustomerPersonManager;
+		public var listeningStationBoss:ListeningStationBoss;		
+		public var stageManager:StageManager;
+
+		public var _wbi:WorldBitmapInterface;
+		public var _dwellingController:DwellingController;
+		public var _structureController:StructureController;
+		public var _creatureController:CreatureController;
+		public var _layerableController:LayerableController;
+		public var _myWorld:World;
+		public var _bitmapBlotter:BitmapBlotter;
+		
+		public var numSuperCustomers:int;
+		public var numStaticCustomers:int;
+		public var numMovingCustomers:int;		
+		
+		public function Venue(wbi:WorldBitmapInterface, venueManager:VenueManager, dwellingController:DwellingController, creatureController:CreatureController, layerableController:LayerableController, structureController:StructureController, bandBoss:BandBoss, params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
 			
-			_myWorld = myWorld;
+			_layerableController = layerableController;
+			_structureController = structureController;
 			_venueManager = venueManager;
+			_wbi = wbi;
+			_dwellingController = dwellingController;
+			_creatureController = creatureController;
+			_bandBoss = bandBoss;
+			
 			entryPoints = new ArrayCollection();
 			setEntrance(params);
 			setAdditionalProperties(params);
 			
-			setLayout();
-			updateState();		
+			numStaticCustomers = Math.floor(fancount * VenueManager.STATIC_CUSTOMER_FRACTION);
+			numSuperCustomers = Math.floor(fancount * VenueManager.SUPER_CUSTOMER_FRACTION);
+			numMovingCustomers = fancount - numStaticCustomers - numSuperCustomers;			
+			
+			addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);			
+			
+			addStageManager();	
+		}
+		
+		public function addStageManager():void
+		{
+			stageManager = new StageManager(_structureController);
+			stageManager.createStage();
 		}
 		
 		public function setLayout():void
 		{
 			venueRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, _myWorld.tilesDeep);
 			boothsRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, Math.round(_myWorld.tilesDeep * BOOTH_SECTION_FRACTION))
-			stageBufferRect = new Rectangle(0, (_myWorld.tilesDeep - _venueManager.concertStage.structure.depth - STAGE_BUFFER_SQUARES), _venueManager.concertStage.structure.width + STAGE_BUFFER_SQUARES, _venueManager.concertStage.structure.depth + STAGE_BUFFER_SQUARES);	
-			stageRect = new Rectangle(0, (_myWorld.tilesDeep - _venueManager.concertStage.structure.depth), _venueManager.concertStage.structure.width, _venueManager.concertStage.structure.depth);	
+			stageBufferRect = new Rectangle(0, (_myWorld.tilesDeep - stageManager.concertStage.structure.depth - STAGE_BUFFER_SQUARES), stageManager.concertStage.structure.width + STAGE_BUFFER_SQUARES, stageManager.concertStage.structure.depth + STAGE_BUFFER_SQUARES);	
+			stageRect = new Rectangle(0, (_myWorld.tilesDeep - stageManager.concertStage.structure.depth), stageManager.concertStage.structure.width, stageManager.concertStage.structure.depth);	
 			crowdBufferRect = new Rectangle(Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width), boothsRect.bottom, venueRect.right - (Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width)), venueRect.height - boothsRect.height);
 			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom - 1));
 			audienceRect = new Rectangle(0, boothsRect.bottom, venueRect.width, venueRect.height - boothsRect.height - 1);
 			
 			assignedSeats = _myWorld.pathFinder.createSeatingArrangement(audienceRect, stageBufferRect, this.dwelling.capacity);
 		}
+		
+		public function onBoothUnstocked(evt:VenueEvent):void
+		{
+			customerPersonManager.removeBoothFromAvailable(evt.booth);
+		}	
+		
+		public function update(deltaTime:Number):void
+		{
+			if (customerPersonManager)
+			{
+				customerPersonManager.update(deltaTime);			
+			}
+			if (listeningStationBoss)
+			{
+				listeningStationBoss.passerbyManager.update(deltaTime);							
+			}
+		}
+		
+		public function addStaticStuffToVenue():void
+		{
+			setLayout();
+			updateState();	
+			
+			getNumberOfBitmaps();
+			
+			customerPersonManager = new CustomerPersonManager(_myWorld, this);
+			boothBoss = new BoothBoss(_structureController, _myWorld, this);
+			listeningStationBoss = new ListeningStationBoss(_structureController, _layerableController, stageManager, _myWorld, this, boothBoss, customerPersonManager);
+
+//			add UI layer to boothBoss
+			boothBoss.setInMotion();
+			listeningStationBoss.setInMotion();
+		}	
+		
+		public function addMovingStuffToVenue():void
+		{
+			creatureGenerator = new CreatureGenerator(_layerableController);
+			_wbi.customerPersonManager = customerPersonManager;
+			groupieBoss = new GroupieBoss(customerPersonManager, boothBoss, stageManager.concertStage, _creatureController, _myWorld, this);
+
+			listeningStationBoss.addStaticStationListeners();
+			listeningStationBoss.showPassersby();
+			
+			addStaticCustomersToVenue();
+			addSuperCustomersToVenue(stageManager.myStage);
+			addMovingCustomersToVenue();
+			
+			groupieBoss.setInMotion();
+		}		
 		
 		public function setAdditionalProperties(params:Object):void
 		{
@@ -97,6 +194,19 @@ package rock_on
 			}				
 		}
 		
+		private function getNumberOfBitmaps():void
+		{
+			var totalStructures:int = 0;
+			for each (var os:OwnedStructure in _structureController.owned_structures)
+			{
+				if (os.structure.structure_type == "Booth")
+				{
+					totalStructures++;
+				}
+			}
+			_bitmapBlotter.expectedAssetCount = numStaticCustomers + totalStructures;				
+		}		
+		
 		public function updateState():void
 		{
 			updateStateOnServer(false);
@@ -105,7 +215,7 @@ package rock_on
 		public function updateStateOnServer(showButtonClicked:Boolean):void
 		{
 			var timeElapsed:int = getUpdatedTimeElapsed();
-			_venueManager.dwellingManager.serverController.sendRequest({id: id, time_elapsed_client: timeElapsed, show_button_clicked: showButtonClicked}, "owned_dwelling", "update_state");
+			_venueManager.dwellingController.serverController.sendRequest({id: id, time_elapsed_client: timeElapsed, show_button_clicked: showButtonClicked}, "owned_dwelling", "update_state");
 		}
 		
 		public function getUpdatedTimeElapsed():int
@@ -114,6 +224,57 @@ package rock_on
 			var timeSinceStateChanged:int = currentDate.getTime()/1000 + (currentDate.timezoneOffset * 60) - GameClock.convertStringTimeToUnixTime(_state_updated_at);
 			return timeSinceStateChanged;
 		}
+		
+		public function addStaticCustomersToVenue():void
+		{
+			if (!customerPersonManager.concertStage)
+			{
+				customerPersonManager.concertStage = stageManager.concertStage;
+			}
+			for (var i:int = 0; i < numStaticCustomers; i++)
+			{
+				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
+				cp.speed = 0.06;
+				customerPersonManager.add(cp, false, i);
+			}
+		}
+		
+		public function addSuperCustomersToVenue(worldToUpdate:World):void
+		{
+			if (!customerPersonManager.concertStage)
+			{
+				customerPersonManager.concertStage = stageManager.concertStage;
+			}
+			for (var i:int = 0; i < numSuperCustomers; i++)
+			{
+				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
+				cp.speed = 0.06;
+				cp.isSuperFan = true;
+				customerPersonManager.add(cp, true, -1, stageBufferRect, stageRect, worldToUpdate);
+			}					
+		}
+		
+		public function addMovingCustomersToVenue():void
+		{
+			if (!customerPersonManager.concertStage)
+			{
+				customerPersonManager.concertStage = stageManager.concertStage;
+			}
+			for (var i:int = 0; i < numMovingCustomers; i++)
+			{
+				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
+				cp.speed = 0.06;
+				customerPersonManager.add(cp, true, -1, boothsRect);
+			}			
+		}
+		
+		public function removeCustomersFromVenue():void
+		{
+			for each (var cp:CustomerPerson in customerPersonManager)
+			{
+				customerPersonManager.remove(cp);
+			}
+		}		
 		
 		public function stateTranslateString():int
 		{
@@ -250,7 +411,7 @@ package rock_on
 		{
 			if (state == ENCORE_STATE || state == ENCORE_WAIT_STATE)
 			{
-				_venueManager.dwellingManager.serverController.sendRequest({id: id, level: _venueManager.levelManager.level}, "owned_dwelling", "change_venue");
+				_venueManager.dwellingController.serverController.sendRequest({id: id, level: _venueManager.levelController.level}, "owned_dwelling", "change_venue");
 			}
 		}
 		
@@ -272,7 +433,7 @@ package rock_on
 		
 		public function updateFanCount(fansToAdd:int, venue:Venue, station:ListeningStation):void
 		{
-			_venueManager.dwellingManager.serverController.sendRequest({id: venue.id, to_add: fansToAdd, owned_structure_id: station.id}, "owned_dwelling", "update_fancount");
+			_venueManager.dwellingController.serverController.sendRequest({id: venue.id, to_add: fansToAdd, owned_structure_id: station.id}, "owned_dwelling", "update_fancount");
 		}
 		
 		public function startEncoreWaitState():void
@@ -288,7 +449,7 @@ package rock_on
 		public function startShowWaitState():void
 		{
 			state = SHOW_WAIT_STATE;
-			displayStartShowButton();
+//			displayStartShowButton();
 		}
 		
 		public function displayStartShowButton():void
@@ -319,9 +480,24 @@ package rock_on
 			}			
 		}
 		
+		public function set myWorld(val:World):void
+		{
+			_myWorld = val;
+		}
+		
+		public function set bitmapBlotter(val:BitmapBlotter):void
+		{
+			_bitmapBlotter = val;
+		}
+		
 		public function get myWorld():World
 		{
 			return _myWorld;
+		}
+		
+		public function get creatureController():CreatureController
+		{
+			return _creatureController;
 		}
 		
 	}

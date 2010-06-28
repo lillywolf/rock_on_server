@@ -1,6 +1,6 @@
 package models
 {
-	import controllers.UserManager;
+	import controllers.UserController;
 	
 	import flash.events.IEventDispatcher;
 	
@@ -27,7 +27,7 @@ package models
 		
 		public var _last_showtime:String;
 		
-		public var _userManager:UserManager;
+		public var _userController:UserController;
 		
 		public function User(params:Object=null, target:IEventDispatcher=null)
 		{
@@ -241,7 +241,7 @@ package models
 		public function set level_id(val:int):void
 		{
 			_level_id = val;
-			_userManager.levelManager.setLevelOnUser(this);
+			_userController.levelController.setLevelOnUser(this);
 		}
 		
 		public function get level_id():int
@@ -259,14 +259,14 @@ package models
 			return _xp;
 		}
 		
-		public function set userManager(val:UserManager):void
+		public function set userController(val:UserController):void
 		{
-			_userManager = val;
+			_userController = val;
 		}
 		
-		public function get userManager():UserManager
+		public function get userController():UserController
 		{
-			return _userManager;
+			return _userController;
 		}	
 		
 	}

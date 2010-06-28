@@ -53,15 +53,15 @@ package rock_on
 		public var isBitmapped:Boolean;
 		public var isSuperFan:Boolean;
 		public var _concertStage:ConcertStage;
-		public var _boothManager:BoothManager;
+		public var _boothBoss:BoothBoss;
 		public var _venue:Venue;
 		public var proxiedDestination:Point3D;
 		
-		public function CustomerPerson(movieClipStack:MovieClip, concertStage:ConcertStage, boothManager:BoothManager, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public function CustomerPerson(movieClipStack:MovieClip, concertStage:ConcertStage, boothBoss:BoothBoss, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
 		{
 			super(movieClipStack, layerableOrder, creature, personScale, source);
 			_concertStage = concertStage;
-			_boothManager = boothManager;
+			_boothBoss = boothBoss;
 			startInitializedState();
 			setMoods();
 		}
@@ -440,7 +440,7 @@ package rock_on
 		
 		private function decrementQueue():void
 		{
-			currentBooth.boothManager.decreaseInventoryCount(currentBooth, 1);
+			currentBooth.boothBoss.decreaseInventoryCount(currentBooth, 1);
 			currentBooth.currentQueue--;
 			currentBooth.actualQueue--;			
 		}
@@ -493,7 +493,7 @@ package rock_on
 		{
 			state = ROUTE_STATE;
 			
-			var booth:Booth = _boothManager.getRandomBooth(currentBooth);
+			var booth:Booth = _boothBoss.getRandomBooth(currentBooth);
 			if (booth == null)
 			{
 				advanceState(ROAM_STATE);
@@ -600,12 +600,12 @@ package rock_on
 			var boothFront:Point3D;
 			if (state == ROUTE_STATE)
 			{
-				boothFront = _boothManager.getBoothFront(currentBooth, index, true);
+				boothFront = _boothBoss.getBoothFront(currentBooth, index, true);
 				updateDestination(boothFront);
 			}
 			else if (state == QUEUED_STATE)
 			{
-				boothFront = _boothManager.getBoothFront(currentBooth, index, false, true);
+				boothFront = _boothBoss.getBoothFront(currentBooth, index, false, true);
 				moveCustomer(boothFront);
 			}
 			else
@@ -724,7 +724,7 @@ package rock_on
 		
 		public function getPathToBoothLength(routedCustomer:Boolean=false, queuedCustomer:Boolean=false):int
 		{
-			var boothFront:Point3D = _boothManager.getBoothFront(currentBooth, 0, routedCustomer, queuedCustomer);				
+			var boothFront:Point3D = _boothBoss.getBoothFront(currentBooth, 0, routedCustomer, queuedCustomer);				
 			var currentPoint:Point3D = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
 			var path:ArrayCollection = _myWorld.pathFinder.calculatePathGrid(this, currentPoint, boothFront, false);
 

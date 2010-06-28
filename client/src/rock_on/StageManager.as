@@ -1,6 +1,6 @@
 package rock_on
 {
-	import controllers.StructureManager;
+	import controllers.StructureController;
 	
 	import flash.display.MovieClip;
 	import flash.events.EventDispatcher;
@@ -17,7 +17,7 @@ package rock_on
 
 	public class StageManager extends EventDispatcher
 	{
-		public var _structureManager:StructureManager;
+		public var _structureController:StructureController;
 		public var _myWorld:World;
 		public var _myStage:World;
 		public var editMirror:Boolean;
@@ -25,10 +25,10 @@ package rock_on
 		public var stages:ArrayCollection;
 		public var concertStage:ConcertStage;
 		
-		public function StageManager(structureManager:StructureManager, target:IEventDispatcher=null)
+		public function StageManager(structureController:StructureController, target:IEventDispatcher=null)
 		{
 			super(target);
-			_structureManager = structureManager;
+			_structureController = structureController;
 			stages = new ArrayCollection();
 		}
 		
@@ -44,7 +44,7 @@ package rock_on
 		
 		public function createStage():void
 		{
-			var stageStructures:ArrayCollection = _structureManager.getStructuresByType("ConcertStage");
+			var stageStructures:ArrayCollection = _structureController.getStructuresByType("ConcertStage");
 			concertStage = new ConcertStage(stageStructures[0]);
 			
 			stageAsset = new ActiveAsset(new MovieClip());
@@ -55,7 +55,7 @@ package rock_on
 		
 		public function addStageDecorations(worldToUpdate:World):void
 		{
-			var stageDecorations:ArrayCollection = _structureManager.getStructuresByType("StageDecoration");
+			var stageDecorations:ArrayCollection = _structureController.getStructuresByType("StageDecoration");
 			for each (var os:OwnedStructure in stageDecorations)
 			{
 				var stageDecoration:StageDecoration = new StageDecoration(this.concertStage, os);

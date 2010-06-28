@@ -1,49 +1,42 @@
 package game
 {
-	import controllers.CreatureManager;
-	import controllers.DwellingManager;
-	import controllers.EssentialModelManager;
-	import controllers.LayerableManager;
-	import controllers.LevelManager;
-	import controllers.OwnedLayerableManager;
-	import controllers.SongManager;
-	import controllers.StoreManager;
-	import controllers.StructureManager;
-	import controllers.ThingerManager;
-	import controllers.UserManager;
-	
+	import controllers.CreatureController;
+	import controllers.DwellingController;
+	import controllers.EssentialModelController;
+	import controllers.LayerableController;
+	import controllers.LevelController;
+	import controllers.SongController;
+	import controllers.StoreController;
+	import controllers.StructureController;
+	import controllers.ThingerController;
+	import controllers.UserController;	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
-	
 	import helpers.UnprocessedModel;
-	
 	import models.EssentialModelReference;
 	import models.OwnedDwelling;
 	import models.User;
-	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
-	
 	import server.ServerController;
 	import server.ServerDataEvent;
 	
 	public class GameDataInterface extends EventDispatcher
 	{
-		[Bindable] public var songManager:SongManager;
-		[Bindable] public var layerableManager:LayerableManager;
-		[Bindable] public var ownedLayerableManager:OwnedLayerableManager;
-		[Bindable] public var creatureManager:CreatureManager;
-		[Bindable] public var thingerManager:ThingerManager;
-		[Bindable] public var essentialModelManager:EssentialModelManager;
-		[Bindable] public var storeManager:StoreManager;
-		[Bindable] public var structureManager:StructureManager;
-		[Bindable] public var dwellingManager:DwellingManager;
-		[Bindable] public var levelManager:LevelManager;
-		[Bindable] public var userManager:UserManager;
+		[Bindable] public var songController:SongController;
+		[Bindable] public var layerableController:LayerableController;
+		[Bindable] public var creatureController:CreatureController;
+		[Bindable] public var thingerController:ThingerController;
+		[Bindable] public var essentialModelController:EssentialModelController;
+		[Bindable] public var storeController:StoreController;
+		[Bindable] public var structureController:StructureController;
+		[Bindable] public var dwellingController:DwellingController;
+		[Bindable] public var levelController:LevelController;
+		[Bindable] public var userController:UserController;
 		[Bindable] public var user:User;
 		
 		public var sc:ServerController;
@@ -58,40 +51,39 @@ package game
 			sc = new ServerController(this);
 			createManagers(preLoadedContent);
 			gameClock = new GameClock();
-			essentialModelManager.users.addEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
-			essentialModelManager.addEventListener(ServerDataEvent.INSTANCE_TO_CREATE, onInstanceToCreate);
-			essentialModelManager.addEventListener('instanceLoaded', onInstanceLoaded);	
+			essentialModelController.users.addEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
+			essentialModelController.addEventListener(ServerDataEvent.INSTANCE_TO_CREATE, onInstanceToCreate);
+			essentialModelController.addEventListener('instanceLoaded', onInstanceLoaded);	
 		}
 		
 		public function createManagers(preLoadedContent:Dictionary):void
 		{
-			essentialModelManager = new EssentialModelManager();
-			songManager = new SongManager(essentialModelManager);
-			layerableManager = new LayerableManager(essentialModelManager);
-			ownedLayerableManager = new OwnedLayerableManager(essentialModelManager);
-			creatureManager = new CreatureManager(essentialModelManager);
-			thingerManager = new ThingerManager(essentialModelManager);
-			storeManager = new StoreManager(essentialModelManager);
-			structureManager = new StructureManager(essentialModelManager);
-			dwellingManager = new DwellingManager(essentialModelManager);
-			userManager = new UserManager(essentialModelManager);
-			levelManager = new LevelManager(essentialModelManager);
+			essentialModelController = new EssentialModelController();
+			songController = new SongController(essentialModelController);
+			layerableController = new LayerableController(essentialModelController);
+			creatureController = new CreatureController(essentialModelController);
+			thingerController = new ThingerController(essentialModelController);
+			storeController = new StoreController(essentialModelController);
+			structureController = new StructureController(essentialModelController);
+			dwellingController = new DwellingController(essentialModelController);
+			userController = new UserController(essentialModelController);
+			levelController = new LevelController(essentialModelController);
 			
-			userManager.levelManager = levelManager;
+			userController.levelController = levelController;
 			
 			if (preLoadedContent)
 			{
 				setPreLoadedContent(preLoadedContent);
 			}			
 			
-			structureManager.serverController = sc;
-			creatureManager.serverController = sc;
-			thingerManager.serverController = sc;
-			userManager.serverController = sc;
-			levelManager.serverController = sc;
-			dwellingManager.serverController = sc;
+			structureController.serverController = sc;
+			creatureController.serverController = sc;
+			thingerController.serverController = sc;
+			userController.serverController = sc;
+			levelController.serverController = sc;
+			dwellingController.serverController = sc;
 			
-			storeManager.gdi = this;
+			storeController.gdi = this;
 		}
 		
 		public function onInstanceToCreate(evt:ServerDataEvent):void
@@ -103,32 +95,32 @@ package game
 		{
 			if (preLoadedContent["essentialModelReference"])
 			{
-				essentialModelManager.essentialModelReference = preLoadedContent["essentialModelReference"];
+				essentialModelController.essentialModelReference = preLoadedContent["essentialModelReference"];
 			}
 			if (preLoadedContent["structures"])
 			{
-				essentialModelManager.structures = preLoadedContent["structures"];
-				structureManager.structures = essentialModelManager.structures;
+				essentialModelController.structures = preLoadedContent["structures"];
+				structureController.structures = essentialModelController.structures;
 			}
 			if (preLoadedContent["layerables"])
 			{
-				essentialModelManager.layerables = preLoadedContent["layerables"];
-				layerableManager.layerables = essentialModelManager.layerables;
+				essentialModelController.layerables = preLoadedContent["layerables"];
+				layerableController.layerables = essentialModelController.layerables;
 			}									
 			if (preLoadedContent["dwellings"])
 			{
-				essentialModelManager.layerables = preLoadedContent["dwellings"];
-				dwellingManager.dwellings = essentialModelManager.dwellings;
+				essentialModelController.layerables = preLoadedContent["dwellings"];
+				dwellingController.dwellings = essentialModelController.dwellings;
 			}
 			if (preLoadedContent["levels"])
 			{
-				essentialModelManager.levels = preLoadedContent["levels"];
-				levelManager.levels = essentialModelManager.levels;
+				essentialModelController.levels = preLoadedContent["levels"];
+				levelController.levels = essentialModelController.levels;
 			}
 			if (preLoadedContent["songs"])
 			{
-				essentialModelManager.songs = preLoadedContent["songs"];
-				songManager.songs = essentialModelManager.songs;
+				essentialModelController.songs = preLoadedContent["songs"];
+				songController.songs = essentialModelController.songs;
 			}
 		}
 		
@@ -138,11 +130,11 @@ package game
 			if ((collection.getItemAt(collection.length - 1) as User).snid == snid)
 			{				
 				user = collection.getItemAt(collection.length - 1) as User;
-				userManager.user = user;
+				userController.user = user;
 								
 				var serverDataEvent:ServerDataEvent = new ServerDataEvent(ServerDataEvent.USER_LOADED, 'user', evt.currentTarget, null, true, true);
 				dispatchEvent(serverDataEvent);
-				essentialModelManager.users.removeEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
+				essentialModelController.users.removeEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
 			}
 		}
 		
@@ -211,7 +203,7 @@ package game
 		
 		public function updateProperties(obj:Object):void
 		{
-			var className:String = essentialModelManager.convertToClassCase(obj.model);
+			var className:String = essentialModelController.convertToClassCase(obj.model);
 			var klass:Class = getDefinitionByName('models.'+className) as Class;
 			
 			// This should be improved, first way is better
@@ -219,7 +211,7 @@ package game
 			var instance:Object;
 			if (obj.model)
 			{			
-				for each (instance in essentialModelManager[obj.model+'s'])
+				for each (instance in essentialModelController[obj.model+'s'])
 				{
 					if (instance.id == obj.instance[obj.model].id)
 					{
@@ -239,7 +231,7 @@ package game
 			{
 				if (isGameUser(obj.instance[obj.model].snid))
 				{
-					for each (instance in essentialModelManager[obj.model])
+					for each (instance in essentialModelController[obj.model])
 					{
 						if (instance.id == obj.instance[obj.model].id)
 						{
@@ -274,7 +266,7 @@ package game
 		public function loadObject(obj:Object, requestType:String):void
 		{
 			var toLoad:UnprocessedModel = new UnprocessedModel(requestType, obj, obj.instance[requestType]);
-			essentialModelManager.loadNewInstance(toLoad);				
+			essentialModelController.loadNewInstance(toLoad);				
 		}
 		
 		public function requestChildrenFromServer(parentObject:Object, requestType:String):void
@@ -299,7 +291,7 @@ package game
 		public function checkIfLoadingAndInstantiationComplete():void
 		{
 //			Alert.show(pendingRequests.toString() + "::" + loadCounter.toString());
-			if (essentialModelManager.instancesToLoad.length == 0 && pendingRequests == loadCounter)
+			if (essentialModelController.instancesToLoad.length == 0 && pendingRequests == loadCounter)
 			{
 //				Use true for testing in non-Facebook environment				
 				
@@ -320,22 +312,33 @@ package game
 		{
 			checkForLoadedStructures();
 			checkForLoadedLayerables();
+			checkForLoadedSongs();
+		}
+		
+		private function checkForLoadedSongs():void
+		{
+			if (songController.ownedSongsLoaded == songController.songsLoaded)
+			{
+				if (isLoggedInUser() && !songController.fullyLoaded)
+				{
+					FlexGlobals.topLevelApplication.onSongsLoaded();
+					songController.fullyLoaded = true;
+				}
+			}
 		}
 		
 		private function checkForLoadedStructures():void
 		{
-// 			This number is currently adjusted for stages without MCs!! CHANGE LATER!!
-//			trace (structureManager.ownedStructureMovieClipsLoaded.toString() + "::" + structureManager.ownedStructuresLoaded.toString());
-			if (structureManager.ownedStructureMovieClipsLoaded == structureManager.ownedStructuresLoaded)
+			if (structureController.ownedStructureMovieClipsLoaded == structureController.ownedStructuresLoaded)
 			{
 //				Use true for non-Facebook testing					
-				if (isLoggedInUser() && !structureManager.fullyLoaded && (dwellingManager.owned_dwellings[0] as OwnedDwelling).dwelling)
+				if (isLoggedInUser() && !structureController.fullyLoaded && (dwellingController.owned_dwellings[0] as OwnedDwelling).dwelling)
 //				if (true)
 				{
 					FlexGlobals.topLevelApplication.attemptToInitializeVenueForUser();	
-					structureManager.fullyLoaded = true;
+					structureController.fullyLoaded = true;
 				}
-				else if (isLoggedInUser() && !structureManager.fullyLoaded && !(dwellingManager.owned_dwellings[0] as OwnedDwelling).dwelling)
+				else if (isLoggedInUser() && !structureController.fullyLoaded && !(dwellingController.owned_dwellings[0] as OwnedDwelling).dwelling)
 				{
 					throw new Error("Dwelling not set");
 				}
@@ -348,12 +351,12 @@ package game
 		
 		private function checkForLoadedLayerables():void
 		{
-			if (layerableManager.ownedLayerableMovieClipsLoaded == layerableManager.ownedLayerablesLoaded)
+			if (layerableController.ownedLayerableMovieClipsLoaded == layerableController.ownedLayerablesLoaded)
 			{
-				if (isLoggedInUser() && !layerableManager.fullyLoaded)
+				if (isLoggedInUser() && !layerableController.fullyLoaded)
 				{
 					FlexGlobals.topLevelApplication.attemptToPopulateVenueForUser();
-					layerableManager.fullyLoaded = true;
+					layerableController.fullyLoaded = true;
 				}
 				else
 				{

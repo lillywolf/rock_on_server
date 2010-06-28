@@ -2,15 +2,15 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:views="views.*" width="1000" height="1000" clipContent="false" creationComplete="onCreationComplete()" verticalScrollPolicy="off" horizontalScrollPolicy="off">	
 	<mx:Script>
 		<![CDATA[
-			import controllers.CreatureManager;
-			import controllers.DwellingManager;
-			import controllers.LayerableManager;
-			import controllers.LevelManager;
-			import controllers.SongManager;
-			import controllers.StoreManager;
-			import controllers.StructureManager;
-			import controllers.ThingerManager;
-			import controllers.UserManager;
+			import controllers.CreatureController;
+			import controllers.DwellingController;
+			import controllers.LayerableController;
+			import controllers.LevelController;
+			import controllers.SongController;
+			import controllers.StoreController;
+			import controllers.StructureController;
+			import controllers.ThingerController;
+			import controllers.UserController;
 			
 			import flash.utils.getDefinitionByName;
 			import flash.utils.getQualifiedClassName;
@@ -53,13 +53,13 @@
 			import rock_on.BandMember;
 			import rock_on.BandMemberManager;
 			import rock_on.Booth;
-			import rock_on.BoothManager;
+			import rock_on.BoothBoss;
 			import rock_on.ConcertStage;
 			import rock_on.CustomerPerson;
 			import rock_on.CustomerPersonManager;
-			import rock_on.GroupieManager;
+			import rock_on.GroupieBoss;
 			import rock_on.ListeningStation;
-			import rock_on.ListeningStationManager;
+			import rock_on.ListeningStationBoss;
 			import rock_on.PasserbyManager;
 			import rock_on.Person;
 			import rock_on.Promoter;
@@ -105,13 +105,13 @@
 			public var booths:ArrayCollection;
 			public var stages:ArrayCollection;
 			[Bindable] public var customerPersonManager:CustomerPersonManager;
-			[Bindable] public var bandManager:BandManager;
+			[Bindable] public var bandBoss:BandBoss;
 			[Bindable] public var concertStage:ConcertStage;
-			public var listeningStationManager:ListeningStationManager;
-			public var groupieManager:GroupieManager;
+			[Bindable] public var listeningStationBoss:ListeningStationBoss;
+			[Bindable] public var groupieBoss:GroupieBoss;
 			[Bindable] public var venueManager:VenueManager;
-			[Bindable] public var boothManager:BoothManager;
-			public var stageManager:StageManager;
+			[Bindable] public var boothBoss:BoothBoss;
+			[Bindable] public var stageManager:StageManager;
 			public var creatureGenerator:CreatureGenerator;
 			public var creditsBox:Text;
 			public var myStage:World;
@@ -119,15 +119,15 @@
 			public var wbi:WorldBitmapInterface;
 			
 			[Bindable] public var gameMagicManager:GameMagicManager;			
-			[Bindable] public var layerableManager:LayerableManager;
-			[Bindable] public var structureManager:StructureManager;
-			[Bindable] public var storeManager:StoreManager;
-			[Bindable] public var creatureManager:CreatureManager;
-			[Bindable] public var thingerManager:ThingerManager;
-			[Bindable] public var userManager:UserManager;
-			[Bindable] public var dwellingManager:DwellingManager;
-			[Bindable] public var levelManager:LevelManager;
-			[Bindable] public var songManager:SongManager;
+			[Bindable] public var layerableController:LayerableController;
+			[Bindable] public var structureController:StructureController;
+			[Bindable] public var storeController:StoreController;
+			[Bindable] public var creatureController:CreatureController;
+			[Bindable] public var thingerController:ThingerController;
+			[Bindable] public var userController:UserController;
+			[Bindable] public var dwellingController:DwellingController;
+			[Bindable] public var levelController:LevelController;
+			[Bindable] public var songController:SongController;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
@@ -151,26 +151,23 @@
 				wbi.onWorldViewClicked(evt);
 			}
 			
-			public function initializer():void
+			public function initializeWorld():void
 			{
-				addWorld();
-				addUILayer();
-				
-				customerPersonManager = new CustomerPersonManager();
-				wbi.customerPersonManager = customerPersonManager;
-				customerPersonManager.myWorld = myWorld;				
+				addWorld();	
 				var evt:DynamicEvent = new DynamicEvent("worldAdded", true, true);
 				dispatchEvent(evt);
 			}
 			
+			public function initializeVenue():void
+			{
+				venueManager = new VenueManager(wbi, structureController, layerableController, dwellingController, levelController, creatureController, myWorld);
+				venueManager.getVenue();
+			}
+			
 			public function initializeStructures():void
 			{
-				initializer();
-				boothManager = new BoothManager(structureManager, myWorld);
-				creatureGenerator = new CreatureGenerator(layerableManager);
-				generateManagers();				
-				initializeVenue();	
-				addStructuresToVenue();
+				venueManager.updateWorld(myWorld, bitmapBlotter);
+				venueManager.venue.addStaticStuffToVenue();				
 			}
 			
 			public function initializeCreatures():void
@@ -182,7 +179,7 @@
 			{
 				if (creaturesAdded)
 				{
-					addCreaturesToVenue();
+					venueManager.venue.addMovingStuffToVenue();
 				}
 				else
 				{
@@ -193,20 +190,6 @@
 			private function onAssetsDrawn(evt:WorldEvent):void
 			{
 				checkForCreaturesAdded();
-			}
-			
-			public function addStructuresToVenue():void
-			{
-				showBooths();
-				showListeningStations();				
-			}
-			
-			public function addCreaturesToVenue():void
-			{
-				showStaticListeners();
-				showPassersby();
-				showVenue();		
-				showGroupies();	
 			}
 			
 			private function onMouseDown(evt:MouseEvent):void
@@ -246,15 +229,6 @@
 				backgroundCanvas.nestLevel = 2;				
 			}
 			
-			public function addStageLayer():void
-			{
-				createStage();
-				myStage = new World(concertStage.structure.width*tileSize, concertStage.structure.height*tileSize, tileSize, concertStage.structure.height);
-				myStage.nestLevel = 1;
-				addChild(myStage);
-				stageManager.addStageToWorld(stageManager.stageAsset, concertStage.worldCoords, myStage);
-			}
-			
 			public function addWorld():void
 			{
 				myWorld = new World(worldWidth, worldHeight, tileSize, concertStage.structure.height);	
@@ -262,67 +236,6 @@
 				addBackgroundLayer();
 				addChild(myWorld);	
 				myWorld.assetRenderer.addEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);
-			}
-			
-			public function generateManagers():void
-			{
-				listeningStationManager = new ListeningStationManager(structureManager, layerableManager, myWorld);
-				groupieManager = new GroupieManager(customerPersonManager, boothManager, concertStage, creatureManager, myWorld);
-				stageView.initializeBandManager();
-				venueManager = new VenueManager(creatureGenerator, customerPersonManager, dwellingManager, levelManager, bandManager, boothManager, stageManager, myWorld);
-			}
-
-			private function initializeVenue():void
-			{
-				venueManager.getVenue();
-				
-				getNumberOfBitmaps();
-				
-				boothManager.venue = venueManager.venue;
-				listeningStationManager.venue = venueManager.venue;
-				customerPersonManager.venue = venueManager.venue;
-				bandManager.venue = venueManager.venue;	
-				groupieManager.venue = venueManager.venue;
-			}
-			
-			public function showStaticListeners():void
-			{
-				listeningStationManager.addStaticStationListeners();
-			}
-			
-			private function getNumberOfBitmaps():void
-			{
-				var totalStructures:int = 0;
-				for each (var os:OwnedStructure in structureManager.owned_structures)
-				{
-					if (os.structure.structure_type == "Booth")
-					{
-						totalStructures++;
-					}
-				}
-				bitmapBlotter.expectedAssetCount = venueManager.numStaticCustomers + totalStructures;				
-			}
-			
-			private function showVenue():void
-			{
-				venueManager.addStaticCustomersToVenue();
-				venueManager.addSuperCustomersToVenue(stageView.myStage);
-				venueManager.addMovingCustomersToVenue();
-			}
-			
-			private function showListeningStations():void
-			{
-				listeningStationManager.uiLayer = uiLayer;				
-				listeningStationManager.setInMotion();	
-				
-				listeningStationManager.boothManager = boothManager;
-				listeningStationManager.stageManager = stageManager;				
-				listeningStationManager.customerPersonManager = customerPersonManager;			
-			}
-			
-			private function showPassersby():void
-			{
-				listeningStationManager.showPassersby();
 			}
 			
 			private function onEnterFrame(evt:Event):void
@@ -336,36 +249,17 @@
 				
 				if (wbi)
 				{
-					wbi.handleEnterFrameEvents();				
+					wbi.handleEnterFrameEvents();			
 				}
-				
-				checkCustomerPersonManager(lockedDelta);
-			}
-			
-			public function addUILayer():void
-			{
-				uiLayer = new UILayer();
-				uiLayer.width = this.width;
-				uiLayer.height = this.height;
-				addChild(uiLayer);				
-			}			
-			
-			public function checkCustomerPersonManager(lockedDelta:Number):void
-			{
-				if (customerPersonManager)
+				if (venueManager)
 				{
-					customerPersonManager.update(lockedDelta);				
-				}				
-			}
-			
-			public function onUserLoaded():void
-			{
-				
+					venueManager.update(lockedDelta);				
+				}
 			}
 			
 			private function onStructurePlaced(evt:DynamicEvent):void
 			{
-				thingerManager.saveStructurePlacement(evt.asset, evt.currentPoint);
+				thingerController.saveStructurePlacement(evt.asset, evt.currentPoint);
 			}
 			
 			private function onWorldClicked(evt:MouseEvent):void
@@ -394,32 +288,21 @@
 				}
 			}
 			
-			public function showBooths():void
-			{
-				boothManager.uiLayer = uiLayer;
-				boothManager.setInMotion();
-			}
-			
 			public function createStage():void
 			{
-				stageManager = new StageManager(structureManager, myStage);
+				stageManager = new StageManager(structureController, myStage);
 				stageManager.createStage();
 				concertStage = stageManager.concertStage;
 			}
 			
 			public function boothPlaced():void
 			{
-				boothManager.reInitializeBooths(true);
-			}
-			
-			public function showGroupies():void
-			{	
-				groupieManager.setInMotion();
+				boothBoss.reInitializeBooths(true);
 			}
 			
 			public function showBandMembers():void
 			{
-				bandManager.setInMotion();
+				bandBoss.setInMotion();
 			}
 			
 			public function showCustomizer(creature:Creature):void
@@ -471,13 +354,13 @@
 			{				
 				if (os.structure.structure_type == "Booth")
 				{
-					boothManager.reInitializeBooths(true);
+					boothBoss.reInitializeBooths(true);
 					customerPersonManager.redrawAllCustomers();
 					this.bitmapBlotter.renderReplacedBitmaps();
 				}
 				else if (os.structure.structure_type == "ListeningStation")
 				{
-					listeningStationManager.reInitializeListeningStations();				
+					listeningStationBoss.reInitializeListeningStations();				
 				}
 			}
 			

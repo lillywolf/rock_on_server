@@ -31,16 +31,16 @@ package rock_on
 		public var enthralledTimer:Timer;
 		public var isStatic:Boolean;
 				
-		public function StationListener(movieClipStack:MovieClip, listeningStationManager:ListeningStationManager, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public function StationListener(movieClipStack:MovieClip, listeningStationBoss:ListeningStationBoss, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
 		{
-			super(movieClipStack, listeningStationManager, passerbyManager, myWorld, venue, layerableOrder, creature, personScale, source);
+			super(movieClipStack, listeningStationBoss, passerbyManager, myWorld, venue, layerableOrder, creature, personScale, source);
 		}	
 		
 		override public function startRouteState():void
 		{
 			state = ROUTE_STATE;
 			
-			var station:ListeningStation = _listeningStationManager.getRandomStation(currentStation);
+			var station:ListeningStation = _listeningStationBoss.getRandomStation(currentStation);
 			if (station == null)
 			{
 				// advance state
@@ -56,7 +56,7 @@ package rock_on
 		
 		override public function tryDestination():Point3D
 		{
-			var stationFront:Point3D = _listeningStationManager.getStationFront(currentStation);
+			var stationFront:Point3D = _listeningStationBoss.getStationFront(currentStation);
 			return stationFront;				
 		} 
 		

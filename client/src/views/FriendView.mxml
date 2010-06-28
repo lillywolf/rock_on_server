@@ -2,54 +2,65 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
 	<mx:Script>
 		<![CDATA[
-			import controllers.DwellingManager;
-			import controllers.LevelManager;
-			import rock_on.GroupieManager;
-			import rock_on.ListeningStationManager;
-			import helpers.CreatureGenerator;
-			import rock_on.StageManager;
+			import controllers.CreatureController;
+			import controllers.DwellingController;
+			import controllers.LayerableController;
+			import controllers.LevelController;
+			import controllers.StoreController;
+			import controllers.StructureController;
+			import controllers.ThingerController;
+			import controllers.UserController;
+			
+			import flash.utils.getTimer;
+			
 			import game.GameMagicManager;
-			import rock_on.ContentIndex;
-			import rock_on.BoothManager;
-			import world.WorldEvent;
-			import mx.controls.Alert;
-			import controllers.UserManager;
-			import mx.core.Application;
-			import rock_on.BandMemberManager;
-			import rock_on.BandMember;
-			import mx.events.FlexEvent;
-			import user.UserEvent;
-			import mx.controls.Text;
-			import rock_on.ConcertStage;
-			import rock_on.CustomerPersonManager;
-			import rock_on.Booth;
-			import rock_on.CustomerPerson;
-			import rock_on.Person;
-			import mx.events.DynamicEvent;
-			import controllers.ThingerManager;
-			import stores.StoreEvent;
-			import models.OwnedLayerable;
-			import models.User;
-			import models.Structure;
-			import controllers.StructureManager;
-			import controllers.CreatureManager;
-			import models.OwnedStructure;
-			import controllers.StoreManager;
-			import mx.core.UIComponent;
-			import models.StoreOwnedThinger;
-			import models.Store;
-			import models.OwnedThinger;
-			import models.Thinger;
-			import world.AssetStack;
+			
+			import helpers.CreatureGenerator;
+			
 			import models.Creature;
+			import models.OwnedLayerable;
+			import models.OwnedStructure;
+			import models.OwnedThinger;
+			import models.Store;
+			import models.StoreOwnedThinger;
+			import models.Structure;
+			import models.Thinger;
+			import models.User;
+			
 			import mx.collections.ArrayCollection;
-			import controllers.LayerableManager;
-			import world.Point3D;
+			import mx.controls.Alert;
+			import mx.controls.Text;
+			import mx.core.Application;
+			import mx.core.UIComponent;
+			import mx.events.DynamicEvent;
+			import mx.events.FlexEvent;
+			
+			import rock_on.BandMember;
+			import rock_on.BandMemberManager;
+			import rock_on.Booth;
+			import rock_on.BoothBoss;
+			import rock_on.ConcertStage;
+			import rock_on.ContentIndex;
+			import rock_on.CustomerPerson;
+			import rock_on.CustomerPersonManager;
+			import rock_on.GroupieBoss;
+			import rock_on.ListeningStationBoss;
+			import rock_on.Person;
+			import rock_on.StageManager;
+			
+			import stores.StoreEvent;
+			
+			import user.UserEvent;
+			
 			import world.ActiveAsset;
+			import world.AssetStack;
+			import world.BitmapBlotter;
+			import world.Point3D;
 			import world.World;
-			import flash.utils.getTimer;	
+			import world.WorldEvent;	
 
 			public var myWorld:World;
+			[Bindable] public var wbi:WorldBitmapInterface;
 			[Bindable] public var myUser:User;
 			
 			public var inventoryCanvas:Canvas;
@@ -61,27 +72,28 @@
 			public var customerPersonManager:CustomerPersonManager;
 			public var bandMemberManager:BandMemberManager;
 			public var concertStage:ConcertStage;
-			public var boothManager:BoothManager;
+			public var boothBoss:BoothBoss;
 			
 			public var creditsBox:Text;
 			
-			[Bindable] public var layerableManager:LayerableManager;
-			[Bindable] public var structureManager:StructureManager;
-			[Bindable] public var storeManager:StoreManager;
-			[Bindable] public var creatureManager:CreatureManager;
-			[Bindable] public var thingerManager:ThingerManager;
-			[Bindable] public var userManager:UserManager;
-			[Bindable] public var levelManager:LevelManager;
-			[Bindable] public var dwellingManager:DwellingManager;
+			[Bindable] public var layerableController:LayerableController;
+			[Bindable] public var structureController:StructureController;
+			[Bindable] public var storeController:StoreController;
+			[Bindable] public var creatureController:CreatureController;
+			[Bindable] public var thingerController:ThingerController;
+			[Bindable] public var userController:UserController;
+			[Bindable] public var levelController:LevelController;
+			[Bindable] public var dwellingController:DwellingController;
 			
 			[Bindable] public var stageManager:StageManager;
 			[Bindable] public var creatureGenerator:CreatureGenerator;
-			[Bindable] public var listeningStationManager:ListeningStationManager;
+			[Bindable] public var listeningStationBoss:ListeningStationBoss;
 			[Bindable] public var venueManager:VenueManager;
-			[Bindable] public var bandManager:BandManager;
-			[Bindable] public var groupieManager:GroupieManager;
+			[Bindable] public var bandBoss:BandBoss;
+			[Bindable] public var groupieBoss:GroupieBoss;
 			
 			public var viewInitialized:Boolean;
+			public var bitmapBlotter:BitmapBlotter;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
@@ -93,12 +105,6 @@
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
 				myWorld = new World(800, 800, 40);				
 				addChild(myWorld);	
-												
-				customerPersonManager = new CustomerPersonManager();
-				customerPersonManager.myWorld = myWorld;
-												
-				bandMemberManager = new BandMemberManager();
-				bandMemberManager.myWorld = myWorld;
 				
 				var evt:DynamicEvent = new DynamicEvent("worldAdded", true, true);
 				dispatchEvent(evt);
@@ -112,22 +118,15 @@
 					tearDown();
 				}
 				myWorld = new World(800, 800, 40);				
-				addChild(myWorld);	
-												
-				customerPersonManager = new CustomerPersonManager();
-				customerPersonManager.myWorld = myWorld;
-												
-				bandMemberManager = new BandMemberManager();
-				bandMemberManager.myWorld = myWorld;				
+				addChild(myWorld);				
 			}
 			
 			public function tearDown():void
 			{
-				groupieManager.tearDown();
-				venueManager.removeCustomersFromVenue();
+				groupieBoss.tearDown();
 				stageManager.tearDown();
-				boothManager.tearDown();
-				listeningStationManager.tearDown();
+				boothBoss.tearDown();
+				listeningStationBoss.tearDown();
 				creatureGenerator = null;
 				killManagers();
 			}
@@ -137,14 +136,11 @@
 				cleanAndReset();
 				
 				addStage();
-				boothManager = new BoothManager(structureManager, myWorld);
-				creatureGenerator = new CreatureGenerator(layerableManager);
 				generateManagers();
 				initializeVenue();
 									
 				showBooths();
 				showListeningStations();
-				showVenue();
 				showGroupies();				
 			}
 			
@@ -152,27 +148,23 @@
 			{
 				venueManager.getVenue();
 				
-				boothManager.venue = venueManager.venue;
-				listeningStationManager.venue = venueManager.venue;
+				boothBoss.venue = venueManager.venue;
+				listeningStationBoss.venue = venueManager.venue;
 				customerPersonManager.venue = venueManager.venue;
-				bandManager.venue = venueManager.venue;				
 			}			
 			
 			private function generateManagers():void
 			{
-				listeningStationManager = new ListeningStationManager(structureManager, layerableManager, myWorld);
-				groupieManager = new GroupieManager(customerPersonManager, boothManager, concertStage, creatureManager, myWorld);
-				bandManager = new BandManager(creatureManager, booths, concertStage, myWorld);
-				venueManager = new VenueManager(creatureGenerator, customerPersonManager, dwellingManager, levelManager, bandManager, boothManager, stageManager, myWorld);
+				venueManager = new VenueManager(wbi, structureController, layerableController, dwellingController, levelController, creatureController, myWorld);
 			}	
 			
 			private function killManagers():void
 			{
-				listeningStationManager = null;
-				groupieManager = null;
-				bandManager = null;
+				listeningStationBoss = null;
+				groupieBoss = null;
+				bandBoss = null;
 				venueManager = null;
-				boothManager = null;
+				boothBoss = null;
 				stageManager = null;
 			}
 			
@@ -194,7 +186,7 @@
 			
 			private function onStructurePlaced(evt:DynamicEvent):void
 			{
-				thingerManager.saveStructurePlacement(evt.asset, evt.currentPoint);
+				thingerController.saveStructurePlacement(evt.asset, evt.currentPoint);
 			}
 			
 			private function onWorldClicked(evt:MouseEvent):void
@@ -217,38 +209,38 @@
 			
 			public function showBooths():void
 			{
-				boothManager.friendMirror = true;
-				boothManager.setInMotion();
+				boothBoss.friendMirror = true;
+				boothBoss.setInMotion();
 			}
 			
 			public function addStage():void
 			{	
-				stageManager = new StageManager(structureManager, myWorld);
+				stageManager = new StageManager(structureController, myWorld);
 				stageManager.setInMotion();
 				concertStage = stageManager.concertStage;		
 			}
 			
 			private function showListeningStations():void
 			{
-				listeningStationManager.friendMirror = true;
-				listeningStationManager.setInMotion();	
+				listeningStationBoss.friendMirror = true;
+				listeningStationBoss.setInMotion();	
 				
-				listeningStationManager.boothManager = boothManager;
-				listeningStationManager.stageManager = stageManager;				
-				listeningStationManager.customerPersonManager = customerPersonManager;			
+				listeningStationBoss.boothBoss = boothBoss;
+				listeningStationBoss.stageManager = stageManager;				
+				listeningStationBoss.customerPersonManager = customerPersonManager;			
 			}			
 			
 			public function showGroupies():void
 			{	
 				// Creating ActiveAssets 2x as much as necessary here...
 				
-				groupieManager.friendMirror = true;
-				groupieManager.setInMotion();
+				groupieBoss.friendMirror = true;
+				groupieBoss.setInMotion();
 			}
 			
 			public function showBandMembers():void
 			{
-//				var bandMembers:ArrayCollection = creatureManager.getConstructedCreaturesByType("BandMember", 1, 1);
+//				var bandMembers:ArrayCollection = creatureController.getConstructedCreaturesByType("BandMember", 1, 1);
 //				
 //				for each (var assetStack:AssetStack in bandMembers)
 //				{
@@ -258,13 +250,8 @@
 //					bandMember.speed = 0.06;
 //					bandMemberManager.add(bandMember);
 //				}
-				bandManager.friendMirror = true;
-				bandManager.setInMotion();
-			}
-			
-			private function showVenue():void
-			{
-				venueManager.addStaticCustomersToVenue();
+				bandBoss.friendMirror = true;
+				bandBoss.setInMotion();
 			}			
 			
 			private function addStaticAsset(asset:ActiveAsset, addTo:Point3D):void

@@ -22,9 +22,13 @@ package rock_on
 		private var _concertStage:ConcertStage;
 		private var _venue:Venue;
 		
-		public function CustomerPersonManager(source:Array=null)
+		public function CustomerPersonManager(myWorld:World, venue:Venue, source:Array=null)
 		{
 			super(source);
+			_venue = venue;
+			_myWorld = myWorld;
+			_myWorld.addEventListener(WorldEvent.DIRECTION_CHANGED, onDirectionChanged);				
+			_myWorld.addEventListener(WorldEvent.FINAL_DESTINATION_REACHED, onFinalDestinationReached);			
 		}
 		
 		public function addConvertedFan(cp:CustomerPerson, startPoint:Point3D, fanIndex:int):void

@@ -3,10 +3,10 @@
 	<mx:states>
 		<mx:State name="topBar">
 			<mx:AddChild position="after">
-				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" songManager="{gdi.songManager}" storeManager="{gdi.storeManager}" levelManager="{gdi.levelManager}"/>
+				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userController="{gdi.userController}" songController="{gdi.songController}" storeController="{gdi.storeController}" levelController="{gdi.levelController}"/>
 			</mx:AddChild>
 			<mx:AddChild position="after">
-				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userManager="{gdi.userManager}" friendManager="{friendManager}" levelManager="{gdi.levelManager}" storeManager="{gdi.storeManager}" thingerManager="{gdi.thingerManager}"/>
+				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userController="{gdi.userController}" friendManager="{friendManager}" levelController="{gdi.levelController}" storeController="{gdi.storeController}" thingerController="{gdi.thingerController}"/>
 			</mx:AddChild>
 			<mx:AddChild position="after">
 				<views:UILayer id="uiLayer"/>
@@ -14,12 +14,12 @@
 		</mx:State>
 		<mx:State name="stageViewer" basedOn="worldView">
 			<mx:AddChild position="before" relativeTo="worldView">
-				<views:StageView id="stageView" wbi="{wbi}" bottomBar="{bottomBarView}" customerPersonManager="{worldView.customerPersonManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" boothManager="{worldView.boothManager}"/>
+				<views:StageView id="stageView" wbi="{wbi}" bottomBar="{bottomBarView}" venueManager="{worldView.venueManager}" customerPersonManager="{worldView.customerPersonManager}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" boothBoss="{worldView.boothBoss}"/>
 			</mx:AddChild>			
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
 			<mx:AddChild position="after">
-				<views:WorldView id="worldView" wbi="{wbi}" bottomBar="{bottomBarView}" songManager="{gdi.songManager}" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" dwellingManager="{gdi.dwellingManager}" levelManager="{gdi.levelManager}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandManager="{stageView.bandManager}"/>
+				<views:WorldView id="worldView" wbi="{wbi}" bottomBar="{bottomBarView}" songController="{gdi.songController}" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" dwellingController="{gdi.dwellingController}" levelController="{gdi.levelController}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandBoss="{stageView.bandBoss}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="friendView" basedOn="topBar">
@@ -29,7 +29,7 @@
 		</mx:State>
 		<mx:State name="editView" basedOn="topBar">
 			<mx:AddChild>
-				<views:EditView id="editView" myUser="{gdi.user}" stageView="{stageView}" userManager="{gdi.userManager}" thingerManager="{gdi.thingerManager}" storeManager="{gdi.storeManager}" creatureManager="{gdi.creatureManager}" structureManager="{gdi.structureManager}" layerableManager="{gdi.layerableManager}" boothManager="{worldView.boothManager}" venueManager="{worldView.venueManager}" dwellingManager="{gdi.dwellingManager}"/>
+				<views:EditView id="editView" myUser="{gdi.user}" stageView="{stageView}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" boothBoss="{worldView.boothBoss}" venueManager="{worldView.venueManager}" dwellingController="{gdi.dwellingController}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="twoDimensional">
@@ -41,58 +41,46 @@
 	<mx:Script>
 		<![CDATA[
 			import com.facebook.data.users.FacebookUser;
-			import com.facebook.events.FacebookEvent;
-			
-			import controllers.CreatureManager;
-			import controllers.FriendManager;
-			
-			import facebook.FacebookFunTime;
-			
-			import flash.utils.Proxy;
-			
+			import com.facebook.events.FacebookEvent;			
+			import controllers.CreatureController;
+			import controllers.FriendController;			
+			import facebook.FacebookFunTime;			
+			import flash.utils.Proxy;			
 			import game.GameDataInterface;
 			import game.GameMagicManager;
 			import game.ImposterOwnedStructure;
-			
 			import models.Creature;
 			import models.OwnedDwelling;
 			import models.OwnedLayerable;
 			import models.OwnedStructure;
 			import models.User;
-			
 			import mx.events.CollectionEvent;
 			import mx.events.DynamicEvent;
 			import mx.events.FlexEvent;
 			import mx.events.StateChangeEvent;
-			
 			import rock_on.ContentIndex;
-			
 			import server.ServerController;
 			import server.ServerDataEvent;
-			
 			import stores.StoreEvent;
-			
 			import user.UserEvent;
-			
 			import views.CreatureCustomizer;
 			import views.WorldBitmapInterface;
-			
 			import world.ActiveAsset;
 			import world.AssetStack;
 						
 			[Bindable] public var gdi:GameDataInterface;
+			[Bindable] public var wbi:WorldBitmapInterface;
 			[Bindable] public var loadedModels:Dictionary;
 			[Bindable] public var xGridCoord:Number;
 			[Bindable] public var yGridCoord:Number;
 			[Bindable] public var gameMagicManager:GameMagicManager;
+			[Bindable] public var friendManager:FriendController;
 			
 			public var facebookInterface:FacebookFunTime;
-			[Bindable] public var friendManager:FriendManager;
 			public var gameContent:Dictionary;
 			public var userLoaded:Boolean;
 			public var friendsLoaded:Boolean;
 			public var facebookDataLoaded:Boolean;
-			[Bindable] public var wbi:WorldBitmapInterface;
 			
 			private function onPreInitialize():void
 			{
@@ -100,14 +88,14 @@
 				
 				gdi = new GameDataInterface();
 				
-				gdi.addEventListener(ServerDataEvent.USER_LOADED, onUserLoaded);
+				gdi.addEventListener(ServerDataEvent.USER_LOADED, onUserObjectLoaded);
 				gdi.addEventListener(ServerDataEvent.GAME_CONTENT_LOADED, onGameContentLoaded);
 				gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	
 				gdi.addEventListener(ServerDataEvent.UPDATE_COMPLETE, onUpdateComplete);
 				
 				initializeFriendManager();
 				
-				gameMagicManager = new GameMagicManager(gdi.levelManager, gdi.userManager);
+				gameMagicManager = new GameMagicManager(gdi.levelController, gdi.userController);
 
 //				Call when in non-Facebook test mode
 				
@@ -115,14 +103,14 @@
 			}
 			private function initializeFriendManager():void
 			{
-				friendManager = new FriendManager(gdi);	
+				friendManager = new FriendController(gdi);	
 				friendManager.addEventListener("friendDataLoaded", onFriendDataLoaded);				
 			}	
 			private function onApplicationComplete():void
 			{
 				initializeFacebookInterface();				
 				currentState = "stageViewer";
-				gdi.storeManager.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
+				gdi.storeController.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
 				
 				wbi = new WorldBitmapInterface(worldView, stageView, editView, bottomBarView);
 			}
@@ -172,23 +160,29 @@
 			public function setGameContent():void
 			{
 				gameContent = new Dictionary();
-				gameContent["structures"] = gdi.structureManager.structures;
-				gameContent["layerables"] = gdi.layerableManager.layerables;
-				gameContent["stores"] = gdi.storeManager.stores;
-				gameContent["essentialModelReference"] = gdi.essentialModelManager.essentialModelReference;
+				gameContent["structures"] = gdi.structureController.structures;
+				gameContent["layerables"] = gdi.layerableController.layerables;
+				gameContent["stores"] = gdi.storeController.stores;
+				gameContent["essentialModelReference"] = gdi.essentialModelController.essentialModelReference;
 			}
 			public function attemptToInitializeVenueForUser():void
 			{
 				if (!userLoaded)
 				{
 					userLoaded = true;
-					stageView.initializeStructures();
+					worldView.initializeVenue();
+					stageView.initializeStage();
+					worldView.initializeWorld();
 					worldView.initializeStructures();
+					stageView.initializeStructures();
 					topBarView.onVenueLoaded();
 					getBasicFriendInfo();			
 				}
 			}
-			
+			public function onSongsLoaded():void
+			{
+				topBarView.onSongsLoaded();
+			}
 			public function attemptToPopulateVenueForUser():void
 			{
 				worldView.initializeCreatures();
@@ -201,12 +195,12 @@
 			{
 				currentState = "friendView";
 				friendView.myUser = friendGDI.user;
-				friendView.userManager = friendGDI.userManager;
-				friendView.structureManager = friendGDI.structureManager;
-				friendView.layerableManager = friendGDI.layerableManager;
-				friendView.creatureManager = friendGDI.creatureManager;
-				friendView.levelManager = friendGDI.levelManager;
-				friendView.dwellingManager = friendGDI.dwellingManager;				
+				friendView.userController = friendGDI.userController;
+				friendView.structureController = friendGDI.structureController;
+				friendView.layerableController = friendGDI.layerableController;
+				friendView.creatureController = friendGDI.creatureController;
+				friendView.levelController = friendGDI.levelController;
+				friendView.dwellingController = friendGDI.dwellingController;				
 				friendView.addEventListener("worldAdded", onFriendViewWorldAdded);
 			}
 			private function onFriendViewWorldAdded(evt:DynamicEvent):void
@@ -218,27 +212,26 @@
 			{
 				currentState = "friendView";
 				friendView.myUser = friendGDI.user;
-				friendView.userManager = friendGDI.userManager;
-				friendView.structureManager = friendGDI.structureManager;
-				friendView.layerableManager = friendGDI.layerableManager;
-				friendView.creatureManager = friendGDI.creatureManager;	
-				friendView.levelManager = friendGDI.levelManager;				
-				friendView.dwellingManager = friendGDI.dwellingManager;				
+				friendView.userController = friendGDI.userController;
+				friendView.structureController = friendGDI.structureController;
+				friendView.layerableController = friendGDI.layerableController;
+				friendView.creatureController = friendGDI.creatureController;	
+				friendView.levelController = friendGDI.levelController;				
+				friendView.dwellingController = friendGDI.dwellingController;				
 				friendView.startFriendMirror();				
 			}
 			public function instancesLoadedForGameUser():void
 			{
-//				worldView.myWorld.addEventListener(UserEvent.THINGER_PURCHASED, onWorldThingerPurchased);				
+
 			}
 			public function instancesLoadedForFriend():void
 			{
 				
 			}
-			private function onUserLoaded(evt:ServerDataEvent):void
+			private function onUserObjectLoaded(evt:ServerDataEvent):void
 			{
-				worldView.onUserLoaded();
-				topBarView.onUserLoaded();
-				bottomBarView.onUserLoaded();				
+				topBarView.onUserObjectLoaded();
+				bottomBarView.onUserObjectLoaded();				
 			}
 			private function onGameContentLoaded(evt:ServerDataEvent):void
 			{
@@ -254,14 +247,14 @@
 				currentState = 'twoDimensional';
 				twoDimensionalView.removeAllChildren();
 				
-				var creatureCustomizer:CreatureCustomizer = gdi.creatureManager.generateCreatureCustomizer(creature);
+				var creatureCustomizer:CreatureCustomizer = gdi.creatureController.generateCreatureCustomizer(creature);
 				creatureCustomizer.x = 0;
 				creatureCustomizer.y = 500;
 				twoDimensionalView.addChild(creatureCustomizer);
 			}
 			private function onWorldThingerPurchased(evt:UserEvent):void
 			{
-				gdi.userManager.incrementCredits(evt.creditsToAdd);
+				gdi.userController.incrementCredits(evt.creditsToAdd);
 			}
 			private function onUpdateComplete(evt:ServerDataEvent):void
 			{
@@ -288,13 +281,13 @@
 					else
 					{
 						gdi.user.updateUserOnServerResponse(instance as User, evt.method);
-						gdi.levelManager.setLevelOnUser(gdi.user);
+						gdi.levelController.setLevelOnUser(gdi.user);
 					}
 				}
 			}
 			private function updateOwnedStructurePostServer(os:OwnedStructure, method:String):void
 			{
-				gdi.structureManager.updateOwnedStructureOnServerResponse(os, method, worldView);
+				gdi.structureController.updateOwnedStructureOnServerResponse(os, method, worldView);
 				worldView.updateRenderedStructures(os, method);
 				stageView.updateRenderedStructures(os, method, stageView.myStage);
 				
@@ -305,12 +298,12 @@
 			}
 			private function updateOwnedLayerablePostServer(ol:OwnedLayerable, method:String):void
 			{
-				var creature:Creature = gdi.creatureManager.getCreatureById(ol.creature_id);
+				var creature:Creature = gdi.creatureController.getCreatureById(ol.creature_id);
 				if (creature.type == "BandMember")
 				{
-					worldView.bandManager.bandMemberManager.updateRenderedBandMembers(ol, creature, method);
+					worldView.bandBoss.bandMemberManager.updateRenderedBandMembers(ol, creature, method);
 				}
-				gdi.layerableManager.updateOwnedLayerableOnServerResponse(ol, method);
+				gdi.layerableController.updateOwnedLayerableOnServerResponse(ol, method);
 			}
 			private function checkForUpdatedVenue(instance:OwnedDwelling, method:String):void
 			{

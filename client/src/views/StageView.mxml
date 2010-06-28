@@ -4,8 +4,8 @@
 		<![CDATA[
 			import com.google.analytics.debug.Alert;
 			
-			import controllers.CreatureManager;
-			import controllers.StructureManager;
+			import controllers.CreatureController;
+			import controllers.StructureController;
 			
 			import flash.utils.getTimer;
 			
@@ -21,7 +21,7 @@
 			import mx.skins.halo.ActivatorSkin;
 			
 			import rock_on.BandMember;
-			import rock_on.BoothManager;
+			import rock_on.BoothBoss;
 			import rock_on.ConcertStage;
 			import rock_on.CustomerPersonManager;
 			import rock_on.Person;
@@ -40,14 +40,15 @@
 			
 			public var myStage:World;
 			public var customerPersonManager:CustomerPersonManager;
-			[Bindable] public var bandManager:BandManager;
+			[Bindable] public var bandBoss:BandBoss;
 			[Bindable] public var concertStage:ConcertStage;
 			[Bindable] public var stageManager:StageManager;
-			[Bindable] public var structureManager:StructureManager;
-			[Bindable] public var creatureManager:CreatureManager;
-			[Bindable] public var boothManager:BoothManager;
+			[Bindable] public var structureController:StructureController;
+			[Bindable] public var creatureController:CreatureController;
+			[Bindable] public var boothBoss:BoothBoss;
 			public var bottomBar:BottomBar;
 			[Bindable] public var wbi:WorldBitmapInterface;
+			[Bindable] public var venueManager:VenueManager;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
@@ -63,43 +64,18 @@
 			}
 			
 			public function initializeStructures():void
-			{				
-				createStage();
+			{								
+				venueManager.venue.stageManager.addStageToWorld(venueManager.venue.stageManager.stageAsset, concertStage.worldCoords, myStage);
+				venueManager.venue.stageManager.addStageDecorations(myStage);
+			}	
+			
+			public function initializeStage():void
+			{	
+				concertStage = venueManager.venue.stageManager.concertStage;
 				myStage = new World(stageWidth, stageHeight, tileSize, concertStage.structure.height);
 				addChild(myStage);
-				myStage.assetRenderer.addEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);
-				stageManager.addStageToWorld(stageManager.stageAsset, concertStage.worldCoords, myStage);
-				stageManager.addStageDecorations(this.myStage);				
+//				myStage.assetRenderer.addEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);
 			}
-			
-			public function onAssetsDrawn(evt:WorldEvent):void
-			{
-				
-			}		
-						
-//			private function onMouseDrag(evt:DynamicEvent):void
-//			{
-//				startDrag();
-//				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);				
-//			}
-//			
-//			private function onMouseUp(evt:MouseEvent):void
-//			{
-//				stopDrag();
-//			}
-			
-			public function initializeBandManager():void
-			{
-				bandManager = new BandManager(creatureManager, boothManager.booths, concertStage, myStage);		
-				wbi.bandManager = bandManager;
-			}
-			
-			public function createStage():void
-			{
-				stageManager = new StageManager(structureManager, myStage);
-				stageManager.createStage();
-				concertStage = stageManager.concertStage;
-			}			
 			
 			private function onEnterFrame(evt:Event):void
 			{
@@ -109,15 +85,10 @@
 				fps = 1000/deltaTime;
 				myMemory = System.totalMemory;
 				lastTime = time;
-												
-				if (customerPersonManager)
-				{
-					customerPersonManager.update(lockedDelta);				
-				}
 				
-				if (bandManager)
+				if (bandBoss)
 				{	
-					bandManager.update(lockedDelta);
+					bandBoss.update(lockedDelta);
 				}					
 			}
 			
@@ -165,7 +136,7 @@
 			{				
 				if (os.structure.structure_type == "StageDecoration")
 				{
-					this.bandManager.bandMemberManager.redrawAllBandMembers();
+					this.bandBoss.bandMemberManager.redrawAllBandMembers();
 				}
 				else
 				{

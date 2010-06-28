@@ -1,6 +1,6 @@
 package views
 {
-	import controllers.StructureManager;
+	import controllers.StructureController;
 	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -32,7 +32,7 @@ package views
 		public var _editView:EditView;
 		public var currentAsset:ActiveAsset;
 		public var locked:Boolean = false;
-		public var _structureManager:StructureManager;
+		public var _structureController:StructureController;
 		public var flexiUIC:FlexibleUIComponent;
 		
 		public static const INVALID_COLOR:ColorTransform = new ColorTransform(1, 0.25, 0.25);
@@ -101,11 +101,11 @@ package views
 			var asset:ActiveAsset;
 			if (thinger is ImposterOwnedStructure)
 			{
-				asset = _structureManager.generateAssetFromOwnedStructure(thinger as ImposterOwnedStructure);
+				asset = _structureController.generateAssetFromOwnedStructure(thinger as ImposterOwnedStructure);
 			}
 			if (thinger is OwnedStructure)
 			{
-				asset = _structureManager.generateAssetFromOwnedStructure(thinger as OwnedStructure);
+				asset = _structureController.generateAssetFromOwnedStructure(thinger as OwnedStructure);
 				var currentPoint:flash.geom.Point = new Point(_myWorld.mouseX, _myWorld.mouseY);
 				_myWorld.addStaticAsset(asset, World.actualToWorldCoords(currentPoint));
 				return asset;
@@ -249,7 +249,7 @@ package views
 		
 		public function saveNewOwnedStructure(os:OwnedStructure, asset:ActiveAsset):void
 		{
-			_structureManager.serverController.sendRequest({user_id: _editView.userManager.user.id, owned_dwelling_id: _editView.venueManager.venue.id, structure_id: os.structure.id, x: asset.worldCoords.x, y: asset.worldCoords.y, z: asset.worldCoords.z}, "owned_structure", "create_new");
+			_structureController.serverController.sendRequest({user_id: _editView.userController.user.id, owned_dwelling_id: _editView.venueManager.venue.id, structure_id: os.structure.id, x: asset.worldCoords.x, y: asset.worldCoords.y, z: asset.worldCoords.z}, "owned_structure", "create_new");
 		}
 		
 		public function onWorldClicked(evt:MouseEvent):void
@@ -271,7 +271,7 @@ package views
 		public function sellButtonClicked():void
 		{
 			var os:OwnedStructure = currentAsset.thinger as OwnedStructure;
-			_structureManager.serverController.sendRequest({id: os.id}, "owned_structure", "sell");
+			_structureController.serverController.sendRequest({id: os.id}, "owned_structure", "sell");
 			deactivateStructureWithoutSaving();
 			locked = false;			
 		}
@@ -469,16 +469,16 @@ package views
 			}
 		}
 		
-		public function set structureManager(val:StructureManager):void
+		public function set structureController(val:StructureController):void
 		{
-			_structureManager = val;
-			_structureManager.addEventListener(StoreEvent.THINGER_SOLD, onThingerSold);	
-			_structureManager.owned_structures.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedStructureCollectionChange);					
+			_structureController = val;
+			_structureController.addEventListener(StoreEvent.THINGER_SOLD, onThingerSold);	
+			_structureController.owned_structures.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedStructureCollectionChange);					
 		}
 		
-		public function get structureManager():StructureManager
+		public function get structureController():StructureController
 		{
-			return _structureManager;
+			return _structureController;
 		}
 		
 	}

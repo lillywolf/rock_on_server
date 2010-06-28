@@ -40,13 +40,13 @@ package rock_on
 		public var counter:Counter;
 		public var secondsRemaining:Number;
 		
-		public var _listeningStationManager:ListeningStationManager;
+		public var _listeningStationBoss:ListeningStationBoss;
 		
-		public function ListeningStation(listeningStationManager:ListeningStationManager, boothManager:BoothManager, venue:Venue, params:Object=null, target:IEventDispatcher=null)
+		public function ListeningStation(listeningStationBoss:ListeningStationBoss, boothBoss:BoothBoss, venue:Venue, params:Object=null, target:IEventDispatcher=null)
 		{
-			super(boothManager, venue, params, target);
+			super(boothBoss, venue, params, target);
 			
-			_listeningStationManager = listeningStationManager;
+			_listeningStationBoss = listeningStationBoss;
 			setProperties();
 			currentListeners = new ArrayCollection();
 		}
@@ -206,17 +206,17 @@ package rock_on
 			
 			// Remove from server and client
 			
-			_listeningStationManager.remove(this);
+			_listeningStationBoss.remove(this);
 		}
 		
 		private function startFanButtonState():void
 		{
 			state = FAN_BUTTON_STATE;
-			_listeningStationManager.addListeners(this);
+			_listeningStationBoss.addListeners(this);
 			
 			if (!friendMirror)
 			{
-				_listeningStationManager.onFanButtonState(this);			
+				_listeningStationBoss.onFanButtonState(this);			
 			}
 		}	
 		
@@ -263,7 +263,7 @@ package rock_on
 		{
 			state = FAN_COLLECTION_STATE;
 			displayCountdown();
-			_listeningStationManager.addListeners(this);
+			_listeningStationBoss.addListeners(this);
 			updateSecondsRemaining();
 		}
 			
