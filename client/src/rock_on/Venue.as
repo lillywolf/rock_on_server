@@ -73,6 +73,7 @@ package rock_on
 		public var stageRect:Rectangle;
 		
 		public var _bandBoss:BandBoss;
+		public var _bandMemberManager:BandMemberManager;
 		
 		public var creatureGenerator:CreatureGenerator;
 		public var boothBoss:BoothBoss;
@@ -498,6 +499,16 @@ package rock_on
 		public function get creatureController():CreatureController
 		{
 			return _creatureController;
+		}
+		
+		public function set bandMemberManager(val:BandMemberManager):void
+		{
+			_bandMemberManager = val;
+		}
+		
+		public function get bandMemberManager():BandMemberManager
+		{
+			return _bandMemberManager;
 		}
 		
 	}

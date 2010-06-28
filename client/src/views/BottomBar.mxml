@@ -65,6 +65,8 @@
 			[Bindable] public var friendManager:FriendController;
 			[Bindable] public var levelController:LevelController;
 			
+			[Bindable] public var venueManager:VenueManager;
+			
 			public static const USER_PIC_DIMENSION:int = 92;
 			public static const FRIEND_PIC_DIMENSION:int = 50;
 			
@@ -444,14 +446,14 @@
 			
 			private function showCustomizerOptions():void
 			{
-				var customizerUI:UICanvas = worldView.bandBoss.bandMemberManager.putBandMembersInCustomizer("walk_toward");
-				worldView.bandBoss.bandMemberManager.addEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
+				var customizerUI:UICanvas = venueManager.venue.bandMemberManager.putBandMembersInCustomizer("walk_toward");
+				venueManager.venue.bandMemberManager.addEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
 				worldView.uiLayer.addChild(customizerUI);
 			}
 			
 			private function onBandMemberSelected(evt:CustomizerEvent):void
 			{
-				worldView.bandBoss.bandMemberManager.removeEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
+				venueManager.venue.bandMemberManager.removeEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
 				worldView.uiLayer.removeChild(evt.selectedCreatureAsset.parent.parent);
 				showCustomizer(evt.selectedCreatureAsset);
 			}

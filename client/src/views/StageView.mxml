@@ -2,16 +2,12 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="1000" x="0" y="0" clipContent="false" creationComplete="onCreationComplete()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	<mx:Script>
 		<![CDATA[
-			import com.google.analytics.debug.Alert;
-			
+			import com.google.analytics.debug.Alert;			
 			import controllers.CreatureController;
-			import controllers.StructureController;
-			
+			import controllers.StructureController;			
 			import flash.utils.getTimer;
-			
 			import models.EssentialModelReference;
 			import models.OwnedStructure;
-			
 			import mx.collections.ArrayCollection;
 			import mx.collections.Sort;
 			import mx.controls.Alert;
@@ -19,14 +15,12 @@
 			import mx.events.DynamicEvent;
 			import mx.managers.DragManager;
 			import mx.skins.halo.ActivatorSkin;
-			
 			import rock_on.BandMember;
 			import rock_on.BoothBoss;
 			import rock_on.ConcertStage;
 			import rock_on.CustomerPersonManager;
 			import rock_on.Person;
 			import rock_on.StageManager;
-			
 			import world.ActiveAsset;
 			import world.AssetStack;
 			import world.BitmapBlotter;
@@ -73,8 +67,8 @@
 			{	
 				concertStage = venueManager.venue.stageManager.concertStage;
 				myStage = new World(stageWidth, stageHeight, tileSize, concertStage.structure.height);
+				venueManager.venue.stageManager.myStage = myStage;
 				addChild(myStage);
-//				myStage.assetRenderer.addEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);
 			}
 			
 			private function onEnterFrame(evt:Event):void
@@ -85,11 +79,11 @@
 				fps = 1000/deltaTime;
 				myMemory = System.totalMemory;
 				lastTime = time;
-				
-				if (bandBoss)
-				{	
-					bandBoss.update(lockedDelta);
-				}					
+//				
+//				if (bandBoss)
+//				{	
+//					bandBoss.update(lockedDelta);
+//				}					
 			}
 			
 			public function updateRenderedStructures(os:OwnedStructure, method:String, worldToUpdate:World):void
@@ -136,7 +130,7 @@
 			{				
 				if (os.structure.structure_type == "StageDecoration")
 				{
-					this.bandBoss.bandMemberManager.redrawAllBandMembers();
+					venueManager.venue.bandMemberManager.redrawAllBandMembers();
 				}
 				else
 				{

@@ -36,10 +36,13 @@ package rock_on
 		public var _venue:Venue;
 		public var spawnLocation:Point3D;				
 		
-		public function BandMemberManager(venue:Venue, source:Array=null)
+		public function BandMemberManager(venue:Venue, myWorld:World, source:Array=null)
 		{
 			super(source);
 			_venue = venue;
+			_myWorld = myWorld;
+			_myWorld.addEventListener(WorldEvent.DIRECTION_CHANGED, onDirectionChanged);				
+			_myWorld.addEventListener(WorldEvent.FINAL_DESTINATION_REACHED, onFinalDestinationReached);			
 		}
 		
 		public function showBandMembers():void

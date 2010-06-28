@@ -93,6 +93,11 @@ package rock_on
 			}
 		}
 		
+		public function set myStage(val:World):void
+		{
+			_myStage = val;
+		}
+		
 		public function get myStage():World
 		{
 			return _myStage;

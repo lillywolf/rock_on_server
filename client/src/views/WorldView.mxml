@@ -300,11 +300,6 @@
 				boothBoss.reInitializeBooths(true);
 			}
 			
-			public function showBandMembers():void
-			{
-				bandBoss.setInMotion();
-			}
-			
 			public function showCustomizer(creature:Creature):void
 			{
 				parentApplication.onCreatureToCustomize(creature);

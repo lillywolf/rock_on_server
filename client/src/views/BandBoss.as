@@ -10,6 +10,8 @@ package views
 	
 	import helpers.CreatureEvent;
 	
+	import models.CreatureGroup;
+	
 	import mx.collections.ArrayCollection;
 	
 	import rock_on.BandMember;
@@ -24,34 +26,43 @@ package views
 
 	public class BandBoss extends EventDispatcher
 	{
-		public var bandMembers:ArrayCollection;
-		public var bandMemberManager:BandMemberManager;
+		public var bands:ArrayCollection;
 		public var friendMirror:Boolean;
 		public var _creatureController:CreatureController;
-		public var _myWorld:World;
 		public var _venueManager:VenueManager;
 		
-		public function BandBoss(venueManager:VenueManager, creatureController:CreatureController, myWorld:World, target:IEventDispatcher=null)
+		public function BandBoss(venueManager:VenueManager, creatureController:CreatureController, target:IEventDispatcher=null)
 		{
 			super(target);
+			bands = new ArrayCollection();
 			_venueManager = venueManager;
 			_creatureController = creatureController;
-			_myWorld = myWorld;					
 		}
 		
-		public function setInMotion():void
+		public function addBands(myWorld:World):void
 		{
-			bandMemberManager = new BandMemberManager(_venueManager.venue);
-			bandMemberManager.myWorld = _myWorld;
-			bandMemberManager.concertStage = _venueManager.venue.stageManager.concertStage;	
-			bandMemberManager.showBandMembers();	
+			for each (var group:CreatureGroup in _creatureController.creature_groups)
+			{
+				var bmm:BandMemberManager = new BandMemberManager(_venueManager.venue, myWorld);
+				bmm.concertStage = _venueManager.venue.stageManager.concertStage;
+				_venueManager.venue.bandMemberManager = bmm;
+				bands.addItem(bmm);
+			}
+		}
+		
+		public function showBandMembers():void
+		{
+			for each (var bmm:BandMemberManager in bands)
+			{
+				bmm.showBandMembers();
+			}
 		}
 		
 		public function update(lockedDelta:Number):void
 		{
-			if (bandMemberManager)
+			for each (var bmm:BandMemberManager in bands)
 			{
-				bandMemberManager.update(lockedDelta);							
+				bmm.update(lockedDelta);
 			}
 		}
 		

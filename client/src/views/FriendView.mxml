@@ -251,7 +251,6 @@
 //					bandMemberManager.add(bandMember);
 //				}
 				bandBoss.friendMirror = true;
-				bandBoss.setInMotion();
 			}			
 			
 			private function addStaticAsset(asset:ActiveAsset, addTo:Point3D):void

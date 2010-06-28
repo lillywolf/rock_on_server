@@ -59,7 +59,7 @@ package views
 			_structureController = structureController;
 			_creatureController = creatureController;			
 		}
-		
+
 		public function getVenue():void
 		{
 			var venues:ArrayCollection = _dwellingController.getDwellingsByType("Venue");
@@ -71,6 +71,10 @@ package views
 			if (venue)
 			{
 				venue.update(deltaTime);			
+			}
+			if (bandBoss)
+			{
+				bandBoss.update(deltaTime);
 			}
 		}
 				
@@ -85,7 +89,8 @@ package views
 				if (venue.state == 0)
 				{
 					venue.advanceState(destinationState);
-					bandBoss.setInMotion();				
+//					bandBoss.addBands(venue.stageManager.myStage);	
+					bandBoss.showBandMembers();
 				}
 				else if (venue.state != destinationState)
 				{
@@ -119,7 +124,8 @@ package views
 		
 		public function initializeBandBoss():void
 		{			
-			bandBoss = new BandBoss(this, _creatureController, _myWorld);									
+			bandBoss = new BandBoss(this, _creatureController);	
+			bandBoss.addBands(venue.stageManager.myStage);
 		}
 		
 		public function set bitmapBlotter(val:BitmapBlotter):void

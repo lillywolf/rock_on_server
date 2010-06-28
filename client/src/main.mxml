@@ -6,7 +6,7 @@
 				<views:TopBar id="topBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userController="{gdi.userController}" songController="{gdi.songController}" storeController="{gdi.storeController}" levelController="{gdi.levelController}"/>
 			</mx:AddChild>
 			<mx:AddChild position="after">
-				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" worldView="{worldView}" userController="{gdi.userController}" friendManager="{friendManager}" levelController="{gdi.levelController}" storeController="{gdi.storeController}" thingerController="{gdi.thingerController}"/>
+				<views:BottomBar id="bottomBarView" myUser="{gdi.user}" editView="{editView}" venueManager="{worldView.venueManager}" worldView="{worldView}" userController="{gdi.userController}" friendManager="{friendManager}" levelController="{gdi.levelController}" storeController="{gdi.storeController}" thingerController="{gdi.thingerController}"/>
 			</mx:AddChild>
 			<mx:AddChild position="after">
 				<views:UILayer id="uiLayer"/>
@@ -301,7 +301,7 @@
 				var creature:Creature = gdi.creatureController.getCreatureById(ol.creature_id);
 				if (creature.type == "BandMember")
 				{
-					worldView.bandBoss.bandMemberManager.updateRenderedBandMembers(ol, creature, method);
+					worldView.venueManager.venue.bandMemberManager.updateRenderedBandMembers(ol, creature, method);
 				}
 				gdi.layerableController.updateOwnedLayerableOnServerResponse(ol, method);
 			}

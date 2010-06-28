@@ -18,6 +18,7 @@ package views
 	import rock_on.CustomerPerson;
 	import rock_on.CustomerPersonManager;
 	import rock_on.Person;
+	import rock_on.Venue;
 	
 	import world.ActiveAsset;
 	import world.AssetStack;
@@ -25,6 +26,7 @@ package views
 	
 	public class WorldBitmapInterface extends EventDispatcher
 	{
+		[Bindable] public var _venueManager:VenueManager;
 		[Bindable] public var _bandBoss:BandBoss;
 		[Bindable] public var _customerPersonManager:CustomerPersonManager;
 		[Bindable] public var _worldView:WorldView;
@@ -44,6 +46,8 @@ package views
 			_stageView = stageView;
 			_editView = editView;
 			_bottomBar = bottomBar;
+			
+			_venueManager = _worldView.venueManager;
 		}
 		
 		public function set backgroundCanvas(val:Canvas):void
@@ -72,7 +76,7 @@ package views
 			{
 				if (_worldView.creaturesAdded && _stageView.bandBoss)
 				{
-					if (_stageView.bandBoss.bandMemberManager)
+					if (_venueManager.venue.bandMemberManager)
 					{
 						updateCursor();									
 					}
@@ -101,7 +105,7 @@ package views
 					}
 				}
 			}
-			for each (var bm:BandMember in _bandBoss.bandMemberManager)
+			for each (var bm:BandMember in _venueManager.venue.bandMemberManager)
 			{
 				if (bm == asset && bm.moods)
 				{
@@ -264,7 +268,7 @@ package views
 			}
 			if (_bandBoss)
 			{
-				_bandBoss.bandMemberManager.clearFilters();			
+				_venueManager.venue.bandMemberManager.clearFilters();			
 			}
 		}
 		
