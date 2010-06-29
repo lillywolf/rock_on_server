@@ -181,10 +181,13 @@ package rock_on
 			listeningStationBoss.showPassersby();
 			
 			addStaticCustomersToVenue();
+			trace("static customers added");
 			addSuperCustomersToVenue(stageManager.myStage);
+			trace("super customers added");
 			addMovingCustomersToVenue();
-			
+			trace("moving customers added");
 			groupieBoss.setInMotion();
+			trace("groupies started");
 		}		
 		
 		public function setAdditionalProperties(params:Object):void

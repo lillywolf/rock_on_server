@@ -70,6 +70,7 @@ package world
 			{
 				initialDraw = true;
 				dispatchInitialDrawEvent();
+				trace("initial draw dispatched");
 			}
 		}
 		

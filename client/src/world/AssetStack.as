@@ -194,11 +194,11 @@ package world
 				{
 					var mcChild:MovieClip = _movieClipStack.getChildAt(0) as MovieClip;
 					var mcClass:String = getQualifiedClassName(mcChild);
-					trace(mcClass);
+//					trace(mcClass);
 					_movieClipStack.removeChildAt(0);
 					mcChild = null;
 					movieClipChildren = _movieClipStack.numChildren.valueOf();
-					trace(movieClipChildren.toString());
+//					trace(movieClipChildren.toString());
 				}
 				
 				for (var i:int = 0; i < totalChildren; i++)

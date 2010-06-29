@@ -104,9 +104,9 @@ package controllers
 //				layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
 //				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
 //				layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];				
-				layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "top", "hair front", "instrument"];
+				layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
 				layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
-				layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "top", "hair front", "instrument"];
+				layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
 				layerableOrder['stand_still_away'] = ["shoes", "bottom", "top", "hair front"];				
 			}
 			else if (creatureType == "Groupie")

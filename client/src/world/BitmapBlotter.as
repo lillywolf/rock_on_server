@@ -1,5 +1,7 @@
 package world
 {
+	import flash.events.EventDispatcher;
+	import flash.events.IEventDispatcher;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.MovieClip;
@@ -19,13 +21,12 @@ package world
 	import mx.collections.Sort;
 	import mx.collections.SortField;
 	import mx.containers.Canvas;
-	import mx.events.CollectionEvent;
-	
+	import mx.core.UIComponent;
+	import mx.events.CollectionEvent;	
 	import rock_on.Person;
-	
 	import views.AssetBitmapData;
 	
-	public class BitmapBlotter extends BitmapData
+	public class BitmapBlotter extends EventDispatcher
 	{
 		public static const FOOT_CONSTANT:int = 9;
 		public static const WIDTH_BUFFER:int = 10;
@@ -39,9 +40,9 @@ package world
 		public var expectedAssetCount:int;
 		public var _myWorld:World;
 		
-		public function BitmapBlotter(width:int, height:int, transparent:Boolean=true, fillColor:uint=4.294967295E9)
+		public function BitmapBlotter(target:IEventDispatcher=null)
 		{
-			super(width, height, transparent, fillColor);
+			super(target);
 			bitmapReferences = new ArrayCollection();
 			bitmapReferences.addEventListener(CollectionEvent.COLLECTION_CHANGE, onNewBitmapReference);
 		}
@@ -111,13 +112,13 @@ package world
 			return abd;
 		}
 		
-//		public function updateAssetBitmapData(abd:AssetBitmapData, asset:ActiveAsset, animation:String=null, frameNumber:int=0):void
-//		{
-//			var newMc:MovieClip = getNewMovieClip(asset, animation, frameNumber);
-//			abd.mc = newMc;			
-//			abd.realCoordX = asset.realCoords.x;
-//			abd.realCoordY = asset.realCoords.y;
-//		}
+		//		public function updateAssetBitmapData(abd:AssetBitmapData, asset:ActiveAsset, animation:String=null, frameNumber:int=0):void
+		//		{
+		//			var newMc:MovieClip = getNewMovieClip(asset, animation, frameNumber);
+		//			abd.mc = newMc;			
+		//			abd.realCoordX = asset.realCoords.x;
+		//			abd.realCoordY = asset.realCoords.y;
+		//		}
 		
 		public function getMatchingBitmapDataForStructure(os:OwnedStructure):AssetBitmapData
 		{
@@ -178,7 +179,7 @@ package world
 			}
 			return null;
 		}
-				
+		
 		public function getMatchingBitmap(asset:ActiveAsset):Bitmap
 		{
 			for each (var abd:AssetBitmapData in bitmapReferences)
@@ -224,30 +225,30 @@ package world
 			
 		}
 		
-//		public function reRenderBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int=0):void
-//		{
-//			var abd:AssetBitmapData = getMatchFromBitmapReferences(asset);
-//			if (abd == null)
-//			{
-//				abd = createNewAssetBitmapData(asset, animation, frameNumber);
-//			}
-//			else
-//			{
-//				updateAssetBitmapData(abd, asset, animation, frameNumber);
-//			}
-//			
-//			if (getMatchFromBitmapReferences(asset) == null)
-//			{
-//				bitmapReferences.addItem(abd);
-//				sortBitmaps();
-//				undrawPreviousBitmaps();
-//				renderBitmaps();
-//			}
-//			else
-//			{
-//				throw new Error("Trying to re-render an already rendered asset");
-//			}
-//		}
+		//		public function reRenderBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int=0):void
+		//		{
+		//			var abd:AssetBitmapData = getMatchFromBitmapReferences(asset);
+		//			if (abd == null)
+		//			{
+		//				abd = createNewAssetBitmapData(asset, animation, frameNumber);
+		//			}
+		//			else
+		//			{
+		//				updateAssetBitmapData(abd, asset, animation, frameNumber);
+		//			}
+		//			
+		//			if (getMatchFromBitmapReferences(asset) == null)
+		//			{
+		//				bitmapReferences.addItem(abd);
+		//				sortBitmaps();
+		//				undrawPreviousBitmaps();
+		//				renderBitmaps();
+		//			}
+		//			else
+		//			{
+		//				throw new Error("Trying to re-render an already rendered asset");
+		//			}
+		//		}
 		
 		public function reIntroduceBitmap(abd:AssetBitmapData, animation:String=null, frameNumber:int=0):void
 		{
@@ -280,7 +281,7 @@ package world
 				}
 				_backgroundCanvas.rawChildren.addChild(abd.bitmap);
 			}
-		
+			
 		}
 		
 		public function sortOverlaps(overlaps:ArrayCollection):void
@@ -332,7 +333,7 @@ package world
 		{
 			updateBitmapLocations();
 			sortBitmaps();
-//			undrawPreviousBitmaps();
+			//			undrawPreviousBitmaps();
 			renderUpdatedBitmaps();
 		}
 		
@@ -360,6 +361,7 @@ package world
 		
 		public function renderBitmaps():void
 		{
+			var i:int = 0;
 			for each (var abd:AssetBitmapData in bitmapReferences)
 			{
 				var bp:Bitmap;
@@ -373,7 +375,13 @@ package world
 					{
 						bp = getBitmapForStructure(abd);
 					}
-					_backgroundCanvas.rawChildren.addChild(bp);			
+					var uic:UIComponent = new UIComponent();
+					uic.addChild(bp);
+					_backgroundCanvas.addChild(uic);
+					//					_backgroundCanvas.rawChildren.addChild(bp);	
+					bp = null;
+					i++;
+					trace("bitmapNumber: " + i.toString());
 				}
 			}			
 		}
@@ -402,15 +410,15 @@ package world
 				bp.opaqueBackground = null;				
 				bp.x = abd.realCoordX - abd.mc.width/2;
 				bp.y = relHeight/2 + abd.realCoordY - abd.mc.height;			
-	//			abd.bitmap.transform.matrix.tx = (abd.realCoordX - abd.mc.width/2) - abd.bitmap.x;
-	//			abd.bitmap.transform.matrix.ty = (relHeight/2 + abd.realCoordY - abd.mc.height) - abd.bitmap.y;	
+				//			abd.bitmap.transform.matrix.tx = (abd.realCoordX - abd.mc.width/2) - abd.bitmap.x;
+				//			abd.bitmap.transform.matrix.ty = (relHeight/2 + abd.realCoordY - abd.mc.height) - abd.bitmap.y;	
 				abd.bitmap = bp;
 			}
 		}
 		
 		public function getBitmapForStructure(abd:AssetBitmapData):Bitmap
 		{
-			var bmd:BitmapData = new BitmapData(relWidth, relHeight, true, 0x00000000);
+			var bmd:BitmapData = new BitmapData(abd.mc.width, abd.mc.height, true, 0x00000000);
 			var bottomSlice:Number = (abd.mc.transform.pixelBounds.bottom/abd.mc.transform.pixelBounds.height)*abd.mc.height;
 			var rect:Rectangle = new Rectangle(0, 0, abd.mc.width + WIDTH_BUFFER, abd.mc.height + bottomSlice);
 			var matrix:Matrix = new Matrix();
@@ -442,10 +450,10 @@ package world
 			bp.y = -mc.height/2;
 			return bp;			
 		}
-
+		
 		public function getBitmapForPerson(abd:AssetBitmapData):Bitmap
 		{
-			var bmd:BitmapData = new BitmapData(relWidth, relHeight, true, 0x00000000);
+			var bmd:BitmapData = new BitmapData(abd.mc.width, abd.mc.height, true, 0x00000000);
 			abd.mc.scaleX = 0.4;
 			abd.mc.scaleY = 0.4;
 			var rect:Rectangle = new Rectangle(0, 0, abd.mc.width + WIDTH_BUFFER, abd.mc.height + FOOT_CONSTANT);
@@ -459,9 +467,6 @@ package world
 				matrix.scale(0.4, 0.4);			
 			}
 			matrix.tx = abd.mc.width/2 + WIDTH_BUFFER/2;
-			var pb:PeachBody = new PeachBody();
-			var pbHeight:int = pb.height;
-			var heightDiff:int = abd.mc.height - pb.height;
 			matrix.ty = abd.mc.height;
 			abd.transformedHeight = matrix.ty;
 			abd.transformedWidth = matrix.tx;
@@ -477,14 +482,14 @@ package world
 		
 		public function undrawPreviousBitmaps():void
 		{
-//			var totalChildren:int = _backgroundCanvas.rawChildren.numChildren.valueOf();
-//			for (var i:int = 0; i < totalChildren; i++)
-//			{
-//				if (_backgroundCanvas.rawChildren)
-//				{
-//					_backgroundCanvas.rawChildren.removeChildAt(0);				
-//				}
-//			}
+			//			var totalChildren:int = _backgroundCanvas.rawChildren.numChildren.valueOf();
+			//			for (var i:int = 0; i < totalChildren; i++)
+			//			{
+			//				if (_backgroundCanvas.rawChildren)
+			//				{
+			//					_backgroundCanvas.rawChildren.removeChildAt(0);				
+			//				}
+			//			}
 		}
 		
 		private function onMouseMove(evt:MouseEvent):void
@@ -532,5 +537,5 @@ package world
 		{
 			return _backgroundCanvas;
 		}
-	}
+	}	
 }

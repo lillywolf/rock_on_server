@@ -230,8 +230,10 @@
 			}
 			private function onUserObjectLoaded(evt:ServerDataEvent):void
 			{
+				trace("user object loaded");
 				topBarView.onUserObjectLoaded();
-				bottomBarView.onUserObjectLoaded();				
+				bottomBarView.onUserObjectLoaded();		
+				trace("bottom bar rendered");
 			}
 			private function onGameContentLoaded(evt:ServerDataEvent):void
 			{

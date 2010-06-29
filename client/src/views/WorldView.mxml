@@ -142,7 +142,7 @@
 			private function onCreationComplete():void
 			{
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);	
+//				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);	
 				addEventListener(MouseEvent.CLICK, onViewClicked);
 			}
 			
@@ -180,6 +180,7 @@
 				if (creaturesAdded)
 				{
 					venueManager.venue.addMovingStuffToVenue();
+					trace("creatures added");
 				}
 				else
 				{
@@ -189,19 +190,21 @@
 			
 			private function onAssetsDrawn(evt:WorldEvent):void
 			{
+				myWorld.assetRenderer.removeEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);
 				checkForCreaturesAdded();
 			}
 			
 			private function onMouseDown(evt:MouseEvent):void
 			{
-				wbi.onMouseDown(evt);
+//				wbi.onMouseDown(evt);
 			}
 			
 			public function addBackgroundLayer():void
 			{
 				var relWidth:Number = myWorld.wg.getRect(myWorld).width;
 				var relHeight:Number = myWorld.wg.getRect(myWorld).height;
-				bitmapBlotter = new BitmapBlotter(relWidth, relHeight, true, 0x00000000);
+//				bitmapBlotter = new BitmapBlotter(relWidth, relHeight, true, 0x00000000);
+				bitmapBlotter = new BitmapBlotter();
 				wbi.bitmapBlotter = bitmapBlotter;
 				bitmapBlotter.myWorld = myWorld;
 				bitmapBlotter.incrementX = (width - relWidth)/2;
@@ -209,11 +212,6 @@
 				bitmapBlotter.relWidth = relWidth;
 				bitmapBlotter.relHeight = relHeight;
 				myWorld.bitmapBlotter = bitmapBlotter;
-				bitmapLayer = new Bitmap(bitmapBlotter);
-				bitmapLayer.opaqueBackground = null;
-				bitmapLayer.width = relWidth;
-				bitmapLayer.height = relHeight;
-				bitmapLayer.bitmapData = bitmapBlotter;
 				backgroundCanvas = new Canvas();
 				wbi.backgroundCanvas = backgroundCanvas;
 				backgroundCanvas.width = relWidth;
@@ -225,8 +223,8 @@
 				bitmapBlotter.backgroundCanvas = backgroundCanvas;
 				
 				addChild(backgroundCanvas);
-				backgroundCanvas.cachePolicy = "on";
-				backgroundCanvas.nestLevel = 2;				
+//				backgroundCanvas.cachePolicy = "on";
+				backgroundCanvas.nestLevel = 2;	
 			}
 			
 			public function addWorld():void
@@ -249,7 +247,7 @@
 				
 				if (wbi)
 				{
-					wbi.handleEnterFrameEvents();			
+//					wbi.handleEnterFrameEvents();			
 				}
 				if (venueManager)
 				{

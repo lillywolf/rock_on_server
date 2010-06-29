@@ -82,18 +82,18 @@ package models
 			{
 				return new PeachBody() as MovieClip;
 			}
-			if (className == "NavyEyes")
-			{
-				return new NavyEyes() as MovieClip;
-			}
-			if (className == "AndrogynousHairFront")
-			{
-				return new AndrogynousHairFront() as MovieClip;
-			}
-			if (className == "ElectricGuitarBasic")
-			{
-				return new ElectricGuitarBasic() as MovieClip;
-			}
+//			if (className == "NavyEyes")
+//			{
+//				return new NavyEyes() as MovieClip;
+//			}
+//			if (className == "AndrogynousHairFront")
+//			{
+//				return new AndrogynousHairFront() as MovieClip;
+//			}
+//			if (className == "ElectricGuitarBasic")
+//			{
+//				return new ElectricGuitarBasic() as MovieClip;
+//			}
 			if (className == "Shoes4")
 			{
 				return new Shoes4() as MovieClip;

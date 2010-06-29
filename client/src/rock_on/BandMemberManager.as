@@ -261,7 +261,8 @@ package rock_on
 				else 
 				{
 				}
-			}			
+			}
+			trace("updated band members");
 		}
 		
 		public function remove(person:BandMember):void

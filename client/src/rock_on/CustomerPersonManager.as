@@ -271,7 +271,8 @@ package rock_on
 				else 
 				{
 				}
-			}			
+			}
+			trace("updated customers");
 		}
 		
 		public function remove(person:CustomerPerson):void
