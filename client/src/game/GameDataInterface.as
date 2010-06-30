@@ -2,6 +2,7 @@ package game
 {
 	import controllers.CreatureController;
 	import controllers.DwellingController;
+	import controllers.EssentialEvent;
 	import controllers.EssentialModelController;
 	import controllers.LayerableController;
 	import controllers.LevelController;
@@ -9,19 +10,25 @@ package game
 	import controllers.StoreController;
 	import controllers.StructureController;
 	import controllers.ThingerController;
-	import controllers.UserController;	
+	import controllers.UserController;
+	
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
+	
 	import helpers.UnprocessedModel;
+	
 	import models.EssentialModelReference;
 	import models.OwnedDwelling;
 	import models.User;
+	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
+	
 	import server.ServerController;
 	import server.ServerDataEvent;
 	
@@ -42,6 +49,7 @@ package game
 		public var sc:ServerController;
 		public var loadCounter:int = 0;
 		public var pendingRequests:int = 0;
+		public var userContentLoaded:Boolean;
 		public var gameClock:GameClock;
 		public var initialized:Boolean;
 		public var snid:Number;
@@ -53,12 +61,14 @@ package game
 			gameClock = new GameClock();
 			essentialModelController.users.addEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
 			essentialModelController.addEventListener(ServerDataEvent.INSTANCE_TO_CREATE, onInstanceToCreate);
-			essentialModelController.addEventListener('instanceLoaded', onInstanceLoaded);	
+//			essentialModelController.addEventListener('instanceLoaded', onInstanceLoaded);	
 		}
 		
 		public function createManagers(preLoadedContent:Dictionary):void
 		{
 			essentialModelController = new EssentialModelController();
+			essentialModelController.gdi = this;
+			
 			songController = new SongController(essentialModelController);
 			layerableController = new LayerableController(essentialModelController);
 			creatureController = new CreatureController(essentialModelController);
@@ -258,6 +268,9 @@ package game
 			loadCounter++;
 			if (pendingRequests == loadCounter)
 			{
+				userContentLoaded = true;
+				essentialModelController.userContentLoaded = true;
+				
 				var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.USER_CONTENT_LOADED, null, null, null, true, true);
 				dispatchEvent(evt);
 			}
@@ -283,99 +296,95 @@ package game
 			}			
 		}
 		
-		private function onInstanceLoaded(evt:DynamicEvent):void
-		{
-			checkIfLoadingAndInstantiationComplete();
-		}
-		
-		public function checkIfLoadingAndInstantiationComplete():void
-		{
-//			Alert.show(pendingRequests.toString() + "::" + loadCounter.toString());
-			if (essentialModelController.instancesToLoad.length == 0 && pendingRequests == loadCounter)
-			{
-//				Use true for testing in non-Facebook environment				
-				
-				if (isLoggedInUser())
-//				if (true)
-				{
-					FlexGlobals.topLevelApplication.instancesLoadedForGameUser();				
-				}
-				else
-				{
-					FlexGlobals.topLevelApplication.instancesLoadedForFriend();
-				}
-				checkForLoadedMovieClips();
-			}			
-		}
-		
 		public function checkForLoadedMovieClips():void
 		{
+			checkForLoadedDwellings();
 			checkForLoadedStructures();
 			checkForLoadedLayerables();
 			checkForLoadedSongs();
 		}
 		
-		private function checkForLoadedSongs():void
+		public function checkIfLoadingAndInstantiationComplete():void
 		{
-			if (songController.ownedSongsLoaded == songController.songsLoaded)
+			essentialModelController.checkIfLoadingAndInstantiationComplete();
+		}
+		
+		public function checkForLoadedSongs():void
+		{
+			if (songController.ownedSongsLoaded == songController.songsLoaded && songController.songsLoaded != 0)
 			{
-				if (isLoggedInUser() && !songController.fullyLoaded)
-				{
-					FlexGlobals.topLevelApplication.onSongsLoaded();
-					songController.fullyLoaded = true;
-				}
+//				if (isLoggedInUser() && !songController.fullyLoaded)
+//				{
+//					FlexGlobals.topLevelApplication.onSongsLoaded();
+//				}
+				songController.fullyLoaded = true;
+				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_SONGS_LOADED);
+				evt.user = this.user;
+				evt.gdi = this;
+				dispatchEvent(evt);
 			}
 		}
 		
-		private function checkForLoadedStructures():void
+		public function checkForLoadedStructures():void
 		{
-			if (structureController.ownedStructureMovieClipsLoaded == structureController.ownedStructuresLoaded)
+			if (structureController.ownedStructureMovieClipsLoaded == structureController.ownedStructuresLoaded && structureController.structuresLoaded != 0)
 			{
-//				Use true for non-Facebook testing					
-				if (isLoggedInUser() && !structureController.fullyLoaded && (dwellingController.owned_dwellings[0] as OwnedDwelling).dwelling)
-//				if (true)
-				{
-					FlexGlobals.topLevelApplication.attemptToInitializeVenueForUser();	
-					structureController.fullyLoaded = true;
-				}
-				else if (isLoggedInUser() && !structureController.fullyLoaded && !(dwellingController.owned_dwellings[0] as OwnedDwelling).dwelling)
-				{
-					throw new Error("Dwelling not set");
-				}
-				else
-				{
-					FlexGlobals.topLevelApplication.friendGDILoaded(this);
-				}
+				structureController.fullyLoaded = true;
+				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_STRUCTURES_LOADED);
+				evt.user = this.user;
+				evt.gdi = this;
+				dispatchEvent(evt);
+				
+//				if (isLoggedInUser() && !structureController.fullyLoaded && (dwellingController.owned_dwellings[0] as OwnedDwelling).dwelling)
+////				if (true)
+//				{
+//					FlexGlobals.topLevelApplication.attemptToInitializeVenueForUser();	
+//					structureController.fullyLoaded = true;
+//				}
+//				else if (isLoggedInUser() && !structureController.fullyLoaded && !(dwellingController.owned_dwellings[0] as OwnedDwelling).dwelling)
+//				{
+//					throw new Error("Dwelling not set");
+//				}
+//				else
+//				{
+//					FlexGlobals.topLevelApplication.friendGDILoaded(this);
+//				}
 			}	
 		}
 		
-		private function checkForLoadedLayerables():void
+		public function checkForLoadedLayerables():void
 		{
-			if (layerableController.ownedLayerableMovieClipsLoaded == layerableController.ownedLayerablesLoaded)
+			if (layerableController.ownedLayerableMovieClipsLoaded == layerableController.ownedLayerablesLoaded && layerableController.ownedLayerablesLoaded != 0)
 			{
-				if (isLoggedInUser() && !layerableController.fullyLoaded)
-				{
-					FlexGlobals.topLevelApplication.attemptToPopulateVenueForUser();
-					layerableController.fullyLoaded = true;
-				}
-				else
-				{
-//					Code for friend creature initialization
-				}
+				layerableController.fullyLoaded = true;
+				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_LAYERABLES_LOADED);
+				evt.user = this.user;
+				evt.gdi = this;
+				dispatchEvent(evt);
+				
+//				if (isLoggedInUser() && !layerableController.fullyLoaded)
+//				{
+//					FlexGlobals.topLevelApplication.attemptToPopulateVenueForUser();
+//					layerableController.fullyLoaded = true;
+//				}
+//				else
+//				{
+////					Code for friend creature initialization
+//				}
 			}			
-		}
+		}	
 		
-		public function isLoggedInUser():Boolean
+		public function checkForLoadedDwellings():void
 		{
-			if (FlexGlobals.topLevelApplication.facebookInterface.snid == user.snid)
+			if (dwellingController.ownedDwellingMovieClipsLoaded == dwellingController.ownedDwellingsLoaded && dwellingController.ownedDwellingsLoaded != 0)
 			{
-				return true;				
+				dwellingController.fullyLoaded = true;
+				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_DWELLINGS_LOADED);
+				evt.user = this.user;
+				evt.gdi = this;
+				dispatchEvent(evt);
 			}
-			else
-			{
-				return false;
-			}			
-		}		
+		}
 
 	}
 }

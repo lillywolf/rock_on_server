@@ -227,6 +227,7 @@ package rock_on
 		
 		public function setInitialDestination():Point3D
 		{
+			trace("set initial dest");
 			destinationLocation = tryDestination();			
 			
 			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
@@ -240,7 +241,8 @@ package rock_on
 			while (isAnyoneElseThere(destinationLocation))
 			{
 				destinationLocation = tryDestination();
-			}			
+			}	
+			trace("destination set");
 			return destinationLocation;
 		}	
 		

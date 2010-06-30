@@ -42,6 +42,7 @@ package helpers
 					if (truncationRequired) {
 						var l : int = 0;
 						var r : int = textField.text.length;
+						trace("stupid fucking text");
 						while (r - l > 1) {
 							var median : Number = Math.floor((l + r) / 2);
 							textField.text = originalText.substr(0, median) + TRUNCATION_INDICATOR;

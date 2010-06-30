@@ -44,7 +44,7 @@ package controllers
 			{
 				ownedSongsLoaded++;
 			}
-			essentialModelController.checkIfAllLoadingComplete();
+			essentialModelController.checkIfLoadingAndInstantiationComplete();
 		}		
 		
 		public function add(song:Song):void

@@ -7,6 +7,8 @@ package controllers
 	import flash.system.ApplicationDomain;
 	import flash.utils.getDefinitionByName;
 	
+	import game.GameDataInterface;
+	
 	import helpers.UnprocessedModel;
 	
 	import models.BoothStructure;
@@ -30,6 +32,7 @@ package controllers
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
+	import mx.core.FlexGlobals;
 	import mx.events.DynamicEvent;
 	
 	import server.ServerController;
@@ -37,8 +40,11 @@ package controllers
 
 	public class EssentialModelController extends Controller
 	{	
+		public var _gdi:GameDataInterface;
 		public var instancesToLoad:ArrayCollection;
 		public var instancesLoaded:ArrayCollection;		
+		
+		public var userContentLoaded:Boolean;
 		
 		public var totalRequests:int = 0;
 		public var instancesFullyLoaded:int = 0;
@@ -135,13 +141,7 @@ package controllers
 			{
 				instantiateAndUpdate(toLoad);			
 			}
-		}
-		
-		public function checkIfAllLoadingComplete():void
-		{
-			var evt:DynamicEvent = new DynamicEvent('instanceLoaded', true, true);
-			dispatchEvent(evt);
-		}
+		}	
 		
 		public function doesObjectBelongTo(toLoad:UnprocessedModel, belongsToId:int, belongsToName:String):void
 		{
@@ -284,7 +284,7 @@ package controllers
 		{
 			var index:int = instancesToLoad.getItemIndex(toLoad);
 			instancesToLoad.removeItemAt(index);
-			checkIfAllLoadingComplete();
+			checkIfLoadingAndInstantiationComplete();
 		}
 		
 		public function createNewClassInstance(um:UnprocessedModel):void
@@ -336,7 +336,9 @@ package controllers
 			essentialModelReference.classesToLoad.addItem(um.instance);
 			if (!um.instanceData['symbol_name'] && !um.instanceData['swf_url'])
 			{
-				// Do nothing?
+				// Do nothing? Or just change this into a function
+//				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.INSTANCE_LOADED, um.instance, um.model, true, true);
+//				dispatchEvent(evt);				
 			}
 			else if (!um.instanceData['swf_url'])
 			{
@@ -433,5 +435,38 @@ package controllers
 				classCopy.setMovieClipFromClass(loadedClass);
 			}
 		}
+		
+		public function checkIfLoadingAndInstantiationComplete():void
+		{
+			if (instancesToLoad.length == 0 && userContentLoaded)
+			{				
+//				if (isLoggedInUser())
+////				if (true)
+//				{
+//					FlexGlobals.topLevelApplication.instancesLoadedForGameUser();				
+//				}
+//				else
+//				{
+//					FlexGlobals.topLevelApplication.instancesLoadedForFriend();
+//				}
+				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.LOADING_AND_INSTANTIATION_COMPLETE);
+				evt.user = _gdi.user;
+				evt.gdi = _gdi;
+				dispatchEvent(evt);	
+				
+				_gdi.checkForLoadedMovieClips();
+			}
+			
+			if (_gdi.user)
+			{
+				_gdi.checkForLoadedDwellings();				
+			}
+		}
+		
+		public function set gdi(val:GameDataInterface):void
+		{
+			_gdi = val;
+		}
+		
 	}
 }

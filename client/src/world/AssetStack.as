@@ -31,7 +31,7 @@ package world
 			_movieClipStack.x = 0;
 			_movieClipStack.y = 0;
 			_movieClipStack.addEventListener(MouseEvent.CLICK, onMovieClipStackClicked);
-			_movieClipStack.addEventListener(MouseEvent.MOUSE_MOVE, onMovieClipStackHover);
+//			_movieClipStack.addEventListener(MouseEvent.MOUSE_MOVE, onMovieClipStackHover);
 //			this.addChild(_movieClipStack);
 			
 			if (layerableOrder)
@@ -156,6 +156,7 @@ package world
 		
 		private function onMovieClipStackHover(evt:MouseEvent):void
 		{
+			trace("hovered");
 			trace(evt.target.name, flash.utils.getQualifiedClassName(evt.target));	
 			var event:CreatureEvent = new CreatureEvent(CreatureEvent.CREATURE_HOVER, evt.currentTarget.parent as AssetStack, true, true);
 //			var cursorClip:MovieClip = FlexGlobals.topLevelApplication.wbi.checkCreatureHover(this);		
@@ -180,6 +181,7 @@ package world
 		
 		public function doAnimation(animationType:String, frameNumber:int=0):void
 		{
+			trace("start animation");
 			currentAnimation = animationType;
 			currentFrameNumber = frameNumber;
 			if (_layerableOrder[animationType])
@@ -231,6 +233,7 @@ package world
 					}
 				}				
 			}
+			trace("animation complete");
 		}
 		
 		public function getMovieClipStackCopy(animation:String, frameNumber:int):MovieClip

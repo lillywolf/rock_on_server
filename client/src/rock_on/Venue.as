@@ -81,6 +81,7 @@ package rock_on
 		public var customerPersonManager:CustomerPersonManager;
 		public var listeningStationBoss:ListeningStationBoss;		
 		public var stageManager:StageManager;
+		public var fullyLoaded:Boolean;		
 
 		public var _wbi:WorldBitmapInterface;
 		public var _dwellingController:DwellingController;
@@ -188,6 +189,20 @@ package rock_on
 			trace("moving customers added");
 			groupieBoss.setInMotion();
 			trace("groupies started");
+			showBandMembersRaceCondition();		
+		}		
+		
+		public function showBandMembersRaceCondition():void
+		{
+			if (fullyLoaded)
+			{
+				_bandBoss.showBandMembers();
+				trace("band members drawn");
+			}
+			else
+			{
+				fullyLoaded = true;
+			}
 		}		
 		
 		public function setAdditionalProperties(params:Object):void
@@ -512,6 +527,11 @@ package rock_on
 		public function get bandMemberManager():BandMemberManager
 		{
 			return _bandMemberManager;
+		}
+		
+		public function set bandBoss(val:BandBoss):void
+		{
+			_bandBoss = val;
 		}
 		
 	}

@@ -70,6 +70,7 @@ package rock_on
 				_myWorld.addAsset(bm, destination);				
 				addItem(bm);
 				bm.myWorld = _myWorld;
+				trace("band member added");
 			}
 			else
 			{
@@ -170,6 +171,7 @@ package rock_on
 		
 		public function pickPointWithinStructure(os:OwnedStructure):Point3D
 		{
+			trace("pick point in structure");
 			var destination:Point3D;
 			var exemptStructures:ArrayCollection = new ArrayCollection();
 			exemptStructures.addItem(os);
@@ -183,6 +185,7 @@ package rock_on
 				destination = new Point3D(Math.floor(os.structure.width - (Math.random()*os.structure.width)), os.structure.height, Math.ceil(_myWorld.tilesDeep - Math.random()*(os.structure.depth)));	
 			}
 			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(destination)));	
+			trace("point picked");
 			return destination;
 		}
 		
@@ -251,7 +254,7 @@ package rock_on
 		}	
 		
 		public function update(deltaTime:Number):void
-		{			
+		{
 			for each (var person:BandMember in this)
 			{
 				if (person.update(deltaTime))
@@ -262,7 +265,6 @@ package rock_on
 				{
 				}
 			}
-			trace("updated band members");
 		}
 		
 		public function remove(person:BandMember):void
@@ -281,6 +283,7 @@ package rock_on
 		
 		private function onDirectionChanged(evt:WorldEvent):void
 		{
+			trace("direction changed");
 			for each (var asset:ActiveAsset in this)
 			{
 				if (evt.activeAsset == asset)

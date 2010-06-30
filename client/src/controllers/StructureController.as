@@ -108,7 +108,7 @@ package controllers
 		{
 			(evt.target as OwnedStructure).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
 			ownedStructureMovieClipsLoaded++;
-			essentialModelController.checkIfAllLoadingComplete();
+			essentialModelController.checkIfLoadingAndInstantiationComplete();
 		}
 		
 		private function onInstanceLoaded(evt:EssentialEvent):void
@@ -121,7 +121,7 @@ package controllers
 			{
 				ownedStructuresLoaded++;
 			}
-			essentialModelController.checkIfAllLoadingComplete();
+			essentialModelController.checkIfLoadingAndInstantiationComplete();
 		}
 		
 		public function getListeningStationTypeByMovieClip(mc:MovieClip):String

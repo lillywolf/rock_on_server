@@ -167,6 +167,7 @@ package world
 		
 		public function createSeatingArrangement(bounds:Rectangle, stageBounds:Rectangle, totalSeats:int):ArrayCollection
 		{
+			trace("create seating arrangement");
 			var seats:ArrayCollection = new ArrayCollection();
 			var totalPoints:int = bounds.height * bounds.width;
 			if (totalSeats < totalPoints)
@@ -222,6 +223,7 @@ package world
 			{
 				throw new Error("Exceeds max capacity");
 			}
+			trace("seating created");
 			return seats;		
 		}
 		
@@ -242,6 +244,7 @@ package world
 		
 		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutStructureOccupiedSpaces:Boolean=true, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null):ArrayCollection
 		{
+			trace("create path grid");
 			var pathGridComplete:Boolean = false;
 			
 			var assetPathFinder:ArrayCollection = initializePath(destination);
@@ -280,6 +283,7 @@ package world
 					}
 				}
 				while (!startPointReached);
+				trace("path grid calculated");
 			}
 			
 			
@@ -304,6 +308,7 @@ package world
 		
 		public function establishPeopleOccupiedSpaces():ArrayCollection
 		{
+			trace("get people occupied spaces");
 			var peopleOccupiedSpaces:ArrayCollection = getPeopleOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets);
 			if (_world.bitmapBlotter)
 			{
@@ -327,6 +332,7 @@ package world
 		
 		public function getPeopleOccupiedSpacesForBitmap(sourceArray:ArrayCollection):ArrayCollection
 		{
+			trace("get people occupied spaces for bitmap");
 			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
 			for each (var abd:AssetBitmapData in sourceArray)
 			{
@@ -345,6 +351,7 @@ package world
 			var pt:Point3D;
 			if (getStructureOccupiedSpaces)
 			{
+				trace("get structure occupied spaces");
 				var structureOccupiedSpaces:ArrayCollection = establishStructureOccupiedSpaces(exemptStructures);
 //				Alert.show("sos: " + structureOccupiedSpaces.length.toString());
 				for each (pt in structureOccupiedSpaces)

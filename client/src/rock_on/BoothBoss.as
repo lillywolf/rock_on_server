@@ -238,6 +238,7 @@ package rock_on
 		
 		public function getRandomBooth(booth:Booth=null):Booth
 		{
+			trace("select booth");
 			var selectedBooth:Booth = null;			
 			var unstockedBooths:int = getUnstockedBooths().length;
 			
@@ -249,6 +250,7 @@ package rock_on
 				}
 				while (selectedBooth == booth || selectedBooth.state != Booth.STOCKED_STATE);
 			}
+			trace("booth selected");
 			return selectedBooth;	
 		}
 		

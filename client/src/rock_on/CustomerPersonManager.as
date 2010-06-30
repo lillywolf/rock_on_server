@@ -125,8 +125,8 @@ package rock_on
 		
 		private function addEventListeners(cp:CustomerPerson):void
 		{
-			cp.addEventListener("customerRouted", onCustomerRouted);
-			cp.addEventListener("queueDecremented", decrementQueue);			
+//			cp.addEventListener("customerRouted", onCustomerRouted);
+//			cp.addEventListener("queueDecremented", decrementQueue);			
 		}
 		
 		private function decrementQueue(evt:DynamicEvent):void
@@ -272,7 +272,6 @@ package rock_on
 				{
 				}
 			}
-			trace("updated customers");
 		}
 		
 		public function remove(person:CustomerPerson):void

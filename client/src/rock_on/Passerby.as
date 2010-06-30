@@ -129,7 +129,12 @@ package rock_on
 		
 		public function doRouteState(deltaTime:Number):void
 		{
-			
+			var totalChildren:int = this.movieClipStack.numChildren;
+			for (var i:int = 0; i < totalChildren; i++)
+			{
+				var mcChild:MovieClip = _movieClipStack.getChildAt(0) as MovieClip;				
+				trace(mcChild.currentFrame.toString());
+			}
 		}
 		
 		public function startEnthralledState():void
@@ -149,6 +154,7 @@ package rock_on
 		
 		public function setInitialDestination():Point3D
 		{
+			trace("select destination");
 			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
 			var destination:Point3D;
 			
@@ -157,7 +163,8 @@ package rock_on
 				destination = tryDestination();
 			}	
 			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(destination)) || isAnyoneElseThere(destination));		
-				
+			
+			trace("destination selected");
 			return destination;
 		}		
 

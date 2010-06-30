@@ -41,30 +41,43 @@
 	<mx:Script>
 		<![CDATA[
 			import com.facebook.data.users.FacebookUser;
-			import com.facebook.events.FacebookEvent;			
+			import com.facebook.events.FacebookEvent;
+			
 			import controllers.CreatureController;
-			import controllers.FriendController;			
-			import facebook.FacebookFunTime;			
-			import flash.utils.Proxy;			
+			import controllers.EssentialEvent;
+			import controllers.FriendController;
+			
+			import facebook.FacebookFunTime;
+			
+			import flash.utils.Proxy;
+			
 			import game.GameDataInterface;
 			import game.GameMagicManager;
 			import game.ImposterOwnedStructure;
+			
 			import models.Creature;
 			import models.OwnedDwelling;
 			import models.OwnedLayerable;
 			import models.OwnedStructure;
 			import models.User;
+			
 			import mx.events.CollectionEvent;
 			import mx.events.DynamicEvent;
 			import mx.events.FlexEvent;
 			import mx.events.StateChangeEvent;
+			
 			import rock_on.ContentIndex;
+			
 			import server.ServerController;
 			import server.ServerDataEvent;
+			
 			import stores.StoreEvent;
+			
 			import user.UserEvent;
+			
 			import views.CreatureCustomizer;
 			import views.WorldBitmapInterface;
+			
 			import world.ActiveAsset;
 			import world.AssetStack;
 						
@@ -81,6 +94,8 @@
 			public var userLoaded:Boolean;
 			public var friendsLoaded:Boolean;
 			public var facebookDataLoaded:Boolean;
+			public var venueLoaded:Boolean;
+			public var layerablesLoaded:Boolean;
 			
 			private function onPreInitialize():void
 			{
@@ -108,7 +123,8 @@
 			}	
 			private function onApplicationComplete():void
 			{
-				initializeFacebookInterface();				
+				initializeFacebookInterface();	
+				addControllerListeners();
 				currentState = "stageViewer";
 				gdi.storeController.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
 				
@@ -143,14 +159,16 @@
 			}
 			public function onFriendDataLoaded(evt:DynamicEvent):void
 			{
+				trace("friend data loaded");
 				friendsLoaded = true;
 				bottomBarView.friendDataLoaded(evt);
+				trace("bottom bar drawn");
 			}
 			public function getBasicFriendInfo():void
 			{
 				if (userLoaded && facebookDataLoaded)
 				{
-					friendManager.getFriendGDIs();								
+//					friendManager.getFriendGDIs();								
 				}
 			}
 			public function getFriendData(uid:int):void
@@ -175,17 +193,18 @@
 					worldView.initializeWorld();
 					worldView.initializeStructures();
 					stageView.initializeStructures();
-					topBarView.onVenueLoaded();
-					getBasicFriendInfo();			
+//					topBarView.onVenueLoaded();
+//					getBasicFriendInfo();			
 				}
-			}
-			public function onSongsLoaded():void
-			{
-				topBarView.onSongsLoaded();
 			}
 			public function attemptToPopulateVenueForUser():void
 			{
-				worldView.initializeCreatures();
+				if (layerablesLoaded && venueLoaded)
+				{
+					worldView.initializeCreatures();
+					topBarView.onVenueLoaded();
+					getBasicFriendInfo();				
+				}
 			}
 			public function friendGDILoaded(friendGDI:GameDataInterface):void
 			{
@@ -226,7 +245,7 @@
 			}
 			public function instancesLoadedForFriend():void
 			{
-				
+				trace("instances loaded for friend");
 			}
 			private function onUserObjectLoaded(evt:ServerDataEvent):void
 			{
@@ -341,6 +360,81 @@
 					var asset:ActiveAsset = editView.editMode.createPurchaseCopy(editView.pausedForStateCompletion);
 					editView.pausedForStateCompletion = null;					
 					editView.editMode.startMoveWithoutEditOptions(asset);					
+				}
+			}
+			private function addControllerListeners():void
+			{
+				gdi.essentialModelController.addEventListener(EssentialEvent.LOADING_AND_INSTANTIATION_COMPLETE, onLoadingAndInstantiationComplete);
+				
+				gdi.addEventListener(EssentialEvent.OWNED_SONGS_LOADED, onSongsLoaded);
+				gdi.addEventListener(EssentialEvent.OWNED_STRUCTURES_LOADED, onStructuresLoaded);
+				gdi.addEventListener(EssentialEvent.OWNED_LAYERABLES_LOADED, onLayerablesLoaded);
+				gdi.addEventListener(EssentialEvent.OWNED_DWELLINGS_LOADED, onDwellingsLoaded);
+			}
+			private function onLoadingAndInstantiationComplete(evt:EssentialEvent):void
+			{
+				if (isLoggedInUser(evt.user))
+//				if (true)
+				{
+					instancesLoadedForGameUser();				
+				}
+				else
+				{
+					instancesLoadedForFriend();
+				}				
+			}
+			private function isLoggedInUser(checkUser:User):Boolean
+			{
+				if (facebookInterface.snid == checkUser.snid)
+				{
+					return true;
+				}
+				return false;
+			}
+			private function onSongsLoaded(evt:EssentialEvent):void
+			{
+				gdi.removeEventListener(EssentialEvent.OWNED_SONGS_LOADED, onSongsLoaded);
+				if (isLoggedInUser(evt.user))
+				{
+					topBarView.onSongsLoaded();	
+				}
+			}	
+			private function onStructuresLoaded(evt:EssentialEvent):void
+			{
+				gdi.removeEventListener(EssentialEvent.OWNED_STRUCTURES_LOADED, onStructuresLoaded);
+				if (isLoggedInUser(evt.user) && evt.gdi.dwellingController.fullyLoaded)
+//				if (true)
+				{
+					attemptToInitializeVenueForUser();	
+					venueLoaded = true;
+					attemptToPopulateVenueForUser();
+				}
+				else if (isLoggedInUser(evt.user) && !evt.gdi.dwellingController.fullyLoaded)
+				{
+//					throw new Error("Dwelling not set");
+				}
+				else
+				{
+					friendGDILoaded(evt.gdi);
+				}				
+			}
+			private function onLayerablesLoaded(evt:EssentialEvent):void
+			{
+				gdi.removeEventListener(EssentialEvent.OWNED_LAYERABLES_LOADED, onLayerablesLoaded);
+				layerablesLoaded = true;
+				if (isLoggedInUser(evt.user) && venueLoaded)
+				{
+					attemptToPopulateVenueForUser();
+				}				
+			}
+			private function onDwellingsLoaded(evt:EssentialEvent):void
+			{
+				gdi.removeEventListener(EssentialEvent.OWNED_DWELLINGS_LOADED, onDwellingsLoaded);
+				if (isLoggedInUser(evt.user) && evt.gdi.structureController.fullyLoaded)
+				{
+					attemptToInitializeVenueForUser();					
+					venueLoaded = true;
+					attemptToPopulateVenueForUser();
 				}
 			}
 			

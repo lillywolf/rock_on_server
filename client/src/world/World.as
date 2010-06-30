@@ -196,7 +196,7 @@ package world
 			
 			if (fourDirectional)
 			{
-				activeAsset.fourDirectional = true;
+//				activeAsset.fourDirectional = true;
 				var arrived:Boolean = checkIfAtDestination(activeAsset);
 				
 				if (arrived)

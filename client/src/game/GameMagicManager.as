@@ -26,6 +26,7 @@ package game
 		
 		public function updateXpAndLevel(xpToAdd:int):void
 		{
+			trace("update xp");
 			var neededXp:int = 0;
 			var i:int = 0;
 			
@@ -44,6 +45,7 @@ package game
 			{
 				_userController.user.incrementLevel(i);
 			}	
+			trace("xp updated");
 		}		
 		
 	}

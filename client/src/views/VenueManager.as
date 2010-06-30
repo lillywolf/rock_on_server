@@ -36,6 +36,7 @@ package views
 		
 		public var venue:Venue;
 		public var concertGoers:ArrayCollection;
+		
 		public var _wbi:WorldBitmapInterface;
 		public var _dwellingController:DwellingController;
 		public var _levelController:LevelController;
@@ -77,7 +78,7 @@ package views
 				bandBoss.update(deltaTime);
 			}
 		}
-				
+		
 		public function onVenueUpdated(method:String, newInstance:OwnedDwelling):void
 		{
 			venue.updateProperties(newInstance);
@@ -89,8 +90,7 @@ package views
 				if (venue.state == 0)
 				{
 					venue.advanceState(destinationState);
-//					bandBoss.addBands(venue.stageManager.myStage);	
-					bandBoss.showBandMembers();
+					venue.showBandMembersRaceCondition();
 				}
 				else if (venue.state != destinationState)
 				{
@@ -125,6 +125,7 @@ package views
 		public function initializeBandBoss():void
 		{			
 			bandBoss = new BandBoss(this, _creatureController);	
+			venue.bandBoss = bandBoss;
 			bandBoss.addBands(venue.stageManager.myStage);
 		}
 		

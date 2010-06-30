@@ -112,6 +112,7 @@ package controllers
 		
 		public function friendGDILoaded(friendGDI:GameDataInterface):void
 		{
+			trace("friend gdi loaded");
 			var friendMap:Object = {snid: friendGDI.user.snid, gdi: friendGDI};
 			addItem(friendMap);						
 			if (length == facebookFriends.length)

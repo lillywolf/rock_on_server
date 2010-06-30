@@ -1,10 +1,10 @@
 package world
 {
-	import flash.events.EventDispatcher;
-	import flash.events.IEventDispatcher;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.MovieClip;
+	import flash.events.EventDispatcher;
+	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
@@ -22,8 +22,10 @@ package world
 	import mx.collections.SortField;
 	import mx.containers.Canvas;
 	import mx.core.UIComponent;
-	import mx.events.CollectionEvent;	
+	import mx.events.CollectionEvent;
+	
 	import rock_on.Person;
+	
 	import views.AssetBitmapData;
 	
 	public class BitmapBlotter extends EventDispatcher
@@ -250,83 +252,85 @@ package world
 		//			}
 		//		}
 		
-		public function reIntroduceBitmap(abd:AssetBitmapData, animation:String=null, frameNumber:int=0):void
-		{
-			// Create new bitmap
-			abd.mc = getNewMovieClip(abd.activeAsset, animation, frameNumber);
-			abd.realCoordX = abd.activeAsset.realCoords.x;
-			abd.realCoordY = abd.activeAsset.realCoords.y;			
-			abd.newBitmap = getNewBitmap(abd);
-			// Get overlaps
-			var overlaps:ArrayCollection = getOverlappingBitmaps(abd);
-			sortOverlaps(overlaps);
-			reRenderOverlaps(overlaps);
-		}
+//		public function reIntroduceBitmap(abd:AssetBitmapData, animation:String=null, frameNumber:int=0):void
+//		{
+//			// Create new bitmap
+//			abd.mc = getNewMovieClip(abd.activeAsset, animation, frameNumber);
+//			abd.realCoordX = abd.activeAsset.realCoords.x;
+//			abd.realCoordY = abd.activeAsset.realCoords.y;			
+//			abd.newBitmap = getNewBitmap(abd);
+//			// Get overlaps
+//			var overlaps:ArrayCollection = getOverlappingBitmaps(abd);
+//			sortOverlaps(overlaps);
+//			reRenderOverlaps(overlaps);
+//		}
 		
-		public function reRenderOverlaps(overlaps:ArrayCollection):void
-		{
-			var abd:AssetBitmapData;
-			for each (abd in overlaps)
-			{
-				if (_backgroundCanvas.rawChildren.contains(abd.bitmap))
-				{
-					_backgroundCanvas.rawChildren.removeChild(abd.bitmap);
-				}
-			}
-			for each (abd in overlaps)
-			{
-				if (abd.newBitmap)
-				{
-					abd.bitmap = abd.newBitmap;
-				}
-				_backgroundCanvas.rawChildren.addChild(abd.bitmap);
-			}
+//		public function reRenderOverlaps(overlaps:ArrayCollection):void
+//		{
+//			var abd:AssetBitmapData;
+//			for each (abd in overlaps)
+//			{
+//				if (_backgroundCanvas.rawChildren.contains(abd.bitmap))
+//				{
+//					_backgroundCanvas.rawChildren.removeChild(abd.bitmap);
+//				}
+//			}
+//			for each (abd in overlaps)
+//			{
+//				if (abd.newBitmap)
+//				{
+//					abd.bitmap = abd.newBitmap;
+//				}
+//				_backgroundCanvas.rawChildren.addChild(abd.bitmap);
+//			}
 			
-		}
+//		}
 		
-		public function sortOverlaps(overlaps:ArrayCollection):void
-		{
-			var sortField:SortField = new SortField("realCoordY");
-			sortField.numeric = true;
-			var sort:Sort = new Sort();
-			sort.fields = [sortField];
-			overlaps.sort = sort;
-			overlaps.refresh();				
-		}
+//		public function sortOverlaps(overlaps:ArrayCollection):void
+//		{
+//			var sortField:SortField = new SortField("realCoordY");
+//			sortField.numeric = true;
+//			var sort:Sort = new Sort();
+//			sort.fields = [sortField];
+//			overlaps.sort = sort;
+//			overlaps.refresh();				
+//		}
 		
-		public function getOverlappingBitmaps(stander:AssetBitmapData):ArrayCollection
-		{
-			var overlaps:ArrayCollection = new ArrayCollection();
-			for each (var abd:AssetBitmapData in bitmapReferences)
-			{
-				if ((abd.realCoordY - abd.transformedHeight) < (stander.realCoordY - stander.transformedHeight) && 
-					abd.realCoordY > (stander.realCoordY - stander.transformedHeight) && 
-					((abd.realCoordX > stander.realCoordX && abd.realCoordX < stander.realCoordX + stander.transformedWidth*2) ||
-						abd.realCoordX + abd.transformedWidth*2 > stander.realCoordX && abd.realCoordX + abd.transformedWidth*2 < stander.realCoordX + stander.transformedWidth*2))
-				{
-					overlaps.addItem(abd);
-				}			
-			}
-			return overlaps;
-		}
-		
-		public function doesBitmapOverlapWithAsset(abd:AssetBitmapData, bitmap:Bitmap):Boolean
-		{
-			var bp:Bitmap = abd.bitmap;
-			if (bitmap.bitmapData.rect.bottom < bp.bitmapData.rect.bottom && 
-				bitmap.bitmapData.rect.top > bp.bitmapData.rect.bottom && 
-				((bitmap.bitmapData.rect.right > bp.bitmapData.rect.left && bitmap.bitmapData.rect.right < bp.bitmapData.rect.right) ||
-					bitmap.bitmapData.rect.left > bp.bitmapData.rect.left && bitmap.bitmapData.rect.left < bp.bitmapData.rect.right))
-			{
-				return true;
-			}
-			return false;
-		}
+//		public function getOverlappingBitmaps(stander:AssetBitmapData):ArrayCollection
+//		{
+//			var overlaps:ArrayCollection = new ArrayCollection();
+//			for each (var abd:AssetBitmapData in bitmapReferences)
+//			{
+//				if ((abd.realCoordY - abd.transformedHeight) < (stander.realCoordY - stander.transformedHeight) && 
+//					abd.realCoordY > (stander.realCoordY - stander.transformedHeight) && 
+//					((abd.realCoordX > stander.realCoordX && abd.realCoordX < stander.realCoordX + stander.transformedWidth*2) ||
+//						abd.realCoordX + abd.transformedWidth*2 > stander.realCoordX && abd.realCoordX + abd.transformedWidth*2 < stander.realCoordX + stander.transformedWidth*2))
+//				{
+//					overlaps.addItem(abd);
+//				}			
+//			}
+//			return overlaps;
+//		}
+//		
+//		public function doesBitmapOverlapWithAsset(abd:AssetBitmapData, bitmap:Bitmap):Boolean
+//		{
+//			var bp:Bitmap = abd.bitmap;
+//			if (bitmap.bitmapData.rect.bottom < bp.bitmapData.rect.bottom && 
+//				bitmap.bitmapData.rect.top > bp.bitmapData.rect.bottom && 
+//				((bitmap.bitmapData.rect.right > bp.bitmapData.rect.left && bitmap.bitmapData.rect.right < bp.bitmapData.rect.right) ||
+//					bitmap.bitmapData.rect.left > bp.bitmapData.rect.left && bitmap.bitmapData.rect.left < bp.bitmapData.rect.right))
+//			{
+//				return true;
+//			}
+//			return false;
+//		}
 		
 		public function renderInitialBitmap():void
 		{
+			trace("render initial bitmap");
 			sortBitmaps();
 			renderBitmaps();
+			trace("initial bitmap rendered");
 		}
 		
 		public function renderReplacedBitmaps():void
@@ -339,17 +343,20 @@ package world
 		
 		public function renderUpdatedBitmaps():void
 		{
+			trace("render updated bitmap");
 			for each (var abd:AssetBitmapData in bitmapReferences)
 			{
 				if (abd)
 				{
 					_backgroundCanvas.rawChildren.addChild(abd.bitmap);
 				}
-			}			
+			}	
+			trace("updated bitmap rendered");
 		}
 		
 		public function updateBitmapLocations():void
 		{
+			trace("update bitmap locations");
 			for each (var abd:AssetBitmapData in bitmapReferences)
 			{
 				if (abd)
@@ -357,6 +364,7 @@ package world
 					moveRenderedBitmap(abd);
 				}
 			}
+			trace("bitmap locations updated");
 		}
 		
 		public function renderBitmaps():void
@@ -381,7 +389,6 @@ package world
 					//					_backgroundCanvas.rawChildren.addChild(bp);	
 					bp = null;
 					i++;
-					trace("bitmapNumber: " + i.toString());
 				}
 			}			
 		}
@@ -530,7 +537,7 @@ package world
 		public function set backgroundCanvas(val:Canvas):void
 		{
 			_backgroundCanvas = val;
-			_backgroundCanvas.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+//			_backgroundCanvas.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 		}
 		
 		public function get backgroundCanvas():Canvas

@@ -17,7 +17,6 @@ package world
 	{
 		public var sortedAssets:ArrayCollection;
 		public var unsortedAssets:ArrayCollection;
-		public var _assetGenius:AssetGenius;
 		public var initialDraw:Boolean;
 		private static const DEFAULT_SPEED:Number = .02;
 
@@ -178,7 +177,7 @@ package world
 						asset.worldCoords = World.actualToWorldCoords(asset.realCoords);
 					}
 				}
-			}				
+			}
 		}	
 		
 		private function updateSortedAssets(lockedDelta:Number):void
@@ -243,16 +242,6 @@ package world
 					removeChild(asset);									
 				}
 			}			
-		}
-		
-		public function set assetGenius(val:AssetGenius):void
-		{
-			_assetGenius = val;
-		}
-		
-		public function get assetGenius():AssetGenius
-		{
-			return _assetGenius;
 		}
 		
 	}

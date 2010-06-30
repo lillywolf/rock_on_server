@@ -14,7 +14,7 @@ package views
 		public function DraggableCanvas()
 		{
 			super();
-			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);				
+//			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);				
 		}
 		
 		private function onMouseDown(evt:MouseEvent):void

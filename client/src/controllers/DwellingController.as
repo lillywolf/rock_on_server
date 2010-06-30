@@ -13,6 +13,7 @@ package controllers
 
 	public class DwellingController extends Controller
 	{
+		public var fullyLoaded:Boolean;
 		public var dwellings:ArrayCollection;
 		public var owned_dwellings:ArrayCollection;
 		public var dwellingsLoaded:int;
@@ -25,6 +26,7 @@ package controllers
 			super(essentialModelController, target);
 			dwellings = essentialModelController.dwellings;
 			owned_dwellings = essentialModelController.owned_dwellings;
+			owned_dwellings.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedDwellingsCollectionChange);			
 			essentialModelController.addEventListener(EssentialEvent.INSTANCE_LOADED, onInstanceLoaded);
 			essentialModelController.addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
 			
@@ -103,7 +105,7 @@ package controllers
 		{
 			(evt.target as OwnedDwelling).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
 			ownedDwellingMovieClipsLoaded++;
-			essentialModelController.checkIfAllLoadingComplete();
+			essentialModelController.checkIfLoadingAndInstantiationComplete();
 		}
 		
 		private function onInstanceLoaded(evt:EssentialEvent):void
@@ -111,12 +113,14 @@ package controllers
 			if (evt.instance is Dwelling)
 			{
 				dwellingsLoaded++;
+				trace("dwellings loaded: " + dwellingsLoaded.toString());
 			}
 			else if (evt.instance is OwnedDwelling)
 			{
 				ownedDwellingsLoaded++;
+				trace("owned dwellings loaded: " + ownedDwellingsLoaded.toString());
 			}
-			essentialModelController.checkIfAllLoadingComplete();
+			essentialModelController.checkIfLoadingAndInstantiationComplete();
 		}	
 		
 		public function set serverController(val:ServerController):void

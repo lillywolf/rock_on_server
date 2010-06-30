@@ -209,6 +209,7 @@ package rock_on
 		
 		public function getStationFront(station:ListeningStation):Point3D
 		{	
+			trace("get station front");
 			// This assumes a particular rotation
 
 			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
@@ -220,6 +221,7 @@ package rock_on
 				stationFront = new Point3D(Math.floor(station.x + station.structure.width/2 + 1 + Math.round(Math.random()*station.radius.x)), 0, Math.floor(station.z - Math.round(Math.random()*station.radius.z*2)));										
 			}			
 			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stationFront)));
+			trace("station front found");
 			return stationFront;
 		}
 		
@@ -238,6 +240,7 @@ package rock_on
 		
 		public function getRandomStation(station:ListeningStation=null):ListeningStation
 		{
+			trace("get random station");
 			var selectedStation:ListeningStation = null;
 
 			if (listeningStations.length && !(listeningStations.length == 1 && station) && isAnyStationAvailable())
@@ -248,6 +251,7 @@ package rock_on
 				}
 				while (selectedStation == station);
 			}
+			trace ("selected station");
 			return selectedStation;	
 		}	
 		

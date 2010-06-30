@@ -63,7 +63,7 @@ package controllers
 		{
 			(evt.target as OwnedLayerable).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
 			ownedLayerableMovieClipsLoaded++;
-			essentialModelController.checkIfAllLoadingComplete();
+			essentialModelController.checkIfLoadingAndInstantiationComplete();
 		}
 		
 		private function onInstanceLoaded(evt:EssentialEvent):void
@@ -76,13 +76,11 @@ package controllers
 			{
 				ownedLayerablesLoaded++;
 			}
-			essentialModelController.checkIfAllLoadingComplete();
+			essentialModelController.checkIfLoadingAndInstantiationComplete();
 		}		
 		
 		public function getMovieClipCopy(layerable:Layerable, formatted:Boolean=false, dimensionX:int=100, dimensionY:int=100):UIComponent
 		{
-//			var className:String = flash.utils.getQualifiedClassName(layerable.mc);
-//			var klass:Class = essentialModelController.essentialModelReference.loadedModels[className].klass;
 			var copy:MovieClip = EssentialModelReference.getMovieClipCopy(layerable.mc);
 			if (formatted)
 			{

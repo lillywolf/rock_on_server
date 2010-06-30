@@ -64,6 +64,7 @@ package rock_on
 			_boothBoss = boothBoss;
 			startInitializedState();
 			setMoods();
+			trace("customer person created");
 		}
 		
 		override public function updateMoods():void
@@ -235,9 +236,11 @@ package rock_on
 		
 		override public function startRoamState():void
 		{
+			trace("start roam state");
 			state = ROAM_STATE;
 			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
 			moveCustomer(destination);
+			trace("customer person roamed");
 		}
 		
 		public function timedConversion(fanIndex:int):void
@@ -249,6 +252,7 @@ package rock_on
 		
 		private function onConversionComplete(evt:TimerEvent):void
 		{
+			trace("conversion timer complete");
 			var convertTimer:Timer = evt.currentTarget as Timer;
 			convertTimer.removeEventListener(TimerEvent.TIMER, onConversionComplete);
 			convertTimer.stop();
@@ -295,15 +299,17 @@ package rock_on
 		
 		public function startEnthralledState():void
 		{
+			trace("enthralled state started");
 			state = ENTHRALLED_STATE;
 			
 			var frameNumber:int = 1;
 			var obj:Object = standFacingObject(_concertStage, frameNumber);
 			
-			enthralledTimer = new Timer(CustomerPerson.ENTHRALLED_TIME);
-			enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
-			enthralledTimer.start();
-			numEnthralledTimers++;
+//			enthralledTimer = new Timer(CustomerPerson.ENTHRALLED_TIME);
+//			enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
+//			enthralledTimer.start();
+//			numEnthralledTimers++;
+			trace("enthralled state start ended");
 		}
 		
 		public function startBitmappedEnthralledState():void
@@ -327,7 +333,7 @@ package rock_on
 		private function routeToQueue(evt:TimerEvent):void
 		{
 //			Condition this somehow
-
+			trace("route to queue");
 			if (Math.random() < 0.2 && !isBitmapped && !isSuperFan)
 			{
 				enthralledTimer.stop();
@@ -342,6 +348,7 @@ package rock_on
 					throw new Error("State is not enthralled state");
 				}
 			}
+			trace("routing function finished");
 		}
 		
 		public function endEnthralledState():void
@@ -356,11 +363,13 @@ package rock_on
 		
 		public function startQueuedState():void
 		{
+			trace("start queued state");
 			state = QUEUED_STATE;
 			standFacingObject(currentBooth);
 			currentBooth.actualQueue++;
 			
 			checkIfFrontOfQueue();
+			trace("start queued state complete");
 		}
 		
 		public function checkIfFrontOfQueue():void
@@ -385,6 +394,7 @@ package rock_on
 		
 		public function startQueuedTimer():void
 		{
+			trace("start queued timer");
 			if (state != QUEUED_STATE)
 			{
 				trace("Queued Timers: " + numQueuedTimers.toString());		
@@ -410,6 +420,7 @@ package rock_on
 		
 		private function exitQueue(evt:TimerEvent):void
 		{
+			trace("exit queue called");
 			if (state == QUEUED_STATE)
 			{
 				decrementQueue();
@@ -542,6 +553,7 @@ package rock_on
 		
 		public function pickPointNearStructure(bounds:Rectangle, avoid:Rectangle=null, worldToUpdate:World=null):Point3D
 		{
+			trace("pick point near structure");
 			var stagePoint:Point3D;
 			var occupiedSpaces:ArrayCollection;
 			if (worldToUpdate)
@@ -583,6 +595,7 @@ package rock_on
 			{
 				throw new Error("There are no available spaces in this world");
 			}
+			trace("point picked");
 			return stagePoint;
 		}
 		

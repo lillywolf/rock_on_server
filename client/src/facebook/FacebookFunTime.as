@@ -15,6 +15,8 @@ package facebook
 	
 	import flash.events.Event;
 	
+	import models.User;
+	
 	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
@@ -178,6 +180,15 @@ package facebook
 			evt.facebookFriends = facebookFriendAppUsers;
 			FlexGlobals.topLevelApplication.dispatchEvent(evt);
 //			Application.application.bottomBarView.dispatchEvent(evt);				
+		}
+		
+		protected function isLoggedInUser(checkUser:User):Boolean
+		{
+			if (snid == checkUser.snid)
+			{
+				return true;
+			}
+			return false;
 		}
 
 	}

@@ -71,7 +71,6 @@
 			import user.UserEvent;
 			
 			import world.ActiveAsset;
-			import world.AssetGenius;
 			import world.AssetStack;
 			import world.BitmapBlotter;
 			import world.Point3D;
@@ -96,7 +95,6 @@
 			[Bindable] public var bitmapBlotter:BitmapBlotter;
 			public var backgroundCanvas:Canvas;
 			public var bottomBar:BottomBar;
-			public var assetGenius:AssetGenius;
 			public var inventoryCanvas:Canvas;
 			public var inventoryIndex:int = 0;
 			public var uiLayer:UILayer;
@@ -142,7 +140,7 @@
 			private function onCreationComplete():void
 			{
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-//				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);	
+				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);	
 				addEventListener(MouseEvent.CLICK, onViewClicked);
 			}
 			
