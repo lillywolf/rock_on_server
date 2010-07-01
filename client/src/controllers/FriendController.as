@@ -21,6 +21,7 @@ package controllers
 		public var randomBandMembers:ArrayCollection;
 		public var facebookFriends:Array;
 		public var facebookUser:FacebookUser;
+		public var numLoadedUsers:int;
 		public function FriendController(gdi:GameDataInterface, source:Array=null)
 		{
 			super(source);
@@ -102,17 +103,28 @@ package controllers
 			}
 		}
 		
-		public function getFriendGDIs():void
+		public function getBasicFriendGDIs():void
 		{
 			for each (var friend:FacebookUser in facebookFriends)
 			{
-				createNewFriendMap(Number(friend.uid));
+				var friendMap:Object = createNewFriendMap(Number(friend.uid));
+				getBasicUserData(friendMap);
 			}			
+		}
+		
+		public function getExtendedFriendGDI(snid:Number):void
+		{
+			for each (var friendMap:Object in this)
+			{
+				if (friendMap.snid == snid)
+				{
+					getExtendedUserData(friendMap);
+				}
+			}
 		}
 		
 		public function friendGDILoaded(friendGDI:GameDataInterface):void
 		{
-			trace("friend gdi loaded");
 			var friendMap:Object = {snid: friendGDI.user.snid, gdi: friendGDI};
 			addItem(friendMap);						
 			if (length == facebookFriends.length)
@@ -121,6 +133,16 @@ package controllers
 				var evt:DynamicEvent = new DynamicEvent("friendDataLoaded", true, true);
 				dispatchEvent(evt);
 			}			
+		}
+		
+		public function basicFriendDataLoaded():void
+		{
+			if (length == numLoadedUsers)
+			{
+				addItem({snid: mainGDI.user.snid, gdi: mainGDI});
+				var evt:DynamicEvent = new DynamicEvent("friendDataLoaded", true, true);
+				dispatchEvent(evt);
+			}
 		}
 		
 		public function processRandomBandMemberData(creature:Creature, method:String):void
@@ -148,11 +170,20 @@ package controllers
 			gdi.addEventListener(ServerDataEvent.USER_LOADED, onUserLoaded);
 			gdi.addEventListener(ServerDataEvent.GAME_CONTENT_LOADED, onGameContentLoaded);
 			gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	
-			
-			gdi.getUserContent(uid);
-			
+				
 			var friendMap:Object = {snid: uid, gdi: gdi};
+			addItem(friendMap);
 			return friendMap;
+		}
+		
+		public function getExtendedUserData(friendMap:Object):void
+		{			
+			friendMap.gdi.getUserContent(friendMap.snid);
+		}
+		
+		public function getBasicUserData(friendMap:Object):void
+		{
+			friendMap.gdi.getBasicUserContent(friendMap.snid);
 		}
 		
 		public function checkForFriendData(uid:Number):Object
@@ -169,7 +200,9 @@ package controllers
 		
 		private function onUserLoaded(evt:ServerDataEvent):void
 		{
-			
+			var friendUser:User = evt.user;
+			numLoadedUsers++;
+			basicFriendDataLoaded();
 		}
 
 		private function onGameContentLoaded(evt:ServerDataEvent):void

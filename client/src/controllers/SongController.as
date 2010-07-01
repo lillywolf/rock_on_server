@@ -2,6 +2,7 @@ package controllers
 {
 	import flash.events.IEventDispatcher;
 	
+	import models.EssentialModelReference;
 	import models.OwnedSong;
 	import models.Song;
 	
@@ -21,6 +22,9 @@ package controllers
 			super(essentialModelController, target);
 			_songs = essentialModelController.songs;
 			_owned_songs = essentialModelController.owned_songs;
+			owned_songs.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedSongsCollectionChange);	
+			essentialModelController.addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
+			essentialModelController.addEventListener(EssentialEvent.INSTANCE_LOADED, onInstanceLoaded);			
 		}
 		
 		private function onOwnedSongsCollectionChange(evt:CollectionEvent):void
@@ -31,7 +35,9 @@ package controllers
 		private function onParentAssigned(evt:EssentialEvent):void
 		{
 			var os:OwnedSong = evt.currentTarget as OwnedSong;
-			os.removeEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);		
+			os.removeEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);	
+			ownedSongsLoaded++;
+			checkForLoadingComplete();
 		}	
 		
 		private function onInstanceLoaded(evt:EssentialEvent):void
@@ -44,8 +50,16 @@ package controllers
 			{
 				ownedSongsLoaded++;
 			}
-			essentialModelController.checkIfLoadingAndInstantiationComplete();
-		}		
+			checkForLoadingComplete();
+		}	
+		
+		private function checkForLoadingComplete():void
+		{
+			if (ownedSongsLoaded == EssentialModelReference.numInstancesToLoad["owned_song"])
+			{
+				essentialModelController.checkIfLoadingAndInstantiationComplete();
+			}
+		}
 		
 		public function add(song:Song):void
 		{

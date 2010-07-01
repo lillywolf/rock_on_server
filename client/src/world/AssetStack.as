@@ -181,7 +181,6 @@ package world
 		
 		public function doAnimation(animationType:String, frameNumber:int=0):void
 		{
-			trace("start animation");
 			currentAnimation = animationType;
 			currentFrameNumber = frameNumber;
 			if (_layerableOrder[animationType])
@@ -223,7 +222,7 @@ package world
 					_movieClipStack.addChildAt(newMc, k);
 					if (frameNumber == 0)
 					{
-						newMc.cacheAsBitmap = false;
+						newMc.cacheAsBitmap = true;
 						newMc.gotoAndPlay(animationType);
 					}
 					else
@@ -233,7 +232,6 @@ package world
 					}
 				}				
 			}
-			trace("animation complete");
 		}
 		
 		public function getMovieClipStackCopy(animation:String, frameNumber:int):MovieClip

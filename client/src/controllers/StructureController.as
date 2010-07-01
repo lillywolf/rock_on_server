@@ -2,21 +2,29 @@ package controllers
 {
 	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
-	import flash.utils.getQualifiedClassName;	
-	import game.ImposterOwnedStructure;	
+	import flash.utils.getQualifiedClassName;
+	
+	import game.ImposterOwnedStructure;
+	
 	import models.EssentialModelReference;
 	import models.OwnedStructure;
-	import models.Structure;	
+	import models.Structure;
+	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
 	import mx.events.CollectionEvent;
-	import mx.events.DynamicEvent;	
+	import mx.events.DynamicEvent;
+	
 	import rock_on.BoothBoss;
-	import rock_on.ListeningStationBoss;	
-	import server.ServerController;	
-	import stores.StoreEvent;	
-	import views.WorldView;	
+	import rock_on.ListeningStationBoss;
+	
+	import server.ServerController;
+	
+	import stores.StoreEvent;
+	
+	import views.WorldView;
+	
 	import world.ActiveAsset;
 
 	public class StructureController extends Controller
@@ -90,7 +98,9 @@ package controllers
 			if (os.structure['mc'])
 			{
 				ownedStructureMovieClipsLoaded++;
-			}		
+			}	
+			
+			checkForLoadingComplete();
 		}
 		
 		public function add(structure:Structure):void
@@ -108,7 +118,16 @@ package controllers
 		{
 			(evt.target as OwnedStructure).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
 			ownedStructureMovieClipsLoaded++;
-			essentialModelController.checkIfLoadingAndInstantiationComplete();
+			
+			checkForLoadingComplete();
+		}
+		
+		private function checkForLoadingComplete():void
+		{
+			if (ownedStructureMovieClipsLoaded == EssentialModelReference.numInstancesToLoad["owned_structure"] && ownedStructuresLoaded == EssentialModelReference.numInstancesToLoad["owned_structure"])
+			{
+				essentialModelController.checkIfLoadingAndInstantiationComplete();			
+			}			
 		}
 		
 		private function onInstanceLoaded(evt:EssentialEvent):void

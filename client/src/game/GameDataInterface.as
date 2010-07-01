@@ -143,6 +143,7 @@ package game
 				userController.user = user;
 								
 				var serverDataEvent:ServerDataEvent = new ServerDataEvent(ServerDataEvent.USER_LOADED, 'user', evt.currentTarget, null, true, true);
+				serverDataEvent.user = user;
 				dispatchEvent(serverDataEvent);
 				essentialModelController.users.removeEventListener(CollectionEvent.COLLECTION_CHANGE, setUser);
 			}
@@ -152,6 +153,12 @@ package game
 		{
 			snid = uid;
 			getDataForModel({snid: uid}, "user", "find_by_snid");
+		}
+		
+		public function getBasicUserContent(uid:Number):void
+		{
+			snid = uid;
+			getDataForModel({snid: uid}, "user", "get_basic_info_by_snid");
 		}
 	
 		public function getStaticGameContent():void
@@ -175,8 +182,23 @@ package game
 			sc.sendRequest(params, modelName, methodName);
 		}
 		
+		public function addNumberOfInstancesToLoad(requestType:String, numResults:int):void
+		{
+			if (!EssentialModelReference.numInstancesToLoad[requestType])
+			{
+				EssentialModelReference.numInstancesToLoad[requestType] = numResults;
+			}
+			else
+			{
+				EssentialModelReference.numInstancesToLoad[requestType] += numResults;
+			}
+		}
+		
 		public function objectLoaded(objectsLoaded:Object, requestType:String):void
-		{				
+		{	
+			var numResults:int = (objectsLoaded as Array).length;
+			addNumberOfInstancesToLoad(requestType, numResults);
+			
 			for each (var obj:Object in objectsLoaded)
 			{
 				if (obj.has_many)
@@ -311,12 +333,8 @@ package game
 		
 		public function checkForLoadedSongs():void
 		{
-			if (songController.ownedSongsLoaded == songController.songsLoaded && songController.songsLoaded != 0)
+			if (songController.ownedSongsLoaded != 0)
 			{
-//				if (isLoggedInUser() && !songController.fullyLoaded)
-//				{
-//					FlexGlobals.topLevelApplication.onSongsLoaded();
-//				}
 				songController.fullyLoaded = true;
 				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_SONGS_LOADED);
 				evt.user = this.user;
@@ -334,21 +352,6 @@ package game
 				evt.user = this.user;
 				evt.gdi = this;
 				dispatchEvent(evt);
-				
-//				if (isLoggedInUser() && !structureController.fullyLoaded && (dwellingController.owned_dwellings[0] as OwnedDwelling).dwelling)
-////				if (true)
-//				{
-//					FlexGlobals.topLevelApplication.attemptToInitializeVenueForUser();	
-//					structureController.fullyLoaded = true;
-//				}
-//				else if (isLoggedInUser() && !structureController.fullyLoaded && !(dwellingController.owned_dwellings[0] as OwnedDwelling).dwelling)
-//				{
-//					throw new Error("Dwelling not set");
-//				}
-//				else
-//				{
-//					FlexGlobals.topLevelApplication.friendGDILoaded(this);
-//				}
 			}	
 		}
 		
@@ -361,16 +364,6 @@ package game
 				evt.user = this.user;
 				evt.gdi = this;
 				dispatchEvent(evt);
-				
-//				if (isLoggedInUser() && !layerableController.fullyLoaded)
-//				{
-//					FlexGlobals.topLevelApplication.attemptToPopulateVenueForUser();
-//					layerableController.fullyLoaded = true;
-//				}
-//				else
-//				{
-////					Code for friend creature initialization
-//				}
 			}			
 		}	
 		

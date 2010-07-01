@@ -440,15 +440,6 @@ package controllers
 		{
 			if (instancesToLoad.length == 0 && userContentLoaded)
 			{				
-//				if (isLoggedInUser())
-////				if (true)
-//				{
-//					FlexGlobals.topLevelApplication.instancesLoadedForGameUser();				
-//				}
-//				else
-//				{
-//					FlexGlobals.topLevelApplication.instancesLoadedForFriend();
-//				}
 				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.LOADING_AND_INSTANTIATION_COMPLETE);
 				evt.user = _gdi.user;
 				evt.gdi = _gdi;
@@ -456,16 +447,21 @@ package controllers
 				
 				_gdi.checkForLoadedMovieClips();
 			}
-			
-			if (_gdi.user)
-			{
-				_gdi.checkForLoadedDwellings();				
-			}
+//			
+//			if (_gdi.user)
+//			{
+//				_gdi.checkForLoadedDwellings();				
+//			}
 		}
 		
 		public function set gdi(val:GameDataInterface):void
 		{
 			_gdi = val;
+		}
+
+		public function get gdi():GameDataInterface
+		{
+			return _gdi;
 		}
 		
 	}

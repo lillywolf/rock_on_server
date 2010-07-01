@@ -1,6 +1,8 @@
 package server
 {
 	import flash.events.Event;
+	
+	import models.User;
 
 	public class ServerDataEvent extends Event
 	{
@@ -13,6 +15,7 @@ package server
 		public var _model:String;
 		public var _params:Object;
 		public var _method:String;
+		public var _user:User;
 		
 		public function ServerDataEvent(type:String, model:String=null, params:Object=null, method:String=null, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
@@ -64,6 +67,16 @@ package server
 		public function get params():Object
 		{
 			return _params;
+		}
+		
+		public function set user(val:User):void
+		{
+			_user = val;
+		}
+		
+		public function get user():User
+		{
+			return _user;
 		}
 	
 	}

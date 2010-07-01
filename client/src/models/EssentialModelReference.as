@@ -17,6 +17,7 @@ package models
 	public class EssentialModelReference
 	{
 		public static var loadedModels:Dictionary = new Dictionary();
+		public static var numInstancesToLoad:Dictionary = new Dictionary();
 		public var classCopies:Array;
 		
 		public var swfsToLoad:ArrayCollection;

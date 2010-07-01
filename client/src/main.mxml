@@ -168,7 +168,7 @@
 			{
 				if (userLoaded && facebookDataLoaded)
 				{
-//					friendManager.getFriendGDIs();								
+					friendManager.getBasicFriendGDIs();							
 				}
 			}
 			public function getFriendData(uid:int):void

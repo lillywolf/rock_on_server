@@ -3,6 +3,7 @@ package controllers
 	import flash.events.IEventDispatcher;
 	
 	import models.Dwelling;
+	import models.EssentialModelReference;
 	import models.OwnedDwelling;
 	
 	import mx.collections.ArrayCollection;
@@ -82,7 +83,9 @@ package controllers
 			if (od.dwelling['mc'])
 			{
 				ownedDwellingMovieClipsLoaded++;
-			}		
+			}
+			
+			checkForLoadingComplete();		
 		}
 		
 //		public function updateOwnedDwellingState(stateName:String, venueId:int):void
@@ -99,13 +102,22 @@ package controllers
 		{
 			var i:int = dwellings.getItemIndex(dwelling);
 			dwellings.removeItemAt(i);
-		}		
+		}
+		
+		private function checkForLoadingComplete():void
+		{
+			if (ownedDwellingMovieClipsLoaded == EssentialModelReference.numInstancesToLoad["owned_dwelling"] && ownedDwellingsLoaded == EssentialModelReference.numInstancesToLoad["owned_dwelling"])
+			{
+				essentialModelController.checkIfLoadingAndInstantiationComplete();	
+			}			
+		}
 		
 		private function onParentMovieClipAssigned(evt:DynamicEvent):void
 		{
 			(evt.target as OwnedDwelling).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
 			ownedDwellingMovieClipsLoaded++;
-			essentialModelController.checkIfLoadingAndInstantiationComplete();
+			
+			checkForLoadingComplete();
 		}
 		
 		private function onInstanceLoaded(evt:EssentialEvent):void

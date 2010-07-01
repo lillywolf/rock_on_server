@@ -56,14 +56,25 @@ package controllers
 			if (ol.layerable.mc)
 			{
 				ownedLayerableMovieClipsLoaded++;
-			}		
-		}	
+			}	
+			
+			checkForLoadingComplete();		
+		}
+		
+		private function checkForLoadingComplete():void
+		{
+			if (ownedLayerableMovieClipsLoaded == EssentialModelReference.numInstancesToLoad["owned_layerable"] && ownedLayerablesLoaded == EssentialModelReference.numInstancesToLoad["owned_layerable"])
+			{
+				essentialModelController.checkIfLoadingAndInstantiationComplete();	
+			}			
+		}
 		
 		private function onParentMovieClipAssigned(evt:DynamicEvent):void
 		{
 			(evt.target as OwnedLayerable).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
 			ownedLayerableMovieClipsLoaded++;
-			essentialModelController.checkIfLoadingAndInstantiationComplete();
+			
+			checkForLoadingComplete();		
 		}
 		
 		private function onInstanceLoaded(evt:EssentialEvent):void
