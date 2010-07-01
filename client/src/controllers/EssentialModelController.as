@@ -42,7 +42,7 @@ package controllers
 	{	
 		public var _gdi:GameDataInterface;
 		public var instancesToLoad:ArrayCollection;
-		public var instancesLoaded:ArrayCollection;		
+		public var instancesLoaded:ArrayCollection;	
 		
 		public var userContentLoaded:Boolean;
 		

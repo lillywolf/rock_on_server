@@ -49,10 +49,11 @@ package game
 		public var sc:ServerController;
 		public var loadCounter:int = 0;
 		public var pendingRequests:int = 0;
+		public var staticContentLoaded:Boolean;
 		public var userContentLoaded:Boolean;
 		public var gameClock:GameClock;
 		public var initialized:Boolean;
-		public var snid:Number;
+		public var snid:Number;		
 		
 		public function GameDataInterface(preLoadedContent:Dictionary=null)
 		{
@@ -290,11 +291,22 @@ package game
 			loadCounter++;
 			if (pendingRequests == loadCounter)
 			{
-				userContentLoaded = true;
-				essentialModelController.userContentLoaded = true;
-				
-				var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.USER_CONTENT_LOADED, null, null, null, true, true);
-				dispatchEvent(evt);
+				var evt:ServerDataEvent;
+				if (!staticContentLoaded)
+				{
+					staticContentLoaded = true;
+					evt = new ServerDataEvent(ServerDataEvent.GAME_CONTENT_LOADED, null, null, null, true, true);
+					dispatchEvent(evt);
+					pendingRequests = 0;
+					loadCounter = 0;
+				}
+				else
+				{
+					userContentLoaded = true;
+					essentialModelController.userContentLoaded = true;				
+					evt = new ServerDataEvent(ServerDataEvent.USER_CONTENT_LOADED, null, null, null, true, true);
+					dispatchEvent(evt);	
+				}
 			}
 		}
 				
@@ -357,7 +369,7 @@ package game
 		
 		public function checkForLoadedLayerables():void
 		{
-			if (layerableController.ownedLayerableMovieClipsLoaded == layerableController.ownedLayerablesLoaded && layerableController.ownedLayerablesLoaded != 0)
+			if (layerableController.ownedLayerableReferencesUpdated == EssentialModelReference.numInstancesToLoad["owned_layerable"] && EssentialModelReference.numInstancesToLoad["layerable"] == layerableController.layerableMovieClipsLoaded)
 			{
 				layerableController.fullyLoaded = true;
 				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_LAYERABLES_LOADED);
