@@ -47,7 +47,7 @@ package rock_on
 			var stageStructures:ArrayCollection = _structureController.getStructuresByType("ConcertStage");
 			concertStage = new ConcertStage(stageStructures[0]);
 			
-			stageAsset = new ActiveAsset(new MovieClip());
+			stageAsset = new ActiveAsset();
 			stageAsset.thinger = stageStructures[0];
 			var addTo:Point3D = new Point3D(concertStage.x, concertStage.y, concertStage.z);
 			concertStage.worldCoords = addTo;

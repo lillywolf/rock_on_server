@@ -5,6 +5,8 @@ package rock_on
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	
+	import models.Creature;
+	
 	import mx.collections.ArrayCollection;
 	
 	import world.AssetStack;
@@ -47,14 +49,27 @@ package rock_on
 			// Creating ActiveAssets 2x as much as necessary here...
 			
 			groupies = new ArrayCollection();
-			var groupieAssets:ArrayCollection = _creatureController.getConstructedCreaturesByType("Groupie", 1, 1);
+//			var groupieAssets:ArrayCollection = _creatureController.getConstructedCreaturesByType("Groupie", 1, 1);
+//			
+//			for each (var assetStack:AssetStack in groupieAssets)
+//			{
+//				var cp:CustomerPerson = new CustomerPerson(assetStack.movieClips, _concertStage, _boothBoss, assetStack.layerableOrder, assetStack.creature, 0.4);
+//				cp.speed = 0.06;
+//				_customerPersonManager.add(cp, true, -1, _venue.boothsRect);
+//				groupies.addItem(cp);
+//			}
 			
-			for each (var assetStack:AssetStack in groupieAssets)
+			for each (var c:Creature in _creatureController.creatures)
 			{
-				var cp:CustomerPerson = new CustomerPerson(assetStack.movieClipStack, _concertStage, _boothBoss, assetStack.layerableOrder, assetStack.creature, 0.4);
-				cp.speed = 0.06;
-				_customerPersonManager.add(cp, true, -1, _venue.boothsRect);
-				groupies.addItem(cp);
+				if (c.type == "Groupie")
+				{
+					var cp:CustomerPerson = new CustomerPerson(_boothBoss, c, null, c.layerableOrder, 0.4);
+					cp.speed = 0.06;
+					cp.doInitialAnimation("walk_toward");
+					cp.stageManager = _venue.stageManager;
+					_customerPersonManager.add(cp, true, -1, _venue.boothsRect);
+					groupies.addItem(cp);
+				}
 			}
 		}		
 		

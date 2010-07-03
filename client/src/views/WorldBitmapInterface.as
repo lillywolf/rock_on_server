@@ -21,6 +21,7 @@ package views
 	import rock_on.Venue;
 	
 	import world.ActiveAsset;
+	import world.ActiveAssetStack;
 	import world.AssetStack;
 	import world.BitmapBlotter;
 	
@@ -189,7 +190,7 @@ package views
 			{
 				if (asset is AssetStack)
 				{
-					var bounds:Rectangle = (asset as AssetStack).movieClipStack.getBounds(_worldView);
+					var bounds:Rectangle = (asset as AssetStack).getBounds(_worldView);
 					if (bounds.contains(_worldView.mouseX, _worldView.mouseY))
 					{
 						clearFilters();
@@ -353,7 +354,7 @@ package views
 			var abd:AssetBitmapData = isMouseInsideBitmapAsset();
 			if (abd)
 			{
-				_bottomBar.replaceCreature((abd.activeAsset as AssetStack).creature);
+				_bottomBar.replaceCreature((abd.activeAsset as ActiveAssetStack).creature);
 				return true;
 			}
 			return false;

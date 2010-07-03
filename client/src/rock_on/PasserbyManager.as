@@ -14,6 +14,7 @@ package rock_on
 	import mx.core.FlexGlobals;
 	
 	import world.ActiveAsset;
+	import world.ActiveAssetStack;
 	import world.AssetStack;
 	import world.Point3D;
 	import world.World;
@@ -75,15 +76,16 @@ package rock_on
 		
 		private function generatePasserby():Passerby
 		{
-			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "Passerby");
-			var passerby:Passerby = new Passerby(asset.movieClipStack, _listeningStationBoss, this, _myWorld, _venue, asset.layerableOrder, asset.creature, 0.4);			
+			var c:Creature = _creatureGenerator.createImposterCreature("Passerby");
+			var passerby:Passerby = new Passerby(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.4);			
 			return passerby;		
 		}
 		
 		private function generateStationListener():StationListener
 		{
-			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "StationListener");
-			var sl:StationListener = new StationListener(asset.movieClipStack, _listeningStationBoss, this, _myWorld, _venue, asset.layerableOrder, asset.creature, 0.4);			
+//			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "StationListener");
+			var c:Creature = _creatureGenerator.createImposterCreature("StationListener");
+			var sl:StationListener = new StationListener(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.4);	
 			return sl;		
 		}
 		

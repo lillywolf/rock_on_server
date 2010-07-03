@@ -41,6 +41,7 @@ package world
 		}
 		
 		private function onEnterFrame(evt:Event):void
+//		private function update():void
 		{
 			var time:Number = getTimer();
 			var deltaTime:Number = time - lastTime;
@@ -49,9 +50,7 @@ package world
 			myMemory = System.totalMemory;
 			aux = sortedAssets.length;
 			lastTime = time;
-			
-//			_assetGenius.onEnterFrame();
-			
+						
 			removeExistingAssets();
 			updateSortedAssets(lockedDelta);
 			drawAssets();

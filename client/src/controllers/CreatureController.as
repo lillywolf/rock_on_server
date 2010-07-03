@@ -56,7 +56,7 @@ package controllers
 				}
 			}
 		}
-		
+				
 		public function getConstructedCreaturesByType(type:String, sizeX:Number, sizeY:Number):ArrayCollection
 		{
 			var matchingCreatures:ArrayCollection = new ArrayCollection();
@@ -104,10 +104,10 @@ package controllers
 //				layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
 //				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
 //				layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];				
-				layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
-				layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
-				layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
-				layerableOrder['stand_still_away'] = ["shoes", "bottom", "top", "hair front"];				
+				layerableOrder['walk_toward'] = ["body"];
+				layerableOrder['walk_away'] = ["body"];
+				layerableOrder['stand_still_toward'] = ["body"];
+				layerableOrder['stand_still_away'] = ["body"];				
 			}
 			else if (creatureType == "Groupie")
 			{
@@ -115,10 +115,10 @@ package controllers
 //				layerableOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
 //				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
 //				layerableOrder['stand_still_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];								
-				layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
-				layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
-				layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
-				layerableOrder['stand_still_away'] = ["shoes", "bottom", "top", "hair front"];								
+				layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];								
 			}
 			else
 			{

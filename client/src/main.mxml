@@ -205,7 +205,7 @@
 				if (layerablesLoaded && venueLoaded)
 				{
 					worldView.initializeCreatures();
-					topBarView.onVenueLoaded();
+//					topBarView.onVenueLoaded();
 					getBasicFriendInfo();				
 				}
 			}

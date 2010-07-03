@@ -6,6 +6,7 @@ package models
 	
 	import mx.collections.ArrayCollection;
 	
+	import world.ActiveAsset;
 	import world.AssetStack;
 	import world.Point3D;
 
@@ -75,16 +76,34 @@ package models
 //			layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
 //			layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
 //			layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "top", "hair front", "instrument"];
-			layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
-			layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "top", "hair front", "instrument"];
-			layerableOrder['stand_still_away'] = ["shoes", "bottom", "top", "hair front"];
+			layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "instrument"];
+			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "instrument"];
+			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];
 		}
 		
 		public function getConstructedCreature(layerablerOrder:Array, animation:String, sizeX:Number, sizeY:Number):AssetStack
 		{
 //			var movieClipStack:MovieClip = new MovieClip();
-			var constructedCreature:AssetStack = new AssetStack(new MovieClip());
+			var constructedCreature:AssetStack = new AssetStack();
+//			for each (var str:String in layerableOrder[animation])
+//			{
+//				for each (var ol:OwnedLayerable in owned_layerables)
+//				{
+//					if (ol.layerable.layer_name == str && ol.in_use)
+//					{
+//						var mc:MovieClip = new MovieClip();
+//						mc = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
+//						mc.scaleX = sizeX;
+//						mc.scaleY = sizeY;
+//						mc.name = ol.layerable.layer_name;
+//						constructedCreature.layerableOrder = layerableOrder;
+//						constructedCreature.movieClipStack.addChild(mc);
+//					}
+//				}
+//			}
+			
+			var movieClips:ArrayCollection = new ArrayCollection();
 			for each (var str:String in layerableOrder[animation])
 			{
 				for each (var ol:OwnedLayerable in owned_layerables)
@@ -96,14 +115,16 @@ package models
 						mc.scaleX = sizeX;
 						mc.scaleY = sizeY;
 						mc.name = ol.layerable.layer_name;
-						constructedCreature.layerableOrder = layerableOrder;
-						constructedCreature.movieClipStack.addChild(mc);
+						movieClips.addItem(mc);
+//						constructedCreature.movieClip = mc;
 					}
 				}
 			}
-			constructedCreature.movieClipStack.buttonMode = true;
+			
+//			constructedCreature.movieClipStack.buttonMode = true;
 			constructedCreature.creature = this;
 			constructedCreature.layerableOrder = layerableOrder;
+			constructedCreature.movieClips = movieClips;
 			return constructedCreature;
 		}	
 		

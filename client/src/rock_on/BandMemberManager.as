@@ -18,6 +18,7 @@ package rock_on
 	import views.UICanvas;
 	
 	import world.ActiveAsset;
+	import world.ActiveAssetStack;
 	import world.AssetStack;
 	import world.Point3D;
 	import world.World;
@@ -48,17 +49,30 @@ package rock_on
 		public function showBandMembers():void
 		{
 			var bandMembers:ArrayCollection = _venue.creatureController.getConstructedCreaturesByType("BandMember", 1, 1);
-			
-			for each (var assetStack:AssetStack in bandMembers)
+//			
+//			for each (var assetStack:AssetStack in bandMembers)
+//			{
+//				var bandMember:BandMember = new BandMember(assetStack.movieClips, assetStack.layerableOrder, assetStack.creature, 0.4);
+//				bandMember. = _venue.stageManager.concertStage;
+//				bandMember.addExemptStructures();
+//				bandMember.speed = 0.06;
+//				add(bandMember);
+//				
+//				var newState:int = mapVenueStateToBandMemberState();
+//				bandMember.advanceState(newState);
+//			}
+			for each (var c:Creature in _venue.creatureController.creatures)
 			{
-				var bandMember:BandMember = new BandMember(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
-				bandMember.concertStage = _venue.stageManager.concertStage;
-				bandMember.addExemptStructures();
-				bandMember.speed = 0.06;
-				add(bandMember);
-				
-				var newState:int = mapVenueStateToBandMemberState();
-				bandMember.advanceState(newState);
+				if (c.type == "BandMember")
+				{
+					var bm:BandMember = new BandMember(c, null, c.layerableOrder, 0.4);
+					bm.stageManager = _venue.stageManager;
+					bm.addExemptStructures();
+					bm.speed = 0.06;
+					add(bm);
+					
+					bm.advanceState(mapVenueStateToBandMemberState());
+				}
 			}
 		}		
 		
@@ -241,9 +255,10 @@ package rock_on
 		
 		public function getBandMemberAssetCopy(bm:BandMember, animation:String):AssetStack
 		{
-			var asset:AssetStack = bm.creature.getConstructedCreature(bm.layerableOrder, animation, 1, 1);
-			asset.doAnimation(animation, 39);
-			return asset;
+//			var asset:AssetStack = bm.creature.getConstructedCreature(bm.layerableOrder, animation, 1, 1);
+//			asset.doAnimation(animation, 39);
+//			return asset;
+			return new AssetStack();
 		}	
 		
 		public function getCustomizerUI():UICanvas

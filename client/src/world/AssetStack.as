@@ -1,6 +1,7 @@
 package world
 {
 	import flash.display.Bitmap;
+	import flash.display.DisplayObject;
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.utils.getQualifiedClassName;
@@ -16,43 +17,129 @@ package world
 	import mx.controls.Image;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
+	import mx.events.CollectionEvent;
+	import mx.events.CollectionEventKind;
 
 	public class AssetStack extends ActiveAsset
 	{
-		[Bindable] public var _movieClipStack:MovieClip;
+		[Bindable] public var _movieClips:ArrayCollection;
+		[Bindable] public var _savedMovieClips:ArrayCollection;
+		public var orientation:Number;
 		public var _layerableOrder:Array;
 		public var _creature:Creature;
 		
-		public function AssetStack(movieClipStack:MovieClip, layerableOrder:Array=null, source:Array=null)
+		public function AssetStack(movieClips:ArrayCollection=null, layerableOrder:Array=null, source:Array=null)
 		{
-			super(movieClipStack);
-			_movieClipStack = new MovieClip();
-			_movieClipStack = movieClipStack;
-			_movieClipStack.x = 0;
-			_movieClipStack.y = 0;
-			_movieClipStack.addEventListener(MouseEvent.CLICK, onMovieClipStackClicked);
-//			_movieClipStack.addEventListener(MouseEvent.MOUSE_MOVE, onMovieClipStackHover);
-//			this.addChild(_movieClipStack);
+			super();
+			_savedMovieClips = new ArrayCollection();
+			
+			if (movieClips)
+			{
+				_movieClips = movieClips;
+				addNewChildMovieClips();
+				_movieClips.addEventListener(CollectionEvent.COLLECTION_CHANGE, onMovieClipsCollectionChanged);
+//				_movieClipStack.addEventListener(MouseEvent.CLICK, onMovieClipStackClicked);
+			}
 			
 			if (layerableOrder)
 			{
 				_layerableOrder = layerableOrder;
 			}	
+			
+//			_movieClipStack = new MovieClip();
+//			_movieClipStack = movieClipStack;
+//			_movieClipStack.x = 0;
+//			_movieClipStack.y = 0;
+//			_movieClipStack.addEventListener(MouseEvent.MOUSE_MOVE, onMovieClipStackHover);
+//			this.addChild(_movieClipStack);
+			
 		}	
-		
-		public function set movieClipStack(val:MovieClip):void
+				
+		public function set movieClips(val:ArrayCollection):void
 		{
-			if (_movieClipStack in this)
-			{
+//			if (_movieClipStack in this)
+//			{
 //				this.removeChild(_movieClipStack);
-				_movieClipStack = val;
-				_movieClipStack.addEventListener(MouseEvent.CLICK, onMovieClipStackClicked);
+			removeOldChildMovieClips();
+			_movieClips = val;
+			addNewChildMovieClips();
+			_movieClips.addEventListener(CollectionEvent.COLLECTION_CHANGE, onMovieClipsCollectionChanged);
+//				_movieClipStack.addEventListener(MouseEvent.CLICK, onMovieClipStackClicked);
 //				this.addChild(_movieClipStack);
-			}
-			else
+//			}
+//			else
+//			{
+//				_movieClipStack = val;
+//				this.addChild(_movieClipStack);
+//			}
+		}
+		
+		public function removeAllOldChildMovieClips():void
+		{
+			for each (var mc:MovieClip in _movieClips)
 			{
-				_movieClipStack = val;
-//				this.addChild(_movieClipStack);
+				var index:int = _movieClips.getItemIndex(mc);
+				_movieClips.removeItemAt(index);
+				
+				if (!_savedMovieClips.contains(mc))
+				{
+					_savedMovieClips.addItem(mc);				
+				}
+			}
+		}
+		
+		public function hasSavedMovieClip(className:String):MovieClip
+		{
+			for each (var mc:MovieClip in _savedMovieClips)
+			{
+				if (getQualifiedClassName(mc) == className)
+				{
+					return mc;
+				}
+			}
+			return null;
+		}
+		
+		public function removeOldChildMovieClips():void
+		{
+			for each (var mc:MovieClip in _movieClips)
+			{
+				if (this.contains(mc))
+				{
+					removeChild(mc);
+				}
+			}			
+		}
+		 
+		public function addNewChildMovieClips():void
+		{			
+			for each (var mc:MovieClip in _movieClips)
+			{
+				addChild(mc);
+			}
+		}
+		
+		public function onMovieClipsCollectionChanged(evt:CollectionEvent):void
+		{
+			if (evt.kind == CollectionEventKind.ADD)
+			{
+				for each (var item:DisplayObject in evt.items)
+				{
+					if (!this.contains(item))
+					{
+						addChild(item);								
+					}
+				}
+			}
+			if (evt.kind == CollectionEventKind.REMOVE)
+			{
+				for each (item in evt.items)
+				{
+					if (this.contains(item))
+					{
+						removeChild(item);									
+					}
+				}
 			}
 		}
 		
@@ -61,21 +148,21 @@ package world
 			var newOl:OwnedLayerable = getOwnedLayerableMatch(ol);
 			var newMc:MovieClip = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
 			var oldOl:OwnedLayerable = getOwnedLayerableByLayerName(ol.layerable.layer_name, animation);
+			var index:int;
 			if (oldOl)
 			{
 				var oldMc:MovieClip = getMovieClipByOwnedLayerable(oldOl);
-				movieClipStack.addChild(newMc);			
-				movieClipStack.swapChildren(oldMc, newMc);		
-				movieClipStack.removeChild(oldMc);
+				index = _movieClips.getItemIndex(oldMc);
+				_movieClips.setItemAt(newMc, index);	
 				oldOl.in_use = false;			
 			}
 			else
 			{
-				var index:int = getLayerableIndex(ol, animation);
-				movieClipStack.addChildAt(newMc, index);				
+				index = getLayerableIndex(ol, animation);
+				_movieClips.setItemAt(newMc, index);				
 			}
 			newOl.in_use = true;
-			doAnimation(currentAnimation, currentFrameNumber);	
+			doAnimation(oldMc.scaleX, currentAnimation, currentFrameNumber);	
 		}
 		
 		public function getOwnedLayerableMatch(olMatch:OwnedLayerable):OwnedLayerable
@@ -128,13 +215,12 @@ package world
 		public function getMovieClipByOwnedLayerable(ol:OwnedLayerable):MovieClip
 		{
 			var className:String = flash.utils.getQualifiedClassName(ol.layerable.mc);
-			var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
-			for (var j:int = 0; j < movieClipChildren; j++)
+			for each (var mc:MovieClip in _movieClips)
 			{			
-				var tempName:String = flash.utils.getQualifiedClassName(_movieClipStack.getChildAt(j));
+				var tempName:String = flash.utils.getQualifiedClassName(mc);
 				if (tempName == className)
 				{
-					return _movieClipStack.getChildAt(j) as MovieClip;
+					return mc;
 				}
 			}
 			return null;			
@@ -163,10 +249,9 @@ package world
 //			FlexGlobals.topLevelApplication.wbi.handleCursorClip(cursorClip);
 		}
 		
-		public function stand(frameNumber:int, animationType:String):void
+		public function stand(scale:Number, frameNumber:int, animationType:String):void
 		{
-			var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
-			doAnimation(animationType, frameNumber);
+			doAnimation(scale, animationType, frameNumber);
 		}	
 		
 		public function doFakeAnimation(animationType:String, frameNumber:int=0):void
@@ -179,89 +264,128 @@ package world
 			}
 		}
 		
-		public function doAnimation(animationType:String, frameNumber:int=0):void
+		public function doAnimation(scale:Number, animationType:String, frameNumber:int=0):void
 		{
 			currentAnimation = animationType;
 			currentFrameNumber = frameNumber;
-			if (_layerableOrder[animationType])
+			
+			for each (var mc:MovieClip in _movieClips)
 			{
-				var totalChildren:int = (_layerableOrder[animationType] as Array).length;
-				var totalOwnedLayerables:int = _creature.owned_layerables.length.valueOf();
-				var newStack:MovieClip = new MovieClip();
-				
-				var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
-				var limit:int = movieClipChildren;
-				for (var l:int = 0; l < limit; l++)
+				mc.stop();
+			}
+			
+//			if (_layerableOrder[animationType])
+//			{
+//				var totalChildren:int = (_layerableOrder[animationType] as Array).length;
+//				var totalOwnedLayerables:int = _creature.owned_layerables.length.valueOf();
+//				removeAllOldChildMovieClips();
+//				for (var i:int = 0; i < totalChildren; i++)
+//				{
+//					for (var j:int = 0; j < totalOwnedLayerables; j++)
+//					{
+//						var layerName:String = (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.layer_name;
+//						var className:String = getQualifiedClassName((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);
+//						var newMc:MovieClip = hasSavedMovieClip(className);
+//						
+//						if (!newMc)
+//						{
+//							newMc = EssentialModelReference.getMovieClipCopy((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);						
+//						}						
+//						newMc.scaleX = scale;
+//						newMc.scaleY = Math.abs(scale);
+//						if (frameNumber == 0)
+//						{
+//							newMc.gotoAndPlay(animationType);
+//						}
+//						else
+//						{
+//							newMc.gotoAndStop(frameNumber);
+//						}
+//						_movieClips.addItem(newMc);
+//					}
+//				}
+//						if (layerName == _layerableOrder[animationType][i] && (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).in_use)
+//						{
+//							newStack.addChild(mc);
+//						}
+//				var newChildren:int = newStack.numChildren.valueOf();
+//				
+//				for (var k:int = 0; k < newChildren; k++)
+//				{
+//					var newMc:MovieClip = newStack.getChildAt(0) as MovieClip;
+//				var newStack:MovieClip = new MovieClip();
+//				
+//				var movieClipChildren:int = _movieClipStack.numChildren.valueOf();
+//				var limit:int = movieClipChildren;
+//				for (var l:int = 0; l < limit; l++)
+//				{
+//					var mcChild:MovieClip = _movieClipStack.getChildAt(0) as MovieClip;
+//					var mcClass:String = getQualifiedClassName(mcChild);
+////					trace(mcClass);
+//					_movieClipStack.removeChildAt(0);
+//					mcChild = null;
+//					movieClipChildren = _movieClipStack.numChildren.valueOf();
+////					trace(movieClipChildren.toString());
+//				}
+//				
+//					_movieClipStack.addChildAt(newMc, k);
+//					if (frameNumber == 0)
+//					{
+//						newMc.cacheAsBitmap = true;
+//						newMc.gotoAndPlay(animationType);
+//					}
+//					else
+//					{
+//						newMc.cacheAsBitmap = true;
+//						newMc.gotoAndStop(frameNumber);
+//					}
+//				}	
+//			}
+		}
+		
+		public function scaleMovieClips(scaleX:Number=0, scaleY:Number=0):void
+		{
+			for each (var mc:MovieClip in _movieClips)
+			{
+				if (scaleX != 0)
 				{
-					var mcChild:MovieClip = _movieClipStack.getChildAt(0) as MovieClip;
-					var mcClass:String = getQualifiedClassName(mcChild);
-//					trace(mcClass);
-					_movieClipStack.removeChildAt(0);
-					mcChild = null;
-					movieClipChildren = _movieClipStack.numChildren.valueOf();
-//					trace(movieClipChildren.toString());
+					mc.scaleX = scaleX;				
 				}
-				
-				for (var i:int = 0; i < totalChildren; i++)
+				if (scaleY != 0)
 				{
-					for (var j:int = 0; j < totalOwnedLayerables; j++)
-					{
-						var layerName:String = (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.layer_name;
-						var mc:MovieClip = EssentialModelReference.getMovieClipCopy((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);
-						if (layerName == _layerableOrder[animationType][i] && (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).in_use)
-						{
-							newStack.addChild(mc);
-						}
-					}
+					mc.scaleY = scaleY;				
 				}
-				var newChildren:int = newStack.numChildren.valueOf();
-				
-				for (var k:int = 0; k < newChildren; k++)
-				{
-					var newMc:MovieClip = newStack.getChildAt(0) as MovieClip;
-					_movieClipStack.addChildAt(newMc, k);
-					if (frameNumber == 0)
-					{
-						newMc.cacheAsBitmap = true;
-						newMc.gotoAndPlay(animationType);
-					}
-					else
-					{
-						newMc.cacheAsBitmap = true;
-						newMc.gotoAndStop(frameNumber);
-					}
-				}				
 			}
 		}
 		
-		public function getMovieClipStackCopy(animation:String, frameNumber:int):MovieClip
+		public function getMovieClipStackCopy(animation:String, frameNumber:int):ArrayCollection
 		{
 			var totalChildren:int = (_layerableOrder[animation] as Array).length;
 			var totalOwnedLayerables:int = _creature.owned_layerables.length.valueOf();
-			var newStack:MovieClip = new MovieClip();			
-			var movieClipChildren:int = _movieClipStack.numChildren;
+			var newMovieClips:ArrayCollection = new ArrayCollection();
 			
-			for (var l:int = 0; l < movieClipChildren; l++)
+			for each (var mc:MovieClip in _movieClips)
 			{
-				var mcChild:MovieClip = _movieClipStack.getChildAt(0) as MovieClip;
-				var mcClass:String = getQualifiedClassName(mcChild);
-				movieClipChildren = _movieClipStack.numChildren;
+				var newMc:MovieClip = EssentialModelReference.getMovieClipCopy(mc);
+				newMovieClips.addItem(newMc);
 			}
 			
-			for (var i:int = 0; i < totalChildren; i++)
-			{
-				for (var j:int = 0; j < totalOwnedLayerables; j++)
-				{
-					var layerName:String = (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.layer_name;
-					var mc:MovieClip = EssentialModelReference.getMovieClipCopy((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);
-					if (layerName == _layerableOrder[animation][i] && (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).in_use)
-					{
-						newStack.addChild(mc);
-					}
-				}
-			}
-			var updatedStack:MovieClip = animateChildMovieClips(newStack, animation, frameNumber);
-			return updatedStack;					
+			return newMovieClips;
+//			
+//			for (var i:int = 0; i < totalChildren; i++)
+//			{
+//				for (var j:int = 0; j < totalOwnedLayerables; j++)
+//				{
+//					var layerName:String = (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.layer_name;
+//					var mc:MovieClip = EssentialModelReference.getMovieClipCopy((_creature.owned_layerables.getItemAt(j) as OwnedLayerable).layerable.mc);
+//					if (layerName == _layerableOrder[animation][i] && (_creature.owned_layerables.getItemAt(j) as OwnedLayerable).in_use)
+//					{
+//						newStack.addChild(mc);
+//					}
+//				}
+//			}
+//			var updatedStack:MovieClip = animateChildMovieClips(newStack, animation, frameNumber);
+//			return updatedStack;					
 		}
 		
 		public function animateChildMovieClips(stack:MovieClip, animation:String, frameNumber:int):MovieClip
@@ -278,7 +402,7 @@ package world
 				}
 				else
 				{
-					newMc.gotoAndPlay(animation);
+//					newMc.gotoAndPlay(animation);
 					newMc.gotoAndStop(frameNumber);
 				}
 			}
@@ -295,9 +419,9 @@ package world
 			return _layerableOrder;
 		}
 		
-		public function get movieClipStack():MovieClip
+		public function get movieClips():ArrayCollection
 		{
-			return _movieClipStack;
+			return _movieClips;
 		}
 		
 		public function set creature(val:Creature):void

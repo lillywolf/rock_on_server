@@ -688,13 +688,11 @@
 			public function getDisplayedCreature(creature:Creature, dimension:Number):ContainerUIC
 			{
 				var asset:AssetStack = creature.getConstructedCreature(creature.layerableOrder, "walk_toward", dimension, dimension);
-				asset.doAnimation("walk_toward", 39);
-				asset.movieClipStack.scaleX = dimension;
-				asset.movieClipStack.scaleY = dimension;				
+				asset.doAnimation(asset.orientation, "walk_toward", 39);
+				asset.scaleMovieClips(dimension, dimension);
 				var uic:ContainerUIC = new ContainerUIC();
 				uic.thinger = asset;
-				uic.addChild(asset.movieClipStack);
-				asset.movieClipStack.cacheAsBitmap = true;
+				uic.addChild(asset);
 				return uic;				
 			}
 			
@@ -706,13 +704,11 @@
 					if (constructedCreatures.length > 0)
 					{
 						var selectedCreature:AssetStack = constructedCreatures[0];
-						selectedCreature.doAnimation("walk_toward", 39);
-						selectedCreature.movieClipStack.scaleX = dimension;
-						selectedCreature.movieClipStack.scaleY = dimension;
+						selectedCreature.doAnimation(selectedCreature.orientation, "walk_toward", 39);
+						selectedCreature.scaleMovieClips(dimension, dimension);
 						var uic:ContainerUIC = new ContainerUIC();
 						uic.thinger = selectedCreature;
-						uic.addChild(selectedCreature.movieClipStack);
-						selectedCreature.movieClipStack.cacheAsBitmap = true;
+						uic.addChild(selectedCreature);
 						return uic;
 					}
 				}	

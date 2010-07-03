@@ -15,9 +15,11 @@ package rock_on
 	import game.Counter;
 	import game.CounterEvent;
 	import game.GameClock;
+	import game.ImposterCreature;
 	
 	import helpers.CreatureGenerator;
 	
+	import models.Creature;
 	import models.OwnedDwelling;
 	import models.OwnedStructure;
 	
@@ -252,8 +254,11 @@ package rock_on
 			}
 			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
-				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
+				var c:Creature = creatureGenerator.createImposterCreature("Concert Goer");
+				var cp:CustomerPerson = new CustomerPerson(boothBoss, c);
+//				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
 				cp.speed = 0.06;
+				cp.stageManager = stageManager;
 				customerPersonManager.add(cp, false, i);
 			}
 		}
@@ -266,7 +271,10 @@ package rock_on
 			}
 			for (var i:int = 0; i < numSuperCustomers; i++)
 			{
-				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
+				var imposter:ImposterCreature = creatureGenerator.createImposterCreature("Concert Goer");
+				var cp:CustomerPerson = new CustomerPerson(boothBoss, imposter, null, imposter.layerableOrder, 0.4);
+				cp.stageManager = stageManager;
+//				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
 				cp.speed = 0.06;
 				cp.isSuperFan = true;
 				customerPersonManager.add(cp, true, -1, stageBufferRect, stageRect, worldToUpdate);
@@ -281,7 +289,9 @@ package rock_on
 			}
 			for (var i:int = 0; i < numMovingCustomers; i++)
 			{
-				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
+				var c:ImposterCreature = creatureGenerator.createImposterCreature("Concert Goer");
+				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.4);
+				cp.stageManager = stageManager;
 				cp.speed = 0.06;
 				customerPersonManager.add(cp, true, -1, boothsRect);
 			}			

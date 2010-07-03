@@ -9,6 +9,8 @@ package rock_on
 	
 	import mx.collections.ArrayCollection;
 	
+	import org.osmf.events.TimeEvent;
+	
 	import world.ActiveAsset;
 	import world.Point3D;
 	import world.WorldEvent;
@@ -24,21 +26,24 @@ package rock_on
 		
 		private static const ROAM_TIME:int = Math.random()*5000 + 500;
 		private static const STOP_TIME:int = 10000;
+		private static const ENTER_TIME:int = 1000;
 		
 		public var destinationLocation:Point3D;
 		public var exemptStructures:ArrayCollection;
+		public var state:int;
+		public var stopTime:Timer;
+		public var enterTime:Timer;
 		
-		public function BandMember(movieClipStack:MovieClip, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public function BandMember(creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
-			super(movieClipStack, layerableOrder, creature, personScale, source);			
+			super(creature, movieClip, layerableOrder, scale);			
 			addEventListener(MouseEvent.CLICK, showBandMemberPopup);
-			startEnterState();				
 		}
 		
 		public function addExemptStructures():void
 		{
 			exemptStructures = new ArrayCollection();
-			exemptStructures.addItem(concertStage);
+			exemptStructures.addItem(_stageManager.concertStage);
 		}
 		
 		private function showBandMemberPopup(evt:MouseEvent):void
@@ -46,10 +51,9 @@ package rock_on
 			
 		}
 		
-		override public function startStopState():void
+		public function startStopState():void
 		{
 			state = STOP_STATE;
-
 			standFacingCrowd();
 						
 			stopTime = new Timer(STOP_TIME);
@@ -57,18 +61,23 @@ package rock_on
 			stopTime.start();
 		}	
 		
-		override public function endStopState():void
+		public function endStopState():void
 		{
 			stopTime.stop();
 			stopTime.removeEventListener(TimerEvent.TIMER, roam);
 		}
+		
+		public function roam(evt:TimerEvent):void
+		{
+			advanceState(ROAM_STATE);
+		}		
 		
 		public function stop(evt:TimerEvent):void
 		{
 			advanceState(STOP_STATE);
 		}
 		
-		override public function startRoamState():void
+		public function startRoamState():void
 		{
 			state = ROAM_STATE;
 			adjustForPathfinding();
@@ -149,59 +158,73 @@ package rock_on
 		public function standFacingCrowd():void
 		{
 			var frameNumber:int = 1;			
-			var distanceFromLeft:Number = worldCoords.z - concertStage.worldCoords.z;
-			var distanceFromBottom:Number = concertStage.worldCoords.x - worldCoords.x;
+			var distanceFromLeft:Number = worldCoords.z - _stageManager.concertStage.worldCoords.z;
+			var distanceFromBottom:Number = _stageManager.concertStage.worldCoords.x - worldCoords.x;
 			
 			if (distanceFromLeft < distanceFromBottom)
 			{
 				frameNumber = 39;
-				_movieClipStack.scaleX = orientation;
+				changeScaleX(_scale);
 			}
 			else
 			{
 				frameNumber = 39;
-				_movieClipStack.scaleX = -(orientation);
+				changeScaleX(_scale);
 			}
 			
-			stand(frameNumber, "stand_still_toward");			
+			var standAnimation:String = getStandAnimation(frameNumber);
+			stand(standAnimation, frameNumber);			
 		}
 		
-		public function standStill():void
-		{
-			var frameNumber:int = 1;
-			if (directionality.x > 0)
-			{
-				frameNumber = 39;
-				_movieClipStack.scaleX = -(orientation);
-			}
-			else if (directionality.x < 0)
-			{
-				frameNumber = 37;
-				_movieClipStack.scaleX = -(orientation);
-			}
-			else if (directionality.z > 0)
-			{
-				frameNumber = 37;
-				_movieClipStack.scaleX = orientation;
-			}
-			else if (directionality.z < 0)
-			{
-				frameNumber = 39;
-				_movieClipStack.scaleX = orientation;
-			}
-			
-			var animationType:String;
-			if (frameNumber == 37)
-			{
-				animationType = "stand_still_away";
-			}
-			else if (frameNumber == 39)
-			{
-				animationType = "stand_still_toward";
-			}			
-			
-			stand(frameNumber, animationType);
-		}
+//		public function standStill():void
+//		{
+//			var frameNumber:int = 1;
+//			if (directionality.x > 0)
+//			{
+//				frameNumber = 39;
+//			}
+//			else if (directionality.x < 0)
+//			{
+//				frameNumber = 37;
+//			}
+//			else if (directionality.z > 0)
+//			{
+//				frameNumber = 37;
+//			}
+//			else if (directionality.z < 0)
+//			{
+//				frameNumber = 39;
+//			}
+//			
+//			var animationType:String;
+//			if (frameNumber == 37)
+//			{
+//				animationType = "stand_still_away";
+//			}
+//			else if (frameNumber == 39)
+//			{
+//				animationType = "stand_still_toward";
+//			}			
+//			
+//			stand(frameNumber);
+//			
+//			if (directionality.x > 0)
+//			{
+//				this.scaleMovieClips(-(orientation));
+//			}
+//			else if (directionality.x < 0)
+//			{
+//				this.scaleMovieClips(-(orientation));
+//			}
+//			else if (directionality.z > 0)
+//			{
+//				this.scaleMovieClips(orientation);
+//			}
+//			else if (directionality.z < 0)
+//			{
+//				this.scaleMovieClips(orientation);
+//			}			
+//		}		
 		
 		public function startWaitState():void
 		{
@@ -270,11 +293,13 @@ package rock_on
 		
 		public function tryDestination():Point3D
 		{
-			destinationLocation = new Point3D(concertStage.worldCoords.x + Math.floor((concertStage.structure.width - 1) - (Math.random()*(concertStage.structure.width - 1))), 0, concertStage.worldCoords.z + Math.floor((concertStage.structure.depth - 1) - Math.random()*(concertStage.structure.depth - 1)));	
+			destinationLocation = new Point3D(_stageManager.concertStage.worldCoords.x + Math.floor((_stageManager.concertStage.structure.width - 1) - (Math.random()*(_stageManager.concertStage.structure.width - 1))), 
+				0, 
+				_stageManager.concertStage.worldCoords.z + Math.floor((_stageManager.concertStage.structure.depth - 1) - Math.random()*(_stageManager.concertStage.structure.depth - 1)));	
 			return destinationLocation;	
 		}
 		
-		override public function update(deltaTime:Number):Boolean
+		public function update(deltaTime:Number):Boolean
 		{
 			switch (state)
 			{
@@ -301,7 +326,7 @@ package rock_on
 			return false;
 		}		
 		
-		override public function advanceState(destinationState:int):void
+		public function advanceState(destinationState:int):void
 		{
 			switch (state)
 			{	
@@ -346,7 +371,67 @@ package rock_on
 					break;	
 				default: throw new Error('no state to advance to!');	
 			}
-		}														
+		}	
+		
+		public function startEnterState():void
+		{
+			state = ENTER_STATE;
+			enterTime = new Timer(ENTER_TIME);
+			enterTime.addEventListener(TimerEvent.TIMER, roam);
+			enterTime.start();
+		}
+		
+		public function startLeavingState():void
+		{
+			state = LEAVING_STATE;
+//			pickLeaveDirection();
+		}
+		
+		public function startGoneState():void
+		{
+			state = GONE_STATE;
+		}
+		
+		public function endEnterState():void
+		{
+//			enterTime.stop();
+//			enterTime.removeEventListener(TimerEvent.TIMER, roam);
+		}
+		
+		public function endRoamState():void
+		{
+			
+		}
+		
+		public function endLeavingState():void
+		{
+			
+		}
+		
+		public function doEnterState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function doRoamState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function doStopState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function doLeavingState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function doGoneState(deltaTime:Number):void
+		{
+			
+		}		
 		
 	}
 }

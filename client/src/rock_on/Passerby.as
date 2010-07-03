@@ -27,17 +27,19 @@ package rock_on
 		public var testTimer:Timer;
 		public var testTime:int = 500;
 		public var slatedForRemoval:Boolean;
+		public var state:int;
 				
-		public function Passerby(movieClipStack:MovieClip, listeningStationBoss:ListeningStationBoss, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public function Passerby(listeningStationBoss:ListeningStationBoss, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
-			super(movieClipStack, layerableOrder, creature, personScale, source);
+			super(creature, movieClip, layerableOrder, scale);
+			
 			_listeningStationBoss = listeningStationBoss;
 			_passerbyManager = passerbyManager;
 			_venue = venue;
 			_myWorld = myWorld;
 		}
 		
-		override public function update(deltaTime:Number):Boolean
+		public function update(deltaTime:Number):Boolean
 		{
 			switch (state)
 			{
@@ -60,7 +62,7 @@ package rock_on
 			return false;
 		}
 		
-		override public function advanceState(destinationState:int):void
+		public function advanceState(destinationState:int):void
 		{
 			switch (state)
 			{	
@@ -105,11 +107,36 @@ package rock_on
 			state = ROUTE_STATE;
 			
 			var destination:Point3D = setInitialDestination();
-			moveCustomer(destination);		
+			movePerson(destination);		
 			
 //			testTimer = new Timer(testTime);
 //			testTimer.start();
 //			testTimer.addEventListener(TimerEvent.TIMER, onTestComplete);
+		}
+		
+		public function startGoneState():void
+		{
+			
+		}
+		
+		public function doGoneState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function startRoamState():void
+		{
+			
+		}
+		
+		public function doRoamState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function endRoamState():void
+		{
+			
 		}
 		
 		public function onTestComplete(evt:TimerEvent):void
@@ -129,12 +156,7 @@ package rock_on
 		
 		public function doRouteState(deltaTime:Number):void
 		{
-			var totalChildren:int = this.movieClipStack.numChildren;
-			for (var i:int = 0; i < totalChildren; i++)
-			{
-				var mcChild:MovieClip = _movieClipStack.getChildAt(0) as MovieClip;				
-				trace(mcChild.currentFrame.toString());
-			}
+
 		}
 		
 		public function startEnthralledState():void

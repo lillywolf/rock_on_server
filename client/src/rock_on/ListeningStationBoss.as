@@ -127,7 +127,7 @@ package rock_on
 		
 		private function convertStationListenerToCustomer(sl:StationListener, fanIndex:int):void
 		{
-			var cp:CustomerPerson = new CustomerPerson(sl.movieClipStack, _stageManager.concertStage, _boothBoss, sl.layerableOrder, sl.creature, VenueManager.PERSON_SCALE);
+			var cp:CustomerPerson = new CustomerPerson(_boothBoss, sl.creature, null, sl.layerableOrder, VenueManager.PERSON_SCALE);
 			_customerPersonManager.addConvertedFan(cp, sl.worldCoords, fanIndex);
 		}
 		
@@ -150,6 +150,8 @@ package rock_on
 			{
 				var listeningStation:ListeningStation = createListeningStation(os);
 				var asset:ActiveAsset = createListeningStationAsset(listeningStation);
+//				asset.movieClip.scaleX = 0.4;
+//				asset.movieClip.scaleY = 0.4;
 				listeningStation.activeAsset = asset;
 //				listeningStation.setInMotion();
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);

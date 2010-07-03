@@ -1,106 +1,39 @@
 package rock_on
 {
 	import flash.display.MovieClip;
-	import flash.events.TimerEvent;
-	import flash.filters.GlowFilter;
-	import flash.ui.Mouse;
-	import flash.ui.MouseCursor;
 	import flash.utils.Dictionary;
-	import flash.utils.Timer;
-	
-	import game.GameClock;
 	
 	import models.Creature;
 	import models.EssentialModelReference;
+	import models.OwnedLayerable;
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
-	import mx.containers.Canvas;
-	import mx.containers.HBox;
-	import mx.managers.CursorManager;
 	
-	import views.ContainerUIC;
-	import views.ExpandingMovieclip;
-	
-	import world.AssetStack;
+	import world.ActiveAssetStack;
 	import world.Point3D;
 	import world.World;
-
-	public class Person extends AssetStack
+	
+	public class Person extends ActiveAssetStack
 	{
-		public static const ENTER_STATE:int = 0;
-		public static const ROAM_STATE:int = 1;
-		public static const STOP_STATE:int = 3;
-		public static const LEAVING_STATE:int = 2;
-		public static const GONE_STATE:int = 5;
-		
-		private static const ENTER_TIME:int = 1000;
-		private static const ROAM_TIME:int = Math.random()*20000 + 3000;
-		private static const STOP_TIME:int = 5000;
-		private static const HUNGER_DELAY:int = 360000;
-//		private static const HUNGER_DELAY:int = 720000 + 360000 * Math.random();
-		
-		public static const IS_HUNGRY:String = "hungry";	
-		public static const IS_THIRSTY:String = "thirsty";
-		public static const MOOD_WIDTH:int = 28;
-		public var moods:ArrayCollection;	
+		public var moods:ArrayCollection;
 		public var moodCursorID:int;
-		
-		public var stopTime:Timer;	
-		public var enterTime:Timer;
-		public var roamTime:Timer;
+		public var currentDirection:Point3D;
 		
 		public var _myWorld:World;
-		private var _concertStage:ConcertStage;
-		public var state:int;
-		public var currentDirection:Point3D;	
-		public var orientation:Number;			
+		public var _myStage:World;
+		public var _stageManager:StageManager;
 		
-		public function Person(movieClipStack:MovieClip, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public function Person(creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
-			super(movieClipStack, source);
-		
-			orientation = personScale;
-			movieClipStack.scaleX = orientation;
-			movieClipStack.scaleY = orientation;		
-			
-			setOptionalProperties(layerableOrder, creature);
-			setMoods();			
+			super(creature, movieClip, layerableOrder, scale);
 		}
 		
-		public function setOptionalProperties(layerableOrder:Array=null, creature:Creature=null):void
+		public function initializeMoods():void
 		{
-			if (layerableOrder)
+			if (creature.has_moods)
 			{
-				_layerableOrder = layerableOrder;
-			}
-			
-			if (creature)
-			{
-				_creature = creature;
-			}						
-		}
-		
-		public function setMoods():void
-		{
-			if (this.creature.has_moods)
-			{
-				moods = new ArrayCollection();
-				var index:int = 0;
-				var timeSinceLastMeal:Number = new Date().getTime() - GameClock.convertStringTimeToUnixTime(this.creature.last_fed);
-				if (Math.random() < 0.5)
-				{
-					moods.addItem(Person.IS_THIRSTY);
-				}
-				if (timeSinceLastMeal > Person.HUNGER_DELAY)
-				{
-					moods.addItem(Person.IS_HUNGRY);
-				}
-//				for each (var mood:int in moods)
-//				{
-					startMood(moods[0], index, moods.length);
-					index++;
-//				}
+				
 			}
 		}
 		
@@ -109,109 +42,126 @@ package rock_on
 			var cursorClass:Class = EssentialModelReference.getCursorClassForMood(mood);
 			var mc:MovieClip = new cursorClass() as MovieClip;
 			mc.cacheAsBitmap = true;
-			return mc;
-		}
-
-		public function startHungryMood(index:int, numMoods:int):void
-		{
-			var hungryIcon:Hamburger = new Hamburger();
-			var emc:ExpandingMovieclip = new ExpandingMovieclip(0.6, hungryIcon);
-			emc.y = -(this.movieClipStack.height + 5);
-//			emc.x = -(numMoods * MOOD_WIDTH/2) + MOOD_WIDTH * index + MOOD_WIDTH/2;
-			this.addChild(emc);
+			return mc;			
 		}
 		
-		public function startThirstyMood(index:int, numMoods:int):void
+		public function standFacingObject(os:OwnedStructure, frameNumber:int=0, strictFacing:Boolean=true):Object
 		{
-			var thirstyIcon:CoffeeLeftover = new CoffeeLeftover();
-			var emc:ExpandingMovieclip = new ExpandingMovieclip(0.6, thirstyIcon);
-			emc.y = -(this.movieClipStack.height + 5);
-//			emc.x = -(numMoods * MOOD_WIDTH/2) + MOOD_WIDTH * index + MOOD_WIDTH/2;
-			this.addChild(emc);
+			var cornerMatrix:Dictionary = os.getCornerMatrix();
+			var relationship:Array = getHorizontalAndVerticalRelationship(cornerMatrix);						
+			_frameNumber = evaluateHorizontalAndVerticalRelationship(relationship, frameNumber, os, strictFacing);						
+			var reflection:Boolean = getReflection(relationship);	
+			var standAnimation:String = getStandAnimation(_frameNumber);
+			stand(standAnimation, _frameNumber);	
+			return {frameNumber: _frameNumber, animation: standAnimation, reflection: reflection};			
 		}
 		
-		public function doHungryMood():void
+		public function getStandAnimation(frameNumber:int):String
 		{
-			
-		}		
-		
-		public function startMood(mood:String, index:int, numMoods:int):void
-		{
-			switch (mood)
-			{
-				case IS_HUNGRY:
-					startHungryMood(index, numMoods);
-					break;
-				case IS_THIRSTY:
-					startThirstyMood(index, numMoods);
-					break;
-			}
-		}		
-		
-		public function standFacingObject(structure:OwnedStructure, frameNumber:int=0, strictFacing:Boolean=true):Object
-		{
-			var horizontalRelationship:String;
-			var verticalRelationship:String;
-			
-			var cornerMatrix:Dictionary = structure.getCornerMatrix();
-			if (worldCoords.x < (cornerMatrix["topLeft"] as Point3D).x)
-			{
-				verticalRelationship = "bottom";
-			}
-			else if (worldCoords.x > (cornerMatrix["bottomLeft"] as Point3D).x)
-			{
-				verticalRelationship = "top";
-			}
-			else
-			{
-				verticalRelationship = "center";
-			}
-			if (worldCoords.z < (cornerMatrix["topLeft"] as Point3D).z)
-			{
-				horizontalRelationship = "left";
-			}		
-			else if (worldCoords.z > (cornerMatrix["topRight"] as Point3D).z)
-			{
-				horizontalRelationship = "right";
-			}	
-			else
-			{
-				horizontalRelationship = "center";
-			}
-			
-			frameNumber = evaluateHorizontalAndVerticalRelationship(horizontalRelationship, verticalRelationship, frameNumber, structure, strictFacing);
-	
-			var animationType:String;
 			if (frameNumber == 37)
 			{
-				animationType = "stand_still_away";
+				return "stand_still_away";
 			}
 			else if (frameNumber == 39)
 			{
-				animationType = "stand_still_toward";
+				return "stand_still_toward";
 			}
-			
+			else
+			{
+				return null;
+			}
+		}
+		
+		public function getReflection(relationship:Array):Boolean
+		{
 			var reflection:Boolean = false;
-
-			if (horizontalRelationship == "center" && verticalRelationship == "top")
+			
+			if (relationship["horizontalRelationship"] == "center" && relationship["verticalRelationship"] == "top")
 			{
 				reflection = true;
 			}
-			else if (horizontalRelationship != "center" && verticalRelationship == "top")
+			else if (relationship["horizontalRelationship"] != "center" && relationship["verticalRelationship"] == "top")
 			{
 				if (Math.random() < 0.5)
 				{
 					reflection = true;
 				}
 			}
-			
-			stand(frameNumber, animationType);
-			return {frameNumber: frameNumber, animation: animationType, reflection: reflection};
+			return reflection;
 		}
 		
-		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
+		public function getHorizontalAndVerticalRelationship(cornerMatrix:Dictionary):Array
 		{
-			if (this.worldCoords.x%1 == 0 && this.worldCoords.y%1 == 0 && this.worldCoords.z%1 == 0)
+			var relationship:Array = [];
+			
+			if (worldCoords.x < (cornerMatrix["topLeft"] as Point3D).x)
+			{
+				relationship["verticalRelationship"] = "bottom";
+			}
+			else if (worldCoords.x > (cornerMatrix["bottomLeft"] as Point3D).x)
+			{
+				relationship["verticalRelationship"] = "top";
+			}
+			else
+			{
+				relationship["verticalRelationship"] = "center";
+			}
+			
+			if (worldCoords.z < (cornerMatrix["topLeft"] as Point3D).z)
+			{
+				relationship["horizontalRelationship"] = "left";
+			}		
+			else if (worldCoords.z > (cornerMatrix["topRight"] as Point3D).z)
+			{
+				relationship["horizontalRelationship"] = "right";
+			}	
+			else
+			{
+				relationship["horizontalRelationship"] = "center";
+			}			
+			return relationship;
+		}
+		
+		public function evaluateHorizontalAndVerticalRelationship(relationship:Array, frameNumber:int=0, structure:*=null, strictFacing:Boolean=false):int
+		{
+			var rand:Number = Math.random();
+			
+			if (relationship["verticalRelationship"] == "bottom")
+			{
+				frameNumber = 39;
+				changeScaleX(-(_scale));
+			}
+			else if (relationship["horizontalRelationship"] == "left")
+			{
+				frameNumber = 37;
+				changeScaleX(_scale);
+			}
+			else if (relationship["verticalRelationship"] == "top")
+			{
+				frameNumber = 37;
+				changeScaleX(-(_scale));
+			}
+			else if (relationship["horizontalRelationship"] == "right")
+			{
+				frameNumber = 39;
+				changeScaleX(_scale);
+			}
+			else
+			{
+				throw new Error("You're in the middle of a structure");
+			}
+			return frameNumber;
+		}	
+		
+		public function stand(animation:String, frameNumber:int):void
+		{
+			doAnimation(animation, false, frameNumber);
+			switchToBitmap();
+		}
+		
+		public function movePerson(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
+		{
+			if (worldCoords.x%1 == 0 && worldCoords.y%1 == 0 && worldCoords.z%1 == 0)
 			{			
 				_myWorld.moveAssetTo(this, destination, true, avoidStructures, avoidPeople);			
 			}
@@ -227,58 +177,6 @@ package rock_on
 			}			
 		}
 		
-//		public function moveCustomer(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
-//		{	
-//			if (this.worldCoords.x%1 == 0 && this.worldCoords.y%1 == 0 && this.worldCoords.z%1 == 0)
-//			{			
-////				if (!(_myWorld.assetRenderer.unsortedAssets.contains(this)))
-////				{
-////					_myWorld.addAsset(this, worldCoords);				
-////					_myWorld.bitmapBlotter.removeBitmapFromBlotter(this);
-////				}
-//			}
-//		}	
-		
-		public function getNextPointAlongPath():Point3D
-		{
-			if (currentPath.length > pathStep)
-			{			
-				var nextPoint:Point3D = currentPath.getItemAt(pathStep) as Point3D;
-			}
-			return nextPoint;
-		}				
-		
-		public function evaluateHorizontalAndVerticalRelationship(horizontalRelationship:String, verticalRelationship:String, frameNumber:int=0, structure:*=null, strictFacing:Boolean=false):int
-		{
-			var rand:Number = Math.random();
-			
-			if (verticalRelationship == "bottom")
-			{
-				frameNumber = 39;
-				this.movieClipStack.scaleX = -(orientation);
-			}
-			else if (horizontalRelationship == "left")
-			{
-				frameNumber = 37;
-				this.movieClipStack.scaleX = orientation;
-			}
-			else if (verticalRelationship == "top")
-			{
-				frameNumber = 37;
-				this.movieClipStack.scaleX = -(orientation);
-			}
-			else if (horizontalRelationship == "right")
-			{
-				frameNumber = 39;
-				this.movieClipStack.scaleX = orientation;
-			}
-			else
-			{
-				throw new Error("You're in the middle of a structure");
-			}
-			return frameNumber;
-		}				
-		
 		public function setDirection(destination:Point3D):void
 		{
 			if (destination)
@@ -290,270 +188,58 @@ package rock_on
 				{
 					if (xDiff > 0)
 					{
-						doAnimation('walk_toward');
+						doAnimation("walk_toward", true);
 					}
 					else
 					{
-						doAnimation('walk_away');
+						doAnimation("walk_away", true);
 					}
-					movieClipStack.scaleX = -(orientation);				
+					changeScaleX(-(_scale));			
 				}
-				
+					
 				else if (Math.abs(xDiff) < Math.abs(yDiff))
 				{
 					if (yDiff > 0)
 					{
-						doAnimation('walk_away');
+						doAnimation("walk_away", true);
 					}
 					else
 					{		
-						doAnimation('walk_toward');	
+						doAnimation("walk_toward", true);	
 					}
-					movieClipStack.scaleX = orientation;
+					changeScaleX(_scale);
 				}
 				else
 				{				
-	//				throw new Error("this is pretty damn weird");
 				}
 				currentDirection = destination;
 			}
-		}	
-		
-		public function movePerson(destination:Point3D, fourDirectional:Boolean=false):void
-		{
-			_myWorld.moveAssetTo(this, destination, fourDirectional);
-//			setDirection(destination);
-			setDirection(worldDestination);
 		}
 		
-		public function pickLeaveDirection():void
-		{
-			var leaveDirection:Point3D;
-			if (Math.random() < 0.5)
-			{
-				leaveDirection = new Point3D(_myWorld.tilesWide - 1, worldCoords.x, 0);
-			}
-			else
-			{
-				leaveDirection = new Point3D(worldCoords.z, _myWorld.tilesDeep - 1, 0);
-			}
-			_myWorld.(this, leaveDirection);
-		}
-		
-		public function setNextAction():void
-		{
-			if (state == ENTER_STATE)
-			{
-				advanceState(ROAM_STATE);
-			}
-			else if (state == ROAM_STATE)
-			{
-				advanceState(STOP_STATE);
-			}
-			else if (state == LEAVING_STATE)
-			{
-				advanceState(GONE_STATE);
-			}
-		}
-		
-		public function startEnterState():void
-		{
-			state = ENTER_STATE;
-			enterTime = new Timer(ENTER_TIME);
-			enterTime.addEventListener(TimerEvent.TIMER, roam);
-			enterTime.start();
-		}	
-		
-		public function startRoamState():void
-		{
-			state = ROAM_STATE;
-			setDirection(worldDestination);
-		}	
-		
-		public function startStopState():void
-		{
-			state = STOP_STATE;
-			doAnimation("stand_still_away");
-//			for each (movieClip in movieClipStack)
-//			{
-//				movieClip.gotoAndPlay('stand_still_away');						
-//			}
-			stopTime = new Timer(STOP_TIME);
-			stopTime.addEventListener(TimerEvent.TIMER, leave);
-			stopTime.start();
-		}
-		
-		public function startLeavingState():void
-		{
-			state = LEAVING_STATE;
-			pickLeaveDirection();
-		}
-		
-		public function startGoneState():void
-		{
-			state = GONE_STATE;
-		}
-		
-		public function endEnterState():void
-		{
-			enterTime.stop();
-			enterTime.removeEventListener(TimerEvent.TIMER, roam);
-		}
-		
-		public function endRoamState():void
+		public function swapMovieClipsByOwnedLayerable(ol:OwnedLayerable, animation:String):void
 		{
 			
 		}
-		
-		public function endStopState():void
-		{
-			stopTime.stop();
-			stopTime.removeEventListener(TimerEvent.TIMER, leave);
-		}
-		
-		public function endLeavingState():void
-		{
-			
-		}
-		
-		public function doEnterState(deltaTime:Number):void
-		{
-		
-		}
-		
-		public function doRoamState(deltaTime:Number):void
-		{
-			
-		}
-		
-		public function doStopState(deltaTime:Number):void
-		{
-			
-		}
-		
-		public function doLeavingState(deltaTime:Number):void
-		{
-			
-		}
-		
-		public function doGoneState(deltaTime:Number):void
-		{
-			
-		}
-		
-		public function leave(evt:TimerEvent):void
-		{
-			advanceState(LEAVING_STATE);
-		}
-		
-		public function roam(evt:TimerEvent):void
-		{
-			advanceState(ROAM_STATE);
-		}
-		
-		public function updateMoods():void
-		{
-			for each (var i:int in moods)
-			{
-
-			}
-		}		
-		
-		public function update(deltaTime:Number):Boolean
-		{
-			if (creature.has_moods)
-			{
-				updateMoods();			
-			}			
-			switch (state)
-			{
-				case ENTER_STATE:
-					doEnterState(deltaTime);
-					break;
-				case ROAM_STATE:
-					doRoamState(deltaTime);
-					break;
-				case STOP_STATE:
-					doStopState(deltaTime);
-					break;					
-				case LEAVING_STATE:
-					doLeavingState(deltaTime);
-					break;
-				case GONE_STATE:
-					doGoneState(deltaTime);	
-					return true;
-				default: throw new Error('oh noes!');
-			}			
-			return false;
-		}
-		
-		public function advanceState(destinationState:int):void
-		{
-			switch (state)
-			{	
-				case ENTER_STATE:
-					endEnterState();
-					break;
-				case ROAM_STATE:
-					endRoamState();				
-					break;	
-				case STOP_STATE:
-					endStopState();
-					break;	
-				case LEAVING_STATE:
-					endLeavingState();
-					break;	
-				case GONE_STATE:
-					break;					
-				default: throw new Error('no state to advance from!');
-			}
-			switch (destinationState)
-			{
-				case ROAM_STATE:
-					startRoamState();
-					break;
-				case STOP_STATE:
-					startStopState();
-					break;
-				case LEAVING_STATE:
-					startLeavingState();
-					break;
-				case GONE_STATE:
-					startGoneState();
-					break;	
-				default: throw new Error('no state to advance to!');	
-			}
-		}	
 		
 		public function set myWorld(val:World):void
 		{
-			if(!_myWorld)
-			{
-				_myWorld = val;
-			}
-			else
-			{	
-//				throw new Error("Where's the world?");
-			}	
+			_myWorld = val;
 		}
 		
 		public function get myWorld():World
 		{
 			return _myWorld;
-		}	
-		
-		public function set concertStage(val:ConcertStage):void
-		{
-			if(!_concertStage)
-				_concertStage = val;
-			else
-				throw new Error("Where's the world?");
 		}
 		
-		public function get concertStage():ConcertStage
+		public function set stageManager(val:StageManager):void
 		{
-			return _concertStage;
-		}								
-				
+			_stageManager = val;
+		}
+		
+		public function get stageManager():StageManager
+		{
+			return _stageManager;
+		}
+		
 	}
 }

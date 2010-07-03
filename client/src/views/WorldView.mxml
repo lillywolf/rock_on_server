@@ -249,7 +249,7 @@
 				}
 				if (venueManager)
 				{
-					venueManager.update(lockedDelta);				
+//					venueManager.update(lockedDelta);				
 				}
 			}
 			
@@ -356,5 +356,5 @@
 			}
 			
 		]]>
-	</mx:Script>	
+	</mx:Script>			
 </mx:Canvas>

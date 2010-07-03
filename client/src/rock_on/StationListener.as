@@ -31,9 +31,9 @@ package rock_on
 		public var enthralledTimer:Timer;
 		public var isStatic:Boolean;
 				
-		public function StationListener(movieClipStack:MovieClip, listeningStationBoss:ListeningStationBoss, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, layerableOrder:Array=null, creature:Creature=null, personScale:Number=1, source:Array=null)
+		public function StationListener(listeningStationBoss:ListeningStationBoss, passerbyManager:PasserbyManager, myWorld:World, venue:Venue, creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
-			super(movieClipStack, listeningStationBoss, passerbyManager, myWorld, venue, layerableOrder, creature, personScale, source);
+			super(listeningStationBoss, passerbyManager, myWorld, venue, creature, movieClip, layerableOrder, scale);
 		}	
 		
 		override public function startRouteState():void
@@ -50,7 +50,7 @@ package rock_on
 				currentStation = station;
 				currentStation.currentQueue++;
 				var destination:Point3D = setInitialDestination();
-				moveCustomer(destination);
+				movePerson(destination);
 			}			
 		}
 		
@@ -123,7 +123,17 @@ package rock_on
 					break;	
 				default: throw new Error('no state to advance to!');	
 			}
-		}				
+		}	
+		
+		public function doLeavingState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function endLeavingState():void
+		{
+			
+		}
 		
 		override public function startEnthralledState():void
 		{
@@ -183,18 +193,18 @@ package rock_on
 			}
 		}
 		
-		override public function leave(evt:TimerEvent):void
+		public function leave(evt:TimerEvent):void
 		{
 			advanceState(LEAVING_STATE);
 			enthralledTimer.stop();
 			enthralledTimer.removeEventListener(TimerEvent.TIMER, leave);
 		}
 		
-		override public function startLeavingState():void
+		public function startLeavingState():void
 		{
 			state = LEAVING_STATE;
 			var destination:Point3D = setLeaveDestination();
-			moveCustomer(destination);			
+			movePerson(destination);			
 		}
 		
 		public function setLeaveDestination():Point3D

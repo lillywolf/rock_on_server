@@ -145,10 +145,14 @@ package world
 		
 		public function getNewMovieClip(asset:ActiveAsset, animation:String=null, frameNumber:int = 0):MovieClip
 		{
-			var newMc:MovieClip;
-			if (asset is AssetStack)
+			var newMc:MovieClip = new MovieClip();
+			if (asset is ActiveAssetStack)
 			{
-				newMc = (asset as AssetStack).getMovieClipStackCopy(animation, frameNumber);			
+				var newMcs:ArrayCollection = (asset as ActiveAssetStack).getMovieClipStackCopy(animation, frameNumber);	
+				for each (var mc:MovieClip in newMcs)
+				{
+					newMc.addChild(mc);
+				}
 			}
 			else
 			{

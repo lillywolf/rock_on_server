@@ -81,6 +81,7 @@ package models
 			var className:String = flash.utils.getQualifiedClassName(mc);
 			var klass:Class = EssentialModelReference.getClassCopy(className);	
 			var newMc:MovieClip = new klass() as MovieClip;
+			newMc.cacheAsBitmap = true;
 			return newMc;
 		}
 		

@@ -139,12 +139,12 @@ package views
 
 			var layerableOrder:Array = creatureController.getLayerableOrderByCreatureType(_creature.type);
 			constructedCreature = _creature.getConstructedCreature(layerableOrder, animation, 1, 1);
-			constructedCreature.doAnimation(animation, currentFrame);
+			constructedCreature.doAnimation(constructedCreature.orientation, animation, currentFrame);
 			constructedCreature.x = creaturePreview.width / 2;
 			var uic:ContainerUIC = new ContainerUIC();
 			uic.y = constructedCreature.height;
 			uic.thinger = constructedCreature;
-			uic.addChild(constructedCreature.movieClipStack);
+			uic.addChild(constructedCreature);
 			creaturePreview.addChild(uic);
 			addChild(creaturePreview);
 		}
@@ -320,13 +320,12 @@ package views
 			if (olMatch)
 			{
 				var mcMatch:MovieClip = getMovieClipByLayerable(olMatch, "walk_toward");	
-				constructedCreature.movieClipStack.addChild(mc);			
-				constructedCreature.movieClipStack.swapChildren(mcMatch, mc);		
-				constructedCreature.movieClipStack.removeChild(mcMatch);				
+//				var index:int = constructedCreature.movieClips.getItemIndex(mcMatch);
+				constructedCreature.movieClips.setItemAt(mc, index);							
 			}
 			else
 			{
-				constructedCreature.movieClipStack.addChildAt(mc, index);
+				constructedCreature.movieClips.setItemAt(mc, index);
 			}
 		}
 		
@@ -385,15 +384,14 @@ package views
 		
 		public function getMovieClipByLayerable(ol:OwnedLayerable, animation:String):MovieClip
 		{
-			var movieClipChildren:int = constructedCreature.movieClipStack.numChildren.valueOf();
 			var className:String = flash.utils.getQualifiedClassName(ol.layerable.mc);
 			
-			for (var j:int = 0; j < movieClipChildren; j++)
+			for each (var mc:MovieClip in constructedCreature.movieClips)
 			{			
-				var tempName:String = flash.utils.getQualifiedClassName(constructedCreature.movieClipStack.getChildAt(j));
+				var tempName:String = flash.utils.getQualifiedClassName(mc);
 				if (tempName == className)
 				{
-					return constructedCreature.movieClipStack.getChildAt(j) as MovieClip;
+					return mc;
 				}
 			}
 			return null;

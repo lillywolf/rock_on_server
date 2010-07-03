@@ -462,7 +462,7 @@ package world
 		private function addToOccupiedSpaces(asset:ActiveAsset):ArrayCollection
 		{
 			var structureSpaces:ArrayCollection = new ArrayCollection();
-			if (asset.movieClip.height == 0)
+			if (!asset.movieClip)
 			{
 				structureSpaces = getEstimatedPoint3DForStructure(asset, structureSpaces);
 			}

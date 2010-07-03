@@ -1,19 +1,20 @@
 package world
 {
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
-	import flash.events.Event;
 	import flash.events.MouseEvent;
-	import flash.events.TimerEvent;
+	import flash.geom.ColorTransform;
+	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import flash.utils.Timer;
 	import flash.utils.getQualifiedClassName;
 	
+	import models.EssentialModelReference;
+	
 	import mx.collections.ArrayCollection;
-	import mx.containers.Canvas;
-	import mx.controls.Image;
-
+	
 	public class ActiveAsset extends Sprite
 	{
 		public var _movieClip:MovieClip;
@@ -42,25 +43,92 @@ package world
 		public var currentAnimation:String;
 		public var currentFrameNumber:int;
 		
+		public var bitmapData:BitmapData;
+		public var bitmap:Bitmap;
+		public var reflected:Boolean;
+		public var _scale:Number;
+		
 		public static const MOVE_DELAY_TIME:int = 200;
 		
-		public function ActiveAsset(movieClip:MovieClip)
+		public function ActiveAsset(movieClip:MovieClip=null)
 		{
 			super();
-			_movieClip = movieClip;
 			_directionality = new Point3D(0, 0, 0);
-//			addEventListener(Event.ADDED, onAdded);
-			if (_movieClip)
+			
+			if (movieClip)
 			{
+				_movieClip = movieClip;
+//				switchToBitmap();				
 				addChild(_movieClip);			
 				_movieClip.addEventListener(MouseEvent.CLICK, onMouseClicked);
 			}
 		}
 		
+		public function getNextPointAlongPath():Point3D
+		{
+			if (currentPath.length > pathStep)
+			{			
+				var nextPoint:Point3D = currentPath.getItemAt(pathStep) as Point3D;
+			}
+			return nextPoint;
+		}			
+		
 		private function onMouseClicked(evt:MouseEvent):void
 		{
 			trace(evt.target.name, flash.utils.getQualifiedClassName(evt.target));					
 		}
+		
+		public function switchToBitmap():void
+		{
+			var mc:Sprite = createMovieClipForBitmap();
+			bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
+			var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width/2, mc.height);
+			scaleMovieClip(mc);
+			var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height);
+			scaleMatrix(matrix);
+			bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
+			bitmap = new Bitmap(bitmapData);
+			bitmap.x = -mc.width/2;
+			bitmap.y = -mc.height;
+			bitmap.opaqueBackground = null;
+			addChild(bitmap);
+		}
+		
+		public function scaleMatrix(matrix:Matrix):void
+		{
+			if (reflected)
+			{
+				matrix.scale(-(_scale), _scale);
+			}
+			else
+			{
+				matrix.scale(_scale, _scale);			
+			}			
+		}		
+		
+		public function scaleMovieClip(mc:Sprite):void
+		{
+			if (_scale)
+			{
+				if (reflected)
+				{
+					mc.scaleX = -(_scale);
+				}
+				else
+				{
+					mc.scaleX = _scale;
+				}
+				mc.scaleY = _scale;
+			}
+		}		
+		
+		public function createMovieClipForBitmap():Sprite
+		{
+			var newClip:MovieClip = EssentialModelReference.getMovieClipCopy(_movieClip);
+			newClip.scaleX = 1;
+			newClip.scaleY = 1;
+			return newClip;
+		}		
 		
 		public function onAdded(evt:Event):void
 		{
@@ -110,7 +178,7 @@ package world
 		{
 			return _walkProgress;
 		} 
-
+		
 		public function set realDestination(val:Point):void
 		{
 			_realDestination = val;					
@@ -162,7 +230,7 @@ package world
 		{
 			return _realCoords;
 		} 
-				
+		
 		public function set lastRealPoint(val:Point):void
 		{
 			_lastRealPoint = val;					
@@ -172,7 +240,7 @@ package world
 		{
 			return _lastRealPoint;
 		} 	
-			
+		
 		public function set isMoving(val:Boolean):void
 		{
 			_isMoving = val;					
@@ -241,7 +309,6 @@ package world
 		public function get actualBounds():Rectangle
 		{
 			return _actualBounds;
-		}
-		
+		}		
 	}
-}
+}		
