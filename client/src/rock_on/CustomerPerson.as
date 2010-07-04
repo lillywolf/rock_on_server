@@ -312,17 +312,18 @@ package rock_on
 		
 		public function startEnthralledState():void
 		{
-			trace("enthralled state started");
 			state = ENTHRALLED_STATE;
 			
 			var frameNumber:int = 1;
 			var obj:Object = standFacingObject(_stageManager.concertStage, frameNumber);
 			
-//			enthralledTimer = new Timer(CustomerPerson.ENTHRALLED_TIME);
-//			enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
-//			enthralledTimer.start();
-//			numEnthralledTimers++;
-			trace("enthralled state start ended");
+			if (!isBitmapped && !isSuperFan)
+			{
+				enthralledTimer = new Timer(CustomerPerson.ENTHRALLED_TIME);
+				enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
+				enthralledTimer.start();
+				numEnthralledTimers++;				
+			}
 		}
 		
 		public function startBitmappedEnthralledState():void
@@ -347,7 +348,7 @@ package rock_on
 		{
 //			Condition this somehow
 			trace("route to queue");
-			if (Math.random() < 0.2 && !isBitmapped && !isSuperFan)
+			if (Math.random() < 0.5)
 			{
 				enthralledTimer.stop();
 				enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
@@ -361,7 +362,6 @@ package rock_on
 					throw new Error("State is not enthralled state");
 				}
 			}
-			trace("routing function finished");
 		}
 		
 		public function endEnthralledState():void

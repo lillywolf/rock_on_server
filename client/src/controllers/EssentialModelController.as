@@ -243,6 +243,7 @@ package controllers
 			// Add our copy to list of class copies
 			var classCopiesArray:Array = [belongsTo.instance, isChild.instance[belongsTo.model]];
 			essentialModelReference.classCopies.push(classCopiesArray);
+			trace(essentialModelReference.classCopies.length.toString());
 //			isChild.instance[belongsTo.model] = belongsTo.instance;			
 		}		
 		

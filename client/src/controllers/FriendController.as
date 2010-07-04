@@ -2,6 +2,7 @@ package controllers
 {
 	import com.facebook.data.users.FacebookUser;
 	
+	import game.GameClock;
 	import game.GameDataInterface;
 	
 	import models.Creature;
@@ -33,11 +34,13 @@ package controllers
 			var friendMap:Object = checkForFriendData(uid);
 			if (friendMap)
 			{
-				FlexGlobals.topLevelApplication.showFriendVenuePostLoad(friendMap.gdi);
+				getExtendedUserData(friendMap);
+//				FlexGlobals.topLevelApplication.showFriendVenuePostLoad(friendMap.gdi);
 			}
 			else
 			{
-				createNewFriendMap(uid);
+				friendMap = createNewFriendMap(uid);
+				getExtendedUserData(friendMap);
 			}
 		}
 				
@@ -170,6 +173,13 @@ package controllers
 			gdi.addEventListener(ServerDataEvent.USER_LOADED, onUserLoaded);
 			gdi.addEventListener(ServerDataEvent.GAME_CONTENT_LOADED, onGameContentLoaded);
 			gdi.addEventListener(ServerDataEvent.USER_CONTENT_LOADED, onUserContentLoaded);	
+			
+			gdi.essentialModelController.addEventListener(EssentialEvent.LOADING_AND_INSTANTIATION_COMPLETE, onLoadingAndInstantiationComplete);
+			
+			gdi.addEventListener(EssentialEvent.OWNED_SONGS_LOADED, onSongsLoaded);
+			gdi.addEventListener(EssentialEvent.OWNED_STRUCTURES_LOADED, onStructuresLoaded);
+			gdi.addEventListener(EssentialEvent.OWNED_LAYERABLES_LOADED, onLayerablesLoaded);
+			gdi.addEventListener(EssentialEvent.OWNED_DWELLINGS_LOADED, onDwellingsLoaded);			
 				
 			var friendMap:Object = {snid: uid, gdi: gdi};
 			addItem(friendMap);
@@ -177,8 +187,15 @@ package controllers
 		}
 		
 		public function getExtendedUserData(friendMap:Object):void
-		{			
-			friendMap.gdi.getUserContent(friendMap.snid);
+		{	
+			if (!(friendMap.gdi as GameDataInterface).essentialModelController.userContentLoaded)
+			{
+				(friendMap.gdi as GameDataInterface).getUserContent(friendMap.snid);
+			}
+			else
+			{
+				
+			}
 		}
 		
 		public function getBasicUserData(friendMap:Object):void
@@ -215,6 +232,56 @@ package controllers
 			var gdi:GameDataInterface = evt.currentTarget as GameDataInterface;
 			gdi.checkIfLoadingAndInstantiationComplete();
 		}
+		
+		private function onLoadingAndInstantiationComplete(evt:EssentialEvent):void
+		{
+//			instancesLoadedForFriend();
+		}
+		
+		private function onSongsLoaded(evt:EssentialEvent):void
+		{
+			var friendGDI:GameDataInterface = evt.gdi;
+			friendGDI.removeEventListener(EssentialEvent.OWNED_SONGS_LOADED, onSongsLoaded);
+//			topBarView.onSongsLoaded();	
+		}	
+		
+		private function onStructuresLoaded(evt:EssentialEvent):void
+		{
+			var friendGDI:GameDataInterface = evt.gdi;
+			friendGDI.removeEventListener(EssentialEvent.OWNED_STRUCTURES_LOADED, onStructuresLoaded);
+			if (evt.gdi.dwellingController.fullyLoaded)
+			{
+				FlexGlobals.topLevelApplication.attemptToInitializeVenueForFriend(friendGDI);
+				FlexGlobals.topLevelApplication.friendView.venueLoaded = true;
+				FlexGlobals.topLevelApplication.attemptToPopulateVenueForFriend();
+			}				
+		}
+		
+		private function onLayerablesLoaded(evt:EssentialEvent):void
+		{
+			var friendGDI:GameDataInterface = evt.gdi;
+			friendGDI.removeEventListener(EssentialEvent.OWNED_LAYERABLES_LOADED, onLayerablesLoaded);
+			FlexGlobals.topLevelApplication.friendView.layerablesLoaded = true;
+			
+			if (FlexGlobals.topLevelApplication.friendView.venueLoaded)
+			{
+				FlexGlobals.topLevelApplication.attemptToPopulateVenueForFriend();
+			}				
+		}
+		
+		private function onDwellingsLoaded(evt:EssentialEvent):void
+		{
+			var friendGDI:GameDataInterface = evt.gdi;
+			friendGDI.removeEventListener(EssentialEvent.OWNED_DWELLINGS_LOADED, onDwellingsLoaded);
+			
+			if (friendGDI.structureController.fullyLoaded)
+			{
+				FlexGlobals.topLevelApplication.attemptToInitializeVenueForFriend(friendGDI);				
+				FlexGlobals.topLevelApplication.venueLoaded = true;
+				FlexGlobals.topLevelApplication.attemptToPopulateVenueForFriend();
+			}
+		}	
+		
 				
 	}
 }

@@ -241,7 +241,11 @@ package models
 		public function set level_id(val:int):void
 		{
 			_level_id = val;
-			_userController.levelController.setLevelOnUser(this);
+			
+			if (_userController)
+			{
+				_userController.levelController.setLevelOnUser(this);			
+			}
 		}
 		
 		public function get level_id():int

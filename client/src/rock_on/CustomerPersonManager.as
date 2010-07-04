@@ -120,13 +120,14 @@ package rock_on
 			cp.worldCoords = destination;
 			var standAnimation:Object = cp.standFacingObject(_concertStage, 0, true);
 			_myWorld.addStaticBitmap(cp, destination, standAnimation.animation, standAnimation.frameNumber, standAnimation.reflection);
+//			_myWorld.addAsset(cp, destination);
 			this.addItem(cp);
 		}	
 		
 		private function addEventListeners(cp:CustomerPerson):void
 		{
-//			cp.addEventListener("customerRouted", onCustomerRouted);
-//			cp.addEventListener("queueDecremented", decrementQueue);			
+			cp.addEventListener("customerRouted", onCustomerRouted);
+			cp.addEventListener("queueDecremented", decrementQueue);			
 		}
 		
 		private function decrementQueue(evt:DynamicEvent):void

@@ -56,6 +56,23 @@ package controllers
 				}
 			}
 		}
+		
+		public function makeSureOwnedLayerablesAreAssignedToCreatures():void
+		{
+			for each (var ol:OwnedLayerable in owned_layerables)
+			{
+				for each (var c:Creature in _creatures)
+				{
+					if (ol.creature_id == c.id)
+					{
+						if (!c.owned_layerables.contains(ol))
+						{
+							c.owned_layerables.addItem(ol);
+						}
+					}
+				}
+			}
+		}
 				
 		public function getConstructedCreaturesByType(type:String, sizeX:Number, sizeY:Number):ArrayCollection
 		{

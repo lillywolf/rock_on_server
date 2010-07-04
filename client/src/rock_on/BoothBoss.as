@@ -168,7 +168,7 @@ package rock_on
 			}
 			else
 			{
-				_myWorld.addStaticBitmap(asset, addTo);
+				_myWorld.addStaticAsset(asset, addTo);
 			}
 		}
 		

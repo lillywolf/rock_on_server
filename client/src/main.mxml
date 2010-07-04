@@ -27,6 +27,11 @@
 				<views:FriendView id="friendView"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="friendStage" basedOn="friendView">
+			<mx:AddChild position="before" relativeTo="friendView">
+				<views:StageView id="friendStageView"/>
+			</mx:AddChild>
+		</mx:State>
 		<mx:State name="editView" basedOn="topBar">
 			<mx:AddChild>
 				<views:EditView id="editView" myUser="{gdi.user}" stageView="{stageView}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" boothBoss="{worldView.boothBoss}" venueManager="{worldView.venueManager}" dwellingController="{gdi.dwellingController}"/>
@@ -209,13 +214,21 @@
 					getBasicFriendInfo();				
 				}
 			}
+			public function attemptToPopulateVenueForFriend():void
+			{
+				if (friendView.layerablesLoaded && friendView.venueLoaded)
+				{
+					friendView.initializeCreatures();								
+				}
+			}
 			public function friendGDILoaded(friendGDI:GameDataInterface):void
 			{
 				friendManager.friendGDILoaded(friendGDI);
 			}
-			public function attemptToShowFriendVenue(friendGDI:GameDataInterface):void
+			public function attemptToInitializeVenueForFriend(friendGDI:GameDataInterface):void
 			{
-				currentState = "friendView";
+				currentState = "friendStage";
+				friendView.wbi = new WorldBitmapInterface(friendView, friendStageView, null, null);
 				friendView.myUser = friendGDI.user;
 				friendView.userController = friendGDI.userController;
 				friendView.structureController = friendGDI.structureController;
@@ -224,24 +237,38 @@
 				friendView.levelController = friendGDI.levelController;
 				friendView.dwellingController = friendGDI.dwellingController;				
 				friendView.addEventListener("worldAdded", onFriendViewWorldAdded);
+
+				friendView.initializeVenue();
+				friendStageView.venueManager = friendView.venueManager;
+				friendStageView.initializeStage();
+				friendView.stageManager = friendStageView.stageManager;
+				friendView.initializeWorld();
+				friendView.initializeStructures();
+				friendStageView.initializeStructures();
 			}
 			private function onFriendViewWorldAdded(evt:DynamicEvent):void
 			{
 				friendView.removeEventListener("worldAdded", onFriendViewWorldAdded);
-				friendView.startFriendMirror();		
+				friendView.initializeCreatures();	
 			}
-			public function showFriendVenuePostLoad(friendGDI:GameDataInterface):void
-			{
-				currentState = "friendView";
-				friendView.myUser = friendGDI.user;
-				friendView.userController = friendGDI.userController;
-				friendView.structureController = friendGDI.structureController;
-				friendView.layerableController = friendGDI.layerableController;
-				friendView.creatureController = friendGDI.creatureController;	
-				friendView.levelController = friendGDI.levelController;				
-				friendView.dwellingController = friendGDI.dwellingController;				
-				friendView.startFriendMirror();				
-			}
+//			public function showFriendVenuePostLoad(friendGDI:GameDataInterface):void
+//			{
+//				currentState = "friendView";
+//				friendView.wbi = new WorldBitmapInterface(friendView, friendStageView, null, null);
+//				friendView.myUser = friendGDI.user;
+//				friendView.userController = friendGDI.userController;
+//				friendView.structureController = friendGDI.structureController;
+//				friendView.layerableController = friendGDI.layerableController;
+//				friendView.creatureController = friendGDI.creatureController;	
+//				friendView.levelController = friendGDI.levelController;				
+//				friendView.dwellingController = friendGDI.dwellingController;				
+//				
+//				friendView.initializeVenue();
+//				friendStageView.initializeStage();
+//				friendView.initializeWorld();
+//				friendView.initializeStructures();
+//				friendStageView.initializeStructures();				
+//			}
 			public function instancesLoadedForGameUser():void
 			{
 

@@ -129,22 +129,22 @@ package rock_on
 			if (relationship["verticalRelationship"] == "bottom")
 			{
 				frameNumber = 39;
-				changeScaleX(-(_scale));
+				changeScale(-(_scale), _scale);
 			}
 			else if (relationship["horizontalRelationship"] == "left")
 			{
 				frameNumber = 37;
-				changeScaleX(_scale);
+				changeScale(_scale, _scale);
 			}
 			else if (relationship["verticalRelationship"] == "top")
 			{
 				frameNumber = 37;
-				changeScaleX(-(_scale));
+				changeScale(-(_scale), _scale);
 			}
 			else if (relationship["horizontalRelationship"] == "right")
 			{
 				frameNumber = 39;
-				changeScaleX(_scale);
+				changeScale(_scale, _scale);
 			}
 			else
 			{
@@ -194,7 +194,7 @@ package rock_on
 					{
 						doAnimation("walk_away", true);
 					}
-					changeScaleX(-(_scale));			
+					changeScale(-(_scale), _scale);			
 				}
 					
 				else if (Math.abs(xDiff) < Math.abs(yDiff))
@@ -207,7 +207,7 @@ package rock_on
 					{		
 						doAnimation("walk_toward", true);	
 					}
-					changeScaleX(_scale);
+					changeScale(_scale, _scale);
 				}
 				else
 				{				

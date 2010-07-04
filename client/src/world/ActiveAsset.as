@@ -9,6 +9,7 @@ package world
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
 	import models.EssentialModelReference;
@@ -58,8 +59,8 @@ package world
 			if (movieClip)
 			{
 				_movieClip = movieClip;
-//				switchToBitmap();				
-				addChild(_movieClip);			
+				switchToBitmap();				
+//				addChild(_movieClip);			
 				_movieClip.addEventListener(MouseEvent.CLICK, onMouseClicked);
 			}
 		}
@@ -81,29 +82,34 @@ package world
 		public function switchToBitmap():void
 		{
 			var mc:Sprite = createMovieClipForBitmap();
+			var mcBounds:Rectangle = mc.getBounds(_world);
+			var heightDiff:Number = Math.abs(mcBounds.top - this.y);
 			bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
-			var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width/2, mc.height);
+			var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width/2, heightDiff);
 			scaleMovieClip(mc);
 			var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height);
 			scaleMatrix(matrix);
 			bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
 			bitmap = new Bitmap(bitmapData);
 			bitmap.x = -mc.width/2;
-			bitmap.y = -mc.height;
+			bitmap.y = -heightDiff;
 			bitmap.opaqueBackground = null;
 			addChild(bitmap);
 		}
 		
 		public function scaleMatrix(matrix:Matrix):void
 		{
-			if (reflected)
+			if (_scale)
 			{
-				matrix.scale(-(_scale), _scale);
+				if (reflected)
+				{
+					matrix.scale(-(_scale), _scale);
+				}
+				else
+				{
+					matrix.scale(_scale, _scale);			
+				}				
 			}
-			else
-			{
-				matrix.scale(_scale, _scale);			
-			}			
 		}		
 		
 		public function scaleMovieClip(mc:Sprite):void
@@ -125,10 +131,14 @@ package world
 		public function createMovieClipForBitmap():Sprite
 		{
 			var newClip:MovieClip = EssentialModelReference.getMovieClipCopy(_movieClip);
+			if (!newClip)
+			{
+				newClip = EssentialModelReference.getMovieClipCopyFromSystem(_movieClip);
+			}
 			newClip.scaleX = 1;
 			newClip.scaleY = 1;
 			return newClip;
-		}		
+		}	
 		
 		public function onAdded(evt:Event):void
 		{

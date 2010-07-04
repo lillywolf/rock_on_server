@@ -41,18 +41,33 @@ package world
 		override public function switchToBitmap():void
 		{
 			var mc:Sprite = createMovieClipsForBitmap();
-			bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
-			var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width/2, mc.height);
-			scaleMovieClip(mc);
-			var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height);
-			scaleMatrix(matrix);
-			bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
-			bitmap = new Bitmap(bitmapData);
-			bitmap.x = -mc.width/2;
-			bitmap.y = -mc.height;
-			bitmap.opaqueBackground = null;
-			clearMovieClips();
-			addChild(bitmap);
+			removeCurrentChildren();
+			
+			if (mc)
+			{
+				addChild(mc);
+				var mcBounds:Rectangle = mc.getBounds(this);
+				removeChild(mc);
+				var heightDiff:Number = getHeightDifferential(mcBounds);		
+				bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
+				var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width/2, heightDiff);
+				scaleMovieClip(mc);
+				var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height);
+				scaleMatrix(matrix);
+				bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
+				bitmap = new Bitmap(bitmapData);
+				bitmap.x = -mc.width/2;
+				bitmap.y = -heightDiff * _scale;
+				bitmap.opaqueBackground = null;
+				addChild(bitmap);
+			}
+		}
+		
+		public function getHeightDifferential(mcBounds:Rectangle):Number
+		{
+			var heightDiff:Number;
+			heightDiff = Math.abs(mcBounds.top);
+			return heightDiff;
 		}
 		
 		public function createMovieClipsForBitmap():Sprite
@@ -89,11 +104,12 @@ package world
 			return _scale;
 		}
 		
-		public function changeScaleX(newScaleX:Number):void
+		public function changeScale(newScaleX:Number, newScaleY:Number=1):void
 		{
 			for each (var mc:MovieClip in _displayMovieClips)
 			{
 				mc.scaleX = newScaleX;
+				mc.scaleY = newScaleY;
 			}
 			if (newScaleX < 0)
 			{
@@ -121,6 +137,7 @@ package world
 			}
 			
 			clearMovieClips();
+			clearBitmap();
 			
 			if (!_layerableOrder[animation])
 			{
@@ -189,11 +206,35 @@ package world
 				}
 			}
 			return newMovieClips;
-		}		
+		}	
+		
+		public function clearBitmap():void
+		{
+			var totalChildren:int = this.numChildren.valueOf();
+			for (var i:int = 0; i < totalChildren; i++)
+			{
+				if (this.getChildAt(i) == bitmap)
+				{
+					removeChild(bitmap);
+				}
+			}
+		}
 		
 		public function clearMovieClips():void
 		{
-			_displayMovieClips.removeAll();
+			if (_displayMovieClips.length > 0)
+			{
+				_displayMovieClips.removeAll();			
+			}
+		}
+		
+		public function removeCurrentChildren():void
+		{
+			var totalChildren:int = this.numChildren.valueOf();
+			for (var i:int = 0; i < totalChildren; i++)
+			{
+				this.removeChildAt(i);
+			}
 		}
 		
 		public function initializeMovieClips():void
@@ -237,22 +278,37 @@ package world
 		}
 		
 		private function onDisplayMovieClipsCollectionChange(evt:CollectionEvent):void
-		{
-			var item:DisplayObject;
-			if (evt.kind == CollectionEventKind.ADD)
+		{			
+			for each (var item:DisplayObject in evt.items)
 			{
-				for each (item in evt.items)
-				{				
+				if (evt.kind == CollectionEventKind.ADD)
+				{
 					addChild(item);
 				}
-			}
-			if (evt.kind == CollectionEventKind.REMOVE)
-			{
-				for each (item in evt.items)
+				else if (evt.kind == CollectionEventKind.REMOVE)
 				{
 					if (this.contains(item))
 					{
-						removeChild(item);					
+						this.removeChild(item);
+					}
+				}
+			}
+			
+			if (evt.kind == CollectionEventKind.RESET)
+			{
+				var totalChildren:int = this.numChildren.valueOf();
+				var skips:int = 0;
+				for (var i:int = totalChildren; i > 0; i--)
+				{
+					var currentChildren:int = this.numChildren;
+					var index:int = currentChildren - 1 - skips;
+					if (this.getChildAt(index) is Sprite)
+					{
+						this.removeChildAt(index);					
+					}
+					else
+					{
+						skips++;
 					}
 				}
 			}

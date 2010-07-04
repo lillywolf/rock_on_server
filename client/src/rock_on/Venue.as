@@ -183,6 +183,8 @@ package rock_on
 			listeningStationBoss.addStaticStationListeners();
 			listeningStationBoss.showPassersby();
 			
+			_creatureController.makeSureOwnedLayerablesAreAssignedToCreatures();
+			
 			addStaticCustomersToVenue();
 			trace("static customers added");
 			addSuperCustomersToVenue(stageManager.myStage);
@@ -225,7 +227,7 @@ package rock_on
 					totalStructures++;
 				}
 			}
-			_bitmapBlotter.expectedAssetCount = numStaticCustomers + totalStructures;				
+			_bitmapBlotter.expectedAssetCount = numStaticCustomers;				
 		}		
 		
 		public function updateState():void
@@ -255,7 +257,7 @@ package rock_on
 			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
 				var c:Creature = creatureGenerator.createImposterCreature("Concert Goer");
-				var cp:CustomerPerson = new CustomerPerson(boothBoss, c);
+				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.4);
 //				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
 				cp.speed = 0.06;
 				cp.stageManager = stageManager;

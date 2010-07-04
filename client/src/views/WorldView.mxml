@@ -194,7 +194,7 @@
 			
 			private function onMouseDown(evt:MouseEvent):void
 			{
-//				wbi.onMouseDown(evt);
+				wbi.onMouseDown(evt);
 			}
 			
 			public function addBackgroundLayer():void
@@ -227,7 +227,7 @@
 			
 			public function addWorld():void
 			{
-				myWorld = new World(worldWidth, worldHeight, tileSize, concertStage.structure.height);	
+				myWorld = new World(worldWidth, worldHeight, tileSize, stageManager.concertStage.structure.height);	
 				myWorld.nestLevel = 3;
 				addBackgroundLayer();
 				addChild(myWorld);	
@@ -245,11 +245,11 @@
 				
 				if (wbi)
 				{
-//					wbi.handleEnterFrameEvents();			
+					wbi.handleEnterFrameEvents();			
 				}
 				if (venueManager)
 				{
-//					venueManager.update(lockedDelta);				
+					venueManager.update(lockedDelta);				
 				}
 			}
 			

@@ -65,6 +65,7 @@
 			
 			public function initializeStage():void
 			{	
+				stageManager = venueManager.venue.stageManager;
 				concertStage = venueManager.venue.stageManager.concertStage;
 				myStage = new World(stageWidth, stageHeight, tileSize, concertStage.structure.height);
 				venueManager.venue.stageManager.myStage = myStage;

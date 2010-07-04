@@ -65,7 +65,8 @@ package models
 		{
 			if (!loadedModels[className])
 			{
-				throw new Error("no models");
+				trace("no models");
+				return null;
 			}
 			var klass:Class = loadedModels[className].klass;
 			return klass;
@@ -80,10 +81,25 @@ package models
 		{
 			var className:String = flash.utils.getQualifiedClassName(mc);
 			var klass:Class = EssentialModelReference.getClassCopy(className);	
-			var newMc:MovieClip = new klass() as MovieClip;
-			newMc.cacheAsBitmap = true;
-			return newMc;
+			if (klass)
+			{
+				var newMc:MovieClip = new klass() as MovieClip;
+				newMc.cacheAsBitmap = true;
+				return newMc;
+			}
+			else
+			{
+				return null;
+			}
 		}
+		
+		public static function getMovieClipCopyFromSystem(mc:MovieClip):MovieClip
+		{
+			var className:String = getQualifiedClassName(mc);
+			var klass:Class = getDefinitionByName(className) as Class;
+			var newMc:MovieClip = new klass() as MovieClip;
+			return newMc;
+		}		
 		
 		public static function getCursorClassForMood(type:String):Class
 		{

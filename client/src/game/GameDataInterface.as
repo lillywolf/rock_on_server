@@ -357,7 +357,7 @@ package game
 		
 		public function checkForLoadedStructures():void
 		{
-			if (structureController.ownedStructureMovieClipsLoaded == structureController.ownedStructuresLoaded && structureController.structuresLoaded != 0)
+			if (structureController.ownedStructureMovieClipsLoaded == structureController.ownedStructuresLoaded && structureController.ownedStructuresLoaded != 0)
 			{
 				structureController.fullyLoaded = true;
 				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_STRUCTURES_LOADED);

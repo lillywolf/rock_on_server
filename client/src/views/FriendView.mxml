@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="760" height="610" creationComplete="onCreationComplete()">
+<views:WorldView xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:views="views.*" width="1000" height="1000" creationComplete="onCreationComplete()" verticalScrollPolicy="off" horizontalScrollPolicy="off">
 	<mx:Script>
 		<![CDATA[
 			import controllers.CreatureController;
@@ -58,56 +58,29 @@
 			import world.Point3D;
 			import world.World;
 			import world.WorldEvent;	
-
-			public var myWorld:World;
-			[Bindable] public var wbi:WorldBitmapInterface;
-			[Bindable] public var myUser:User;
+						
+			public static var worldWidth:int = 1200;
+			public static var worldHeight:int = 1200;
+			public static var tileSize:int = 40;
 			
-			public var inventoryCanvas:Canvas;
-			public var inventoryIndex:int = 0;
-			public var editMode:EditMode;
-			public var editModeActivated:Boolean = false;
-			public var booths:ArrayCollection;
-			public var stages:ArrayCollection;
-			public var customerPersonManager:CustomerPersonManager;
-			public var bandMemberManager:BandMemberManager;
-			public var concertStage:ConcertStage;
-			public var boothBoss:BoothBoss;
+			public var venueLoaded:Boolean;
+			public var layerablesLoaded:Boolean;
 			
-			public var creditsBox:Text;
-			
-			[Bindable] public var layerableController:LayerableController;
-			[Bindable] public var structureController:StructureController;
-			[Bindable] public var storeController:StoreController;
-			[Bindable] public var creatureController:CreatureController;
-			[Bindable] public var thingerController:ThingerController;
-			[Bindable] public var userController:UserController;
-			[Bindable] public var levelController:LevelController;
-			[Bindable] public var dwellingController:DwellingController;
-			
-			[Bindable] public var stageManager:StageManager;
-			[Bindable] public var creatureGenerator:CreatureGenerator;
-			[Bindable] public var listeningStationBoss:ListeningStationBoss;
-			[Bindable] public var venueManager:VenueManager;
-			[Bindable] public var bandBoss:BandBoss;
-			[Bindable] public var groupieBoss:GroupieBoss;
-			
-			public var viewInitialized:Boolean;
-			public var bitmapBlotter:BitmapBlotter;
-			
-			[Bindable] public var myMemory:Number;
-			[Bindable] public var fps:Number;
-			[Bindable] public var aux:Number;	
-			public var lastTime:Number;	
-					
 			private function onCreationComplete():void
 			{
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				myWorld = new World(800, 800, 40);				
-				addChild(myWorld);	
-				
-				var evt:DynamicEvent = new DynamicEvent("worldAdded", true, true);
-				dispatchEvent(evt);
+				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);	
+				addEventListener(MouseEvent.CLICK, onViewClicked);								
+			}
+			
+			private function onMouseDown(evt:MouseEvent):void
+			{
+				wbi.onMouseDown(evt);
+			}
+			
+			private function onViewClicked(evt:MouseEvent):void
+			{
+				wbi.onWorldViewClicked(evt);
 			}
 			
 			public function cleanAndReset():void
@@ -129,28 +102,6 @@
 				listeningStationBoss.tearDown();
 				creatureGenerator = null;
 				killManagers();
-			}
-			
-			public function startFriendMirror():void
-			{			
-				cleanAndReset();
-				
-				addStage();
-				generateManagers();
-				initializeVenue();
-									
-				showBooths();
-				showListeningStations();
-				showGroupies();				
-			}
-			
-			private function initializeVenue():void
-			{
-				venueManager.getVenue();
-				
-				boothBoss.venue = venueManager.venue;
-				listeningStationBoss.venue = venueManager.venue;
-				customerPersonManager.venue = venueManager.venue;
 			}			
 			
 			private function generateManagers():void
@@ -176,8 +127,6 @@
 				fps = 1000/deltaTime;
 				myMemory = System.totalMemory;
 				lastTime = time;
-				customerPersonManager.update(lockedDelta);
-				bandMemberManager.update(lockedDelta);
 			}
 			
 			public function onUserLoaded():void
@@ -240,16 +189,16 @@
 			
 			public function showBandMembers():void
 			{
-//				var bandMembers:ArrayCollection = creatureController.getConstructedCreaturesByType("BandMember", 1, 1);
-//				
-//				for each (var assetStack:AssetStack in bandMembers)
-//				{
-//					var bandMember:BandMember = new BandMember(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
-//					bandMember.concertStage = concertStage;
-//					bandMember.addExemptStructures();
-//					bandMember.speed = 0.06;
-//					bandMemberManager.add(bandMember);
-//				}
+				//				var bandMembers:ArrayCollection = creatureController.getConstructedCreaturesByType("BandMember", 1, 1);
+				//				
+				//				for each (var assetStack:AssetStack in bandMembers)
+				//				{
+				//					var bandMember:BandMember = new BandMember(assetStack.movieClipStack, assetStack.layerableOrder, assetStack.creature, 0.4);
+				//					bandMember.concertStage = concertStage;
+				//					bandMember.addExemptStructures();
+				//					bandMember.speed = 0.06;
+				//					bandMemberManager.add(bandMember);
+				//				}
 				bandBoss.friendMirror = true;
 			}			
 			
@@ -261,6 +210,5 @@
 			}
 			
 		]]>
-	</mx:Script>	
-	
-</mx:Canvas>
+	</mx:Script>		
+</views:WorldView>

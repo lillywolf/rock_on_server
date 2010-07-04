@@ -16,6 +16,7 @@
 			import facebook.FacebookFunTime;
 			
 			import game.GameDataInterface;
+			import game.ImposterCreature;
 			
 			import helpers.CreatureEvent;
 			
@@ -39,9 +40,12 @@
 			import mx.events.CollectionEvent;
 			import mx.events.DynamicEvent;
 			
+			import rock_on.BandMember;
+			
 			import stores.StoreEvent;
 			
 			import world.ActiveAsset;
+			import world.ActiveAssetStack;
 			import world.AssetStack;
 			import world.World;
 			import world.WorldEvent;		
@@ -165,7 +169,7 @@
 			{
 				var uic:ContainerUIC = getBandMember(friendManager.mainGDI, 0.55);
 				setDisplayedCreatureDimensions(uic);
-				displayCreatureInfo((uic.thinger as AssetStack).creature);
+				displayCreatureInfo((uic.thinger as ActiveAssetStack).creature);
 				addChild(uic);					
 			}
 			
@@ -687,9 +691,9 @@
 			
 			public function getDisplayedCreature(creature:Creature, dimension:Number):ContainerUIC
 			{
-				var asset:AssetStack = creature.getConstructedCreature(creature.layerableOrder, "walk_toward", dimension, dimension);
-				asset.doAnimation(asset.orientation, "walk_toward", 39);
-				asset.scaleMovieClips(dimension, dimension);
+				var asset:ActiveAssetStack = new ActiveAssetStack(creature, null, creature.layerableOrder, dimension);
+				asset.doAnimation("walk_toward", false, 39);
+//				asset.scaleMovieClips(dimension, dimension);
 				var uic:ContainerUIC = new ContainerUIC();
 				uic.thinger = asset;
 				uic.addChild(asset);
@@ -700,17 +704,19 @@
 			{
 				if (friendGDI)
 				{
-					var constructedCreatures:ArrayCollection = friendGDI.creatureController.getConstructedCreaturesByType("BandMember", dimension, dimension);
-					if (constructedCreatures.length > 0)
+					for each (var c:Creature in friendGDI.creatureController.creatures)
 					{
-						var selectedCreature:AssetStack = constructedCreatures[0];
-						selectedCreature.doAnimation(selectedCreature.orientation, "walk_toward", 39);
-						selectedCreature.scaleMovieClips(dimension, dimension);
-						var uic:ContainerUIC = new ContainerUIC();
-						uic.thinger = selectedCreature;
-						uic.addChild(selectedCreature);
-						return uic;
+						if (c.type == "BandMember")
+						{
+							var asset:ActiveAssetStack = new ActiveAssetStack(c, null, c.layerableOrder, dimension);
+							asset.doAnimation("walk_toward", false, 39);
+							break;
+						}
 					}
+					var uic:ContainerUIC = new ContainerUIC();
+					uic.thinger = asset;
+					uic.addChild(asset);
+					return uic;				
 				}	
 				return null;			
 			}

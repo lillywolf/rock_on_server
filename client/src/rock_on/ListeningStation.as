@@ -253,7 +253,7 @@ package rock_on
 			
 		public function addLeftoverToStation(leftover:Leftover):void
 		{
-			var asset:ActiveAsset = new ActiveAsset(leftover);
+			var asset:ActiveAsset = new ActiveAsset(leftover.mc);
 			asset.thinger = leftover;
 			var destination:Point3D = new Point3D(this.x + this.structure.width/2 + Math.random()*this.radius.x + 2, 0, this.z - this.radius.z + Math.random()*(this.radius.z*2));
 			_venue.myWorld.addAsset(asset, destination);		

@@ -164,12 +164,12 @@ package rock_on
 			if (distanceFromLeft < distanceFromBottom)
 			{
 				frameNumber = 39;
-				changeScaleX(_scale);
+				changeScale(_scale, _scale);
 			}
 			else
 			{
 				frameNumber = 39;
-				changeScaleX(_scale);
+				changeScale(_scale, _scale);
 			}
 			
 			var standAnimation:String = getStandAnimation(frameNumber);

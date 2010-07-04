@@ -24,6 +24,7 @@ package views
 	import world.ActiveAssetStack;
 	import world.AssetStack;
 	import world.BitmapBlotter;
+	import world.World;
 	
 	public class WorldBitmapInterface extends EventDispatcher
 	{
@@ -40,7 +41,7 @@ package views
 		public var isDragging:Boolean;
 		public var mouseIncrementX:Number;
 		public var mouseIncrementY:Number;
-		public function WorldBitmapInterface(worldView:WorldView, stageView:StageView, editView:EditView, bottomBar:BottomBar, target:IEventDispatcher=null)
+		public function WorldBitmapInterface(worldView:WorldView, stageView:StageView, editView:EditView=null, bottomBar:BottomBar=null, target:IEventDispatcher=null)
 		{
 			super(target);
 			_worldView = worldView;
@@ -410,7 +411,33 @@ package views
 		{
 			_worldView.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			isDragging = false;
-		}		
+		}	
+		
+		public function createBackgroundLayer(currentWorld:World, currentWidth:int, currentHeight:int):Canvas
+		{
+			var relWidth:Number = currentWorld.wg.getRect(currentWorld).width;
+			var relHeight:Number = currentWorld.wg.getRect(currentWorld).height;
+			var bitmapBlotter:BitmapBlotter = new BitmapBlotter();
+			currentWorld.bitmapBlotter = bitmapBlotter;
+			bitmapBlotter.myWorld = currentWorld;
+			bitmapBlotter.incrementX = (currentWidth - relWidth)/2;
+			bitmapBlotter.incrementY = (currentHeight - relHeight)/2;
+			bitmapBlotter.relWidth = relWidth;
+			bitmapBlotter.relHeight = relHeight;
+			currentWorld.bitmapBlotter = bitmapBlotter;
+			var backgroundCanvas:Canvas = new Canvas();
+			backgroundCanvas.width = relWidth;
+			backgroundCanvas.height = relHeight;
+			backgroundCanvas.clipContent = false;
+			_backgroundCanvas = backgroundCanvas;
+			backgroundCanvas.x = (currentWidth - relWidth)/2;
+			backgroundCanvas.y = (currentHeight - relHeight)/2;
+			backgroundCanvas.setStyle("backgroundAlpha", 0);
+			bitmapBlotter.backgroundCanvas = backgroundCanvas;
+			return backgroundCanvas;
+//			addChild(backgroundCanvas);
+//			backgroundCanvas.nestLevel = 2;				
+		}
 		
 		public function set bandBoss(val:BandBoss):void
 		{
