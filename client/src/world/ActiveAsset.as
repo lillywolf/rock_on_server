@@ -101,14 +101,7 @@ package world
 		{
 			if (_scale)
 			{
-				if (reflected)
-				{
-					matrix.scale(-(_scale), _scale);
-				}
-				else
-				{
-					matrix.scale(_scale, _scale);			
-				}				
+				matrix.scale(_scale, _scale);			
 			}
 		}		
 		

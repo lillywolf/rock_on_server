@@ -7,8 +7,10 @@ package rock_on
 	import models.EssentialModelReference;
 	import models.OwnedLayerable;
 	import models.OwnedStructure;
+	import models.Usable;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.UIComponent;
 	
 	import world.ActiveAssetStack;
 	import world.Point3D;
@@ -16,7 +18,7 @@ package rock_on
 	
 	public class Person extends ActiveAssetStack
 	{
-		public var moods:ArrayCollection;
+		public var mood:String;
 		public var moodCursorID:int;
 		public var currentDirection:Point3D;
 		
@@ -28,21 +30,26 @@ package rock_on
 		{
 			super(creature, movieClip, layerableOrder, scale);
 		}
-		
-		public function initializeMoods():void
+	
+		public function generateMoodOverheadHover(mood:String):MovieClip
 		{
-			if (creature.has_moods)
-			{
-				
-			}
+			var cursorClass:Class = EssentialModelReference.getClassForMood(mood);
+			var mc:MovieClip = new cursorClass() as MovieClip;
+			mc.cacheAsBitmap = true;
+			return mc;			
 		}
 		
 		public function generateMoodCursor(mood:String):MovieClip
 		{
-			var cursorClass:Class = EssentialModelReference.getCursorClassForMood(mood);
+			var cursorClass:Class = EssentialModelReference.getClassForMood(mood);
 			var mc:MovieClip = new cursorClass() as MovieClip;
 			mc.cacheAsBitmap = true;
 			return mc;			
+		}	
+		
+		public function generateMoodMessage(mood:String):UIComponent
+		{
+			return new UIComponent();
 		}
 		
 		public function standFacingObject(os:OwnedStructure, frameNumber:int=0, strictFacing:Boolean=true):Object

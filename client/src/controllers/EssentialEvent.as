@@ -15,6 +15,7 @@ package controllers
 		public static const OWNED_STRUCTURES_LOADED:String = "Essential:OwnedStructuresLoaded";	
 		public static const OWNED_LAYERABLES_LOADED:String = "Essential:OwnedLayerablesLoaded";	
 		public static const OWNED_DWELLINGS_LOADED:String = "Essential:OwnedDwellingsLoaded";	
+		public static const OWNED_USABLES_LOADED:String = "Essential:OwnedUsablesLoaded";	
 		public var _instance:Object;
 		public var _model:String;
 		public var _user:User;

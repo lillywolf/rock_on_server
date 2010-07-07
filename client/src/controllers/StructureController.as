@@ -18,6 +18,7 @@ package controllers
 	
 	import rock_on.BoothBoss;
 	import rock_on.ListeningStationBoss;
+	import rock_on.Venue;
 	
 	import server.ServerController;
 	
@@ -157,7 +158,7 @@ package controllers
 			_serverController.sendRequest({id: id, client_validate: "true"}, "owned_structure", "update_inventory_count");
 		}
 		
-		public function updateOwnedStructureOnServerResponse(osCopy:OwnedStructure, method:String, worldView:WorldView):void
+		public function updateOwnedStructureOnServerResponse(osCopy:OwnedStructure, method:String, venue:Venue):void
 		{
 			for each (var os:OwnedStructure in owned_structures)
 			{
@@ -173,11 +174,11 @@ package controllers
 			
 			if (osReference.structure.structure_type == "Booth")
 			{
-				updateBoothOnServerResponse(osReference, method, worldView.boothBoss);
+				updateBoothOnServerResponse(osReference, method, venue.boothBoss);
 			}
 			else if (osReference.structure.structure_type == "ListeningStation")
 			{
-				updateListeningStationOnServerResponse(osReference, method, worldView.listeningStationBoss);
+				updateListeningStationOnServerResponse(osReference, method, venue.listeningStationBoss);
 			}						
 		}
 		
@@ -219,6 +220,33 @@ package controllers
 			var asset:ActiveAsset = new ActiveAsset(mc);
 			asset.thinger = os;
 			return asset;
+		}
+		
+		public function findAssetFromOwnedStructure(assets:ArrayCollection, os:OwnedStructure):ActiveAsset
+		{
+			for each (var asset:ActiveAsset in assets)
+			{
+				if (asset.thinger)
+				{
+					if (doesOwnedStructureMatchThingerId(asset.thinger, os.id))
+					{
+						return asset;
+					}
+				}
+			}
+			return null;
+		}
+		
+		public function doesOwnedStructureMatchThingerId(thinger:Object, osId:int):Boolean
+		{
+			if (thinger.hasOwnProperty("id"))
+			{
+				if (thinger.id == osId)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 		
 		private function updateListeningStationOnServerResponse(os:OwnedStructure, method:String, listeningStationBoss:ListeningStationBoss):void

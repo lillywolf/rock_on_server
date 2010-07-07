@@ -24,10 +24,12 @@ package controllers
 	import models.OwnedSong;
 	import models.OwnedStructure;
 	import models.OwnedThinger;
+	import models.OwnedUsable;
 	import models.Song;
 	import models.Store;
 	import models.StoreOwnedThinger;
 	import models.Structure;
+	import models.Usable;
 	import models.User;
 	
 	import mx.collections.ArrayCollection;
@@ -68,6 +70,8 @@ package controllers
 		[Bindable] public var creature_groups:ArrayCollection;
 		[Bindable] public var songs:ArrayCollection;
 		[Bindable] public var owned_songs:ArrayCollection;
+		[Bindable] public var usables:ArrayCollection;
+		[Bindable] public var owned_usables:ArrayCollection;
 		
 		public var layerable:Layerable;
 		public var creature:Creature;
@@ -86,6 +90,8 @@ package controllers
 		public var level:Level;
 		public var booth_structure:BoothStructure;
 		public var friend_user:FriendUser;
+		public var usable:Usable;
+		public var owned_usable:OwnedUsable;
 		
 		public var baseUrl:String = ServerController.BASE_URL;		
 		
@@ -103,6 +109,8 @@ package controllers
 			songs = new ArrayCollection();
 			owned_songs = new ArrayCollection();
 			owned_layerables = new ArrayCollection();
+			usables = new ArrayCollection();
+			owned_usables = new ArrayCollection();
 			creatures = new ArrayCollection();	
 			creature_groups = new ArrayCollection();
 			thingers = new ArrayCollection();	

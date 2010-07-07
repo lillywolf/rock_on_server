@@ -1,5 +1,9 @@
 package rock_on
 {
+	import adobe.utils.CustomActions;
+	
+	import controllers.UsableController;
+	
 	import flash.display.MovieClip;
 	import flash.events.TimerEvent;
 	import flash.geom.Rectangle;
@@ -8,12 +12,19 @@ package rock_on
 	import game.GameClock;
 	
 	import models.Creature;
+	import models.EssentialModelReference;
+	import models.Usable;
 	
 	import mx.collections.ArrayCollection;
+	import mx.containers.Canvas;
 	import mx.containers.HBox;
+	import mx.controls.Text;
+	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
 	
 	import views.AssetBitmapData;
+	import views.ExpandingMovieclip;
+	import views.WorldBitmapInterface;
 	
 	import world.Point3D;
 	import world.World;
@@ -30,15 +41,16 @@ package rock_on
 		public static const HEADTOSTAGE_STATE:int = 6;
 		public static const HEADTODOOR_STATE:int = 7;
 		public static const BITMAPPED_ENTHRALLED_STATE:int = 8;
-		
+
+		public static const HUNGER_DELAY:int = 360000;
 		public static const IS_CHILLIN:String = "chillin";
 		public static const IS_HUNGRY:String = "hungry";
+		public static const IS_THIRSTY:String = "thirsty";
 		public static const WANTS_MUSIC:String = "music";
 		
 		public static const ENTHRALLED_TIME:int = 50000 * Math.random();
 		public static const QUEUED_TIME:int = 4000;
 		public static const FAN_CONVERSION_DELAY:int = 2000;
-		public static const HUNGER_DELAY:int = 720000 + 360000 * Math.random();
 		public static const MUSIC_DELAY:int = 2000000 + 1000000 * Math.random();
 				
 		public var enthralledTimer:Timer;
@@ -63,23 +75,8 @@ package rock_on
 
 			_boothBoss = boothBoss;
 			startInitializedState();
-//			setMoods();
+			
 			trace("customer person created");
-		}
-		
-		public function updateMoods():void
-		{
-			for each (var s:String in moods)
-			{
-				if (s == CustomerPerson.IS_HUNGRY)
-				{
-//					doHungryMood();
-				}
-				if (s == CustomerPerson.WANTS_MUSIC)
-				{
-					doWantsMusicMood();
-				}
-			}
 		}
 		
 		public function reInitialize():void
@@ -102,12 +99,57 @@ package rock_on
 			currentBooth = null;
 		}
 		
+		public function setMood():void
+		{
+			if (_creature.has_moods)
+			{
+				if (_creature.last_fed)
+				{
+					var timeSinceLastMeal:Number = new Date().getTime() - GameClock.convertStringTimeToUnixTime(_creature.last_fed);				
+					if (timeSinceLastMeal > CustomerPerson.HUNGER_DELAY)
+					{
+						mood = CustomerPerson.IS_HUNGRY;
+					}
+				}
+				else
+				{
+					if (Math.random() < 0.25)
+					{
+						mood = CustomerPerson.IS_THIRSTY;
+					}
+					else if (Math.random() < 0.5)
+					{
+						mood = CustomerPerson.IS_HUNGRY;
+					}
+				}
+				
+				if (mood)
+				{
+					startMood(mood);				
+				}
+			}
+		}		
+				
+		
+		public function updateMood(deltaTime:Number):void
+		{
+			if (creature.has_moods)
+			{
+//				if (mood == CustomerPerson.IS_HUNGRY)
+//				{
+//					doHungryMood();
+//				}
+//				if (mood == CustomerPerson.WANTS_MUSIC)
+//				{
+//					doWantsMusicMood();
+//				}
+			}				
+		}
+		
 		public function update(deltaTime:Number):Boolean
 		{
-//			if (creature.has_moods)
-//			{
-//				updateMoods();			
-//			}
+//			updateMood(deltaTime);
+			
 			switch (state)
 			{
 				case INITIALIZED_STATE:
@@ -209,19 +251,27 @@ package rock_on
 			state = INITIALIZED_STATE;
 		}
 
-		public function startMood(mood:String, index:int, numMoods:int):void
+		public function startMood(mood:String):void
 		{
-			switch (mood)
-			{
-				case IS_HUNGRY:
-//					startHungryMood(index, numMoods);
-//					break;
-				case WANTS_MUSIC:
-					startWantsMusicMood(index, numMoods);
-					break;
-			}
+			var cursor:MovieClip = generateMoodOverheadHover(mood);
+			var emc:ExpandingMovieclip = new ExpandingMovieclip(0.6, cursor);
+			emc.y = -(height + 5);
+			addChild(emc);			
 		}
 		
+		override public function generateMoodMessage(mood:String):UIComponent
+		{
+			var usable:Usable = _venue.usableController.getUsableByMood(mood);
+			var numberOfOwnedUsables:int = _venue.usableController.getNumberOfOwnedUsablesByMood(mood);
+			var usablesText:Text = new Text();
+			var usablesContainer:UIComponent = new UIComponent();
+			usablesText.text = numberOfOwnedUsables.toString() + " left!";
+			WorldBitmapInterface.setStylesForNurtureText(usablesText, usable, numberOfOwnedUsables);
+			WorldBitmapInterface.setStylesForNurtureContainer(usablesContainer, numberOfOwnedUsables);
+			usablesContainer.addChild(usablesText);
+			return usablesContainer;			
+		}		
+				
 		public function doInitializedState(deltaTime:Number):void
 		{
 			
@@ -324,6 +374,7 @@ package rock_on
 				enthralledTimer.start();
 				numEnthralledTimers++;				
 			}
+			setMood();			
 		}
 		
 		public function startBitmappedEnthralledState():void
@@ -335,14 +386,6 @@ package rock_on
 			_world.removeAssetFromWorld(this);
 			_world.bitmapBlotter.addRenderedBitmap(this, obj.animation, obj.frameNumber, obj.reflection);
 		}
-		
-//		public function evaluateBitmapSwitch():void
-//		{
-//			if (_world.bitmapBlotter.getMatchFromBitmapReferences(this) == null)
-//			{
-//				_world.bitmapBlotter.reIntroduceBitmap(this);
-//			}
-//		}
 		
 		private function routeToQueue(evt:TimerEvent):void
 		{
@@ -640,11 +683,6 @@ package rock_on
 			}
 		}
 		
-		public function startWantsMusicMood(index:int, numMoods:int):void
-		{
-			
-		}
-		
 		public function doWantsMusicMood():void
 		{
 			
@@ -793,6 +831,11 @@ package rock_on
 		public function set venue(val:Venue):void
 		{
 			_venue = val;
+		}
+		
+		public function get venue():Venue
+		{
+			return _venue;
 		}
 				
 	}

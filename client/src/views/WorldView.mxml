@@ -10,6 +10,7 @@
 			import controllers.StoreController;
 			import controllers.StructureController;
 			import controllers.ThingerController;
+			import controllers.UsableController;
 			import controllers.UserController;
 			
 			import flash.utils.getDefinitionByName;
@@ -42,6 +43,7 @@
 			import mx.controls.Text;
 			import mx.core.Application;
 			import mx.core.DragSource;
+			import mx.core.FlexGlobals;
 			import mx.core.UIComponent;
 			import mx.events.DragEvent;
 			import mx.events.DynamicEvent;
@@ -126,6 +128,7 @@
 			[Bindable] public var dwellingController:DwellingController;
 			[Bindable] public var levelController:LevelController;
 			[Bindable] public var songController:SongController;
+			[Bindable] public var usableController:UsableController;
 			
 			[Bindable] public var myMemory:Number;
 			[Bindable] public var fps:Number;
@@ -136,11 +139,16 @@
 			public var cursorUIC:ContainerUIC;
 			public var mouseIncrementX:Number;
 			public var mouseIncrementY:Number;
+			public var viewReference:WorldView;
 			
 			private function onCreationComplete():void
 			{
+				viewReference = this;
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);	
+				addEventListener(MouseEvent.MOUSE_DOWN, function onMouseDown():void
+				{
+					wbi.handleMouseDown(viewReference);
+				});	
 				addEventListener(MouseEvent.CLICK, onViewClicked);
 			}
 			
@@ -158,7 +166,7 @@
 			
 			public function initializeVenue():void
 			{
-				venueManager = new VenueManager(wbi, structureController, layerableController, dwellingController, levelController, creatureController, myWorld);
+				venueManager = new VenueManager(wbi, structureController, layerableController, dwellingController, levelController, creatureController, usableController, myWorld);
 				venueManager.getVenue();
 			}
 			
@@ -190,11 +198,6 @@
 			{
 				myWorld.assetRenderer.removeEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);
 				checkForCreaturesAdded();
-			}
-			
-			private function onMouseDown(evt:MouseEvent):void
-			{
-				wbi.onMouseDown(evt);
 			}
 			
 			public function addBackgroundLayer():void
@@ -234,7 +237,7 @@
 				myWorld.assetRenderer.addEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);
 			}
 			
-			private function onEnterFrame(evt:Event):void
+			public function onEnterFrame(evt:Event):void
 			{
 				var time:Number = getTimer();
 				var deltaTime:Number = time - lastTime;
@@ -243,9 +246,9 @@
 				myMemory = System.totalMemory;
 				lastTime = time;
 				
-				if (wbi)
+				if (wbi && FlexGlobals.topLevelApplication.currentState == "stageViewer")
 				{
-					wbi.handleEnterFrameEvents();			
+					wbi.handleEnterFrameEvents(viewReference, stageView);			
 				}
 				if (venueManager)
 				{
@@ -305,7 +308,7 @@
 			{
 				if (isValidWorldStructure(os))
 				{
-					var asset:ActiveAsset = myWorld.findAssetByThinger(os);
+					var asset:ActiveAsset = structureController.findAssetFromOwnedStructure(myWorld.assetRenderer.unsortedAssets, os);
 					if (asset && method == "sell")
 					{
 						myWorld.assetRenderer.removeAsset(asset);
@@ -313,7 +316,7 @@
 					}
 					if (asset && method == "save_placement")
 					{
-						myWorld.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z), true);
+						myWorld.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z), false);
 						reInitializeStructures(os);					
 					}
 					if (method == "create_new")
@@ -345,13 +348,13 @@
 			{				
 				if (os.structure.structure_type == "Booth")
 				{
-					boothBoss.reInitializeBooths(true);
-					customerPersonManager.redrawAllCustomers();
-					this.bitmapBlotter.renderReplacedBitmaps();
+					venueManager.venue.boothBoss.reInitializeBooths(false);
+					venueManager.venue.customerPersonManager.redrawStandAloneCustomers();
+//					bitmapBlotter.renderReplacedBitmaps();
 				}
 				else if (os.structure.structure_type == "ListeningStation")
 				{
-					listeningStationBoss.reInitializeListeningStations();				
+					venueManager.venue.listeningStationBoss.reInitializeListeningStations();				
 				}
 			}
 			

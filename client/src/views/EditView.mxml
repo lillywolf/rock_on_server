@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="1000" creationComplete="onCreationComplete()" clipContent="false" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+<views:WorldView xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:views="views.*" width="1000" height="1000" creationComplete="onCreationComplete()" clipContent="false" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	<mx:Script>
 		<![CDATA[
 			import controllers.CreatureController;
@@ -48,72 +48,48 @@
 			import world.AssetStack;
 			import world.BitmapBlotter;
 			import world.Point3D;
-			import world.World;	
-
-			public var myWorld:World;
-			[Bindable] public var myUser:User;
-			
-			public var stageView:StageView;
-			public var uiLayer:UILayer;
-			public var bitmapBlotter:BitmapBlotter;
-			public var inventoryCanvas:Canvas;
-			public var inventoryIndex:int = 0;
-			public var editMode:EditMode;
+			import world.World;				
 			public var pausedForStateCompletion:OwnedStructure;
-			public var editModeActivated:Boolean = false;
-			public var booths:ArrayCollection;
-			public var stages:ArrayCollection;
-			public var concertStage:ConcertStage;
-			[Bindable] public var boothBoss:BoothBoss;
-			[Bindable] public var stageManager:StageManager;
-			[Bindable] public var listeningStationBoss:ListeningStationBoss;
+			public var stageWidth:int = 1200;
+			public var stageHeight:int = 1200;
 			
-			public var creditsBox:Text;
-			
-			[Bindable] public var layerableController:LayerableController;
-			[Bindable] public var structureController:StructureController;
-			[Bindable] public var storeController:StoreController;
-			[Bindable] public var creatureController:CreatureController;
-			[Bindable] public var thingerController:ThingerController;
-			[Bindable] public var userController:UserController;
-			[Bindable] public var venueManager:VenueManager;
-			[Bindable] public var dwellingController:DwellingController;
-			
-			[Bindable] public var myMemory:Number;
-			[Bindable] public var fps:Number;
-			[Bindable] public var aux:Number;	
-			public var lastTime:Number;	
-			
-			public var isDragging:Boolean;
-			public var mouseIncrementX:Number;
-			public var mouseIncrementY:Number;			
-					
 			private function onCreationComplete():void
 			{
+				viewReference = this;
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);					
+				addEventListener(MouseEvent.MOUSE_DOWN, function onMouseDown():void
+				{
+					wbi.handleMouseDown(viewReference);
+				});	
 				
-				myWorld = new World(WorldView.worldWidth, WorldView.worldHeight, WorldView.tileSize, stageView.concertStage.structure.height);				
-				addChild(myWorld);	
-												
 				editMode = new EditMode(myWorld, this);
-				editMode.addEventListener('structurePlaced', onStructurePlaced);
+				editMode.addEventListener("structurePlaced", onStructurePlaced);
 				editMode.structureController = structureController;
 				addChild(editMode);		
-				initializeSpace();
 				
 				addUILayer();				
 				
 				dispatchEditViewCreationEvent();			
 			}
 			
-			private function onMouseDown(evt:MouseEvent):void
+			override public function onEnterFrame(evt:Event):void
 			{
-				isDragging = true;
-				mouseIncrementX = mouseX.valueOf();
-				mouseIncrementY = mouseY.valueOf();
-				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-			}
+				var time:Number = getTimer();
+				var deltaTime:Number = time - lastTime;
+				var lockedDelta:Number = Math.min(100, deltaTime);
+				fps = 1000/deltaTime;
+				myMemory = System.totalMemory;
+				lastTime = time;
+				
+				if (wbi && FlexGlobals.topLevelApplication.currentState == "editView")
+				{
+					wbi.handleEnterFrameEvents(viewReference);			
+				}
+				if (venueManager)
+				{
+					venueManager.update(lockedDelta);				
+				}
+			}			
 			
 			private function dragStage():void
 			{		
@@ -140,49 +116,20 @@
 			{
 				var evt:DynamicEvent = new DynamicEvent("editViewCreated", true, true);
 				dispatchEvent(evt);
-			}
+			}	
 			
-			public function initializeSpace():void
-			{
-				addStage();
-				venueManager = FlexGlobals.topLevelApplication.worldView.venueManager;
-				boothBoss.venue = venueManager.venue;
-				listeningStationBoss.venue = venueManager.venue;
-				boothBoss.editMirror = true;
-				boothBoss.setInMotion();
-				listeningStationBoss.editMirror = true;
-				listeningStationBoss.showListeningStations();
-			} 
-			
-			private function onEnterFrame(evt:Event):void
-			{
-				var time:Number = getTimer();
-				var deltaTime:Number = time - lastTime;
-				var lockedDelta:Number = Math.min(100, deltaTime);
-				fps = 1000/deltaTime;
-				myMemory = System.totalMemory;
-				lastTime = time;
-				checkDrag();
-			}
-			
-			public function checkDrag():void
-			{
-				if (isDragging)
-				{
-					dragStage();
-				}				
+			public function initializeStage():void
+			{	
+				stageManager = venueManager.venue.stageManager;
+				myStage = new World(stageWidth, stageHeight, tileSize, stageManager.concertStage.structure.height);
+				stageManager.myStage = myStage;
+				addChild(myStage);
 			}			
 			
-			public function onUserLoaded():void
+			public function initializeStageStructures():void
 			{
-			}
-			
-			public function addStage():void
-			{
-				stageManager = new StageManager(structureController, myWorld);
 				stageManager.editMirror = true;
-				stageManager.setInMotion();
-				concertStage = stageManager.concertStage;
+				stageManager.addStageToWorld(stageManager.stageAsset, stageManager.concertStage.worldCoords, myWorld);
 				stageManager.addStageDecorations(myWorld);
 			}			
 			
@@ -190,23 +137,10 @@
 			{
 				thingerController.saveStructurePlacement(evt.asset, evt.currentPoint);
 			}
-		
-			private function onWorldThingerPurchased(evt:UserEvent):void
-			{
-				creditsBox.text = myUser.credits.toString();
-			}
 			
-			private function addStaticAsset(asset:ActiveAsset, addTo:Point3D):void
+			override public function updateRenderedStructures(os:OwnedStructure, method:String):void
 			{
-//				var addTo:Point3D = new Point3D(Math.floor(Math.random()*myWorld.tilesWide), 0, Math.floor(Math.random()*myWorld.tilesDeep));				
-				myWorld.addAsset(asset, addTo);
-				asset.movieClip.gotoAndPlay(1);
-				asset.movieClip.stop();
-			}
-			
-			public function updateRenderedStructures(os:OwnedStructure, method:String):void
-			{
-				var asset:ActiveAsset = myWorld.findAssetByThinger(os);
+				var asset:ActiveAsset = structureController.findAssetFromOwnedStructure(myWorld.assetRenderer.unsortedAssets, os);
 				if (method == "sell")
 				{
 					myWorld.assetRenderer.removeAsset(asset);
@@ -217,5 +151,6 @@
 				}
 			}							
 		]]>
-	</mx:Script>	
-</mx:Canvas>
+	</mx:Script>		
+</views:WorldView>
+

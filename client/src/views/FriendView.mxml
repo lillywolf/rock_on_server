@@ -68,14 +68,13 @@
 			
 			private function onCreationComplete():void
 			{
+				viewReference = this;
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);	
+				addEventListener(MouseEvent.MOUSE_DOWN, function onMouseDown():void
+				{
+					wbi.handleMouseDown(viewReference);
+				});	
 				addEventListener(MouseEvent.CLICK, onViewClicked);								
-			}
-			
-			private function onMouseDown(evt:MouseEvent):void
-			{
-				wbi.onMouseDown(evt);
 			}
 			
 			private function onViewClicked(evt:MouseEvent):void
@@ -106,7 +105,7 @@
 			
 			private function generateManagers():void
 			{
-				venueManager = new VenueManager(wbi, structureController, layerableController, dwellingController, levelController, creatureController, myWorld);
+				venueManager = new VenueManager(wbi, structureController, layerableController, dwellingController, levelController, creatureController, usableController, myWorld);
 			}	
 			
 			private function killManagers():void
@@ -119,7 +118,7 @@
 				stageManager = null;
 			}
 			
-			private function onEnterFrame(evt:Event):void
+			override public function onEnterFrame(evt:Event):void
 			{
 				var time:Number = getTimer();
 				var deltaTime:Number = time - lastTime;
@@ -127,6 +126,11 @@
 				fps = 1000/deltaTime;
 				myMemory = System.totalMemory;
 				lastTime = time;
+				
+				if (wbi)
+				{
+					wbi.handleEnterFrameEvents(viewReference, stageView);			
+				}				
 			}
 			
 			public function onUserLoaded():void

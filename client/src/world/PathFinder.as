@@ -428,11 +428,11 @@ package world
 		private function getStructureOccupiedSpacesForArray(sourceArray:ArrayCollection, exemptStructures:ArrayCollection=null):ArrayCollection
 		{	
 			var structureOccupiedSpaces:ArrayCollection = new ArrayCollection();
-			var structureSpaces:ArrayCollection;	
 			
 			for each (var asset:ActiveAsset in sourceArray)
 			{				
 				// Check if the owned structures in exemptStructures equal asset.thinger; if so, do not add them
+				var structureSpaces:ArrayCollection = new ArrayCollection();	
 				
 				if (asset.thinger is OwnedStructure)
 				{
@@ -442,12 +442,18 @@ package world
 					}
 					else
 					{
+						var exempt:Boolean = false;
+						
 						for each (var os:OwnedStructure in exemptStructures)
 						{
-							if (!(os.id == (asset.thinger as OwnedStructure).id && os.structure == (asset.thinger as OwnedStructure).structure))
+							if ((os.id == (asset.thinger as OwnedStructure).id) || (os.structure == (asset.thinger as OwnedStructure).structure))
 							{
-								structureSpaces = addToOccupiedSpaces(asset);							
+								exempt = true;
 							}
+						}
+						if (!exempt)
+						{
+							structureSpaces = addToOccupiedSpaces(asset);														
 						}
 					}		
 					for each (var pt:Point3D in structureSpaces)
@@ -462,14 +468,14 @@ package world
 		private function addToOccupiedSpaces(asset:ActiveAsset):ArrayCollection
 		{
 			var structureSpaces:ArrayCollection = new ArrayCollection();
-			if (!asset.movieClip)
-			{
-				structureSpaces = getEstimatedPoint3DForStructure(asset, structureSpaces);
-			}
-			else
-			{
-				structureSpaces = getPoint3DForStructure(asset, structureSpaces);			
-			}
+//			if (!asset.movieClip)
+//			{
+			structureSpaces = getEstimatedPoint3DForStructure(asset, structureSpaces);
+//			}
+//			else
+//			{
+//			structureSpaces = getPoint3DForStructure(asset, structureSpaces);			
+//			}
 			return structureSpaces;
 		}
 		

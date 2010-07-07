@@ -101,7 +101,7 @@ package models
 			return newMc;
 		}		
 		
-		public static function getCursorClassForMood(type:String):Class
+		public static function getClassForMood(type:String):Class
 		{
 			switch (type)
 			{

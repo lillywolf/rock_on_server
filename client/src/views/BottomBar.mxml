@@ -474,6 +474,15 @@
 			private function switchToEditView():void
 			{
 				FlexGlobals.topLevelApplication.currentState = "editView";
+				if (!editView.wbi)
+				{
+					editView.wbi = worldView.wbi;
+					editView.initializeVenue();
+					editView.initializeStage();
+					editView.initializeWorld();
+					editView.initializeStructures();
+					editView.initializeStageStructures();
+				}
 			}				
 			
 			public function switchToWorldView():void
@@ -482,6 +491,7 @@
 				FlexGlobals.topLevelApplication.stageView.y = worldView.y;
 				FlexGlobals.topLevelApplication.stageView.myStage.x = worldView.myWorld.x;
 				FlexGlobals.topLevelApplication.stageView.myStage.y = worldView.myWorld.y;
+				
 				FlexGlobals.topLevelApplication.currentState = "stageViewer";
 			}
 			

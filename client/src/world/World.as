@@ -153,10 +153,10 @@ package world
 				var index:int = assetRenderer.unsortedAssets.getItemIndex(activeAsset);
 				assetRenderer.unsortedAssets.removeItemAt(index);
 			}
-			else if (bitmapBlotter.getMatchingBitmap(activeAsset) != null)
-			{
-				bitmapBlotter.removeRenderedBitmap(activeAsset);
-			}
+//			else if (bitmapBlotter.getMatchingBitmap(activeAsset) != null)
+//			{
+//				bitmapBlotter.removeRenderedBitmap(activeAsset);
+//			}
 		}
 		
 		public static function worldToActualCoords(worldCoords:Point3D):Point
@@ -306,34 +306,6 @@ package world
 			asset.movieClip.gotoAndPlay(1);
 			asset.movieClip.stop();
 		}		
-		
-		public function findAssetByThinger(thinger:Object):ActiveAsset
-		{
-			for each (var asset:ActiveAsset in assetRenderer.unsortedAssets)
-			{
-				if (asset.thinger)
-				{
-					if (asset.thinger.id)
-					{
-						if (asset.thinger.id == thinger.id)
-						{
-							return asset;					
-						}
-					}
-				}
-			}
-			for each (var abd:AssetBitmapData in this.bitmapBlotter.bitmapReferences)
-			{
-				if (abd.activeAsset.thinger)
-				{
-					if (abd.activeAsset.thinger.id == thinger.id)
-					{
-						return abd.activeAsset;
-					}
-				}
-			}
-			return null;
-		}
 		
 		public function updateAssetCoords(asset:ActiveAsset, newCoords:Point3D, bitmapped:Boolean):void
 		{

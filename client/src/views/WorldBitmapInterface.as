@@ -1,5 +1,5 @@
 package views
-{
+{	
 	import flash.display.Bitmap;
 	import flash.display.MovieClip;
 	import flash.events.Event;
@@ -10,9 +10,13 @@ package views
 	import flash.geom.Rectangle;
 	import flash.utils.getQualifiedClassName;
 	
+	import models.Usable;
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.containers.Canvas;
+	import mx.controls.Text;
+	import mx.core.UIComponent;
 	
 	import rock_on.BandMember;
 	import rock_on.CustomerPerson;
@@ -41,7 +45,7 @@ package views
 		public var isDragging:Boolean;
 		public var mouseIncrementX:Number;
 		public var mouseIncrementY:Number;
-		public function WorldBitmapInterface(worldView:WorldView, stageView:StageView, editView:EditView=null, bottomBar:BottomBar=null, target:IEventDispatcher=null)
+		public function WorldBitmapInterface(worldView:WorldView, stageView:StageView, editView:views.EditView=null, bottomBar:BottomBar=null, target:IEventDispatcher=null)
 		{
 			super(target);
 			_worldView = worldView;
@@ -72,44 +76,47 @@ package views
 			return _bitmapBlotter;
 		}
 		
-		public function handleEnterFrameEvents():void
+		public function handleEnterFrameEvents(view:WorldView, concertStageView:StageView=null):void
 		{
-			if (_worldView)
+			if (view && concertStageView)
 			{
-				if (_worldView.creaturesAdded && _stageView.bandBoss)
+				if (view.creaturesAdded && concertStageView.venueManager.bandBoss)
 				{
-					if (_venueManager.venue.bandMemberManager)
+					if (view.venueManager.venue.bandMemberManager)
 					{
-						updateCursor();									
+						updateCursor(view, concertStageView);									
 					}
 				}
-				checkDrag();			
+			}
+			if (view)
+			{
+				checkDrag(view, concertStageView);							
 			}
 		}
 		
-		public function checkDrag():void
+		public function checkDrag(view:WorldView, concertStageView:StageView=null):void
 		{
 			if (isDragging)
 			{
-				dragStage();
+				dragStage(view, concertStageView);
 			}				
 		}
 		
-		public function getPersonFromAsset(asset:ActiveAsset):Person
+		public function getPersonFromAsset(asset:ActiveAsset, view:WorldView, concertStageView:StageView):Person
 		{
-			for each (var cp:CustomerPerson in _customerPersonManager)
+			for each (var cp:CustomerPerson in view.venueManager.venue.customerPersonManager)
 			{
 				if (cp.creature)
 				{
-					if (cp.creature == (asset as AssetStack).creature && cp.moods)
+					if (cp.creature == (asset as ActiveAssetStack).creature && cp.mood)
 					{					
 						return cp;
 					}
 				}
 			}
-			for each (var bm:BandMember in _venueManager.venue.bandMemberManager)
+			for each (var bm:BandMember in concertStageView.venueManager.venue.bandMemberManager)
 			{
-				if (bm == asset && bm.moods)
+				if (bm == asset && bm.mood)
 				{
 					return bm;
 				}
@@ -117,18 +124,61 @@ package views
 			return null;
 		}
 		
-		public function checkCreatureHover(asset:ActiveAsset):MovieClip
+		public function checkCreatureHover(asset:ActiveAsset, view:WorldView, concertStageView:StageView):Object
 		{
-			var person:Person = getPersonFromAsset(asset);
+			var person:Person = getPersonFromAsset(asset, view, concertStageView);
+			
 			if (person)
 			{
-				var cursorClip:MovieClip = person.generateMoodCursor(person.moods[0]);
-				var gf:GlowFilter = new GlowFilter(0x0CEB7B);
-				person.filters = [gf];						
-				return cursorClip;
+				var cursorClip:MovieClip = person.generateMoodCursor(person.mood);
+				var gf:GlowFilter = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
+				person.filters = [gf];	
+				var cursorMessage:UIComponent = person.generateMoodMessage(person.mood);
+				return {cursorClip: cursorClip, cursorMessage: cursorMessage};
 			}
 			return null;
-		}					
+		}
+		
+		public static function getTypicalTextFilter():GlowFilter
+		{
+			var filter:GlowFilter = new GlowFilter(0x333333, 1, 1.4, 1.4, 30, 5); 
+			return filter;
+		}		
+		
+		public static function setStylesForNurtureText(usableText:Text, usable:Usable, numberOfOwnedUsables:int):void
+		{
+			usableText.setStyle("paddingLeft", 5);
+			usableText.setStyle("paddingRight", 5);
+			usableText.setStyle("paddingTop", 2);
+			usableText.setStyle("paddingBottom", 2);
+			usableText.setStyle("fontFamily", "Museo-Slab-900");
+			usableText.setStyle("fontSize", 13);
+			usableText.setStyle("color", 0xffffff);
+			usableText.filters = [WorldBitmapInterface.getTypicalTextFilter()];
+		}
+		
+		public static function setStylesForGenericBackContainer(container:Canvas):void
+		{
+			container.clipContent;
+		}
+		
+		public static function setStylesForNurtureContainer(container:UIComponent, numberOfOwnedUsables:int):void
+		{
+			container.y = 22;
+			container.x = 20;
+			container.setStyle("cornerRadius", 6);
+			container.setStyle("borderStyle", "solid");
+			if (numberOfOwnedUsables > 0)
+			{
+				container.setStyle("borderColor", 0x008C52);
+				container.setStyle("backgroundColor", 0x35DE49);
+			}
+			else
+			{
+				container.setStyle("borderColor", 0x910000);
+				container.setStyle("backgroundColor", 0xFF3333);				
+			}
+		}
 		
 		public function onWorldViewClicked(evt:MouseEvent):void
 		{
@@ -183,78 +233,80 @@ package views
 			}
 		}
 		
-		public function worldHovered():MovieClip
+		public function worldHovered(view:WorldView, concertStageView:StageView):Object
 		{
-			var cursorClip:MovieClip;
+			var cursorObject:Object;
 			
-			for each (var asset:ActiveAsset in _worldView.myWorld.assetRenderer.unsortedAssets)				
+			for each (var asset:ActiveAsset in view.myWorld.assetRenderer.unsortedAssets)				
 			{
-				if (asset is AssetStack)
+				if (asset is Person)
 				{
-					var bounds:Rectangle = (asset as AssetStack).getBounds(_worldView);
-					if (bounds.contains(_worldView.mouseX, _worldView.mouseY))
+					var bounds:Rectangle = (asset as Person).getBounds(view);
+					if (bounds.contains(view.mouseX, view.mouseY))
 					{
 						clearFilters();
-						cursorClip = checkCreatureHover(asset);
+						cursorObject = checkCreatureHover(asset, view, concertStageView);
 					}
 				}
 			}	
-			return cursorClip;
+			return cursorObject;
 		}
 		
-		public function stageHovered(currentMouseX:int, currentMouseY:int):MovieClip
+		public function stageHovered(currentMouseX:int, currentMouseY:int, view:WorldView, concertStageView:StageView):Object
 		{
 			var sortedArray:ArrayCollection = sortStageAssets();
-			var cursorClip:MovieClip;
+			var cursorObject:Object;
 			
 			for each (var asset:ActiveAsset in sortedArray)				
 			{
-				if (asset is AssetStack)
+				if (asset is ActiveAssetStack)
 				{
 					var hitRect:Rectangle = new Rectangle(asset.x - asset.width/2, asset.y - asset.height, asset.width, asset.height);
 					if (hitRect.contains(currentMouseX, currentMouseY))
 					{
 						clearFilters();
-						cursorClip = checkCreatureHover(asset);
+						cursorObject = checkCreatureHover(asset, view, concertStageView);
 					}
 				}
 			}				
-			return cursorClip;
+			return cursorObject;
 		}		
 		
-		private function updateCursor():void
+		private function updateCursor(view:WorldView, concertStageView:StageView):void
 		{
 			clearFilters();
 			
 			var bitmapHovered:Boolean = bitmapHovered();
-			var cursorClip:MovieClip;
+			var cursorObject:Object;
+
 			if (!bitmapHovered)
 			{
-				cursorClip = checkIfStageViewHovered(_worldView.mouseX - _worldView.myWorld.x, _worldView.mouseY, _stageView.height);				
+				cursorObject = checkIfStageViewHovered(view.mouseX - view.myWorld.x, concertStageView.mouseY, concertStageView.height, view, concertStageView);				
 			}
-			if (!cursorClip)
+			if (!cursorObject)
 			{
-				cursorClip = worldHovered();
+				cursorObject = worldHovered(view, concertStageView);
 			}
-			handleCursorClip(cursorClip);
+			handleCursorObject(cursorObject);
 		}	
 		
-		public function handleCursorClip(cursorClip:MovieClip):void
+		public function handleCursorObject(cursorObject:Object):void
 		{
-			if (!cursorUIC && !cursorClip)
+//			var cursorClip:MovieClip = cursorObject.cursorClip;
+			if (!cursorUIC && !cursorObject)
 			{
 			}
-			else if (!cursorUIC && cursorClip)
+			else if (!cursorUIC && cursorObject)
 			{
-				addCursorUIC(cursorClip);
+				addCursorUIC(cursorObject.cursorClip, cursorObject.cursorMessage);
 			}
-			else if (!cursorClip && cursorUIC)
+			else if (!cursorObject && cursorUIC)
 			{
 				removeCursorUIC();
 			}
-			else if (getQualifiedClassName(cursorUIC.mc) != getQualifiedClassName(cursorClip))
+			else if (getQualifiedClassName(cursorUIC.mc) != getQualifiedClassName(cursorObject.cursorClip))
 			{
-				swapCursorClip(cursorClip);
+				swapCursorClip(cursorObject.cursorClip);
 			}
 			else
 			{
@@ -283,30 +335,34 @@ package views
 			cursorUIC = null;
 		}
 		
-		public function addCursorUIC(cursorClip:MovieClip):void
+		public function addCursorUIC(cursorClip:MovieClip, cursorMessage:UIComponent=null):void
 		{
-			createNewCursorUIC(cursorClip);
+			createNewCursorUIC(cursorClip, cursorMessage);
 			_worldView.addChild(cursorUIC);
 		}
 		
-		public function swapCursorClip(cursorClip:MovieClip):void
+		public function swapCursorClip(cursorClip:MovieClip, cursorMessage:UIComponent=null):void
 		{
 			if (_worldView.contains(cursorUIC))
 			{
 				_worldView.removeChild(cursorUIC);				
 			}
-			createNewCursorUIC(cursorClip);
+			createNewCursorUIC(cursorClip, cursorMessage);
 			_worldView.addChild(cursorUIC);
 		}
 		
-		public function createNewCursorUIC(cursorClip:MovieClip):void
+		public function createNewCursorUIC(cursorClip:MovieClip, cursorMessage:UIComponent=null):void
 		{
 			cursorUIC = new ContainerUIC();
 			var bp:Bitmap = BitmapBlotter.getBitmapForMovieClip(cursorClip);
 			cursorUIC.setStyles(_worldView.mouseX, _worldView.mouseY, cursorClip.width, cursorClip.height);
 			cursorUIC.mc = cursorClip;
 			cursorUIC.bitmap = bp;
-			cursorUIC.addChild(bp);				
+			cursorUIC.addChild(bp);	
+			if (cursorMessage)
+			{
+				cursorUIC.addChild(cursorMessage);
+			}
 		}
 		
 		public function updateCursorUIC():void
@@ -315,13 +371,17 @@ package views
 			cursorUIC.y = _worldView.mouseY;
 		}	
 		
-		public function onMouseDown(evt:MouseEvent):void
+		public function handleMouseDown(view:WorldView):void
 		{
 			isDragging = true;
-			mouseIncrementX = _worldView.mouseX.valueOf();
-			mouseIncrementY = _worldView.mouseY.valueOf();
-			_worldView.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-		}	
+			mouseIncrementX = view.mouseX.valueOf();
+			mouseIncrementY = view.mouseY.valueOf();
+			view.addEventListener(MouseEvent.MOUSE_UP, function onMouseUp():void
+			{
+				view.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+				isDragging = false;				
+			});
+		}
 		
 		public function isMouseInsideBitmapAsset():AssetBitmapData
 		{
@@ -377,12 +437,12 @@ package views
 			stageClicked(currentMouseX, adjustedY);				
 		}
 		
-		private function checkIfStageViewHovered(currentMouseX:Number, currentMouseY:Number, viewHeight:Number):MovieClip
+		private function checkIfStageViewHovered(currentMouseX:Number, currentMouseY:Number, viewHeight:Number, view:WorldView, concertStageView:StageView):Object
 		{
-			var cursorClip:MovieClip;
+			var cursorObject:Object;
 			var adjustedY:Number = getAdjustedY(currentMouseX, currentMouseY, viewHeight);
-			cursorClip = stageHovered(currentMouseX, adjustedY);
-			return cursorClip;
+			cursorObject = stageHovered(currentMouseX, adjustedY, view, concertStageView);
+			return cursorObject;
 		}
 		
 		public function getAdjustedY(currentMouseX:Number, currentMouseY:Number, viewHeight:Number):Number
@@ -399,24 +459,22 @@ package views
 			return adjustedY;
 		}
 		
-		private function dragStage():void
+		private function dragStage(view:WorldView, concertStageView:StageView=null):void
 		{		
-			_stageView.x = _stageView.x + (_worldView.mouseX - mouseIncrementX);
-			_stageView.y = _stageView.y + (_worldView.mouseY - mouseIncrementY);
-			_worldView.x = _worldView.x + (_worldView.mouseX - mouseIncrementX);
-			_worldView.y = _worldView.y + (_worldView.mouseY - mouseIncrementY);
-		}		
-		
-		private function onMouseUp(evt:MouseEvent):void
-		{
-			_worldView.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-			isDragging = false;
-		}	
+			if (concertStageView)
+			{
+				concertStageView.x = concertStageView.x + (view.mouseX - mouseIncrementX);
+				concertStageView.y = concertStageView.y + (view.mouseY - mouseIncrementY);
+			}
+			view.x = view.x + (view.mouseX - mouseIncrementX);
+			view.y = view.y + (view.mouseY - mouseIncrementY);
+		}
 		
 		public function createBackgroundLayer(currentWorld:World, currentWidth:int, currentHeight:int):Canvas
 		{
 			var relWidth:Number = currentWorld.wg.getRect(currentWorld).width;
 			var relHeight:Number = currentWorld.wg.getRect(currentWorld).height;
+			
 			var bitmapBlotter:BitmapBlotter = new BitmapBlotter();
 			currentWorld.bitmapBlotter = bitmapBlotter;
 			bitmapBlotter.myWorld = currentWorld;
@@ -425,6 +483,7 @@ package views
 			bitmapBlotter.relWidth = relWidth;
 			bitmapBlotter.relHeight = relHeight;
 			currentWorld.bitmapBlotter = bitmapBlotter;
+			
 			var backgroundCanvas:Canvas = new Canvas();
 			backgroundCanvas.width = relWidth;
 			backgroundCanvas.height = relHeight;
@@ -433,6 +492,7 @@ package views
 			backgroundCanvas.x = (currentWidth - relWidth)/2;
 			backgroundCanvas.y = (currentHeight - relHeight)/2;
 			backgroundCanvas.setStyle("backgroundAlpha", 0);
+			
 			bitmapBlotter.backgroundCanvas = backgroundCanvas;
 			return backgroundCanvas;
 //			addChild(backgroundCanvas);

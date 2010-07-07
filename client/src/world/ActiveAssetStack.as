@@ -8,15 +8,15 @@ package world
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
-	import flash.utils.getQualifiedClassName;
-	
+	import flash.utils.getQualifiedClassName;	
 	import models.Creature;
 	import models.EssentialModelReference;
 	import models.OwnedLayerable;
-	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
-	import mx.events.CollectionEventKind;
+	import mx.events.CollectionEventKind;	
+	import rock_on.CustomerPerson;
+	import views.ExpandingMovieclip;
 	
 	public class ActiveAssetStack extends ActiveAsset
 	{
@@ -45,19 +45,22 @@ package world
 			
 			if (mc)
 			{
+				scaleMovieClip(mc);
 				addChild(mc);
 				var mcBounds:Rectangle = mc.getBounds(this);
 				removeChild(mc);
-				var heightDiff:Number = getHeightDifferential(mcBounds);		
-				bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
-				var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width/2, heightDiff);
-				scaleMovieClip(mc);
-				var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height);
+				var heightDiff:Number = getHeightDifferential(mcBounds);
+				var widthDiff:Number = getWidthDifferential(mcBounds);
+				bitmapData = new BitmapData(mc.width + 10, mc.height + 8, true, 0x000000);
+				var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width + 10, heightDiff/_scale);
+				var rect:Rectangle = new Rectangle(0, 0, mc.width + 10, mc.height + 8);
 				scaleMatrix(matrix);
 				bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
 				bitmap = new Bitmap(bitmapData);
+//				bitmap.x = -mc.width/2;
+//				bitmap.y = -heightDiff * _scale;
 				bitmap.x = -mc.width/2;
-				bitmap.y = -heightDiff * _scale;
+				bitmap.y = -heightDiff;
 				bitmap.opaqueBackground = null;
 				addChild(bitmap);
 			}
@@ -70,6 +73,12 @@ package world
 			return heightDiff;
 		}
 		
+		public function getWidthDifferential(mcBounds:Rectangle):Number
+		{
+			var widthDiff:Number = Math.abs(mcBounds.left);
+			return widthDiff;
+		}
+		
 		public function createMovieClipsForBitmap():Sprite
 		{
 			var newClip:Sprite = new Sprite();
@@ -77,7 +86,7 @@ package world
 			{
 				mc.scaleX = 1;
 				mc.scaleY = 1;
-				newClip.addChild(mc);
+				newClip.addChild(mc);				
 			}
 			return newClip;
 		}
@@ -102,6 +111,12 @@ package world
 		public function get scale():Number
 		{
 			return _scale;
+		}
+		
+		public function reset():void
+		{
+			clearMovieClips();
+			removeCurrentChildren();
 		}
 		
 		public function changeScale(newScaleX:Number, newScaleY:Number=1):void
@@ -211,11 +226,14 @@ package world
 		public function clearBitmap():void
 		{
 			var totalChildren:int = this.numChildren.valueOf();
-			for (var i:int = 0; i < totalChildren; i++)
+			for (var i:int = totalChildren; i > 0; i--)
 			{
-				if (this.getChildAt(i) == bitmap)
+				if (this.numChildren > i-1)
 				{
-					removeChild(bitmap);
+					if (this.getChildAt(i-1) == bitmap)
+					{
+						removeChild(bitmap);
+					}
 				}
 			}
 		}
@@ -231,9 +249,19 @@ package world
 		public function removeCurrentChildren():void
 		{
 			var totalChildren:int = this.numChildren.valueOf();
-			for (var i:int = 0; i < totalChildren; i++)
+			var skips:int = 0;
+			for (var i:int = totalChildren; i > 0; i--)
 			{
-				this.removeChildAt(i);
+				var currentChildren:int = this.numChildren;
+				var index:int = currentChildren - 1 - skips;
+				if (this.getChildAt(index))
+				{
+					this.removeChildAt(index);					
+				}
+				else
+				{
+					skips++;
+				}
 			}
 		}
 		
@@ -243,7 +271,7 @@ package world
 			{
 				mc.scaleX = _scale;
 				mc.scaleY = _scale;
-				addChild(mc);
+				addChild(mc);				
 			}
 		}
 		
@@ -283,7 +311,10 @@ package world
 			{
 				if (evt.kind == CollectionEventKind.ADD)
 				{
-					addChild(item);
+					if (!(this.contains(item)))
+					{
+						addChild(item);					
+					}
 				}
 				else if (evt.kind == CollectionEventKind.REMOVE)
 				{
@@ -302,7 +333,7 @@ package world
 				{
 					var currentChildren:int = this.numChildren;
 					var index:int = currentChildren - 1 - skips;
-					if (this.getChildAt(index) is Sprite)
+					if (this.getChildAt(index) is Sprite && !(this.getChildAt(index) is ExpandingMovieclip))
 					{
 						this.removeChildAt(index);					
 					}

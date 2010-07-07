@@ -20,6 +20,9 @@ package views
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
+	import rock_on.ConcertStage;
+	import rock_on.StageDecoration;
+	
 	import stores.StoreEvent;
 	
 	import world.ActiveAsset;
@@ -30,9 +33,11 @@ package views
 	{
 		public var _myWorld:World;
 		public var _editView:EditView;
+		public var _structureController:StructureController;
+		public var _uiLayer:UILayer;
+		
 		public var currentAsset:ActiveAsset;
 		public var locked:Boolean = false;
-		public var _structureController:StructureController;
 		public var flexiUIC:FlexibleUIComponent;
 		
 		public static const INVALID_COLOR:ColorTransform = new ColorTransform(1, 0.25, 0.25);
@@ -43,6 +48,7 @@ package views
 			super();
 			_myWorld = world;
 			_editView = editView;
+			_uiLayer = editView.uiLayer;
 			_editView.addEventListener(MouseEvent.CLICK, onWorldClicked);
 
 //			enableMouseDetection();
@@ -162,13 +168,14 @@ package views
 
 		public function evaluateClickedAsset(clickedParent:Object, clickedObject:Object):void
 		{			
-			var assetParent:ActiveAsset = clickedParent as ActiveAsset;
-			if (!locked && clickedParent is ActiveAsset && (assetParent.thinger as OwnedStructure).editing == false)
+			var asset:ActiveAsset = clickedObject as ActiveAsset;
+
+			if (!locked && clickedObject is ActiveAsset && (asset.thinger as OwnedStructure).editing == false)
 			{
 				resetEditMode();			
-				activateMoveableStructure(assetParent);
+				activateMoveableStructure(asset);
 //				locked = true;
-				(assetParent.thinger as OwnedStructure).editing = true;
+				(asset.thinger as OwnedStructure).editing = true;
 			}
 			else if (locked && (isFurnitureOutOfBounds() || isFurnitureOnInvalidPoint()) && !(clickedObject is Button))
 			{
@@ -326,7 +333,7 @@ package views
 			var heightBase:int = 0;
 			if ((currentAsset.thinger as OwnedStructure).structure.structure_type == "StageDecoration")
 			{
-				heightBase = _editView.concertStage.structure.height;
+				heightBase = _editView.stageManager.concertStage.structure.height;
 			}
 			return heightBase;
 		}
@@ -356,9 +363,9 @@ package views
 			if (inStageArea(currentAsset))
 			{
 				var exemptStructures:ArrayCollection = new ArrayCollection();
-				exemptStructures.addItem(_editView.concertStage);
-				currentAsset.worldCoords.y = _editView.concertStage.structure.height;
-				worldDestination.y = _editView.concertStage.structure.height;
+				exemptStructures.addItem(_editView.stageManager.concertStage);
+				currentAsset.worldCoords.y = _editView.stageManager.concertStage.structure.height;
+				worldDestination.y = _editView.stageManager.concertStage.structure.height;
 				_myWorld.moveAssetTo(currentAsset, worldDestination, false, true, false, exemptStructures);
 			}
 			else
@@ -423,9 +430,14 @@ package views
 		}
 		
 		public function isFurnitureOnInvalidPoint():Boolean
-		{			
+		{	
 			var exemptStructures:ArrayCollection = new ArrayCollection();
 			exemptStructures.addItem(currentAsset.thinger as OwnedStructure);
+			if ((currentAsset.thinger as OwnedStructure) is StageDecoration)
+			{
+				exemptStructures.addItem(_editView.stageManager.concertStage);
+			}			
+			
 			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.establishStructureOccupiedSpaces(exemptStructures);
 			var structureSpaces:ArrayCollection = new ArrayCollection();
 			structureSpaces = _myWorld.pathFinder.getPoint3DForMovingStructure(currentAsset, currentAsset.thinger as OwnedStructure, structureSpaces);

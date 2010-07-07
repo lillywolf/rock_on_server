@@ -238,7 +238,10 @@ package world
 				var asset:ActiveAsset = sortedAssets[i];
 				if (sortedAssets.contains(asset))
 				{
-					removeChild(asset);									
+					if (this.contains(asset))
+					{
+						removeChild(asset);														
+					}
 				}
 			}			
 		}

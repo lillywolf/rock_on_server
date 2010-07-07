@@ -10,6 +10,7 @@ package game
 	import controllers.StoreController;
 	import controllers.StructureController;
 	import controllers.ThingerController;
+	import controllers.UsableController;
 	import controllers.UserController;
 	
 	import flash.events.Event;
@@ -36,6 +37,7 @@ package game
 	{
 		[Bindable] public var songController:SongController;
 		[Bindable] public var layerableController:LayerableController;
+		[Bindable] public var usableController:UsableController;
 		[Bindable] public var creatureController:CreatureController;
 		[Bindable] public var thingerController:ThingerController;
 		[Bindable] public var essentialModelController:EssentialModelController;
@@ -72,6 +74,7 @@ package game
 			
 			songController = new SongController(essentialModelController);
 			layerableController = new LayerableController(essentialModelController);
+			usableController = new UsableController(essentialModelController);
 			creatureController = new CreatureController(essentialModelController);
 			thingerController = new ThingerController(essentialModelController);
 			storeController = new StoreController(essentialModelController);
@@ -117,6 +120,11 @@ package game
 			{
 				essentialModelController.layerables = preLoadedContent["layerables"];
 				layerableController.layerables = essentialModelController.layerables;
+			}									
+			if (preLoadedContent["usables"])
+			{
+				essentialModelController.layerables = preLoadedContent["usables"];
+				usableController.usables = essentialModelController.usables;
 			}									
 			if (preLoadedContent["dwellings"])
 			{
@@ -170,6 +178,7 @@ package game
 			getDataForModel({}, "dwelling", "get_all");
 			getDataForModel({}, "store", "get_all");
 			getDataForModel({}, "song", "get_all");
+			getDataForModel({}, "usable", "get_all");
 		}
 		
 		public function getDataForModel(params:Object, modelName:String, methodName:String):void
@@ -336,6 +345,7 @@ package game
 			checkForLoadedStructures();
 			checkForLoadedLayerables();
 			checkForLoadedSongs();
+			checkForLoadedUsables();
 		}
 		
 		public function checkIfLoadingAndInstantiationComplete():void
@@ -361,6 +371,18 @@ package game
 			{
 				structureController.fullyLoaded = true;
 				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_STRUCTURES_LOADED);
+				evt.user = this.user;
+				evt.gdi = this;
+				dispatchEvent(evt);
+			}	
+		}
+
+		public function checkForLoadedUsables():void
+		{
+			if (usableController.ownedUsableMovieClipsLoaded == usableController.ownedUsablesLoaded && usableController.ownedUsablesLoaded != 0)
+			{
+				usableController.fullyLoaded = true;
+				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_USABLES_LOADED);
 				evt.user = this.user;
 				evt.gdi = this;
 				dispatchEvent(evt);

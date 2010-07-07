@@ -5,6 +5,7 @@ package views
 	import controllers.LayerableController;
 	import controllers.LevelController;
 	import controllers.StructureController;
+	import controllers.UsableController;
 	
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -43,6 +44,7 @@ package views
 		public var _structureController:StructureController;
 		public var _creatureController:CreatureController;
 		public var _layerableController:LayerableController;
+		public var _usableController:UsableController;
 		
 		public var _bitmapBlotter:BitmapBlotter;
 		public var _myWorld:World;
@@ -50,7 +52,7 @@ package views
 		
 		public var bandBoss:BandBoss;
 		
-		public function VenueManager(wbi:WorldBitmapInterface, structureController:StructureController, layerableController:LayerableController, dwellingController:DwellingController, levelController:LevelController, creatureController:CreatureController, target:IEventDispatcher=null)
+		public function VenueManager(wbi:WorldBitmapInterface, structureController:StructureController, layerableController:LayerableController, dwellingController:DwellingController, levelController:LevelController, creatureController:CreatureController, usableController:UsableController, target:IEventDispatcher=null)
 		{
 			super(target);
 			_wbi = wbi;
@@ -58,13 +60,14 @@ package views
 			_dwellingController = dwellingController;
 			_levelController = levelController;
 			_structureController = structureController;
-			_creatureController = creatureController;			
+			_creatureController = creatureController;
+			_usableController = usableController;
 		}
 
 		public function getVenue():void
 		{
 			var venues:ArrayCollection = _dwellingController.getDwellingsByType("Venue");
-			venue = new Venue(_wbi, this, _dwellingController, _creatureController, _layerableController, _structureController, bandBoss, venues[0] as OwnedDwelling);				
+			venue = new Venue(_wbi, this, _dwellingController, _creatureController, _layerableController, _structureController, _usableController, bandBoss, venues[0] as OwnedDwelling);				
 		}
 		
 		public function update(deltaTime:Number):void

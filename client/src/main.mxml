@@ -19,7 +19,7 @@
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
 			<mx:AddChild position="after">
-				<views:WorldView id="worldView" wbi="{wbi}" bottomBar="{bottomBarView}" songController="{gdi.songController}" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" dwellingController="{gdi.dwellingController}" levelController="{gdi.levelController}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandBoss="{stageView.bandBoss}"/>
+				<views:WorldView id="worldView" wbi="{wbi}" bottomBar="{bottomBarView}" usableController="{gdi.usableController}" songController="{gdi.songController}" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" dwellingController="{gdi.dwellingController}" levelController="{gdi.levelController}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandBoss="{stageView.bandBoss}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="friendView" basedOn="topBar">
@@ -235,12 +235,14 @@
 				friendView.layerableController = friendGDI.layerableController;
 				friendView.creatureController = friendGDI.creatureController;
 				friendView.levelController = friendGDI.levelController;
-				friendView.dwellingController = friendGDI.dwellingController;				
+				friendView.dwellingController = friendGDI.dwellingController;
+				friendView.usableController  = friendGDI.usableController;
 				friendView.addEventListener("worldAdded", onFriendViewWorldAdded);
 
 				friendView.initializeVenue();
 				friendStageView.venueManager = friendView.venueManager;
 				friendStageView.initializeStage();
+				friendView.stageView = friendStageView;
 				friendView.stageManager = friendStageView.stageManager;
 				friendView.initializeWorld();
 				friendView.initializeStructures();
@@ -334,7 +336,7 @@
 			}
 			private function updateOwnedStructurePostServer(os:OwnedStructure, method:String):void
 			{
-				gdi.structureController.updateOwnedStructureOnServerResponse(os, method, worldView);
+				gdi.structureController.updateOwnedStructureOnServerResponse(os, method, worldView.venueManager.venue);
 				worldView.updateRenderedStructures(os, method);
 				stageView.updateRenderedStructures(os, method, stageView.myStage);
 				
@@ -396,6 +398,7 @@
 				gdi.addEventListener(EssentialEvent.OWNED_STRUCTURES_LOADED, onStructuresLoaded);
 				gdi.addEventListener(EssentialEvent.OWNED_LAYERABLES_LOADED, onLayerablesLoaded);
 				gdi.addEventListener(EssentialEvent.OWNED_DWELLINGS_LOADED, onDwellingsLoaded);
+				gdi.addEventListener(EssentialEvent.OWNED_USABLES_LOADED, onUsablesLoaded);
 			}
 			private function onLoadingAndInstantiationComplete(evt:EssentialEvent):void
 			{
@@ -443,6 +446,18 @@
 				{
 					friendGDILoaded(evt.gdi);
 				}				
+			}
+			private function onUsablesLoaded(evt:EssentialEvent):void
+			{
+				gdi.removeEventListener(EssentialEvent.OWNED_USABLES_LOADED, onUsablesLoaded);
+				if (isLoggedInUser(evt.user) && evt.gdi.usableController.fullyLoaded)
+				{
+//					Not really sure what should happen here yet
+				}
+				else if (isLoggedInUser(evt.user) && !evt.gdi.usableController.fullyLoaded)
+				{
+//					throw new Error("Dwelling not set");
+				}			
 			}
 			private function onLayerablesLoaded(evt:EssentialEvent):void
 			{

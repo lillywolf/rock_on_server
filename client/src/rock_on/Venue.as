@@ -5,6 +5,7 @@ package rock_on
 	import controllers.LayerableController;
 	import controllers.LevelController;
 	import controllers.StructureController;
+	import controllers.UsableController;
 	
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
@@ -90,6 +91,7 @@ package rock_on
 		public var _structureController:StructureController;
 		public var _creatureController:CreatureController;
 		public var _layerableController:LayerableController;
+		public var _usableController:UsableController;
 		public var _myWorld:World;
 		public var _bitmapBlotter:BitmapBlotter;
 		
@@ -97,7 +99,7 @@ package rock_on
 		public var numStaticCustomers:int;
 		public var numMovingCustomers:int;		
 		
-		public function Venue(wbi:WorldBitmapInterface, venueManager:VenueManager, dwellingController:DwellingController, creatureController:CreatureController, layerableController:LayerableController, structureController:StructureController, bandBoss:BandBoss, params:Object=null, target:IEventDispatcher=null)
+		public function Venue(wbi:WorldBitmapInterface, venueManager:VenueManager, dwellingController:DwellingController, creatureController:CreatureController, layerableController:LayerableController, structureController:StructureController, usableController:UsableController, bandBoss:BandBoss, params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
 			
@@ -107,6 +109,7 @@ package rock_on
 			_wbi = wbi;
 			_dwellingController = dwellingController;
 			_creatureController = creatureController;
+			_usableController = usableController;
 			_bandBoss = bandBoss;
 			
 			entryPoints = new ArrayCollection();
@@ -292,6 +295,7 @@ package rock_on
 			for (var i:int = 0; i < numMovingCustomers; i++)
 			{
 				var c:ImposterCreature = creatureGenerator.createImposterCreature("Concert Goer");
+				c.has_moods = true;
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.4);
 				cp.stageManager = stageManager;
 				cp.speed = 0.06;
@@ -544,6 +548,11 @@ package rock_on
 		public function set bandBoss(val:BandBoss):void
 		{
 			_bandBoss = val;
+		}
+		
+		public function get usableController():UsableController
+		{
+			return _usableController;
 		}
 		
 	}

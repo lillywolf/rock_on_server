@@ -58,6 +58,7 @@ package rock_on
 				{
 					addToWorld(cp, seatNumber);				
 				}
+				
 				addEventListeners(cp);
 				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
 			}
@@ -74,9 +75,9 @@ package rock_on
 				cp.lastWorldPoint = null;
 				cp.worldCoords = null;
 				cp.proxiedDestination = null;
-				addToWorld(cp);
 				cp.reInitialize();
-				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
+				add(cp, true, -1, cp.venue.boothsRect, null, cp.myWorld);
+//				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
 			}
 		}
 		
@@ -126,8 +127,14 @@ package rock_on
 		
 		private function addEventListeners(cp:CustomerPerson):void
 		{
-			cp.addEventListener("customerRouted", onCustomerRouted);
-			cp.addEventListener("queueDecremented", decrementQueue);			
+			if (!cp.hasEventListener("customerRouted"))
+			{
+				cp.addEventListener("customerRouted", onCustomerRouted);			
+			}
+			if (!cp.hasEventListener("queueDecremented"))
+			{
+				cp.addEventListener("queueDecremented", decrementQueue);						
+			}
 		}
 		
 		private function decrementQueue(evt:DynamicEvent):void
@@ -275,12 +282,12 @@ package rock_on
 			}
 		}
 		
-		public function remove(person:CustomerPerson):void
+		public function remove(cp:CustomerPerson):void
 		{
 			if(_myWorld)
 			{
-				_myWorld.removeAsset(person);
-				var personIndex:Number = getItemIndex(person);
+				_myWorld.removeAsset(cp);
+				var personIndex:Number = getItemIndex(cp);
 				removeItemAt(personIndex);
 			}
 			else 
@@ -298,6 +305,26 @@ package rock_on
 				remove(cp);				
 				addAfterInitializing(cp);				
 			}
+		}
+		
+		public function redrawStandAloneCustomers():void
+		{
+			var i:int = 0;
+			var toRemove:ArrayCollection = new ArrayCollection();
+			for each (var cp:CustomerPerson in this)
+			{
+				if (!cp.isBitmapped && !cp.isSuperFan)
+				{
+					toRemove.addItem(cp);
+					i++;
+				}
+			}
+			for each (cp in toRemove)
+			{
+				remove(cp);				
+				addAfterInitializing(cp);	
+			}
+			trace(i.toString());
 		}
 		
 		public function removeAllCustomers():void

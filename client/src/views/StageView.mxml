@@ -91,7 +91,7 @@
 			{
 				if (isValidWorldStructure(os))
 				{
-					var asset:ActiveAsset = worldToUpdate.findAssetByThinger(os);
+					var asset:ActiveAsset = structureController.findAssetFromOwnedStructure(worldToUpdate.assetRenderer.unsortedAssets, os);
 					if (asset && method == "sell")
 					{
 						worldToUpdate.assetRenderer.removeAsset(asset);
