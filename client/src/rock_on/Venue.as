@@ -264,7 +264,7 @@ package rock_on
 //				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
 				cp.speed = 0.06;
 				cp.stageManager = stageManager;
-				customerPersonManager.add(cp, false, i);
+				customerPersonManager.add(cp, false, i);				
 			}
 		}
 		
@@ -300,6 +300,7 @@ package rock_on
 				cp.stageManager = stageManager;
 				cp.speed = 0.06;
 				customerPersonManager.add(cp, true, -1, boothsRect);
+				cp.setMood();							
 			}			
 		}
 		

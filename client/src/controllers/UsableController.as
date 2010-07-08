@@ -130,6 +130,20 @@ package controllers
 			return usable;
 		}
 		
+		public function getNurtureMessageByUsable(usable:Usable):String
+		{
+			switch (usable.name)
+			{
+				case "Hamburger":
+					return "Feed burger";
+					break;
+				case "Coffee":
+					return "Caffeinate";
+					break;
+			}
+			return null;
+		}
+		
 		public function getNumberOfOwnedUsablesByMood(mood:String):int
 		{
 			var usable:Usable = getUsableByMood(mood);

@@ -20,7 +20,7 @@ package views
 			currentScale = scale;
 			currentStep = 0;
 			this.steps = steps;
-			this.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+//			this.addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
 		private function onEnterFrame(evt:Event):void

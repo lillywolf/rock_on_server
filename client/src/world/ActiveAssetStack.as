@@ -8,14 +8,18 @@ package world
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
-	import flash.utils.getQualifiedClassName;	
+	import flash.utils.getQualifiedClassName;
+	
 	import models.Creature;
 	import models.EssentialModelReference;
 	import models.OwnedLayerable;
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
-	import mx.events.CollectionEventKind;	
+	import mx.events.CollectionEventKind;
+	
 	import rock_on.CustomerPerson;
+	
 	import views.ExpandingMovieclip;
 	
 	public class ActiveAssetStack extends ActiveAsset
@@ -254,7 +258,7 @@ package world
 			{
 				var currentChildren:int = this.numChildren;
 				var index:int = currentChildren - 1 - skips;
-				if (this.getChildAt(index))
+				if (!(this.getChildAt(index) is ExpandingMovieclip))
 				{
 					this.removeChildAt(index);					
 				}

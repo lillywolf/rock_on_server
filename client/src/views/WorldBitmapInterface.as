@@ -164,8 +164,8 @@ package views
 		
 		public static function setStylesForNurtureContainer(container:UIComponent, numberOfOwnedUsables:int):void
 		{
-			container.y = 22;
-			container.x = 20;
+//			container.y = 22;
+//			container.x = 20;
 			container.setStyle("cornerRadius", 6);
 			container.setStyle("borderStyle", "solid");
 			if (numberOfOwnedUsables > 0)
@@ -306,7 +306,7 @@ package views
 			}
 			else if (getQualifiedClassName(cursorUIC.mc) != getQualifiedClassName(cursorObject.cursorClip))
 			{
-				swapCursorClip(cursorObject.cursorClip);
+				swapCursorClip(cursorObject.cursorClip, cursorObject.cursorMessage);
 			}
 			else
 			{
@@ -361,6 +361,8 @@ package views
 			cursorUIC.addChild(bp);	
 			if (cursorMessage)
 			{
+				cursorMessage.y = bp.height + bp.y;
+				cursorMessage.x = bp.x - 3;
 				cursorUIC.addChild(cursorMessage);
 			}
 		}

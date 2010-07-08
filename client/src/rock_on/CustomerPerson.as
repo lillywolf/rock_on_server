@@ -75,7 +75,7 @@ package rock_on
 
 			_boothBoss = boothBoss;
 			startInitializedState();
-			
+
 			trace("customer person created");
 		}
 		
@@ -113,11 +113,11 @@ package rock_on
 				}
 				else
 				{
-					if (Math.random() < 0.25)
+					if (Math.random() < 0.2)
 					{
 						mood = CustomerPerson.IS_THIRSTY;
 					}
-					else if (Math.random() < 0.5)
+					else if (Math.random() < 0.4)
 					{
 						mood = CustomerPerson.IS_HUNGRY;
 					}
@@ -264,11 +264,17 @@ package rock_on
 			var usable:Usable = _venue.usableController.getUsableByMood(mood);
 			var numberOfOwnedUsables:int = _venue.usableController.getNumberOfOwnedUsablesByMood(mood);
 			var usablesText:Text = new Text();
+			var numLeftText:Text = new Text();
 			var usablesContainer:UIComponent = new UIComponent();
-			usablesText.text = numberOfOwnedUsables.toString() + " left!";
+			numLeftText.text = "(" + numberOfOwnedUsables.toString() + " left)";
+			usablesText.text = _venue.usableController.getNurtureMessageByUsable(usable);
+			usablesText.validateProperties();
+			numLeftText.y = usablesText.textHeight + 7;
 			WorldBitmapInterface.setStylesForNurtureText(usablesText, usable, numberOfOwnedUsables);
+			WorldBitmapInterface.setStylesForNurtureText(numLeftText, usable, numberOfOwnedUsables);
 			WorldBitmapInterface.setStylesForNurtureContainer(usablesContainer, numberOfOwnedUsables);
 			usablesContainer.addChild(usablesText);
+			usablesContainer.addChild(numLeftText);
 			return usablesContainer;			
 		}		
 				
@@ -374,7 +380,6 @@ package rock_on
 				enthralledTimer.start();
 				numEnthralledTimers++;				
 			}
-			setMood();			
 		}
 		
 		public function startBitmappedEnthralledState():void

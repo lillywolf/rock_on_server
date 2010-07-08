@@ -46,10 +46,10 @@ package helpers
 //			layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
 //			layerableOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
 //			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['walk_toward'] = ["body", "hair front"];
-			layerableOrder['walk_away'] = ["body", "hair front"];
-			layerableOrder['stand_still_toward'] = ["body", "hair front"];
-			layerableOrder['stand_still_away'] = ["body", "hair front"];
+			layerableOrder['walk_toward'] = ["body", "bottom", "top", "hair front"];
+			layerableOrder['walk_away'] = ["body", "bottom", "top", "hair front"];
+			layerableOrder['stand_still_toward'] = ["body", "bottom", "top", "hair front"];
+			layerableOrder['stand_still_away'] = ["body", "bottom", "top", "hair front"];
 			
 			sortedLayerables = new Dictionary();
 			
