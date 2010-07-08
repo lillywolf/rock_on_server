@@ -145,7 +145,7 @@ package views
 			return filter;
 		}		
 		
-		public static function setStylesForNurtureText(usableText:Text, usable:Usable, numberOfOwnedUsables:int):void
+		public static function setStylesForNurtureText(usableText:Text, usable:Usable=null, numberOfOwnedUsables:int=0):void
 		{
 			usableText.setStyle("paddingLeft", 5);
 			usableText.setStyle("paddingRight", 5);

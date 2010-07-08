@@ -10,6 +10,7 @@ package rock_on
 	import flash.utils.Timer;
 	
 	import game.GameClock;
+	import game.MoodBoss;
 	
 	import models.Creature;
 	import models.EssentialModelReference;
@@ -19,6 +20,7 @@ package rock_on
 	import mx.containers.Canvas;
 	import mx.containers.HBox;
 	import mx.controls.Text;
+	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
 	
@@ -44,8 +46,8 @@ package rock_on
 
 		public static const HUNGER_DELAY:int = 360000;
 		public static const IS_CHILLIN:String = "chillin";
-		public static const IS_HUNGRY:String = "hungry";
-		public static const IS_THIRSTY:String = "thirsty";
+		public static const IS_HUNGRY:String = "Hungry";
+		public static const IS_THIRSTY:String = "Thirsty";
 		public static const WANTS_MUSIC:String = "music";
 		
 		public static const ENTHRALLED_TIME:int = 50000 * Math.random();
@@ -108,19 +110,12 @@ package rock_on
 					var timeSinceLastMeal:Number = new Date().getTime() - GameClock.convertStringTimeToUnixTime(_creature.last_fed);				
 					if (timeSinceLastMeal > CustomerPerson.HUNGER_DELAY)
 					{
-						mood = CustomerPerson.IS_HUNGRY;
+						mood = MoodBoss.assignMoodByString(CustomerPerson.IS_HUNGRY);
 					}
 				}
 				else
 				{
-					if (Math.random() < 0.2)
-					{
-						mood = CustomerPerson.IS_THIRSTY;
-					}
-					else if (Math.random() < 0.4)
-					{
-						mood = CustomerPerson.IS_HUNGRY;
-					}
+					mood = MoodBoss.assignMoodByCreatureType(_creature.type, FlexGlobals.topLevelApplication.gdi.user.level.rank);
 				}
 				
 				if (mood)
@@ -135,14 +130,7 @@ package rock_on
 		{
 			if (creature.has_moods)
 			{
-//				if (mood == CustomerPerson.IS_HUNGRY)
-//				{
-//					doHungryMood();
-//				}
-//				if (mood == CustomerPerson.WANTS_MUSIC)
-//				{
-//					doWantsMusicMood();
-//				}
+
 			}				
 		}
 		
@@ -251,7 +239,7 @@ package rock_on
 			state = INITIALIZED_STATE;
 		}
 
-		public function startMood(mood:String):void
+		public function startMood(mood:Object):void
 		{
 			var cursor:MovieClip = generateMoodOverheadHover(mood);
 			var emc:ExpandingMovieclip = new ExpandingMovieclip(0.6, cursor);
@@ -259,22 +247,18 @@ package rock_on
 			addChild(emc);			
 		}
 		
-		override public function generateMoodMessage(mood:String):UIComponent
+		override public function generateMoodMessage(mood:Object):UIComponent
 		{
-			var usable:Usable = _venue.usableController.getUsableByMood(mood);
-			var numberOfOwnedUsables:int = _venue.usableController.getNumberOfOwnedUsablesByMood(mood);
 			var usablesText:Text = new Text();
-			var numLeftText:Text = new Text();
+			var costUIC:UIComponent = MoodBoss.getUIComponentForMoodCost(mood);
 			var usablesContainer:UIComponent = new UIComponent();
-			numLeftText.text = "(" + numberOfOwnedUsables.toString() + " left)";
-			usablesText.text = _venue.usableController.getNurtureMessageByUsable(usable);
-			usablesText.validateProperties();
-			numLeftText.y = usablesText.textHeight + 7;
-			WorldBitmapInterface.setStylesForNurtureText(usablesText, usable, numberOfOwnedUsables);
-			WorldBitmapInterface.setStylesForNurtureText(numLeftText, usable, numberOfOwnedUsables);
-			WorldBitmapInterface.setStylesForNurtureContainer(usablesContainer, numberOfOwnedUsables);
+			usablesContainer.width = 250;
+			usablesText.text = mood.message as String;
+			WorldBitmapInterface.setStylesForNurtureText(usablesText);
 			usablesContainer.addChild(usablesText);
-			usablesContainer.addChild(numLeftText);
+			usablesContainer.validateSize();
+			costUIC.y = usablesText.textHeight + 7;
+			usablesContainer.addChild(costUIC);
 			return usablesContainer;			
 		}		
 				

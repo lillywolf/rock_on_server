@@ -2,6 +2,7 @@ package rock_on
 {
 	import flash.display.MovieClip;
 	import flash.utils.Dictionary;
+	import flash.utils.getDefinitionByName;
 	
 	import models.Creature;
 	import models.EssentialModelReference;
@@ -18,7 +19,7 @@ package rock_on
 	
 	public class Person extends ActiveAssetStack
 	{
-		public var mood:String;
+		public var mood:Object;
 		public var moodCursorID:int;
 		public var currentDirection:Point3D;
 		
@@ -31,23 +32,31 @@ package rock_on
 			super(creature, movieClip, layerableOrder, scale);
 		}
 	
-		public function generateMoodOverheadHover(mood:String):MovieClip
+		public function generateMoodOverheadHover(mood:Object):MovieClip
 		{
-			var cursorClass:Class = EssentialModelReference.getClassForMood(mood);
-			var mc:MovieClip = new cursorClass() as MovieClip;
-			mc.cacheAsBitmap = true;
-			return mc;			
+			if (mood.symbol_name)
+			{
+				var cursorClass:Class = getDefinitionByName(mood.symbol_name) as Class;
+				var mc:MovieClip = new cursorClass() as MovieClip;
+				mc.cacheAsBitmap = true;
+				return mc;			
+			}
+			return null;
 		}
 		
-		public function generateMoodCursor(mood:String):MovieClip
+		public function generateMoodCursor(mood:Object):MovieClip
 		{
-			var cursorClass:Class = EssentialModelReference.getClassForMood(mood);
-			var mc:MovieClip = new cursorClass() as MovieClip;
-			mc.cacheAsBitmap = true;
-			return mc;			
+			if (mood.symbol_name)
+			{
+				var cursorClass:Class = getDefinitionByName(mood.symbol_name) as Class;			
+				var mc:MovieClip = new cursorClass() as MovieClip;
+				mc.cacheAsBitmap = true;
+				return mc;
+			}
+			return null;
 		}	
 		
-		public function generateMoodMessage(mood:String):UIComponent
+		public function generateMoodMessage(mood:Object):UIComponent
 		{
 			return new UIComponent();
 		}
