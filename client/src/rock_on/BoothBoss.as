@@ -254,6 +254,17 @@ package rock_on
 			return selectedBooth;	
 		}
 		
+		public function getAnyExistingBooth(type:String=null):Booth
+		{
+			var selectedBooth:Booth = null;
+			do
+			{
+				selectedBooth = booths.getItemAt(Math.floor(Math.random()*booths.length)) as Booth;			
+			}
+			while (selectedBooth.structure.booth_structure);
+			return selectedBooth;
+		}
+		
 		public function getUnstockedBooths():ArrayCollection
 		{
 			var unstockedBooths:ArrayCollection = new ArrayCollection();

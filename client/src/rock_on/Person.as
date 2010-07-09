@@ -13,6 +13,8 @@ package rock_on
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
 	
+	import views.ExpandingMovieclip;
+	
 	import world.ActiveAssetStack;
 	import world.Point3D;
 	import world.World;
@@ -21,6 +23,7 @@ package rock_on
 	{
 		public var mood:Object;
 		public var moodCursorID:int;
+		public var moodClip:ExpandingMovieclip;		
 		public var currentDirection:Point3D;
 		
 		public var _myWorld:World;
@@ -59,6 +62,31 @@ package rock_on
 		public function generateMoodMessage(mood:Object):UIComponent
 		{
 			return new UIComponent();
+		}
+		
+		public function startMood(mood:Object):void
+		{
+			var cursor:MovieClip = generateMoodOverheadHover(mood);
+			moodClip = new ExpandingMovieclip(0.6, cursor);
+			moodClip.y = -(height + 5);
+			addChild(moodClip);			
+		}		
+		
+		public function endMood():void
+		{
+			if (contains(moodClip))
+			{
+				removeChild(moodClip);
+			}
+			mood = null;
+		}		
+		
+		public function doMultipleAnimations(animations:Array):void
+		{
+			for each (var anim:String in animations)
+			{
+				doAnimation(anim, true);
+			}
 		}
 		
 		public function standFacingObject(os:OwnedStructure, frameNumber:int=0, strictFacing:Boolean=true):Object

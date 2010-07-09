@@ -124,6 +124,16 @@ package views
 			return null;
 		}
 		
+		public function checkBitmapHover(abd:AssetBitmapData, view:WorldView, concertStageView:StageView):Object
+		{
+			var cursorClip:MovieClip = null;
+			var gf:GlowFilter = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
+			abd.bitmap.filters = [gf];
+			var cursorMessage:UIComponent = (abd.activeAsset as Person).generateMoodMessage((abd.activeAsset as Person).mood);			
+//			return {cursorClip: cursorClip, cursorMessage: cursorMessage};
+			return null;
+		}
+		
 		public function checkCreatureHover(asset:ActiveAsset, view:WorldView, concertStageView:StageView):Object
 		{
 			var person:Person = getPersonFromAsset(asset, view, concertStageView);
@@ -236,19 +246,32 @@ package views
 		public function worldHovered(view:WorldView, concertStageView:StageView):Object
 		{
 			var cursorObject:Object;
+			var bounds:Rectangle;
 			
+			for each (var abd:AssetBitmapData in bitmapBlotter.bitmapReferences)
+			{
+				if (_bitmapBlotter.backgroundCanvas.contains(abd.bitmap))
+				{
+					bounds = new Rectangle(abd.bitmap.x, abd.bitmap.y, abd.mc.width, abd.mc.height);
+					if (bounds.contains(_bitmapBlotter.backgroundCanvas.mouseX, _bitmapBlotter.backgroundCanvas.mouseY))
+					{
+						clearFilters();
+						cursorObject = checkBitmapHover(abd, view, concertStageView);
+					}				
+				}				
+			}
 			for each (var asset:ActiveAsset in view.myWorld.assetRenderer.unsortedAssets)				
 			{
 				if (asset is Person)
 				{
-					var bounds:Rectangle = (asset as Person).getBounds(view);
+					bounds = (asset as Person).getBounds(view);
 					if (bounds.contains(view.mouseX, view.mouseY))
 					{
 						clearFilters();
 						cursorObject = checkCreatureHover(asset, view, concertStageView);
 					}
 				}
-			}	
+			}
 			return cursorObject;
 		}
 		
@@ -316,6 +339,10 @@ package views
 		
 		public function clearFilters():void
 		{
+			if (_bitmapBlotter)
+			{
+				_bitmapBlotter.clearFilters();
+			}
 			if (_customerPersonManager)
 			{
 				_customerPersonManager.clearFilters();			

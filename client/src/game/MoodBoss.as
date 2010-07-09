@@ -7,6 +7,8 @@ package game
 	import mx.controls.Text;
 	import mx.core.UIComponent;
 	
+	import rock_on.CustomerPerson;
+	
 	import views.WorldBitmapInterface;
 	
 	public class MoodBoss extends EventDispatcher
@@ -66,132 +68,154 @@ package game
 			HUNGRY: {								
 				creature_types:[BAND_MEMBER],
 				symbol_name: HAMBURGER,
-				message: "Wants food",
+				message: "Feed me!",
 				music_credits: 1, 	
 				fan_credits: 0, 	
 				coins: 0, 					
 				requires:[],
 				min_level: 1,
+				move_to: true,
+				animation: null,	
 				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 4}],
 				possible_rewards: []
 			},
 			THIRSTY: {							
 				creature_types:[BAND_MEMBER],
 				symbol_name: COFFEE,
-				message: "Wants coffee",
+				message: "I'm thirsty",
 				music_credits: 1, 	
 				fan_credits: 0,		
 				coins: 0,					 
 				requires:[],
 				min_level: 1,
+				move_to: true,
+				animation: null,	
 				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 4}],
 				possible_rewards: []
 			},				
 			WANTS_HAMBURGER: {				
 				creature_types:[GROUPIE, CONCERT_GOER],	
 				symbol_name: HAMBURGER,
-				message: "Wants burger",
+				message: "Can I get a burger?",
 				music_credits: 3,		
 				fan_credits: 0,  
 				coins: 0,						
 				requires:[],
 				min_level: 1,
+				move_to: true,
+				animation: null,	
 				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: FAN_CREDITS, total: 1, min_bonus: 1, max_bonus: 4}],
 				possible_rewards: []
 			},
 			WANTS_COFFEE: {
 				creature_types:[GROUPIE, CONCERT_GOER],	
 				symbol_name: COFFEE,
-				message: "Wants coffee",
+				message: "I need caffeine",
 				music_credits: 2,  
 				fan_credits: 0,  
 				coins: 0,						
 				requires:[],
 				min_level: 1,
+				move_to: true,
+				animation: null,	
 				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: FAN_CREDITS, total: 1, min_bonus: 1, max_bonus: 4}],
 				possible_rewards: []
 			},
 			WANTS_PINK_HEADPHONES: {
 				creature_types:[GROUPIE, CONCERT_GOER],		
 				symbol_name: null,
-				message: "Wants headphones",
+				message: "Looking for the pink headphones",
 				music_credits: 5,  
 				fan_credits: 0,  
 				coins: 0,						
 				requires:["Pink Paint", "Headphones"],
 				min_level: 3,
+				move_to: true,
+				animation: ["walk_toward"],
 				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2}]
 			},
 			WANTS_RED_HEADPHONES: {
 				creature_types:[GROUPIE, CONCERT_GOER],	
 				symbol_name: null,
-				message: "Wants headphones",
+				message: "I want red heaphones",
 				music_credits: 5,  
 				fan_credits: 0,  
 				coins: 0, 					
 				requires:["Red Paint", "Headphones"],
 				min_level: 4, 
+				move_to: true,
+				animation: ["walk_toward"],
 				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.3}]
 			},
 			IS_HEARTBROKEN:	{
 				creature_types:[BAND_MEMBER],
 				symbol_name: null,
-				message: "Has broken heart",
+				message: "My heart's broken",
 				music_credits: 10, 
 				fan_credits: 0,  
 				coins: 0,						
 				requires:["Love Potion"],
 				min_level: 10,
+				move_to: false,
+				animation: ["walk_toward"],
 				rewards: [{type: XP, total: 10, min_bonus: 4, max_bonus: 8}, {type: MUSIC_CREDITS, total: 4, min_bonus: 2, max_bonus: 6}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.5}]
 			},
 			FEELS_HOT: {
 				creature_types:[GROUPIE, CONCERT_GOER],	
 				symbol_name: null,
-				message: "Feels hot",
+				message: "I'm kinda hot",
 				music_credits: 0,  
 				fan_credits: 0,  
 				coins: 0,      
 				requires:["Space Heater"],
 				min_level: 3,
+				move_to: true,
+				animation: ["stand_still_toward"],
 				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
 				possible_rewards: []
 			},
 			FEELS_COLD:	{
 				creature_types:[GROUPIE, CONCERT_GOER],		
 				symbol_name: HAMBURGER,
-				message: "Feels cold",
+				message: "It's cold in here",
 				music_credits: 0,  
 				fan_credits: 0,  
 				coins: 0,      
 				requires:["Cooling Fan"],
 				min_level: 3,
+				move_to: true,
+				animation: ["stand_still_toward"],
 				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
 				possible_rewards: []
 			},
 			WANTS_AUTOGRAPH: {
 				creature_types:[GROUPIE, CONCERT_GOER],	
 				symbol_name: HAMBURGER,
-				message: "Wants autograph",
+				message: "Can I get an autograph?",
 				music_credits: 3,  
 				fan_credits: 0,  
 				coins: 0,      
 				requires:[],
 				min_level: 1,
+				move_to: true,
+				animation: null,
 				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 5}], 
 				possible_rewards: []				
 			},
 			IS_SLEEPY: {
 				creature_types:[BAND_MEMBER],
 				symbol_name: COFFEE,
-				message: "Feels sleepy",
+				message: "I'm sleepy...",
 				music_credits: 0,  
 				fan_credits: 2,  
 				coins: 0,      
 				requires:["Pillow"],
 				min_level: 4,
+				move_to: true,
+				animation: null,
 				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
 				possible_rewards: []				
 			}
@@ -239,7 +263,7 @@ package game
 			musicText.y = 0;
 			if (mood.coins > 0)
 			{
-				coinsText.text = "Need: " + mood.coins.toString();
+				coinsText.text = mood.coins.toString();
 				WorldBitmapInterface.setStylesForNurtureText(coinsText);
 				fanText.y += coinsText.textHeight + TEXT_BUFFER;
 				musicText.y += coinsText.textHeight + TEXT_BUFFER;
@@ -247,14 +271,14 @@ package game
 			}
 			if (mood.fan_credits > 0)
 			{
-				fanText.text = "Need: " + mood.fan_credits.toString();
+				fanText.text = mood.fan_credits.toString();
 				WorldBitmapInterface.setStylesForNurtureText(fanText);
 				musicText.y += fanText.textHeight + TEXT_BUFFER;
 				uic.addChild(fanText);
 			}
 			if (mood.music_credits > 0)
 			{
-				musicText.text = "Need: " + mood.music_credits.toString();
+				musicText.text = mood.music_credits.toString();
 				WorldBitmapInterface.setStylesForNurtureText(musicText);
 				uic.addChild(musicText);
 			}

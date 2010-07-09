@@ -5,6 +5,7 @@ package rock_on
 	import controllers.UsableController;
 	
 	import flash.display.MovieClip;
+	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
@@ -43,14 +44,13 @@ package rock_on
 		public static const HEADTOSTAGE_STATE:int = 6;
 		public static const HEADTODOOR_STATE:int = 7;
 		public static const BITMAPPED_ENTHRALLED_STATE:int = 8;
+		public static const ITEM_PICKUP_STATE:int = 9;
 
 		public static const HUNGER_DELAY:int = 360000;
-		public static const IS_CHILLIN:String = "chillin";
-		public static const IS_HUNGRY:String = "Hungry";
-		public static const IS_THIRSTY:String = "Thirsty";
-		public static const WANTS_MUSIC:String = "music";
+		public static const HUNGRY:String = "Hungry";
+		public static const THIRSTY:String = "Thirsty";
 		
-		public static const ENTHRALLED_TIME:int = 50000 * Math.random();
+		public static const ENTHRALLED_TIME:int = 10000 + 40000 * Math.random();
 		public static const QUEUED_TIME:int = 4000;
 		public static const FAN_CONVERSION_DELAY:int = 2000;
 		public static const MUSIC_DELAY:int = 2000000 + 1000000 * Math.random();
@@ -71,12 +71,17 @@ package rock_on
 		public var _venue:Venue;
 		public var proxiedDestination:Point3D;
 		
+		public var itemPickupAnimations:Array;
+		public var pickupBooth:Booth;
+		public var proxiedForItemPickup:Boolean;
+		
 		public function CustomerPerson(boothBoss:BoothBoss, creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
 			super(creature, movieClip, layerableOrder, scale);
 
 			_boothBoss = boothBoss;
 			startInitializedState();
+			addEventListener(MouseEvent.CLICK, onMouseClicked);
 
 			trace("customer person created");
 		}
@@ -110,7 +115,7 @@ package rock_on
 					var timeSinceLastMeal:Number = new Date().getTime() - GameClock.convertStringTimeToUnixTime(_creature.last_fed);				
 					if (timeSinceLastMeal > CustomerPerson.HUNGER_DELAY)
 					{
-						mood = MoodBoss.assignMoodByString(CustomerPerson.IS_HUNGRY);
+						mood = MoodBoss.assignMoodByString(CustomerPerson.HUNGRY);
 					}
 				}
 				else
@@ -123,8 +128,51 @@ package rock_on
 					startMood(mood);				
 				}
 			}
-		}		
+		}	
+		
+		private function onMouseClicked(evt:MouseEvent):void
+		{
+			if (mood && !proxiedForItemPickup)
+			{
+				handleMood(mood);
+			}
+		}
 				
+		public function handleMood(mood:Object):void
+		{
+			itemPickupAnimations = mood.animation;			
+			
+			if (mood.move_to)
+			{
+				proxiedForItemPickup = true;				
+				transitionToItemPickup(mood);
+			}
+			else if (mood.animation)
+			{
+				doMultipleAnimations(itemPickupAnimations);
+			}
+		}
+		
+		public function transitionToItemPickup(mood:Object):void
+		{
+			if (state == CustomerPerson.QUEUED_STATE)
+			{
+				if (queuedTimer)
+				{
+					refreshQueuedTimer();	
+					doItemPickup();
+				}
+				pickupBooth = currentBooth;
+			}
+			else if (state == CustomerPerson.ROUTE_STATE)
+			{
+				pickupBooth = currentBooth;
+			}
+			else
+			{
+				advanceState(CustomerPerson.ROUTE_STATE);
+			}
+		}
 		
 		public function updateMood(deltaTime:Number):void
 		{
@@ -226,7 +274,7 @@ package rock_on
 					break;					
 				case HEADTODOOR_STATE:
 					startHeadToDoorState();
-					break;					
+					break;									
 				case GONE_STATE:
 					startGoneState();
 					break;	
@@ -238,28 +286,25 @@ package rock_on
 		{
 			state = INITIALIZED_STATE;
 		}
-
-		public function startMood(mood:Object):void
-		{
-			var cursor:MovieClip = generateMoodOverheadHover(mood);
-			var emc:ExpandingMovieclip = new ExpandingMovieclip(0.6, cursor);
-			emc.y = -(height + 5);
-			addChild(emc);			
-		}
 		
 		override public function generateMoodMessage(mood:Object):UIComponent
 		{
-			var usablesText:Text = new Text();
-			var costUIC:UIComponent = MoodBoss.getUIComponentForMoodCost(mood);
-			var usablesContainer:UIComponent = new UIComponent();
-			usablesContainer.width = 250;
-			usablesText.text = mood.message as String;
-			WorldBitmapInterface.setStylesForNurtureText(usablesText);
-			usablesContainer.addChild(usablesText);
-			usablesContainer.validateSize();
-			costUIC.y = usablesText.textHeight + 7;
-			usablesContainer.addChild(costUIC);
-			return usablesContainer;			
+			if (mood)
+			{		
+				var usablesText:Text = new Text();
+				var costUIC:UIComponent = MoodBoss.getUIComponentForMoodCost(mood);
+				var usablesContainer:UIComponent = new UIComponent();
+				usablesContainer.width = 250;
+				usablesText.width = 250;
+				usablesText.text = mood.message as String;
+				usablesText.validateProperties();
+				costUIC.y = (usablesText.textHeight + 7) * (Math.ceil(usablesText.textWidth / 250));
+				WorldBitmapInterface.setStylesForNurtureText(usablesText);
+				usablesContainer.addChild(usablesText);
+				usablesContainer.addChild(costUIC);
+				return usablesContainer;			
+			}
+			return null;
 		}		
 				
 		public function doInitializedState(deltaTime:Number):void
@@ -391,7 +436,7 @@ package rock_on
 				}
 				else
 				{
-					throw new Error("State is not enthralled state");
+//					throw new Error("State is not enthralled state");
 				}
 			}
 		}
@@ -430,11 +475,21 @@ package rock_on
 			if (currentBoothPosition == 1 && !queuedTimer)
 			{
 				startQueuedTimer();
+				if (proxiedForItemPickup)
+				{
+					doItemPickup();
+				}
 			}
 			else if (currentBoothPosition == 0)
 			{
 				throw new Error("Booth position is 0");
 			}
+		}
+		
+		public function doItemPickup():void
+		{
+			doMultipleAnimations(itemPickupAnimations);
+			endMood();
 		}
 		
 		public function startQueuedTimer():void
@@ -454,6 +509,22 @@ package rock_on
 			trace("Queued Timers: " + numQueuedTimers.toString());		
 			trace("Enthralled Timers: " + numEnthralledTimers.toString());		
 		}
+
+		public function refreshQueuedTimer():void
+		{
+			if (state != QUEUED_STATE)
+			{						
+				throw new Error("State is not queued state");
+			}
+			
+			queuedTimer.stop();
+			queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);
+			queuedTimer = new Timer(CustomerPerson.QUEUED_TIME);
+			queuedTimer.addEventListener(TimerEvent.TIMER, exitQueue);
+			queuedTimer.start();	
+			trace("Queued Timers: " + numQueuedTimers.toString());		
+			trace("Enthralled Timers: " + numEnthralledTimers.toString());		
+		}
 		
 		public function moveUpInQueue():void
 		{
@@ -470,6 +541,7 @@ package rock_on
 			{
 				decrementQueue();
 				worldDestination = null;
+				proxiedForItemPickup = false;
 				
 				queuedTimer.stop();
 				queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);
@@ -545,11 +617,28 @@ package rock_on
 			
 		}
 		
+		public function getBoothForRouteState():Booth
+		{
+			var booth:Booth;
+			if (proxiedForItemPickup)
+			{
+				booth = _boothBoss.getAnyExistingBooth();
+				pickupBooth = booth;
+			}
+			else
+			{
+				booth = _boothBoss.getRandomBooth(currentBooth);
+				pickupBooth = null;
+			}	
+			return booth;
+		}
+		
 		public function startRouteState():void
 		{
 			state = ROUTE_STATE;
 			
-			var booth:Booth = _boothBoss.getRandomBooth(currentBooth);
+			var booth:Booth = getBoothForRouteState();
+			
 			if (booth == null)
 			{
 				advanceState(ROAM_STATE);

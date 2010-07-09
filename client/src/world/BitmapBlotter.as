@@ -445,6 +445,14 @@ package world
 			return bp;
 		}
 		
+		public function clearFilters():void
+		{
+			for each (var abd:AssetBitmapData in this.bitmapReferences)
+			{
+				abd.bitmap.filters = null;
+			}		
+		}
+		
 		public static function getBitmapForMovieClip(mc:MovieClip):Bitmap
 		{
 			var bmd:BitmapData = new BitmapData(mc.width, mc.height, true, 0x00000000);
