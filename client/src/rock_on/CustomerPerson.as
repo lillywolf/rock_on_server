@@ -7,11 +7,14 @@ package rock_on
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	
 	import game.GameClock;
 	import game.MoodBoss;
+	
+	import helpers.CollectibleDrop;
 	
 	import models.Creature;
 	import models.EssentialModelReference;
@@ -28,6 +31,7 @@ package rock_on
 	import views.AssetBitmapData;
 	import views.ExpandingMovieclip;
 	import views.WorldBitmapInterface;
+	import views.WorldView;
 	
 	import world.Point3D;
 	import world.World;
@@ -49,6 +53,7 @@ package rock_on
 		public static const HUNGER_DELAY:int = 360000;
 		public static const HUNGRY:String = "Hungry";
 		public static const THIRSTY:String = "Thirsty";
+		public static const MAX_DROPS_END_MOOD:int = 3;
 		
 		public static const ENTHRALLED_TIME:int = 10000 + 40000 * Math.random();
 		public static const QUEUED_TIME:int = 4000;
@@ -489,6 +494,11 @@ package rock_on
 		public function doItemPickup():void
 		{
 			doMultipleAnimations(itemPickupAnimations);
+			
+			for (var i:int = 0; i < Math.round(Math.random() * CustomerPerson.MAX_DROPS_END_MOOD); i++)
+			{
+				WorldBitmapInterface.doCollectibleDrop(this, _myWorld.parent as WorldView);			
+			}
 			endMood();
 		}
 		

@@ -1,29 +1,39 @@
 package helpers
 {
+	import com.flashdynamix.motion.Tweensy;
+	
 	import flash.display.DisplayObject;
 	import flash.display.MovieClip;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.getTimer;
+	
+	import mx.events.DynamicEvent;
+	import mx.events.TweenEvent;
 	
 	import views.WorldView;
 	
 	import world.ActiveAsset;
+	import world.World;
 	
 	public class CollectibleDrop extends MovieClip
 	{
 		public var _view:WorldView;
+		public var _world:World;
+		public var _mc:MovieClip;
+		
 		public var subject:ActiveAsset;
 		public var delay:Number;
 		public var rate:Point;
 		public var startTime:Number;
 		public var totalTime:Number;
 		public var accelerationY:Number = .001;
-		public var _mc:MovieClip;
 		public var dropDestination:Point;
 		public var bounds:Point;
 		
-		public function CollectibleDrop(_subject:ActiveAsset, mc:MovieClip, _bounds:Point, _delay:Number=0, _totalTime:Number=1000)
+		public function CollectibleDrop(_subject:ActiveAsset, mc:MovieClip, _bounds:Point, world:World, view:WorldView, _delay:Number=0, _totalTime:Number=1000)
 		{
 			super();
 			subject = _subject;
@@ -34,27 +44,38 @@ package helpers
 			startTime = getTimer();
 			totalTime = _totalTime;
 			bounds = _bounds;
+			_view = view;
+			_world = world;
 			
 			setDestination();
 			rate = new Point();
 			rate.x = (dropDestination.x - subject.x)/totalTime;
 			rate.y = (dropDestination.y - subject.y - (accelerationY * totalTime * totalTime))/(totalTime);
 			this.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+			this.addEventListener(MouseEvent.CLICK, onMouseClicked);
 		}
 		
 		public function setDestination():void
 		{
 			dropDestination = new Point();
-			dropDestination.x = subject.x + Math.random() * bounds.x;
+			dropDestination.x = subject.x + (bounds.x - (Math.random() * bounds.x * 2));
 			dropDestination.y = subject.y + Math.random() * bounds.y;
 		}
 		
-		public function onItemClicked(evt:Event):void
+		public function onMouseClicked(evt:MouseEvent):void
 		{
-//			var dropDestination:Rectangle = this.getBounds(_view);
-//			Tweensy.to(this, {x: dropDestination.top, y: dropDestination.y}, 0.5, null, delay, null, null);
+			var rect:Rectangle = this.getBounds(_world);
+			Tweensy.to(this, {x: this.x, y: this.y - 500, scaleX: 0.3, scaleY: 0.3}, 0.4, null, delay, null, onTweenEnd, null);
+			this.removeEventListener(MouseEvent.CLICK, onMouseClicked);
+			this.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
+		private function onTweenEnd():void
+		{
+			var event:DynamicEvent = new DynamicEvent("removeCollectible", true, true);
+			this.dispatchEvent(event);			
+		}
+
 		public function onEnterFrame(evt:Event):void
 		{
 			var deltaTime:Number = getTimer() - startTime;

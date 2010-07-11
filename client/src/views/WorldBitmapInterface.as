@@ -2,6 +2,7 @@ package views
 {	
 	import flash.display.Bitmap;
 	import flash.display.MovieClip;
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -20,6 +21,7 @@ package views
 	import mx.containers.Canvas;
 	import mx.controls.Text;
 	import mx.core.UIComponent;
+	import mx.events.DynamicEvent;
 	
 	import rock_on.BandMember;
 	import rock_on.CustomerPerson;
@@ -48,6 +50,7 @@ package views
 		public var isDragging:Boolean;
 		public var mouseIncrementX:Number;
 		public var mouseIncrementY:Number;
+		public var currentHoveredObject:Sprite;
 		public function WorldBitmapInterface(worldView:WorldView, stageView:StageView, editView:views.EditView=null, bottomBar:BottomBar=null, target:IEventDispatcher=null)
 		{
 			super(target);
@@ -162,6 +165,13 @@ package views
 			return null;
 		}
 		
+		public function checkCollectibleItemHover(sprite:Sprite, worldViewToCheck:WorldView, stageViewToCheck:StageView):Object
+		{
+			var gf:GlowFilter = new GlowFilter(0xFFEE00, 1, 2, 2, 20, 20);
+			sprite.filters = [gf];
+			return null;s
+		}
+		
 		public static function getTypicalTextFilter():GlowFilter
 		{
 			var filter:GlowFilter = new GlowFilter(0x333333, 1, 1.4, 1.4, 30, 5); 
@@ -205,11 +215,15 @@ package views
 		
 		public function onWorldViewClicked(evt:MouseEvent):void
 		{
-			var bitmapClicked:Boolean = bitmapClicked(evt);
-			
-			if (!bitmapClicked)
+//			var bitmapClicked:Boolean = bitmapClicked(evt);
+//			
+//			if (!bitmapClicked)
+//			{
+//				checkIfStageViewClicked(_worldView.mouseX - _worldView.myWorld.x, _worldView.mouseY, _stageView.height);				
+//			}
+			if (this.currentHoveredObject)
 			{
-				checkIfStageViewClicked(_worldView.mouseX - _worldView.myWorld.x, _worldView.mouseY, _stageView.height);				
+				this.objectClicked(currentHoveredObject);
 			}
 		}
 		
@@ -256,36 +270,87 @@ package views
 			}
 		}
 		
-		public function worldHovered(view:WorldView, concertStageView:StageView):Object
+		private function checkBitmapForHover(worldViewToCheck:WorldView, stageViewToCheck:StageView):Object
 		{
-			var cursorObject:Object;
-			var bounds:Rectangle;
-			
+			var cursorObject:Object = null;
 			for each (var abd:AssetBitmapData in bitmapBlotter.bitmapReferences)
 			{
 				if (_bitmapBlotter.isUnderMousePoint(abd))
 				{
 					clearFilters();
-					cursorObject = checkBitmapHover(abd, view, concertStageView);
+					cursorObject = checkBitmapHover(abd, worldViewToCheck, stageViewToCheck);
+					this.currentHoveredObject = abd.activeAsset;
 				}				
 			}
-			for each (var asset:ActiveAsset in view.myWorld.assetRenderer.unsortedAssets)				
+			return cursorObject;
+		}
+		
+		private function checkAssetRendererForHover(worldViewToCheck:WorldView, stageViewToCheck:StageView):Object
+		{	
+			var cursorObject:Object = null;
+			var bounds:Rectangle;
+			for each (var sprite:Sprite in worldViewToCheck.myWorld.assetRenderer.unsortedAssets)				
 			{
-				bounds = asset.getBounds(view);
-				if (bounds.contains(view.mouseX, view.mouseY))
+				bounds = sprite.getBounds(worldViewToCheck);
+				if (bounds.contains(worldViewToCheck.mouseX, worldViewToCheck.mouseY))
 				{
 					clearFilters();
-					if (asset is Person)
+					if (sprite is Person)
 					{
-						cursorObject = checkCreatureHover(asset, view, concertStageView);					
+						cursorObject = checkCreatureHover(sprite as ActiveAsset, worldViewToCheck, stageViewToCheck);
 					}
-					else
+					else if (sprite is ActiveAsset)
 					{
-						cursorObject = checkStructureHover(asset, view, concertStageView);
+						cursorObject = checkStructureHover(sprite as ActiveAsset, worldViewToCheck, stageViewToCheck);
+					}
+					currentHoveredObject = sprite;
+				}
+			}
+			return cursorObject;
+		}
+		
+		private function checkWorldUIForHover(worldViewToCheck:WorldView, stageViewToCheck:StageView):Object
+		{
+			var cursorObject:Object;
+			var bounds:Rectangle;
+			for (var i:int = 0; i < worldViewToCheck.myWorld.numChildren; i++)
+			{
+				if (worldViewToCheck.myWorld.getChildAt(i) is CollectibleDrop)
+				{
+					var sprite:Sprite = worldViewToCheck.myWorld.getChildAt(i) as Sprite;
+					bounds = sprite.getBounds(worldViewToCheck);
+					if (bounds.contains(worldViewToCheck.mouseX, worldViewToCheck.mouseY))
+					{
+						clearFilters();
+						cursorObject = checkCollectibleItemHover(sprite, worldViewToCheck, stageViewToCheck);
+						currentHoveredObject = sprite;
 					}
 				}
 			}
 			return cursorObject;
+		}
+		
+		public function worldHovered(view:WorldView, concertStageView:StageView):Object
+		{
+			var cursorObject:Object;
+			currentHoveredObject = null;
+			
+			cursorObject = checkBitmapForHover(view, concertStageView);
+			if (cursorObject)
+			{
+				return cursorObject;
+			}
+			cursorObject = checkAssetRendererForHover(view, concertStageView);
+			if (cursorObject)
+			{
+				return cursorObject;
+			}			
+			cursorObject = checkWorldUIForHover(view, concertStageView);
+			if (cursorObject)
+			{
+				return cursorObject;
+			}		
+			return null;
 		}
 		
 		public function stageHovered(currentMouseX:int, currentMouseY:int, view:WorldView, concertStageView:StageView):Object
@@ -458,12 +523,16 @@ package views
 			return isInside;
 		}
 		
-		public function doCollectibleDrop(asset:ActiveAsset):void
+		public static function doCollectibleDrop(asset:ActiveAsset, viewToUpdate:WorldView):void
 		{
-			var radius:Point = new Point(200, 200);
+			var radius:Point = new Point(100, 100);
 			var mc:MovieClip = new Hamburger();
-			var collectibleDrop:CollectibleDrop = new CollectibleDrop(asset, mc, radius, 0, 1000);
-			_worldView.myWorld.addChild(collectibleDrop);
+			var collectibleDrop:CollectibleDrop = new CollectibleDrop(asset, mc, radius, viewToUpdate.myWorld, viewToUpdate, 0, 400);
+			collectibleDrop.addEventListener("removeCollectible", function onRemoveCollectible():void
+			{
+				viewToUpdate.myWorld.removeChild(collectibleDrop);
+			});
+			viewToUpdate.myWorld.addChild(collectibleDrop);
 		}
 		
 		private function bitmapClicked(evt:MouseEvent):Boolean
@@ -472,11 +541,22 @@ package views
 			if (abd)
 			{
 				_bottomBar.replaceCreature((abd.activeAsset as ActiveAssetStack).creature);
-				doCollectibleDrop(abd.activeAsset);
+				doCollectibleDrop(abd.activeAsset, _worldView);
 				return true;
 			}
 			return false;
 		}	
+		
+		private function objectClicked(sprite:Sprite):Boolean
+		{
+			if (sprite is Person)
+			{
+				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
+				WorldBitmapInterface.doCollectibleDrop(sprite as ActiveAsset, _worldView);
+				return true;
+			}
+			return false;
+		}
 		
 		private function bitmapHovered():Boolean
 		{

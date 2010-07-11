@@ -7,6 +7,7 @@ package rock_on
 	import controllers.StructureController;
 	import controllers.UsableController;
 	
+	import flash.display.Sprite;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
@@ -18,6 +19,7 @@ package rock_on
 	import game.GameClock;
 	import game.ImposterCreature;
 	
+	import helpers.CollectibleDrop;
 	import helpers.CreatureGenerator;
 	
 	import models.Creature;
@@ -147,17 +149,29 @@ package rock_on
 		
 		public function clearFilters():void
 		{
-			var asset:ActiveAsset;
-			for each (asset in _myWorld.assetRenderer.unsortedAssets)
+			var sprite:Sprite;
+			for each (sprite in _myWorld.assetRenderer.unsortedAssets)
 			{
-				asset.filters = null;
+				sprite.filters = null;
 			}
-			for each (asset in stageManager.myStage.assetRenderer.unsortedAssets)
+			for each (sprite in stageManager.myStage.assetRenderer.unsortedAssets)
 			{
-				asset.filters = null;
+				sprite.filters = null;
 			}
-		}		
+			clearUIFilters();
+		}
 		
+		private function clearUIFilters():void
+		{
+			for (var i:int = 0; i < _myWorld.numChildren; i++)
+			{
+				if (_myWorld.getChildAt(i) is CollectibleDrop)
+				{
+					(_myWorld.getChildAt(i) as Sprite).filters = null;
+				}
+			}
+		}	
+			
 		public function onBoothUnstocked(evt:VenueEvent):void
 		{
 			customerPersonManager.removeBoothFromAvailable(evt.booth);
