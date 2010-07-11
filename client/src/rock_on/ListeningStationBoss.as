@@ -204,7 +204,7 @@ package rock_on
 		public function createListeningStationAsset(station:ListeningStation):ActiveAsset
 		{
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(station.structure.mc);
-			var asset:ActiveAsset = new ActiveAsset(mc);			
+			var asset:ActiveAsset = new ActiveAsset(mc, StructureController.STRUCTURE_SCALE);	
 			asset.thinger = station;	
 			return asset;		
 		}

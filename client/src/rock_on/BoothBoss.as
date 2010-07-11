@@ -194,7 +194,7 @@ package rock_on
 		{
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(booth.structure.mc);
 			mc.cacheAsBitmap = true;
-			var asset:ActiveAsset = new ActiveAsset(mc);			
+			var asset:ActiveAsset = new ActiveAsset(mc, StructureController.STRUCTURE_SCALE);	
 			asset.thinger = booth;	
 			return asset;		
 		}	

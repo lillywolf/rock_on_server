@@ -473,17 +473,17 @@ package world
 		public function getBitmapForPerson(abd:AssetBitmapData):Bitmap
 		{
 			var bmd:BitmapData = new BitmapData(abd.mc.width, abd.mc.height, true, 0x00000000);
-			abd.mc.scaleX = 0.4;
-			abd.mc.scaleY = 0.4;
+			abd.mc.scaleX = 0.5;
+			abd.mc.scaleY = 0.5;
 			var rect:Rectangle = new Rectangle(0, 0, abd.mc.width + WIDTH_BUFFER, abd.mc.height + FOOT_CONSTANT);
 			var matrix:Matrix = new Matrix();
 			if (abd.reflected)
 			{
-				matrix.scale(-0.4, 0.4);
+				matrix.scale(-0.5, 0.5);
 			}
 			else
 			{
-				matrix.scale(0.4, 0.4);			
+				matrix.scale(0.5, 0.5);			
 			}
 			matrix.tx = abd.mc.width/2 + WIDTH_BUFFER/2;
 			matrix.ty = abd.mc.height;
@@ -515,20 +515,29 @@ package world
 		{
 			for each (var abd:AssetBitmapData in bitmapReferences)
 			{
-				if (abd.bitmap)
+				if (isUnderMousePoint(abd))
 				{
-					var hitRect:Rectangle = new Rectangle(abd.bitmap.x, abd.bitmap.y, abd.mc.width, abd.mc.height);
-					if (hitRect.contains(_backgroundCanvas.mouseX, _backgroundCanvas.mouseY))
-					{
-						backgroundCanvas.buttonMode = true;
-						break;
-					}
-					else
-					{
-						backgroundCanvas.buttonMode = false;
-					}
-				}	
+					backgroundCanvas.buttonMode = true;
+					break;
+				}
+				else
+				{
+					backgroundCanvas.buttonMode = false;
+				}
 			}
+		}
+		
+		public function isUnderMousePoint(abd:AssetBitmapData):Boolean
+		{
+			if (backgroundCanvas.contains(abd.bitmap))
+			{
+				var bounds:Rectangle = new Rectangle(abd.bitmap.x, abd.bitmap.y, abd.mc.width, abd.mc.height);
+				if (bounds.contains(backgroundCanvas.mouseX, backgroundCanvas.mouseY))
+				{
+					return true;
+				}				
+			}			
+			return false;
 		}
 		
 		public function sortBitmaps():void

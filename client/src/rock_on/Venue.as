@@ -35,6 +35,7 @@ package rock_on
 	import views.VenueManager;
 	import views.WorldBitmapInterface;
 	
+	import world.ActiveAsset;
 	import world.BitmapBlotter;
 	import world.Point3D;
 	import world.World;
@@ -143,6 +144,19 @@ package rock_on
 			
 			assignedSeats = _myWorld.pathFinder.createSeatingArrangement(audienceRect, stageBufferRect, this.dwelling.capacity);
 		}
+		
+		public function clearFilters():void
+		{
+			var asset:ActiveAsset;
+			for each (asset in _myWorld.assetRenderer.unsortedAssets)
+			{
+				asset.filters = null;
+			}
+			for each (asset in stageManager.myStage.assetRenderer.unsortedAssets)
+			{
+				asset.filters = null;
+			}
+		}		
 		
 		public function onBoothUnstocked(evt:VenueEvent):void
 		{
@@ -260,7 +274,7 @@ package rock_on
 			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
 				var c:Creature = creatureGenerator.createImposterCreature("Concert Goer");
-				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.4);
+				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
 //				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
 				cp.speed = 0.06;
 				cp.stageManager = stageManager;
@@ -277,7 +291,7 @@ package rock_on
 			for (var i:int = 0; i < numSuperCustomers; i++)
 			{
 				var imposter:ImposterCreature = creatureGenerator.createImposterCreature("Concert Goer");
-				var cp:CustomerPerson = new CustomerPerson(boothBoss, imposter, null, imposter.layerableOrder, 0.4);
+				var cp:CustomerPerson = new CustomerPerson(boothBoss, imposter, null, imposter.layerableOrder, 0.5);
 				cp.stageManager = stageManager;
 //				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
 				cp.speed = 0.06;
@@ -296,7 +310,7 @@ package rock_on
 			{
 				var c:ImposterCreature = creatureGenerator.createImposterCreature("Concert Goer");
 				c.has_moods = true;
-				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.4);
+				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
 				cp.stageManager = stageManager;
 				cp.speed = 0.06;
 				customerPersonManager.add(cp, true, -1, boothsRect);

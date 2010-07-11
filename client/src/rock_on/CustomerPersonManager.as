@@ -81,14 +81,6 @@ package rock_on
 			}
 		}
 		
-		public function clearFilters():void
-		{
-			for each (var cp:CustomerPerson in this)
-			{
-				cp.filters = null;
-			}
-		}
-		
 		private function addToWorldAsMoving(cp:CustomerPerson, bounds:Rectangle, avoid:Rectangle=null, worldToUpdate:World=null):void
 		{
 			cp.venue = _venue;

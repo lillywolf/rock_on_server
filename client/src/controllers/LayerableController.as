@@ -28,7 +28,7 @@ package controllers
 		public var fullyLoaded:Boolean;
 		
 		public static const EYE_SCALE:Number = 1;
-		public static const INSTRUMENT_SCALE:Number = 0.4;
+		public static const INSTRUMENT_SCALE:Number = 0.5;
 		public static const BODY_SCALE:Number = 0.5;
 		
 		public function LayerableController(essentialModelController:EssentialModelController, target:IEventDispatcher=null)

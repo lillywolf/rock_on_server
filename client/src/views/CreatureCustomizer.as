@@ -253,8 +253,8 @@ package views
 			switch (layerName)
 			{
 				case "instrument":
-					mc.scaleX = 0.4;
-					mc.scaleY = 0.4;
+					mc.scaleX = 0.5;
+					mc.scaleY = 0.5;
 					break;
 				case "eyes":
 					break;	

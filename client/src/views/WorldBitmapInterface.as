@@ -7,8 +7,11 @@ package views
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.getQualifiedClassName;
+	
+	import helpers.CollectibleDrop;
 	
 	import models.Usable;
 	
@@ -108,7 +111,7 @@ package views
 			{
 				if (cp.creature)
 				{
-					if (cp.creature == (asset as ActiveAssetStack).creature && cp.mood)
+					if (cp.creature == (asset as ActiveAssetStack).creature)
 					{					
 						return cp;
 					}
@@ -140,12 +143,22 @@ package views
 			
 			if (person)
 			{
-				var cursorClip:MovieClip = person.generateMoodCursor(person.mood);
 				var gf:GlowFilter = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
 				person.filters = [gf];	
-				var cursorMessage:UIComponent = person.generateMoodMessage(person.mood);
-				return {cursorClip: cursorClip, cursorMessage: cursorMessage};
+				if (person.mood)
+				{
+					var cursorClip:MovieClip = person.generateMoodCursor(person.mood);
+					var cursorMessage:UIComponent = person.generateMoodMessage(person.mood);
+					return {cursorClip: cursorClip, cursorMessage: cursorMessage};
+				}
 			}
+			return null;
+		}
+		
+		public function checkStructureHover(asset:ActiveAsset, view:WorldView, concertStageView:StageView):Object
+		{
+			var gf:GlowFilter = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
+			asset.filters = [gf];
 			return null;
 		}
 		
@@ -250,25 +263,25 @@ package views
 			
 			for each (var abd:AssetBitmapData in bitmapBlotter.bitmapReferences)
 			{
-				if (_bitmapBlotter.backgroundCanvas.contains(abd.bitmap))
+				if (_bitmapBlotter.isUnderMousePoint(abd))
 				{
-					bounds = new Rectangle(abd.bitmap.x, abd.bitmap.y, abd.mc.width, abd.mc.height);
-					if (bounds.contains(_bitmapBlotter.backgroundCanvas.mouseX, _bitmapBlotter.backgroundCanvas.mouseY))
-					{
-						clearFilters();
-						cursorObject = checkBitmapHover(abd, view, concertStageView);
-					}				
+					clearFilters();
+					cursorObject = checkBitmapHover(abd, view, concertStageView);
 				}				
 			}
 			for each (var asset:ActiveAsset in view.myWorld.assetRenderer.unsortedAssets)				
 			{
-				if (asset is Person)
+				bounds = asset.getBounds(view);
+				if (bounds.contains(view.mouseX, view.mouseY))
 				{
-					bounds = (asset as Person).getBounds(view);
-					if (bounds.contains(view.mouseX, view.mouseY))
+					clearFilters();
+					if (asset is Person)
 					{
-						clearFilters();
-						cursorObject = checkCreatureHover(asset, view, concertStageView);
+						cursorObject = checkCreatureHover(asset, view, concertStageView);					
+					}
+					else
+					{
+						cursorObject = checkStructureHover(asset, view, concertStageView);
 					}
 				}
 			}
@@ -339,13 +352,19 @@ package views
 		
 		public function clearFilters():void
 		{
+			if (_worldView.venueManager)
+			{
+				if (_worldView.venueManager.venue)
+				{
+					if (_worldView.venueManager.venue.myWorld)
+					{
+						_worldView.venueManager.venue.clearFilters();									
+					}
+				}
+			}
 			if (_bitmapBlotter)
 			{
 				_bitmapBlotter.clearFilters();
-			}
-			if (_customerPersonManager)
-			{
-				_customerPersonManager.clearFilters();			
 			}
 			if (_bandBoss)
 			{
@@ -439,12 +458,21 @@ package views
 			return isInside;
 		}
 		
+		public function doCollectibleDrop(asset:ActiveAsset):void
+		{
+			var radius:Point = new Point(200, 200);
+			var mc:MovieClip = new Hamburger();
+			var collectibleDrop:CollectibleDrop = new CollectibleDrop(asset, mc, radius, 0, 1000);
+			_worldView.myWorld.addChild(collectibleDrop);
+		}
+		
 		private function bitmapClicked(evt:MouseEvent):Boolean
 		{
 			var abd:AssetBitmapData = isMouseInsideBitmapAsset();
 			if (abd)
 			{
 				_bottomBar.replaceCreature((abd.activeAsset as ActiveAssetStack).creature);
+				doCollectibleDrop(abd.activeAsset);
 				return true;
 			}
 			return false;
@@ -454,7 +482,7 @@ package views
 		{
 			var abd:AssetBitmapData = isMouseInsideBitmapAsset();
 			if (abd)
-			{
+			{				
 				return true;
 			}
 			return false;

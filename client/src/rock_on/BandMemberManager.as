@@ -65,7 +65,7 @@ package rock_on
 			{
 				if (c.type == "BandMember")
 				{
-					var bm:BandMember = new BandMember(c, null, c.layerableOrder, 0.4);
+					var bm:BandMember = new BandMember(c, null, c.layerableOrder, 0.5);
 					bm.stageManager = _venue.stageManager;
 					bm.addExemptStructures();
 					bm.speed = 0.06;

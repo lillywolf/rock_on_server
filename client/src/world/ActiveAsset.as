@@ -51,14 +51,20 @@ package world
 		
 		public static const MOVE_DELAY_TIME:int = 200;
 		
-		public function ActiveAsset(movieClip:MovieClip=null)
+		public function ActiveAsset(movieClip:MovieClip=null, scale:Number=1)
 		{
 			super();
 			_directionality = new Point3D(0, 0, 0);
 			
+			if (scale)
+			{
+				_scale = scale;
+			}
 			if (movieClip)
 			{
 				_movieClip = movieClip;
+//				_movieClip.scaleX = _scale;
+//				_movieClip.scaleY = _scale;
 				switchToBitmap();				
 //				addChild(_movieClip);			
 				_movieClip.addEventListener(MouseEvent.CLICK, onMouseClicked);
@@ -84,18 +90,32 @@ package world
 			var mc:Sprite = createMovieClipForBitmap();
 			var mcBounds:Rectangle = mc.getBounds(_world);
 			var heightDiff:Number = Math.abs(mcBounds.top - this.y);
-			bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
-			var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width/2, heightDiff);
+			var widthDiff:Number = getWidthDifferential(mcBounds);			
 			scaleMovieClip(mc);
+			bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
+			var matrix:Matrix = new Matrix(1, 0, 0, 1, widthDiff/2, heightDiff);
 			var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height);
 			scaleMatrix(matrix);
 			bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
 			bitmap = new Bitmap(bitmapData);
 			bitmap.x = -mc.width/2;
-			bitmap.y = -heightDiff;
+			bitmap.y = -heightDiff * _scale;
 			bitmap.opaqueBackground = null;
-			addChild(bitmap);
+			addChild(bitmap);	
 		}
+		
+		public function getHeightDifferential(mcBounds:Rectangle):Number
+		{
+			var heightDiff:Number;
+			heightDiff = Math.abs(mcBounds.top);
+			return heightDiff;
+		}		
+		
+		public function getWidthDifferential(mcBounds:Rectangle):Number
+		{
+			var widthDiff:Number = Math.abs(mcBounds.width);
+			return widthDiff;
+		}		
 		
 		public function scaleMatrix(matrix:Matrix):void
 		{
@@ -312,6 +332,17 @@ package world
 		public function get actualBounds():Rectangle
 		{
 			return _actualBounds;
-		}		
+		}	
+		
+		public function set scale(val:Number):void
+		{
+			_scale = val;
+			
+			if (movieClip)
+			{
+				movieClip.scaleX = _scale;
+				movieClip.scaleY = _scale;
+			}
+		}
 	}
 }		

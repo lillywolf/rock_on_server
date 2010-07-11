@@ -70,19 +70,6 @@ package world
 			}
 		}
 		
-		public function getHeightDifferential(mcBounds:Rectangle):Number
-		{
-			var heightDiff:Number;
-			heightDiff = Math.abs(mcBounds.top);
-			return heightDiff;
-		}
-		
-		public function getWidthDifferential(mcBounds:Rectangle):Number
-		{
-			var widthDiff:Number = Math.abs(mcBounds.left);
-			return widthDiff;
-		}
-		
 		public function createMovieClipsForBitmap():Sprite
 		{
 			var newClip:Sprite = new Sprite();
@@ -105,11 +92,6 @@ package world
 			{
 				_layerableOrder = layerableOrder;			
 			}			
-		}
-				
-		public function set scale(val:Number):void
-		{
-			_scale = val;
 		}
 		
 		public function get scale():Number

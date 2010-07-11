@@ -77,7 +77,7 @@ package rock_on
 		private function generatePasserby():Passerby
 		{
 			var c:Creature = _creatureGenerator.createImposterCreature("Passerby");
-			var passerby:Passerby = new Passerby(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.4);			
+			var passerby:Passerby = new Passerby(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.5);			
 			return passerby;		
 		}
 		
@@ -85,7 +85,7 @@ package rock_on
 		{
 //			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "StationListener");
 			var c:Creature = _creatureGenerator.createImposterCreature("StationListener");
-			var sl:StationListener = new StationListener(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.4);	
+			var sl:StationListener = new StationListener(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.5);	
 			return sl;		
 		}
 		

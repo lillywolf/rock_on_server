@@ -116,7 +116,7 @@ package helpers
 //			var asset:ActiveAssetStack = addLayersToCreatureByType(type, animation, imposter);
 //			asset.buttonMode = true;	
 //			asset.creature = imposter;
-			var cp:CustomerPerson = new CustomerPerson(boothBoss, imposter, null, layerableOrder, 0.4);
+			var cp:CustomerPerson = new CustomerPerson(boothBoss, imposter, null, layerableOrder, 0.5);
 			cp.buttonMode = true;
 			return cp;		
 		}

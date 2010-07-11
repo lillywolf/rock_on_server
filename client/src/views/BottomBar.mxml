@@ -136,6 +136,14 @@
 			public var starBlueFilled:Class;
 			[Embed(source="../libs/icons/star_unfilled_blue.png")]
 			public var starBlueUnfilled:Class;
+			[Embed(source="../libs/icons/miniheart_red.png")]
+			public var miniHeartRed:Class;
+			[Embed(source="../libs/icons/miniheart_blue.png")]
+			public var miniHeartBlue:Class;
+			[Embed(source="../libs/icons/miniheart_orange.png")]
+			public var miniHeartOrange:Class;
+			[Embed(source="../libs/icons/miniheart_green.png")]
+			public var miniHeartGreen:Class;
 			
 
 			private function onCreationComplete():void
@@ -233,55 +241,24 @@
 			{
 				var canvas:Canvas = new Canvas();
 				var star:Image;
-				var i:int;
-				for (i = 0; i<4; i++)
+				var numStars:int = Math.floor(Math.random() * 6);
+
+				for (var i:int = 0; i < (numStars + 1); i++)
 				{
 					star = new Image();
-//					if (creature.type == "BandMember")
-//					{
-//						star.source = starBlueFilled;
-//					}
-//					else
-//					{
-						if (i < 3)
-						{
-							star.source = fillerRedClass;											
-						}
-						else if (i < 7)
-						{
-							star.source = fillerYellowClass;
-						}
-						else
-						{
-							star.source = fillerGreenClass;
-						}
-//					}
-					star.x = i * 14;
-					canvas.addChild(star);
-				}
-				for (i = 4; i<10; i++)
-				{
-					star = new Image();
-//					if (creature.type == "BandMember")
-//					{
-//						star.source = starBlueUnfilled;
-//					}
-//					else
-//					{
-						if (i < 3)
-						{
-							star.source = fillerRedEmptyClass;											
-						}
-						else if (i < 7)
-						{
-							star.source = fillerYellowEmptyClass;
-						}
-						else
-						{
-							star.source = fillerGreenEmptyClass;
-						}
-//					}
-					star.x = i * 14;
+					if (numStars < 2)
+					{
+						star.source = miniHeartBlue;
+					}
+					else if (numStars < 4)
+					{
+						star.source = miniHeartOrange;
+					}
+					else
+					{
+						star.source = miniHeartRed;
+					}
+					star.x = i * 22;
 					canvas.addChild(star);
 				}
 				return canvas;
