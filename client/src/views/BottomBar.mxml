@@ -145,6 +145,28 @@
 			[Embed(source="../libs/icons/miniheart_green.png")]
 			public var miniHeartGreen:Class;
 			
+			[Embed(source="../libs/icons/miniheart_red.png")]
+			public var miniHeart5:Class;
+			[Embed(source="../libs/icons/miniheart_orangered.png")]
+			public var miniHeart4:Class;
+			[Embed(source="../libs/icons/miniheart_orange.png")]
+			public var miniHeart3:Class;
+			[Embed(source="../libs/icons/miniheart_orangeyellow.png")]
+			public var miniHeart2:Class;
+			[Embed(source="../libs/icons/miniheart_yellowgreen.png")]
+			public var miniHeart1:Class;
+			
+			[Embed(source="../libs/icons/chili_red.png")]
+			public var miniChili5:Class;
+			[Embed(source="../libs/icons/chili_orange.png")]
+			public var miniChili4:Class;
+			[Embed(source="../libs/icons/chili_yellow.png")]
+			public var miniChili3:Class;
+			[Embed(source="../libs/icons/chili_yellowgreen.png")]
+			public var miniChili2:Class;
+			[Embed(source="../libs/icons/chili_green.png")]
+			public var miniChili1:Class;
+			
 
 			private function onCreationComplete():void
 			{		
@@ -241,22 +263,28 @@
 			{
 				var canvas:Canvas = new Canvas();
 				var star:Image;
-				var numStars:int = Math.floor(Math.random() * 6);
+				var numStars:int = Math.floor(Math.random() * 5);
 
 				for (var i:int = 0; i < (numStars + 1); i++)
 				{
 					star = new Image();
-					if (numStars < 2)
+					switch (numStars)
 					{
-						star.source = miniHeartBlue;
-					}
-					else if (numStars < 4)
-					{
-						star.source = miniHeartOrange;
-					}
-					else
-					{
-						star.source = miniHeartRed;
+						case 0:
+							star.source = miniChili1;
+							break;
+						case 1:
+							star.source = miniChili2;
+							break;
+						case 2:
+							star.source = miniChili3;
+							break;
+						case 3:
+							star.source = miniChili4;
+							break;
+						case 4:
+							star.source = miniChili5;
+							break;
 					}
 					star.x = i * 22;
 					canvas.addChild(star);
@@ -320,11 +348,15 @@
 				{
 					removeChild(displayedCreatureInfo);
 				}
-				var uic:ContainerUIC = getDisplayedCreature(creature, 0.55);
-				displayedCreatureUIC = uic;
-				setDisplayedCreatureDimensions(uic);
-				displayCreatureInfo(creature);
-				addChild(uic);
+				
+				if (displayedCreatureUIC)
+				{
+					var uic:ContainerUIC = getDisplayedCreature(creature, 0.55);
+					displayedCreatureUIC = uic;
+					setDisplayedCreatureDimensions(uic);
+					displayCreatureInfo(creature);
+					addChild(uic);
+				}
 			}
 			
 			private function createBackCanvas():void
@@ -429,7 +461,7 @@
 			{
 				var customizerUI:UICanvas = venueManager.venue.bandMemberManager.putBandMembersInCustomizer("walk_toward");
 				venueManager.venue.bandMemberManager.addEventListener(CustomizerEvent.CREATURE_SELECTED, onBandMemberSelected);
-				worldView.uiLayer.addChild(customizerUI);
+				worldView.addChild(customizerUI);
 			}
 			
 			private function onBandMemberSelected(evt:CustomizerEvent):void

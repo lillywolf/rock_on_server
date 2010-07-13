@@ -199,7 +199,6 @@ package rock_on
 			{			
 				spawnLocation = listener.setInitialDestination();
 				_myWorld.addAsset(listener, spawnLocation);
-//				listener.movieClipStack.alpha = 0.5;				
 				addItem(listener);
 			}
 			else

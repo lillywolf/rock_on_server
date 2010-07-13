@@ -149,12 +149,19 @@
 				{
 					wbi.handleMouseDown(viewReference);
 				});	
+				this.doubleClickEnabled = true;
+				addEventListener(MouseEvent.DOUBLE_CLICK, onViewDoubleClicked);
 				addEventListener(MouseEvent.CLICK, onViewClicked);
 			}
 			
 			private function onViewClicked(evt:MouseEvent):void
 			{
 				wbi.onWorldViewClicked(evt);
+			}
+			
+			private function onViewDoubleClicked(evt:MouseEvent):void
+			{
+//				wbi.onWorldViewDoubleClicked(evt);
 			}
 			
 			public function initializeWorld():void

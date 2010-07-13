@@ -7,9 +7,11 @@ package views
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.utils.Timer;
 	import flash.utils.getQualifiedClassName;
 	
 	import helpers.CollectibleDrop;
@@ -22,6 +24,8 @@ package views
 	import mx.controls.Text;
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
+	
+	import org.osmf.events.TimeEvent;
 	
 	import rock_on.BandMember;
 	import rock_on.CustomerPerson;
@@ -46,11 +50,18 @@ package views
 		[Bindable] public var _editView:EditView;
 		[Bindable] public var _bottomBar:BottomBar;
 		[Bindable] public var _backgroundCanvas:Canvas;
+		
 		public var cursorUIC:ContainerUIC;
 		public var isDragging:Boolean;
 		public var mouseIncrementX:Number;
 		public var mouseIncrementY:Number;
 		public var currentHoveredObject:Sprite;
+		public var currentMouseX:Number;
+		public var currentMouseY:Number;
+		public var hoverTimer:Timer;
+		
+		public static const CREATURE_DETAIL_DELAY:int = 1000;
+		
 		public function WorldBitmapInterface(worldView:WorldView, stageView:StageView, editView:views.EditView=null, bottomBar:BottomBar=null, target:IEventDispatcher=null)
 		{
 			super(target);
@@ -92,11 +103,38 @@ package views
 					{
 						updateCursor(view, concertStageView);									
 					}
+					checkIfMouseChanged(view);
 				}
 			}
 			if (view)
 			{
 				checkDrag(view, concertStageView);							
+			}
+		}
+		
+		public function checkIfMouseChanged(worldViewToCheck:WorldView):void
+		{
+			if (worldViewToCheck.mouseX != this.currentMouseX || worldViewToCheck.mouseY != this.currentMouseY)
+			{
+				if (hoverTimer)
+				{
+					hoverTimer.removeEventListener(TimerEvent.TIMER, onHoverTimerComplete);				
+				}
+				hoverTimer = new Timer(CREATURE_DETAIL_DELAY);
+				hoverTimer.addEventListener(TimerEvent.TIMER, onHoverTimerComplete);
+				hoverTimer.start();
+			}
+			this.currentMouseX = worldViewToCheck.mouseX;
+			this.currentMouseY = worldViewToCheck.mouseY;
+		}
+		
+		private function onHoverTimerComplete(evt:TimerEvent):void
+		{
+			if (this.currentHoveredObject)
+			{
+				_bottomBar.replaceCreature((this.currentHoveredObject as Person).creature);
+				hoverTimer.removeEventListener(TimerEvent.TIMER, onHoverTimerComplete);
+				hoverTimer.stop();
 			}
 		}
 		
@@ -142,16 +180,16 @@ package views
 		
 		public function checkCreatureHover(asset:ActiveAsset, view:WorldView, concertStageView:StageView):Object
 		{
-			var person:Person = getPersonFromAsset(asset, view, concertStageView);
+//			var person:Person = getPersonFromAsset(asset, view, concertStageView);
 			
-			if (person)
+			if (asset is Person)
 			{
 				var gf:GlowFilter = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
-				person.filters = [gf];	
-				if (person.mood)
+				asset.filters = [gf];	
+				if ((asset as Person).mood)
 				{
-					var cursorClip:MovieClip = person.generateMoodCursor(person.mood);
-					var cursorMessage:UIComponent = person.generateMoodMessage(person.mood);
+					var cursorClip:MovieClip = (asset as Person).generateMoodCursor((asset as Person).mood);
+					var cursorMessage:UIComponent = (asset as Person).generateMoodMessage((asset as Person).mood);
 					return {cursorClip: cursorClip, cursorMessage: cursorMessage};
 				}
 			}
@@ -211,6 +249,14 @@ package views
 				container.setStyle("borderColor", 0x910000);
 				container.setStyle("backgroundColor", 0xFF3333);				
 			}
+		}
+		
+		public function onWorldViewDoubleClicked(evt:MouseEvent):void
+		{
+			if (this.currentHoveredObject)
+			{
+				this.objectDoubleClicked(currentHoveredObject);
+			}			
 		}
 		
 		public function onWorldViewClicked(evt:MouseEvent):void
@@ -526,7 +572,7 @@ package views
 		public static function doCollectibleDrop(asset:ActiveAsset, viewToUpdate:WorldView):void
 		{
 			var radius:Point = new Point(100, 100);
-			var mc:MovieClip = new Hamburger();
+			var mc:MovieClip = new Heart();
 			var collectibleDrop:CollectibleDrop = new CollectibleDrop(asset, mc, radius, viewToUpdate.myWorld, viewToUpdate, 0, 400);
 			collectibleDrop.addEventListener("removeCollectible", function onRemoveCollectible():void
 			{
@@ -534,13 +580,12 @@ package views
 			});
 			viewToUpdate.myWorld.addChild(collectibleDrop);
 		}
-		
+			
 		private function bitmapClicked(evt:MouseEvent):Boolean
 		{
 			var abd:AssetBitmapData = isMouseInsideBitmapAsset();
 			if (abd)
 			{
-				_bottomBar.replaceCreature((abd.activeAsset as ActiveAssetStack).creature);
 				doCollectibleDrop(abd.activeAsset, _worldView);
 				return true;
 			}
@@ -551,8 +596,18 @@ package views
 		{
 			if (sprite is Person)
 			{
-				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
+//				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
 				WorldBitmapInterface.doCollectibleDrop(sprite as ActiveAsset, _worldView);
+				return true;
+			}
+			return false;
+		}
+		
+		private function objectDoubleClicked(sprite:Sprite):Boolean
+		{
+			if (sprite is Person)
+			{
+				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
 				return true;
 			}
 			return false;

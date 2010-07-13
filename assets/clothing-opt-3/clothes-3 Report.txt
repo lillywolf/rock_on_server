@@ -1,0 +1,38 @@
+clothes-3.swf Movie Report
+---------------------------
+
+Metadata
+--------
+Bytes    Value
+-----    -----
+ 1066    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"> <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/"> <xmp:CreatorTool>Adobe Flash CS4 Professional</xmp:CreatorTool> <xmp:CreateDate>2010-07-07T19:42:26-07:00</xmp:CreateDate> <xmp:MetadataDate>2010-07-07T19:43:38-07:00</xmp:MetadataDate> <xmp:ModifyDate>2010-07-07T19:43:38-07:00</xmp:ModifyDate> </rdf:Description> <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/"> <dc:format>application/x-shockwave-flash</dc:format> </rdf:Description> <rdf:Description rdf:about="" xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/" xmlns:stRef="http://ns.adobe.com/xap/1.0/sType/ResourceRef#"> <xmpMM:DerivedFrom rdf:parseType="Resource"> <stRef:instanceID>xmp.iid:FD7F1174072068119FD9A32A22FDA071</stRef:instanceID> <stRef:documentID>xmp.did:FD7F1174072068119FD9A32A22FDA071</stRef:documentID> <stRef:originalDocumentID>xmp.did:FD7F1174072068119FD9A32A22FDA071</stRef:originalDocumentID> </xmpMM:DerivedFrom> <xmpMM:DocumentID>xmp.did:FE7F1174072068119FD9A32A22FDA071</xmpMM:DocumentID> <xmpMM:InstanceID>xmp.iid:FE7F1174072068119FD9A32A22FDA071</xmpMM:InstanceID> <xmpMM:OriginalDocumentID>xmp.did:FD7F1174072068119FD9A32A22FDA071</xmpMM:OriginalDocumentID> </rdf:Description> </rdf:RDF> 
+
+Frame #    Frame Bytes    Total Bytes    Scene
+-------    -----------    -----------    ----------------
+      1         110564         110564    Scene 1 (AS 3.0 Classes Export Frame)
+
+Scene                        Shape Bytes    Text Bytes    ActionScript Bytes
+-------------------------    -----------    ----------    ------------------
+Scene 1                                0             0                  3473
+
+Symbol                       Shape Bytes    Text Bytes    ActionScript Bytes
+-------------------------    -----------    ----------    ------------------
+BrownSkirt                         11470             0                     0
+PurpleSkirt                        11980             0                     0
+YellowSkirt                        11961             0                     0
+Pants6                             20069             0                     0
+Shirt7                             18224             0                     0
+Shirt6                             30482             0                     0
+
+ActionScript Bytes    Location
+------------------    --------
+               582    Scene 1:Frame 1:BrownSkirt
+               575    Scene 1:Frame 1:Pants6
+               583    Scene 1:Frame 1:PurpleSkirt
+               575    Scene 1:Frame 1:Shirt6
+               575    Scene 1:Frame 1:Shirt7
+               583    Scene 1:Frame 1:YellowSkirt
+
+
+
+
