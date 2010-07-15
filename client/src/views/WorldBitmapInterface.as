@@ -12,6 +12,7 @@ package views
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
+	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
 	import helpers.CollectibleDrop;
@@ -21,9 +22,14 @@ package views
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.containers.Canvas;
+	import mx.controls.Image;
+	import mx.controls.ProgressBar;
 	import mx.controls.Text;
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
+	import mx.managers.PopUpManager;
+	import mx.skins.halo.ProgressBarSkin;
+	import mx.skins.halo.ProgressMaskSkin;
 	
 	import org.osmf.events.TimeEvent;
 	
@@ -32,6 +38,9 @@ package views
 	import rock_on.CustomerPersonManager;
 	import rock_on.Person;
 	import rock_on.Venue;
+	
+	import spark.primitives.Rect;
+	import spark.skins.SparkSkin;
 	
 	import world.ActiveAsset;
 	import world.ActiveAssetStack;
@@ -59,6 +68,21 @@ package views
 		public var currentMouseX:Number;
 		public var currentMouseY:Number;
 		public var hoverTimer:Timer;
+		
+		public static const MAX_FILLERS:int = 6;
+		
+		[Embed(source="../libs/icons/chili_2empty.png")]
+		public var chiliBar:Class;		
+		[Embed(source="../libs/icons/chili_greenskin.png")]
+		public var chiliBarGreen:Class;			
+		[Embed(source="../libs/icons/hearts_2empty.png")]
+		public var heartsBar:Class;		
+		[Embed(source="../libs/icons/hearts_chain_6.png")]
+		public var heartsChain6:Class;		
+		[Embed(source="../libs/icons/skin_plain_red.png")]
+		public var plainSkinRed:Class;		
+		[Embed(source="../libs/icons/skin_plain_black.png")]
+		public var plainSkinBlack:Class;		
 		
 		public static const CREATURE_DETAIL_DELAY:int = 1000;
 		
@@ -213,6 +237,12 @@ package views
 		public static function getTypicalTextFilter():GlowFilter
 		{
 			var filter:GlowFilter = new GlowFilter(0x333333, 1, 1.4, 1.4, 30, 5); 
+			return filter;
+		}	
+		
+		public static function getTypicalBlackFilter():GlowFilter
+		{
+			var filter:GlowFilter = new GlowFilter(0x000000, 1, 1.1, 1.1, 30, 5); 
 			return filter;
 		}		
 		
@@ -598,6 +628,7 @@ package views
 			{
 //				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
 				WorldBitmapInterface.doCollectibleDrop(sprite as ActiveAsset, _worldView);
+				createChiliProgressBar(sprite);
 				return true;
 			}
 			return false;
@@ -689,6 +720,91 @@ package views
 			return backgroundCanvas;
 //			addChild(backgroundCanvas);
 //			backgroundCanvas.nestLevel = 2;				
+		}
+		
+		public function getCenterPointAboveSprite(sprite:Sprite, view:WorldView):Point
+		{
+			var worldRect:Rectangle = view.myWorld.getBounds(view); 
+			var wgRect:Rectangle = view.myWorld.wg.getBounds(view.myWorld);
+			return new Point((sprite as ActiveAsset).realCoords.x + worldRect.x, 
+				(sprite as ActiveAsset).realCoords.y + wgRect.height/2 - sprite.height/2);			
+		}
+		
+		public function createChiliProgressBar(sprite:Sprite):void
+		{
+			var barCoords:Point = getCenterPointAboveSprite(sprite, _worldView);
+			
+			var img:Image = new Image();
+			img.source = "../libs/icons/hearts_chain_6.png";
+			img.width = 135;
+			img.height = 25;
+			
+			var customizableBar:CustomizableProgressBar = new CustomizableProgressBar(21, 24, 22, img, 1000, 50, HeartEmpty, plainSkinBlack, plainSkinRed, barCoords.x, barCoords.y, Math.ceil(Math.random() * MAX_FILLERS));
+			_worldView.addChild(customizableBar);
+			customizableBar.startBar();
+			
+//			var numFillers:int = Math.ceil(Math.random() * MAX_FILLERS);
+//			
+//			var progressBar:ProgressBar = new ProgressBar();
+//			progressBar.mode = "manual";
+//			progressBar.minimum = 0;
+//			progressBar.maximum = 100;
+//			progressBar.visible = true;
+//			var worldRect:Rectangle = _worldView.myWorld.getBounds(_worldView); 
+//			var wgRect:Rectangle = _worldView.myWorld.wg.getBounds(_worldView.myWorld);
+//			progressBar.y = (sprite as ActiveAsset).realCoords.y + wgRect.height/2 - sprite.height/2;
+//			progressBar.x = (sprite as ActiveAsset).realCoords.x + worldRect.x;
+//			progressBar.height = 21;
+//			var img:Image = new Image();
+//			img.x = progressBar.x;
+//			img.y = progressBar.y;
+//			img.cacheAsBitmap = true;
+//			img.source = "../libs/icons/hearts_chain_6.png";
+//			var chili:Image = new Image();
+//			chili.height = 21;
+//			chili.x = progressBar.x;
+//			chili.y = progressBar.y;
+//			chili.cacheAsBitmap = true;
+//			chili.source = HeartChain3;
+//			progressBar.cacheAsBitmap = true;
+//			progressBar.setStyle("trackSkin", plainSkinBlack);
+//			progressBar.setStyle("barColor", 0xff3333);
+//			progressBar.setStyle("barSkin", plainSkinRed);
+//			var t:Timer = new Timer(50);
+//			t.addEventListener(TimerEvent.TIMER, function onProgressTimerComplete():void
+//			{
+//				progressBar.setProgress(t.currentCount*5, 100);
+//				if (t.currentCount == 20)
+//				{
+//					t.stop();
+//					t.removeEventListener(TimerEvent.TIMER, onProgressTimerComplete);
+//				}
+//			});
+//			_worldView.addChild(progressBar);
+//			
+//			var maskUI:UIComponent = new UIComponent();
+//			maskUI.y = progressBar.y;
+//			maskUI.x = progressBar.x;
+//			for (var i:int = 0; i < numFillers; i++)
+//			{
+//				var filler:Image = new Image();
+//				filler.height = 24;
+//				filler.source = HeartEmpty;
+//				filler.x = progressBar.x + i * 22;
+//				filler.y = progressBar.y;
+//				_worldView.addChild(filler);
+//				
+//				var heart:Image = new Image();
+//				heart.height = 21;
+//				heart.source = HeartChainFilled1;
+//				heart.x = i * 21;
+//				maskUI.addChild(heart);
+//			}
+//			progressBar.width = numFillers * 22;
+//			progressBar.mask = img;
+//			_worldView.addChild(img);
+//			progressBar.setProgress(0, 0);
+//			t.start();
 		}
 		
 		public function set bandBoss(val:BandBoss):void
