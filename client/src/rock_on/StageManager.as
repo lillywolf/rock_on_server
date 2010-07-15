@@ -25,6 +25,8 @@ package rock_on
 		public var stages:ArrayCollection;
 		public var concertStage:ConcertStage;
 		
+		public static const STAGE_DOOR_X:int = 1;
+		
 		public function StageManager(structureController:StructureController, target:IEventDispatcher=null)
 		{
 			super(target);
@@ -101,6 +103,17 @@ package rock_on
 		public function get myStage():World
 		{
 			return _myStage;
+		}
+		
+		public function set myWorld(val:World):void
+		{
+			_myWorld = val;
+			concertStage.stageEntryPoint = new Point3D(STAGE_DOOR_X, concertStage.structure.height, _myWorld.tilesDeep);			
+		}
+		
+		public function get myWorld():World
+		{
+			return _myWorld;
 		}
 		
 		public function removeStage():void

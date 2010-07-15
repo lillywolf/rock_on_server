@@ -560,7 +560,11 @@ package world
 				
 		public function mapPointToPathGrid(point3D:Point3D):Point3D
 		{
-			return pathGrid[point3D.x][point3D.y][point3D.z];
+			if (pathGrid[point3D.x][point3D.y][point3D.z])
+			{
+				return pathGrid[point3D.x][point3D.y][point3D.z];			
+			}
+			return null;
 		}
 		
 		private function determinePath(asset:ActiveAsset, pathGrid:ArrayCollection):ArrayCollection

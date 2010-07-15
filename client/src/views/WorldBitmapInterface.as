@@ -46,6 +46,7 @@ package views
 	import world.ActiveAssetStack;
 	import world.AssetStack;
 	import world.BitmapBlotter;
+	import world.Point3D;
 	import world.World;
 	
 	public class WorldBitmapInterface extends EventDispatcher
@@ -60,6 +61,7 @@ package views
 		[Bindable] public var _bottomBar:BottomBar;
 		[Bindable] public var _backgroundCanvas:Canvas;
 		
+		public var clickWaitTimer:Timer;
 		public var cursorUIC:ContainerUIC;
 		public var isDragging:Boolean;
 		public var mouseIncrementX:Number;
@@ -70,6 +72,7 @@ package views
 		public var hoverTimer:Timer;
 		
 		public static const MAX_FILLERS:int = 6;
+		public static const CLICK_WAIT_TIME:int = 200;
 		
 		[Embed(source="../libs/icons/chili_2empty.png")]
 		public var chiliBar:Class;		
@@ -92,9 +95,7 @@ package views
 			_worldView = worldView;
 			_stageView = stageView;
 			_editView = editView;
-			_bottomBar = bottomBar;
-			
-			_venueManager = _worldView.venueManager;
+			_bottomBar = bottomBar;			
 		}
 		
 		public function set backgroundCanvas(val:Canvas):void
@@ -297,10 +298,44 @@ package views
 //			{
 //				checkIfStageViewClicked(_worldView.mouseX - _worldView.myWorld.x, _worldView.mouseY, _stageView.height);				
 //			}
-			if (this.currentHoveredObject)
+		}
+		
+		private function onClickWaitComplete(evt:TimerEvent):void
+		{
+			clickWaitTimer.stop();
+			clickWaitTimer.removeEventListener(TimerEvent.TIMER, onClickWaitComplete);
+			
+			if (!isDragging)
 			{
-				this.objectClicked(currentHoveredObject);
-			}
+				if (this.currentHoveredObject)
+				{
+					this.objectClicked(currentHoveredObject);
+				}
+				else
+				{
+					moveMyAvatar(convertPointToWorldPoint(new Point(_worldView.mouseX, _worldView.mouseY)));
+				}				
+			}							
+		}
+		
+		private function startClickWaitTimer(view:WorldView):void
+		{
+			clickWaitTimer = new Timer(CLICK_WAIT_TIME);
+			clickWaitTimer.addEventListener(TimerEvent.TIMER, onClickWaitComplete);
+			clickWaitTimer.start();			
+		}
+		
+		public function convertPointToWorldPoint(pt:Point):Point
+		{
+			var worldRect:Rectangle = _worldView.myWorld.getBounds(_worldView); 
+			var newPoint:Point = new Point(pt.x, pt.y - worldRect.top);
+			return newPoint;			
+		}
+		
+		public function moveMyAvatar(pt:Point):void
+		{
+			var pt3D:Point3D = World.actualToWorldCoords(pt);
+			_venueManager.venue.bandMemberManager.moveMyAvatar(new Point3D(Math.round(pt3D.x), Math.round(pt3D.y), Math.round(pt3D.z)));
 		}
 		
 		public function sortStageAssets():ArrayCollection
@@ -562,6 +597,7 @@ package views
 		
 		public function handleMouseDown(view:WorldView):void
 		{
+			startClickWaitTimer(view);
 			isDragging = true;
 			mouseIncrementX = view.mouseX.valueOf();
 			mouseIncrementY = view.mouseY.valueOf();
@@ -626,7 +662,7 @@ package views
 		{
 			if (sprite is Person)
 			{
-//				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
+				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
 				WorldBitmapInterface.doCollectibleDrop(sprite as ActiveAsset, _worldView);
 				createChiliProgressBar(sprite);
 				return true;
@@ -729,7 +765,7 @@ package views
 			return new Point((sprite as ActiveAsset).realCoords.x + worldRect.x, 
 				(sprite as ActiveAsset).realCoords.y + wgRect.height/2 - sprite.height/2);			
 		}
-		
+				
 		public function createChiliProgressBar(sprite:Sprite):void
 		{
 			var barCoords:Point = getCenterPointAboveSprite(sprite, _worldView);
@@ -742,69 +778,6 @@ package views
 			var customizableBar:CustomizableProgressBar = new CustomizableProgressBar(21, 24, 22, img, 1000, 50, HeartEmpty, plainSkinBlack, plainSkinRed, barCoords.x, barCoords.y, Math.ceil(Math.random() * MAX_FILLERS));
 			_worldView.addChild(customizableBar);
 			customizableBar.startBar();
-			
-//			var numFillers:int = Math.ceil(Math.random() * MAX_FILLERS);
-//			
-//			var progressBar:ProgressBar = new ProgressBar();
-//			progressBar.mode = "manual";
-//			progressBar.minimum = 0;
-//			progressBar.maximum = 100;
-//			progressBar.visible = true;
-//			var worldRect:Rectangle = _worldView.myWorld.getBounds(_worldView); 
-//			var wgRect:Rectangle = _worldView.myWorld.wg.getBounds(_worldView.myWorld);
-//			progressBar.y = (sprite as ActiveAsset).realCoords.y + wgRect.height/2 - sprite.height/2;
-//			progressBar.x = (sprite as ActiveAsset).realCoords.x + worldRect.x;
-//			progressBar.height = 21;
-//			var img:Image = new Image();
-//			img.x = progressBar.x;
-//			img.y = progressBar.y;
-//			img.cacheAsBitmap = true;
-//			img.source = "../libs/icons/hearts_chain_6.png";
-//			var chili:Image = new Image();
-//			chili.height = 21;
-//			chili.x = progressBar.x;
-//			chili.y = progressBar.y;
-//			chili.cacheAsBitmap = true;
-//			chili.source = HeartChain3;
-//			progressBar.cacheAsBitmap = true;
-//			progressBar.setStyle("trackSkin", plainSkinBlack);
-//			progressBar.setStyle("barColor", 0xff3333);
-//			progressBar.setStyle("barSkin", plainSkinRed);
-//			var t:Timer = new Timer(50);
-//			t.addEventListener(TimerEvent.TIMER, function onProgressTimerComplete():void
-//			{
-//				progressBar.setProgress(t.currentCount*5, 100);
-//				if (t.currentCount == 20)
-//				{
-//					t.stop();
-//					t.removeEventListener(TimerEvent.TIMER, onProgressTimerComplete);
-//				}
-//			});
-//			_worldView.addChild(progressBar);
-//			
-//			var maskUI:UIComponent = new UIComponent();
-//			maskUI.y = progressBar.y;
-//			maskUI.x = progressBar.x;
-//			for (var i:int = 0; i < numFillers; i++)
-//			{
-//				var filler:Image = new Image();
-//				filler.height = 24;
-//				filler.source = HeartEmpty;
-//				filler.x = progressBar.x + i * 22;
-//				filler.y = progressBar.y;
-//				_worldView.addChild(filler);
-//				
-//				var heart:Image = new Image();
-//				heart.height = 21;
-//				heart.source = HeartChainFilled1;
-//				heart.x = i * 21;
-//				maskUI.addChild(heart);
-//			}
-//			progressBar.width = numFillers * 22;
-//			progressBar.mask = img;
-//			_worldView.addChild(img);
-//			progressBar.setProgress(0, 0);
-//			t.start();
 		}
 		
 		public function set bandBoss(val:BandBoss):void
@@ -815,6 +788,16 @@ package views
 		public function get bandBoss():BandBoss
 		{
 			return _bandBoss;
+		}
+		
+		public function set venueManager(val:VenueManager):void
+		{
+			_venueManager = val;
+		}
+		
+		public function get venueManager():VenueManager
+		{
+			return _venueManager;
 		}
 		
 		public function set customerPersonManager(val:CustomerPersonManager):void

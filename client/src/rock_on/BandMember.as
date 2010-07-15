@@ -22,13 +22,17 @@ package rock_on
 		public static const STOP_STATE:int = 3;
 		public static const LEAVING_STATE:int = 2;
 		public static const WAIT_STATE:int = 4;
-		public static const GONE_STATE:int = 5;		
+		public static const GONE_STATE:int = 5;
+		public static const EXIT_STAGE_STATE:int = 6;
+		public static const OFFSTAGE_STATE:int = 7;
 		
 		private static const ROAM_TIME:int = Math.random()*5000 + 500;
 		private static const STOP_TIME:int = 10000;
 		private static const ENTER_TIME:int = 1000;
 		
+		public var _venue:Venue;
 		public var destinationLocation:Point3D;
+		public var offStageDestination:Point3D;
 		public var exemptStructures:ArrayCollection;
 		public var state:int;
 		public var stopTime:Timer;
@@ -56,9 +60,9 @@ package rock_on
 			state = STOP_STATE;
 			standFacingCrowd();
 						
-			stopTime = new Timer(STOP_TIME);
-			stopTime.addEventListener(TimerEvent.TIMER, roam);
-			stopTime.start();
+//			stopTime = new Timer(STOP_TIME);
+//			stopTime.addEventListener(TimerEvent.TIMER, roam);
+//			stopTime.start();
 		}	
 		
 		public function endStopState():void
@@ -174,57 +178,7 @@ package rock_on
 			
 			var standAnimation:String = getStandAnimation(frameNumber);
 			stand(standAnimation, frameNumber);			
-		}
-		
-//		public function standStill():void
-//		{
-//			var frameNumber:int = 1;
-//			if (directionality.x > 0)
-//			{
-//				frameNumber = 39;
-//			}
-//			else if (directionality.x < 0)
-//			{
-//				frameNumber = 37;
-//			}
-//			else if (directionality.z > 0)
-//			{
-//				frameNumber = 37;
-//			}
-//			else if (directionality.z < 0)
-//			{
-//				frameNumber = 39;
-//			}
-//			
-//			var animationType:String;
-//			if (frameNumber == 37)
-//			{
-//				animationType = "stand_still_away";
-//			}
-//			else if (frameNumber == 39)
-//			{
-//				animationType = "stand_still_toward";
-//			}			
-//			
-//			stand(frameNumber);
-//			
-//			if (directionality.x > 0)
-//			{
-//				this.scaleMovieClips(-(orientation));
-//			}
-//			else if (directionality.x < 0)
-//			{
-//				this.scaleMovieClips(-(orientation));
-//			}
-//			else if (directionality.z > 0)
-//			{
-//				this.scaleMovieClips(orientation);
-//			}
-//			else if (directionality.z < 0)
-//			{
-//				this.scaleMovieClips(orientation);
-//			}			
-//		}		
+		}	
 		
 		public function startWaitState():void
 		{
@@ -298,7 +252,7 @@ package rock_on
 				_stageManager.concertStage.worldCoords.z + Math.floor((_stageManager.concertStage.structure.depth - 1) - Math.random()*(_stageManager.concertStage.structure.depth - 1)));	
 			return destinationLocation;	
 		}
-		
+				
 		public function update(deltaTime:Number):Boolean
 		{
 			switch (state)
@@ -317,6 +271,12 @@ package rock_on
 					break;
 				case WAIT_STATE:
 					doWaitState(deltaTime);
+					break;
+				case EXIT_STAGE_STATE:
+					doExitStageState(deltaTime);
+					break;
+				case OFFSTAGE_STATE:
+					doOffstageState(deltaTime);
 					break;
 				case GONE_STATE:
 					doGoneState(deltaTime);	
@@ -345,6 +305,12 @@ package rock_on
 				case WAIT_STATE:
 					endWaitState();
 					break;	
+				case EXIT_STAGE_STATE:
+					endExitStageState();
+					break;
+				case OFFSTAGE_STATE:
+					endOffstageState();
+					break;
 				case GONE_STATE:
 					break;					
 				default: throw new Error('no state to advance from!');
@@ -368,7 +334,13 @@ package rock_on
 					break;	
 				case WAIT_STATE:
 					startWaitState();
-					break;	
+					break;
+				case EXIT_STAGE_STATE:
+					startExitStageState();
+					break;
+				case OFFSTAGE_STATE:
+					startOffstageState();
+					break;
 				default: throw new Error('no state to advance to!');	
 			}
 		}	
@@ -390,6 +362,55 @@ package rock_on
 		public function startGoneState():void
 		{
 			state = GONE_STATE;
+		}
+		
+		public function startExitStageState():void
+		{
+			state = EXIT_STAGE_STATE;
+			movePerson(destinationLocation);
+		}
+		
+		public function endExitStageState():void
+		{
+			removeFromView();
+		}
+		
+		public function startOffstageState():void
+		{
+			state = OFFSTAGE_STATE;
+			addToOffstageView();
+			movePerson(offStageDestination);
+		}
+		
+		public function endOffstageState():void
+		{
+			
+		}
+		
+		public function doOffstageState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function doExitStageState(deltaTime:Number):void
+		{
+			
+		}
+		
+		private function addToOffstageView():void
+		{
+			_myWorld = _venue.myWorld;
+			_myWorld.addAsset(this, _venue.mainEntrance);
+		}
+		
+		private function removeFromView():void
+		{
+			_myWorld.removeAsset(this);
+		}
+		
+		public function endDirectedState():void
+		{
+			
 		}
 		
 		public function endEnterState():void
@@ -431,7 +452,12 @@ package rock_on
 		public function doGoneState(deltaTime:Number):void
 		{
 			
-		}		
+		}	
+		
+		public function set venue(val:Venue):void
+		{
+			_venue = val;
+		}
 		
 	}
 }

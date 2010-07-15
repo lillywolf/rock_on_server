@@ -197,6 +197,56 @@ package rock_on
 			return frameNumber;
 		}	
 		
+		public function getClosestAvailableSpot(pt3D:Point3D):Point3D
+		{
+			var depthIndex:int = 1;
+			var closestAvailableSpot:Point3D;
+			do
+			{
+				var surroundingPoints:ArrayCollection = getSurroundingPointsLayer(depthIndex, pt3D);
+				if (surroundingPoints.length > 0)
+				{
+					closestAvailableSpot = surroundingPoints.getItemAt(Math.floor(Math.random() * surroundingPoints.length)) as Point3D;
+				}
+				depthIndex++;
+				if (depthIndex > 4)
+				{
+					break;
+				}
+			}
+			while (!closestAvailableSpot);
+			return closestAvailableSpot;
+		}
+		
+		public function getSurroundingPointsLayer(depthIndex:int, pt3D:Point3D):ArrayCollection
+		{
+			var concentricArray:ArrayCollection = new ArrayCollection();
+			var neighbor:Point3D;
+			for (var i:int = 0; i < 2; i++)
+			{
+				for (var j:int = 0; j < (depthIndex * 2 + 1); j++)
+				{
+					neighbor = _myWorld.pathFinder.mapPointToPathGrid(new Point3D(pt3D.x - (depthIndex * (i * 2 - 1)), pt3D.y, pt3D.z - (depthIndex - j)));
+					if (neighbor && !(_myWorld.pathFinder.establishStructureOccupiedSpaces() as ArrayCollection).contains(neighbor))
+					{
+						concentricArray.addItem(neighbor);					
+					}
+				}
+			}
+			for (i = 0; i < 2; i++)
+			{
+				for (j = 0; j < (depthIndex * 2 - 1); j++)
+				{
+					neighbor = _myWorld.pathFinder.mapPointToPathGrid(new Point3D(pt3D.x - (depthIndex - j), pt3D.y, pt3D.z - (depthIndex * (i * 2 - 1))));
+					if (neighbor && !(_myWorld.pathFinder.establishStructureOccupiedSpaces() as ArrayCollection).contains(neighbor))
+					{
+						concentricArray.addItem(neighbor);					
+					}					
+				}
+			}
+			return concentricArray;
+		}
+		
 		public function stand(animation:String, frameNumber:int):void
 		{
 			doAnimation(animation, false, frameNumber);

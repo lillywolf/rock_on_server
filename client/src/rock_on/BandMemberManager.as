@@ -31,11 +31,12 @@ package rock_on
 		public static const STOP_STATE:int = 3;
 		public static const LEAVING_STATE:int = 2;
 		public static const GONE_STATE:int = 5;	
-			
+					
 		private var _myWorld:World;		
 		private var _concertStage:ConcertStage;
 		public var _venue:Venue;
-		public var spawnLocation:Point3D;				
+		public var spawnLocation:Point3D;
+		public var myAvatar:Person;
 		
 		public function BandMemberManager(venue:Venue, myWorld:World, source:Array=null)
 		{
@@ -43,7 +44,10 @@ package rock_on
 			_venue = venue;
 			_myWorld = myWorld;
 			_myWorld.addEventListener(WorldEvent.DIRECTION_CHANGED, onDirectionChanged);				
-			_myWorld.addEventListener(WorldEvent.FINAL_DESTINATION_REACHED, onFinalDestinationReached);			
+			_myWorld.addEventListener(WorldEvent.FINAL_DESTINATION_REACHED, onFinalDestinationReached);	
+			
+			_venue.myWorld.addEventListener(WorldEvent.DIRECTION_CHANGED, onVenueDirectionChanged);				
+			_venue.myWorld.addEventListener(WorldEvent.FINAL_DESTINATION_REACHED, onVenueFinalDestinationReached);			
 		}
 		
 		public function showBandMembers():void
@@ -63,13 +67,19 @@ package rock_on
 //			}
 			for each (var c:Creature in _venue.creatureController.creatures)
 			{
-				if (c.type == "BandMember")
+				if (c.type == "BandMember" || c.type == "Me")
 				{
 					var bm:BandMember = new BandMember(c, null, c.layerableOrder, 0.5);
 					bm.stageManager = _venue.stageManager;
+					bm.venue = _venue;
 					bm.addExemptStructures();
 					bm.speed = 0.06;
 					add(bm);
+					
+					if (c.type == "Me")
+					{
+						this.myAvatar = bm;
+					}
 					
 					bm.advanceState(mapVenueStateToBandMemberState());
 				}
@@ -136,6 +146,16 @@ package rock_on
 			}
 		}
 		
+		public function moveMyAvatar(destination:Point3D):void
+		{
+			if (this.myAvatar)
+			{
+				(myAvatar as BandMember).offStageDestination = destination;
+				(myAvatar as BandMember).destinationLocation = _concertStage.stageEntryPoint;
+				(myAvatar as BandMember).advanceState(BandMember.EXIT_STAGE_STATE);
+			}
+		}
+		
 		private function onFinalDestinationReached(evt:WorldEvent):void
 		{
 			if (evt.activeAsset is BandMember)
@@ -148,6 +168,30 @@ package rock_on
 				else if (bm.state == ROAM_STATE)
 				{
 					bm.advanceState(STOP_STATE);
+				}
+				else if (bm.state == BandMember.EXIT_STAGE_STATE)
+				{
+					bm.advanceState(BandMember.OFFSTAGE_STATE);
+				}
+				else if (bm.state == BandMember.OFFSTAGE_STATE)
+				{
+					bm.advanceState(BandMember.STOP_STATE);
+				}
+				else
+				{
+					bm.standFacingCrowd();
+				}
+			}
+		}
+
+		private function onVenueFinalDestinationReached(evt:WorldEvent):void
+		{
+			if (evt.activeAsset is BandMember)
+			{
+				var bm:BandMember = evt.activeAsset as BandMember;				
+				if (bm.state == BandMember.OFFSTAGE_STATE)
+				{
+					bm.advanceState(BandMember.STOP_STATE);
 				}
 				else
 				{
@@ -299,6 +343,17 @@ package rock_on
 		private function onDirectionChanged(evt:WorldEvent):void
 		{
 			trace("direction changed");
+			for each (var asset:ActiveAsset in this)
+			{
+				if (evt.activeAsset == asset)
+				{
+					(asset as BandMember).setDirection(asset.worldDestination);
+				}
+			}
+		}	
+		
+		private function onVenueDirectionChanged(evt:WorldEvent):void
+		{
 			for each (var asset:ActiveAsset in this)
 			{
 				if (evt.activeAsset == asset)

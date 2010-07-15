@@ -12,6 +12,8 @@ package rock_on
 		public var stageRadiusRight:Number;
 		public var stageRadiusTop:Number;
 		public var stageRadiusBottom:Number;
+		
+		public var stageEntryPoint:Point3D;
 		public var _worldCoords:Point3D;		
 				
 		public function ConcertStage(params:Object=null, target:IEventDispatcher=null)
@@ -21,7 +23,7 @@ package rock_on
 			stageRadiusLeft = 0;
 			stageRadiusRight = 6;
 			stageRadiusTop = 0;
-			stageRadiusBottom = 6;			
+			stageRadiusBottom = 6;						
 		}	
 		
 		public function set worldCoords(val:Point3D):void

@@ -196,6 +196,7 @@ package rock_on
 			
 			getNumberOfBitmaps();
 			
+			stageManager.myWorld = _myWorld;
 			customerPersonManager = new CustomerPersonManager(_myWorld, this);
 			boothBoss = new BoothBoss(_structureController, _myWorld, this);
 			listeningStationBoss = new ListeningStationBoss(_structureController, _layerableController, stageManager, _myWorld, this, boothBoss, customerPersonManager);
