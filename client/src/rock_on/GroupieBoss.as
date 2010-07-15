@@ -64,7 +64,7 @@ package rock_on
 				if (c.type == "Groupie")
 				{
 					var cp:CustomerPerson = new CustomerPerson(_boothBoss, c, null, c.layerableOrder, 0.5);
-					cp.speed = 0.06;
+					cp.speed = 0.11;
 					cp.doInitialAnimation("walk_toward");
 					cp.stageManager = _venue.stageManager;
 					_customerPersonManager.add(cp, true, -1, _venue.boothsRect);

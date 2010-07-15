@@ -73,7 +73,7 @@ package rock_on
 					bm.stageManager = _venue.stageManager;
 					bm.venue = _venue;
 					bm.addExemptStructures();
-					bm.speed = 0.06;
+					bm.speed = 0.11;
 					add(bm);
 					
 					if (c.type == "Me")

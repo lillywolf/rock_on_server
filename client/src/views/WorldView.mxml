@@ -145,13 +145,9 @@
 			{
 				viewReference = this;
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				addEventListener(MouseEvent.MOUSE_DOWN, function onMouseDown():void
-				{
-					wbi.handleMouseDown(viewReference);
-				});	
 				this.doubleClickEnabled = true;
-				addEventListener(MouseEvent.DOUBLE_CLICK, onViewDoubleClicked);
-				addEventListener(MouseEvent.CLICK, onViewClicked);
+//				addEventListener(MouseEvent.DOUBLE_CLICK, onViewDoubleClicked);
+//				addEventListener(MouseEvent.CLICK, onViewClicked);
 			}
 			
 			private function onViewClicked(evt:MouseEvent):void
@@ -242,7 +238,20 @@
 				myWorld.nestLevel = 3;
 				addBackgroundLayer();
 				addChild(myWorld);	
-				myWorld.assetRenderer.addEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);
+				myWorld.assetRenderer.addEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);	
+				addMouseDownListeners();
+			}
+			
+			public function addMouseDownListeners():void
+			{
+				backgroundCanvas.addEventListener(MouseEvent.MOUSE_DOWN, function onBitmapMouseDown():void
+				{
+					wbi.handleMouseDown(viewReference);					
+				});
+				myWorld.addEventListener(MouseEvent.MOUSE_DOWN, function onWorldMouseDown():void
+				{
+					wbi.handleMouseDown(viewReference);
+				});					
 			}
 			
 			public function onEnterFrame(evt:Event):void

@@ -291,7 +291,7 @@ package rock_on
 				var c:Creature = creatureGenerator.createImposterCreature("Concert Goer");
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
 //				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
-				cp.speed = 0.06;
+				cp.speed = 0.11;
 				cp.stageManager = stageManager;
 				customerPersonManager.add(cp, false, i);				
 			}
@@ -309,7 +309,7 @@ package rock_on
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, imposter, null, imposter.layerableOrder, 0.5);
 				cp.stageManager = stageManager;
 //				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
-				cp.speed = 0.06;
+				cp.speed = 0.11;
 				cp.isSuperFan = true;
 				customerPersonManager.add(cp, true, -1, stageBufferRect, stageRect, worldToUpdate);
 			}					
@@ -327,7 +327,7 @@ package rock_on
 				c.has_moods = true;
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
 				cp.stageManager = stageManager;
-				cp.speed = 0.06;
+				cp.speed = 0.11;
 				customerPersonManager.add(cp, true, -1, boothsRect);
 				cp.setMood();							
 			}			

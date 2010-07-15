@@ -25,6 +25,7 @@ package views
 	import mx.controls.Image;
 	import mx.controls.ProgressBar;
 	import mx.controls.Text;
+	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
 	import mx.managers.PopUpManager;
@@ -72,7 +73,7 @@ package views
 		public var hoverTimer:Timer;
 		
 		public static const MAX_FILLERS:int = 6;
-		public static const CLICK_WAIT_TIME:int = 200;
+		public static const CLICK_WAIT_TIME:int = 500;
 		
 		[Embed(source="../libs/icons/chili_2empty.png")]
 		public var chiliBar:Class;		
@@ -304,18 +305,6 @@ package views
 		{
 			clickWaitTimer.stop();
 			clickWaitTimer.removeEventListener(TimerEvent.TIMER, onClickWaitComplete);
-			
-			if (!isDragging)
-			{
-				if (this.currentHoveredObject)
-				{
-					this.objectClicked(currentHoveredObject);
-				}
-				else
-				{
-					moveMyAvatar(convertPointToWorldPoint(new Point(_worldView.mouseX, _worldView.mouseY)));
-				}				
-			}							
 		}
 		
 		private function startClickWaitTimer(view:WorldView):void
@@ -325,10 +314,11 @@ package views
 			clickWaitTimer.start();			
 		}
 		
-		public function convertPointToWorldPoint(pt:Point):Point
+		public function convertPointToWorldPoint(view:WorldView, pt:Point):Point
 		{
-			var worldRect:Rectangle = _worldView.myWorld.getBounds(_worldView); 
-			var newPoint:Point = new Point(pt.x, pt.y - worldRect.top);
+			var worldRect:Rectangle = view.myWorld.getBounds(view); 
+			var wgRect:Rectangle = view.myWorld.wg.getBounds(view.myWorld);
+			var newPoint:Point = new Point(pt.x + wgRect.left, pt.y + wgRect.y);
 			return newPoint;			
 		}
 		
@@ -601,10 +591,22 @@ package views
 			isDragging = true;
 			mouseIncrementX = view.mouseX.valueOf();
 			mouseIncrementY = view.mouseY.valueOf();
-			view.addEventListener(MouseEvent.MOUSE_UP, function onMouseUp():void
+			view.addEventListener(MouseEvent.MOUSE_UP, function onMouseUp(evt:MouseEvent):void
 			{
+				if (clickWaitTimer.running)
+				{
+					if (currentHoveredObject)
+					{
+						objectClicked(currentHoveredObject);
+					}
+					else
+					{
+						moveMyAvatar(convertPointToWorldPoint(view, new Point(evt.localX, evt.localY)));
+					}				
+				}										
+				
 				view.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-				isDragging = false;				
+				isDragging = false;	
 			});
 		}
 		

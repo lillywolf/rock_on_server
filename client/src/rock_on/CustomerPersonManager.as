@@ -37,7 +37,7 @@ package rock_on
 			{
 				cp.myWorld = _myWorld;
 				cp.venue = _venue;
-				cp.speed = 0.07;
+				cp.speed = 0.11;
 				addEventListeners(cp);
 				addItem(cp);
 				_myWorld.addStaticAsset(cp, startPoint);

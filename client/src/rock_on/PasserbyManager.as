@@ -118,13 +118,13 @@ package rock_on
 			if (Math.random()*_listeningStationBoss.listeningStations.length > (1 - STATIONLISTENER_CONVERSION_PROBABILITY) && _listeningStationBoss.isAnyStationAvailable())
 			{
 				var sl:StationListener = generateStationListener();
-				sl.speed = 0.07;
+				sl.speed = 0.11;
 				add(sl);			
 			}
 			else
 			{
 				var passerby:Passerby = generatePasserby();				
-				passerby.speed = 0.07;
+				passerby.speed = 0.11;
 				add(passerby);
 			}
 				
