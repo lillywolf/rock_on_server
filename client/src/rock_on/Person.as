@@ -100,6 +100,20 @@ package rock_on
 			return {frameNumber: _frameNumber, animation: standAnimation, reflection: reflection};			
 		}
 		
+		public function standFacingCurrentDirection():void
+		{
+			if (this.animation == "walk_away")
+			{
+				_frameNumber = 37;
+				stand("stand_still_away", _frameNumber);
+			}
+			else
+			{
+				_frameNumber = 39;
+				stand("stand_still_toward", _frameNumber);
+			}
+		}
+		
 		public function getStandAnimation(frameNumber:int):String
 		{
 			if (frameNumber == 37)

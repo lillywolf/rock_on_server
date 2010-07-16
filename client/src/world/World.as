@@ -122,6 +122,50 @@ package world
 			return worldBound;
 		}
 		
+		public function getOccupiedSpaces(avoidStructures:Boolean = true, avoidPeople:Boolean = true, exemptStructures:ArrayCollection = null):ArrayCollection
+		{
+			var structureOccupiedSpaces:ArrayCollection = new ArrayCollection();
+			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
+			if (avoidStructures)
+			{
+				structureOccupiedSpaces = this.pathFinder.establishStructureOccupiedSpaces(exemptStructures);			
+			}
+			if (avoidPeople)
+			{
+				peopleOccupiedSpaces = this.pathFinder.establishPeopleOccupiedSpaces();
+			}
+			structureOccupiedSpaces.addAll(peopleOccupiedSpaces);
+			return structureOccupiedSpaces;
+		}
+		
+		public function isPointAvailable(pt3D:Point3D, avoidStructures:Boolean = true, avoidPeople:Boolean = true, exemptStructures:ArrayCollection = null):Boolean
+		{
+			var occupiedSpaces:ArrayCollection = getOccupiedSpaces(avoidStructures, avoidPeople, exemptStructures);
+			pt3D = this.pathFinder.mapPointToPathGrid(pt3D);
+			if (occupiedSpaces.contains(pt3D))
+			{
+				return false;
+			}
+			return true;
+		}
+		
+		public function pickRandomAvailableWorldPoint(avoidStructures:Boolean=true, avoidPeople:Boolean=true, exemptStructures:ArrayCollection=null):Point3D
+		{
+			var occupiedSpaces:ArrayCollection = getOccupiedSpaces(avoidStructures, avoidPeople, exemptStructures);
+			
+			var pt3D:Point3D;
+			return pt3D;
+		}
+		
+		public function doesWorldContain(asset:ActiveAsset):Boolean
+		{
+			if (assetRenderer.unsortedAssets.contains(asset))
+			{
+				return true;
+			}
+			return false;
+		}
+		
 		public function getMatchingStaticAsset(thinger:Object):ActiveAsset
 		{
 			for each (var asset:ActiveAsset in this.assetRenderer.unsortedAssets)

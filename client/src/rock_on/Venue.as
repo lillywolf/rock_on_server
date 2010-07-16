@@ -11,6 +11,7 @@ package rock_on
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	
@@ -132,6 +133,46 @@ package rock_on
 		{
 			stageManager = new StageManager(_structureController);
 			stageManager.createStage();
+		}
+		
+		public function isPointInVenueBounds(pt3D:Point3D):Boolean
+		{
+			if (pt3D.x > venueRect.right || pt3D.x < venueRect.left || pt3D.z > venueRect.bottom || pt3D.z < venueRect.top)
+			{
+				return false;
+			}
+			return true;
+		}
+		
+		public function isPointInRect(pt3D:Point3D, rect:Rectangle):Boolean
+		{
+			if (pt3D.x < rect.right && pt3D.x > rect.left && pt3D.z < rect.bottom && pt3D.z > rect.top)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		public function isPointInStageRect(pt3D:Point3D):Boolean
+		{
+			if (pt3D.x < stageRect.right && pt3D.z > stageRect.top)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		public function pickRandomAvailablePointWithinRect(rect:Rectangle, worldSprite:World, heightBase:int, avoidStructures:Boolean = true, avoidPeople:Boolean = true, exemptStructures:ArrayCollection = null):Point3D
+		{
+			var pt3D:Point3D = new Point3D(0, heightBase, 0);				
+			var occupiedSpaces:ArrayCollection = worldSprite.getOccupiedSpaces(avoidStructures, avoidPeople, exemptStructures);
+			do
+			{
+				pt3D.x = Math.round(rect.right - Math.random() * (rect.right - rect.left));
+				pt3D.z = Math.round(rect.bottom - Math.random() * (rect.bottom - rect.top));
+			}
+			while (occupiedSpaces.contains(pt3D));	
+			return pt3D;
 		}
 		
 		public function setLayout():void

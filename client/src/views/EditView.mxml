@@ -57,9 +57,9 @@
 			{
 				viewReference = this;
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				addEventListener(MouseEvent.MOUSE_DOWN, function onMouseDown():void
+				addEventListener(MouseEvent.MOUSE_DOWN, function onMouseDown(evt:MouseEvent):void
 				{
-					wbi.handleMouseDown(viewReference);
+					wbi.handleMouseDown(stageView, viewReference, new Point(evt.localX, evt.localY));
 				});	
 				
 				editMode = new EditMode(myWorld, this);

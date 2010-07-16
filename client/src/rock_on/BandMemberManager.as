@@ -16,6 +16,7 @@ package rock_on
 	import views.BandBoss;
 	import views.ContainerUIC;
 	import views.UICanvas;
+	import views.WorldView;
 	
 	import world.ActiveAsset;
 	import world.ActiveAssetStack;
@@ -36,7 +37,7 @@ package rock_on
 		private var _concertStage:ConcertStage;
 		public var _venue:Venue;
 		public var spawnLocation:Point3D;
-		public var myAvatar:Person;
+		public var myAvatar:BandMember;
 		
 		public function BandMemberManager(venue:Venue, myWorld:World, source:Array=null)
 		{
@@ -110,7 +111,7 @@ package rock_on
 			}
 			else if (_venue.state == Venue.ENCORE_STATE)
 			{
-				return BandMember.ENTER_STATE;
+				return BandMember.STAGE_ENTER_STATE;
 			}
 			else if (_venue.state == Venue.ENCORE_WAIT_STATE)
 			{
@@ -118,7 +119,7 @@ package rock_on
 			}
 			else if (_venue.state == Venue.SHOW_STATE)
 			{
-				return BandMember.ENTER_STATE;
+				return BandMember.STAGE_ENTER_STATE;
 			}
 			else if (_venue.state == Venue.SHOW_WAIT_STATE)
 			{
@@ -146,13 +147,32 @@ package rock_on
 			}
 		}
 		
-		public function moveMyAvatar(destination:Point3D):void
+		public function moveMyAvatar(destination:Point3D, toWorld:Boolean, toStage:Boolean):void
 		{
 			if (this.myAvatar)
 			{
-				(myAvatar as BandMember).offStageDestination = destination;
-				(myAvatar as BandMember).destinationLocation = _concertStage.stageEntryPoint;
-				(myAvatar as BandMember).advanceState(BandMember.EXIT_STAGE_STATE);
+				(myAvatar as BandMember).destinationLocation = destination;
+				
+				if (toWorld)
+				{
+					if (!(myAvatar as BandMember).inWorld)
+					{
+						(myAvatar as BandMember).exitLocation = _concertStage.stageEntryPoint;
+						(myAvatar as BandMember).advanceState(BandMember.EXIT_STAGE_STATE);
+					}
+					else
+					{
+						(myAvatar as BandMember).advanceState(BandMember.DIRECTED_MOVE_STATE);
+					}
+				}
+				if (toStage)
+				{
+					if ((myAvatar as BandMember).state == BandMember.DIRECTED_MOVE_STATE || (myAvatar as BandMember).state == BandMember.DIRECTED_STOP_STATE)
+					{
+						(myAvatar as BandMember).exitLocation = _venue.mainEntrance;
+						(myAvatar as BandMember).advanceState(BandMember.EXIT_OFFSTAGE_STATE);
+					}
+				}
 			}
 		}
 		
@@ -171,11 +191,18 @@ package rock_on
 				}
 				else if (bm.state == BandMember.EXIT_STAGE_STATE)
 				{
-					bm.advanceState(BandMember.OFFSTAGE_STATE);
+					bm.advanceState(BandMember.DIRECTED_MOVE_STATE);
 				}
-				else if (bm.state == BandMember.OFFSTAGE_STATE)
+				else if (bm.state == BandMember.DIRECTED_MOVE_STATE)
 				{
-					bm.advanceState(BandMember.STOP_STATE);
+					bm.advanceState(BandMember.DIRECTED_STOP_STATE);
+				}
+				else if (bm.state == BandMember.STAGE_ENTER_STATE)
+				{
+					if (bm.itemDropRecipient)
+					{
+						bm.tossItem(bm.itemDropRecipient.recipient as ActiveAsset, bm.itemDropRecipient.view as WorldView);						
+					}
 				}
 				else
 				{
@@ -189,14 +216,27 @@ package rock_on
 			if (evt.activeAsset is BandMember)
 			{
 				var bm:BandMember = evt.activeAsset as BandMember;				
-				if (bm.state == BandMember.OFFSTAGE_STATE)
+				if (bm.state == BandMember.DIRECTED_MOVE_STATE)
 				{
-					bm.advanceState(BandMember.STOP_STATE);
+					bm.advanceState(BandMember.DIRECTED_STOP_STATE);
+				}
+				else if (bm.state == BandMember.EXIT_OFFSTAGE_STATE)
+				{
+					bm.advanceState(BandMember.STAGE_ENTER_STATE);
 				}
 				else
 				{
 					bm.standFacingCrowd();
 				}
+			}
+		}
+		
+		public function goToStageAndTossItem(recipient:ActiveAsset, view:WorldView):void
+		{
+			myAvatar.itemDropRecipient = {recipient: recipient, view: view};
+			if (myAvatar.goToStage())
+			{
+				myAvatar.tossItem(recipient, view);
 			}
 		}
 		

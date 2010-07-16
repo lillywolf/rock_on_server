@@ -307,7 +307,7 @@ package views
 			clickWaitTimer.removeEventListener(TimerEvent.TIMER, onClickWaitComplete);
 		}
 		
-		private function startClickWaitTimer(view:WorldView):void
+		private function startClickWaitTimer():void
 		{
 			clickWaitTimer = new Timer(CLICK_WAIT_TIME);
 			clickWaitTimer.addEventListener(TimerEvent.TIMER, onClickWaitComplete);
@@ -322,10 +322,30 @@ package views
 			return newPoint;			
 		}
 		
-		public function moveMyAvatar(pt:Point):void
+		public function convertPointToStagePoint(view:StageView, pt:Point):Point
 		{
-			var pt3D:Point3D = World.actualToWorldCoords(pt);
-			_venueManager.venue.bandMemberManager.moveMyAvatar(new Point3D(Math.round(pt3D.x), Math.round(pt3D.y), Math.round(pt3D.z)));
+			var worldRect:Rectangle = view.myStage.getBounds(view); 
+			var wgRect:Rectangle = view.myStage.wg.getBounds(view.myStage);
+			var newPoint:Point = new Point(pt.x + wgRect.left, pt.y + wgRect.y);
+			return newPoint;			
+		}
+		
+		public function moveMyAvatar(pt:Point, toWorld:WorldView=null, toStage:StageView=null):void
+		{
+			var pt3D:Point3D;
+			if (toStage)
+			{
+				pt3D = World.actualToWorldCoords(pt, toStage.concertStage.structure.height);
+				_venueManager.venue.bandMemberManager.moveMyAvatar(new Point3D(Math.round(pt3D.x), Math.round(pt3D.y), Math.round(pt3D.z)), false, true);
+			}
+			else
+			{
+				pt3D = World.actualToWorldCoords(pt);
+				if (_venueManager.venue.isPointInVenueBounds(pt3D) && !_venueManager.venue.isPointInStageRect(pt3D) && !_venueManager.venue.isPointInRect(pt3D, _venueManager.venue.mainCrowdRect))
+				{
+					_venueManager.venue.bandMemberManager.moveMyAvatar(new Point3D(Math.round(pt3D.x), Math.round(pt3D.y), Math.round(pt3D.z)), true, false);								
+				}
+			}
 		}
 		
 		public function sortStageAssets():ArrayCollection
@@ -583,15 +603,49 @@ package views
 		{
 			cursorUIC.x = _worldView.mouseX;
 			cursorUIC.y = _worldView.mouseY;
-		}	
+		}
 		
-		public function handleMouseDown(view:WorldView):void
+		public function doDrag(view:UIComponent):void
 		{
-			startClickWaitTimer(view);
+			startClickWaitTimer();
 			isDragging = true;
 			mouseIncrementX = view.mouseX.valueOf();
-			mouseIncrementY = view.mouseY.valueOf();
-			view.addEventListener(MouseEvent.MOUSE_UP, function onMouseUp(evt:MouseEvent):void
+			mouseIncrementY = view.mouseY.valueOf();			
+		}
+		
+		public function getRelevantViewForMouseDown(coords:Point, localStage:StageView, localWorld:WorldView):UIComponent
+		{
+			var pt3D:Point3D = World.actualToWorldCoords(convertPointToWorldPoint(localWorld, coords));
+			var rect:Rectangle = _venueManager.venue.stageRect;
+			if (pt3D.x <= rect.right && pt3D.z >= rect.top)
+			{
+				return localStage;
+			}
+			return localWorld;
+		}
+		
+		public function handleMouseDown(localStage:StageView, localWorld:WorldView, clickPoint:Point):void
+		{
+			if (!isDragging)
+			{
+				doDrag(localWorld);				
+			}
+			
+			var v:UIComponent = getRelevantViewForMouseDown(clickPoint, localStage, localWorld);
+			
+			if (v is WorldView)
+			{
+				listenForWorldMouseUp(localWorld);
+			}
+			else if (v is StageView)
+			{
+				listenForStageMouseUp(localWorld, localStage);
+			}
+		}
+		
+		public function listenForWorldMouseUp(localWorld:WorldView):void
+		{
+			localWorld.addEventListener(MouseEvent.MOUSE_UP, function onMouseUp(evt:MouseEvent):void
 			{
 				if (clickWaitTimer.running)
 				{
@@ -601,12 +655,24 @@ package views
 					}
 					else
 					{
-						moveMyAvatar(convertPointToWorldPoint(view, new Point(evt.localX, evt.localY)));
-					}				
-				}										
-				
-				view.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-				isDragging = false;	
+						moveMyAvatar(convertPointToWorldPoint(localWorld, new Point(evt.localX, evt.localY)), localWorld);												
+					}
+				}
+				localWorld.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+				isDragging = false;					
+			});
+		}
+		
+		public function listenForStageMouseUp(localWorld:WorldView, localStage:StageView):void
+		{
+			localWorld.addEventListener(MouseEvent.MOUSE_UP, function onMouseUp(evt:MouseEvent):void
+			{
+				if (clickWaitTimer.running)
+				{
+					moveMyAvatar(convertPointToStagePoint(localStage, new Point(evt.localX, evt.localY)), null, localStage);
+				}
+				localWorld.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+				isDragging = false;					
 			});
 		}
 		
@@ -667,6 +733,7 @@ package views
 				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
 				WorldBitmapInterface.doCollectibleDrop(sprite as ActiveAsset, _worldView);
 				createChiliProgressBar(sprite);
+				_venueManager.venue.bandMemberManager.goToStageAndTossItem(sprite as ActiveAsset, _worldView);
 				return true;
 			}
 			return false;

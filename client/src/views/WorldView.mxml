@@ -244,14 +244,14 @@
 			
 			public function addMouseDownListeners():void
 			{
-				backgroundCanvas.addEventListener(MouseEvent.MOUSE_DOWN, function onBitmapMouseDown():void
+				backgroundCanvas.addEventListener(MouseEvent.MOUSE_DOWN, function onBitmapMouseDown(evt:MouseEvent):void
 				{
-					wbi.handleMouseDown(viewReference);					
+					wbi.handleMouseDown(stageView, viewReference, new Point(evt.localX, evt.localY));					
 				});
-				myWorld.addEventListener(MouseEvent.MOUSE_DOWN, function onWorldMouseDown():void
-				{
-					wbi.handleMouseDown(viewReference);
-				});					
+//				myWorld.addEventListener(MouseEvent.MOUSE_DOWN, function onWorldMouseDown(evt:MouseEvent):void
+//				{
+//					wbi.handleMouseDown(stageView, viewReference);
+//				});					
 			}
 			
 			public function onEnterFrame(evt:Event):void

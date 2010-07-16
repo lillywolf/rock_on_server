@@ -17,6 +17,7 @@ package helpers
 	
 	import world.ActiveAsset;
 	import world.World;
+	import world.WorldEvent;
 	
 	public class CollectibleDrop extends MovieClip
 	{
@@ -33,7 +34,7 @@ package helpers
 		public var dropDestination:Point;
 		public var bounds:Point;
 		
-		public function CollectibleDrop(_subject:ActiveAsset, mc:MovieClip, _bounds:Point, world:World, view:WorldView, _delay:Number=0, _totalTime:Number=1000)
+		public function CollectibleDrop(_subject:ActiveAsset, mc:MovieClip, _bounds:Point, world:World, view:WorldView, _delay:Number=0, _totalTime:Number=1000, guidedDrop:Point=null)
 		{
 			super();
 			subject = _subject;
@@ -47,7 +48,8 @@ package helpers
 			_view = view;
 			_world = world;
 			
-			setDestination();
+			setDestination(guidedDrop);			
+			
 			rate = new Point();
 			rate.x = (dropDestination.x - subject.x)/totalTime;
 			rate.y = (dropDestination.y - subject.y - (accelerationY * totalTime * totalTime))/(totalTime);
@@ -55,11 +57,18 @@ package helpers
 			this.addEventListener(MouseEvent.CLICK, onMouseClicked);
 		}
 		
-		public function setDestination():void
+		public function setDestination(guidedDrop:Point):void
 		{
-			dropDestination = new Point();
-			dropDestination.x = subject.x + (bounds.x - (Math.random() * bounds.x * 2));
-			dropDestination.y = subject.y + Math.random() * bounds.y;
+			if (guidedDrop)
+			{
+				dropDestination = guidedDrop;
+			}
+			else
+			{
+				dropDestination = new Point();
+				dropDestination.x = subject.x + (bounds.x - (Math.random() * bounds.x * 2));
+				dropDestination.y = subject.y + Math.random() * bounds.y;
+			}
 		}
 		
 		public function onMouseClicked(evt:MouseEvent):void
@@ -83,6 +92,8 @@ package helpers
 			{
 				x = subject.x + (rate.x * deltaTime);
 				y = subject.y + (rate.y * deltaTime) + accelerationY * (deltaTime * deltaTime);
+				var event:WorldEvent = new WorldEvent(WorldEvent.ITEM_DROPPED, subject);
+				dispatchEvent(event);
 			}
 			else
 			{

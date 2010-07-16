@@ -3,7 +3,10 @@ package rock_on
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.geom.Point;
 	import flash.utils.Timer;
+	
+	import helpers.CollectibleDrop;
 	
 	import models.Creature;
 	
@@ -11,28 +14,35 @@ package rock_on
 	
 	import org.osmf.events.TimeEvent;
 	
+	import views.WorldView;
+	
 	import world.ActiveAsset;
 	import world.Point3D;
+	import world.World;
 	import world.WorldEvent;
 
 	public class BandMember extends Person
 	{
-		public static const ENTER_STATE:int = 0;
+		public static const STAGE_ENTER_STATE:int = 0;
 		public static const ROAM_STATE:int = 1;
 		public static const STOP_STATE:int = 3;
 		public static const LEAVING_STATE:int = 2;
 		public static const WAIT_STATE:int = 4;
 		public static const GONE_STATE:int = 5;
 		public static const EXIT_STAGE_STATE:int = 6;
-		public static const OFFSTAGE_STATE:int = 7;
+		public static const DIRECTED_MOVE_STATE:int = 7;
+		public static const DIRECTED_STOP_STATE:int = 8;
+		public static const EXIT_OFFSTAGE_STATE:int = 9;
 		
 		private static const ROAM_TIME:int = Math.random()*5000 + 500;
 		private static const STOP_TIME:int = 10000;
 		private static const ENTER_TIME:int = 1000;
 		
 		public var _venue:Venue;
+		public var inWorld:Boolean;
+		public var itemDropRecipient:Object;
 		public var destinationLocation:Point3D;
-		public var offStageDestination:Point3D;
+		public var exitLocation:Point3D;
 		public var exemptStructures:ArrayCollection;
 		public var state:int;
 		public var stopTime:Timer;
@@ -257,8 +267,8 @@ package rock_on
 		{
 			switch (state)
 			{
-				case ENTER_STATE:
-					doEnterState(deltaTime);
+				case STAGE_ENTER_STATE:
+					doStageEnterState(deltaTime);
 					break;
 				case ROAM_STATE:
 					doRoamState(deltaTime);
@@ -275,8 +285,14 @@ package rock_on
 				case EXIT_STAGE_STATE:
 					doExitStageState(deltaTime);
 					break;
-				case OFFSTAGE_STATE:
-					doOffstageState(deltaTime);
+				case DIRECTED_MOVE_STATE:
+					doDirectedMoveState(deltaTime);
+					break;
+				case DIRECTED_STOP_STATE:
+					doDirectedStopState(deltaTime);
+					break;
+				case EXIT_OFFSTAGE_STATE:
+					doExitOffstageState(deltaTime);
 					break;
 				case GONE_STATE:
 					doGoneState(deltaTime);	
@@ -290,8 +306,8 @@ package rock_on
 		{
 			switch (state)
 			{	
-				case ENTER_STATE:
-					endEnterState();
+				case STAGE_ENTER_STATE:
+					endStageEnterState();
 					break;
 				case ROAM_STATE:
 					endRoamState();				
@@ -308,8 +324,14 @@ package rock_on
 				case EXIT_STAGE_STATE:
 					endExitStageState();
 					break;
-				case OFFSTAGE_STATE:
-					endOffstageState();
+				case DIRECTED_MOVE_STATE:
+					endDirectedMoveState();
+					break;
+				case DIRECTED_STOP_STATE:
+					endDirectedStopState();
+					break;
+				case EXIT_OFFSTAGE_STATE:
+					endExitOffstageState();
 					break;
 				case GONE_STATE:
 					break;					
@@ -317,8 +339,8 @@ package rock_on
 			}
 			switch (destinationState)
 			{
-				case ENTER_STATE:
-					startEnterState();
+				case STAGE_ENTER_STATE:
+					startStageEnterState();
 					break;				
 				case ROAM_STATE:
 					startRoamState();
@@ -338,19 +360,73 @@ package rock_on
 				case EXIT_STAGE_STATE:
 					startExitStageState();
 					break;
-				case OFFSTAGE_STATE:
-					startOffstageState();
+				case DIRECTED_MOVE_STATE:
+					startDirectedMoveState();
+					break;
+				case DIRECTED_STOP_STATE:
+					startDirectedStopState();
+					break;
+				case EXIT_OFFSTAGE_STATE:
+					startExitOffstageState();
 					break;
 				default: throw new Error('no state to advance to!');	
 			}
 		}	
 		
-		public function startEnterState():void
+		public function goToStage():Boolean
 		{
-			state = ENTER_STATE;
-			enterTime = new Timer(ENTER_TIME);
-			enterTime.addEventListener(TimerEvent.TIMER, roam);
-			enterTime.start();
+			if (!(_myWorld == _venue.stageManager.myStage))
+			{
+				var exemptStructures:ArrayCollection = new ArrayCollection();
+				exemptStructures.addItem(_venue.stageManager.concertStage);
+				destinationLocation = _venue.pickRandomAvailablePointWithinRect(_venue.stageRect, _venue.stageManager.myStage, _venue.stageManager.concertStage.structure.height, true, true, exemptStructures);
+				advanceState(EXIT_OFFSTAGE_STATE);
+				return false;
+			}
+			return true;
+		}
+		
+		public function tossItem(recipient:ActiveAsset, view:WorldView):void
+		{
+			var itemDestination:Point = World.worldToActualCoords(recipient.worldCoords);
+			var item:CollectibleDrop = new CollectibleDrop(this, new Hamburger(), new Point(10, 10), _venue.myWorld, view, 0, 1000, itemDestination);
+			item.addEventListener(WorldEvent.ITEM_DROPPED, function onItemDropped():void
+			{
+				item.removeEventListener(WorldEvent.ITEM_DROPPED, onItemDropped);
+				_myWorld.removeChild(item);
+			});
+			_myWorld.addChild(item);
+			itemDropRecipient = null;
+		}
+		
+		public function validateDestinationLocation():Boolean
+		{
+			var exemptStructures:ArrayCollection = new ArrayCollection();
+			exemptStructures.addItem(_venue.stageManager.concertStage);
+			if (!_myWorld.isPointAvailable(destinationLocation, true, true, exemptStructures))
+			{
+				var newPoint:Point3D = getClosestAvailableSpot(destinationLocation);
+				if (newPoint)
+				{
+					destinationLocation = newPoint;
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		public function startStageEnterState():void
+		{
+			state = STAGE_ENTER_STATE;
+			addToOnstageView();	
+			if (validateDestinationLocation())
+			{
+				movePerson(destinationLocation);			
+			}
+				
+//			enterTime = new Timer(ENTER_TIME);
+//			enterTime.addEventListener(TimerEvent.TIMER, roam);
+//			enterTime.start();
 		}
 		
 		public function startLeavingState():void
@@ -367,27 +443,63 @@ package rock_on
 		public function startExitStageState():void
 		{
 			state = EXIT_STAGE_STATE;
-			movePerson(destinationLocation);
+			movePerson(exitLocation);
 		}
 		
 		public function endExitStageState():void
 		{
+			inWorld = true;
 			removeFromView();
 		}
 		
-		public function startOffstageState():void
+		public function startDirectedMoveState():void
 		{
-			state = OFFSTAGE_STATE;
-			addToOffstageView();
-			movePerson(offStageDestination);
+//			Deal with non-whole number coordinates
+			
+			state = DIRECTED_MOVE_STATE;
+			addToOffstageView();			
+			movePerson(destinationLocation);
 		}
 		
-		public function endOffstageState():void
+		public function endDirectedMoveState():void
 		{
 			
 		}
 		
-		public function doOffstageState(deltaTime:Number):void
+		public function doDirectedMoveState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function startDirectedStopState():void
+		{
+			state = DIRECTED_STOP_STATE;
+			standFacingCurrentDirection();
+		}
+		
+		public function endDirectedStopState():void
+		{
+			
+		}
+		
+		public function doDirectedStopState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function startExitOffstageState():void
+		{
+			state = EXIT_OFFSTAGE_STATE;
+			movePerson(exitLocation);
+		}
+		
+		public function endExitOffstageState():void
+		{
+			inWorld = false;
+			removeFromView();
+		}
+		
+		public function doExitOffstageState(deltaTime:Number):void
 		{
 			
 		}
@@ -397,10 +509,22 @@ package rock_on
 			
 		}
 		
+		private function addToOnstageView():void
+		{
+			if (!_venue.stageManager.myStage.doesWorldContain(this))
+			{			
+				_myWorld = _venue.stageManager.myStage;
+				_myWorld.addAsset(this, _venue.stageManager.concertStage.stageEntryPoint);
+			}	
+		}
+		
 		private function addToOffstageView():void
 		{
-			_myWorld = _venue.myWorld;
-			_myWorld.addAsset(this, _venue.mainEntrance);
+			if (!_venue.myWorld.doesWorldContain(this))
+			{
+				_myWorld = _venue.myWorld;
+				_myWorld.addAsset(this, _venue.mainEntrance);
+			}
 		}
 		
 		private function removeFromView():void
@@ -413,7 +537,7 @@ package rock_on
 			
 		}
 		
-		public function endEnterState():void
+		public function endStageEnterState():void
 		{
 //			enterTime.stop();
 //			enterTime.removeEventListener(TimerEvent.TIMER, roam);
@@ -429,7 +553,7 @@ package rock_on
 			
 		}
 		
-		public function doEnterState(deltaTime:Number):void
+		public function doStageEnterState(deltaTime:Number):void
 		{
 			
 		}
