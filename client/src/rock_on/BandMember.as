@@ -412,8 +412,12 @@ package rock_on
 					destinationLocation = newPoint;
 					return true;
 				}
+				else
+				{
+					return false;
+				}
 			}
-			return false;
+			return true;
 		}
 		
 		public function startStageEnterState():void
@@ -456,7 +460,7 @@ package rock_on
 		public function startDirectedMoveState():void
 		{		
 			addToOffstageView();			
-			if (!adjustInCaseAlreadyMoving())
+			if (!adjustInCaseAlreadyMoving(destinationLocation))
 			{
 				movePerson(destinationLocation);				
 			}
@@ -469,14 +473,15 @@ package rock_on
 			{
 				if (worldCoords.x != proxiedDestination.x || worldCoords.y != proxiedDestination.y || worldCoords.z != proxiedDestination.z)
 				{
-					movePerson(proxiedDestination);
+					var newDestination:Point3D = new Point3D(proxiedDestination.x, proxiedDestination.y, proxiedDestination.z);
+					proxiedDestination = null;
+					movePerson(newDestination);
 				}		
 			}
 			else
 			{
 				advanceState(newState);				
 			}
-			proxiedDestination = null;
 		}	
 		
 		public function endDirectedMoveState():void
@@ -505,11 +510,11 @@ package rock_on
 			
 		}
 		
-		public function adjustInCaseAlreadyMoving():Boolean
+		public function adjustInCaseAlreadyMoving(currentDestination:Point3D):Boolean
 		{		
 			if (state == DIRECTED_MOVE_STATE)
 			{
-				updateDestination(destinationLocation);	
+				updateDestination(currentDestination);	
 				return true;
 			}
 			return false;
@@ -517,7 +522,7 @@ package rock_on
 		
 		public function startExitOffstageState():void
 		{
-			if (!adjustInCaseAlreadyMoving())
+			if (!adjustInCaseAlreadyMoving(exitLocation))
 			{
 				movePerson(exitLocation);			
 			}

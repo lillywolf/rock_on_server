@@ -223,7 +223,7 @@ package rock_on
 				}
 				else if (bm.state == BandMember.EXIT_OFFSTAGE_STATE)
 				{
-					bm.advanceState(BandMember.STAGE_ENTER_STATE);
+					bm.checkIfProxiedMove(BandMember.STAGE_ENTER_STATE);
 				}
 				else
 				{
