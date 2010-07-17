@@ -92,13 +92,13 @@ package helpers
 			{
 				x = subject.x + (rate.x * deltaTime);
 				y = subject.y + (rate.y * deltaTime) + accelerationY * (deltaTime * deltaTime);
-				var event:WorldEvent = new WorldEvent(WorldEvent.ITEM_DROPPED, subject);
-				dispatchEvent(event);
 			}
 			else
 			{
 				x = dropDestination.x;
 				y = dropDestination.y;
+				var event:WorldEvent = new WorldEvent(WorldEvent.ITEM_DROPPED, subject);
+				dispatchEvent(event);
 			}
 		}
 	}	

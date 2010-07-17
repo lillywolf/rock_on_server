@@ -77,8 +77,8 @@ package rock_on
 		
 		public function endStopState():void
 		{
-			stopTime.stop();
-			stopTime.removeEventListener(TimerEvent.TIMER, roam);
+//			stopTime.stop();
+//			stopTime.removeEventListener(TimerEvent.TIMER, roam);
 		}
 		
 		public function roam(evt:TimerEvent):void
@@ -97,47 +97,47 @@ package rock_on
 			adjustForPathfinding();
 		}	
 		
-		public function adjustForPathfinding():void
-		{
-			// Don't move out of bounds!
-			// Don't move into structures
-			
-			if (worldCoords.x%1 != 0 || worldCoords.y%1 != 0 || worldCoords.z%1 != 0)
-			{
-				if (directionality.x > 0)
-				{
-					_myWorld.moveAssetTo(this, new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z)));
-				}
-				else if (directionality.x < 0)
-				{
-					_myWorld.moveAssetTo(this, new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z)));
-				}
-				else if (directionality.z > 0)
-				{
-					_myWorld.moveAssetTo(this, new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z)));
-				}
-				else if (directionality.z < 0)
-				{
-					_myWorld.moveAssetTo(this, new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z)));					
-				}
-				else 
-				{
-					// Something?
-				}
-				_myWorld.assetRenderer.addEventListener(WorldEvent.DESTINATION_REACHED, onAdjustedForPathfinding);								
-			}
-			else
-			{
-				if (state == ROAM_STATE)
-				{
-					findNextPath();									
-				}
-				if (state == STOP_STATE)
-				{
-					setPathToCurrentCoords();
-				}
-			}
-		}	
+//		public function adjustForPathfinding():void
+//		{
+//			// Don't move out of bounds!
+//			// Don't move into structures
+//			
+//			if (worldCoords.x%1 != 0 || worldCoords.y%1 != 0 || worldCoords.z%1 != 0)
+//			{
+//				if (directionality.x > 0)
+//				{
+//					_myWorld.moveAssetTo(this, new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z)));
+//				}
+//				else if (directionality.x < 0)
+//				{
+//					_myWorld.moveAssetTo(this, new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z)));
+//				}
+//				else if (directionality.z > 0)
+//				{
+//					_myWorld.moveAssetTo(this, new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z)));
+//				}
+//				else if (directionality.z < 0)
+//				{
+//					_myWorld.moveAssetTo(this, new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z)));					
+//				}
+//				else 
+//				{
+//					// Something?
+//				}
+//				_myWorld.assetRenderer.addEventListener(WorldEvent.DESTINATION_REACHED, onAdjustedForPathfinding);								
+//			}
+//			else
+//			{
+//				if (state == ROAM_STATE)
+//				{
+//					findNextPath();									
+//				}
+//				if (state == STOP_STATE)
+//				{
+//					setPathToCurrentCoords();
+//				}
+//			}
+//		}	
 		
 		public function findNextPath():void
 		{
@@ -379,6 +379,7 @@ package rock_on
 			{
 				var exemptStructures:ArrayCollection = new ArrayCollection();
 				exemptStructures.addItem(_venue.stageManager.concertStage);
+				exitLocation = _venue.mainEntrance;
 				destinationLocation = _venue.pickRandomAvailablePointWithinRect(_venue.stageRect, _venue.stageManager.myStage, _venue.stageManager.concertStage.structure.height, true, true, exemptStructures);
 				advanceState(EXIT_OFFSTAGE_STATE);
 				return false;
@@ -453,13 +454,30 @@ package rock_on
 		}
 		
 		public function startDirectedMoveState():void
-		{
-//			Deal with non-whole number coordinates
-			
-			state = DIRECTED_MOVE_STATE;
+		{		
 			addToOffstageView();			
-			movePerson(destinationLocation);
+			if (!adjustInCaseAlreadyMoving())
+			{
+				movePerson(destinationLocation);				
+			}
+			state = DIRECTED_MOVE_STATE;
 		}
+		
+		public function checkIfProxiedMove(newState:int):void
+		{
+			if (proxiedDestination)
+			{
+				if (worldCoords.x != proxiedDestination.x || worldCoords.y != proxiedDestination.y || worldCoords.z != proxiedDestination.z)
+				{
+					movePerson(proxiedDestination);
+				}		
+			}
+			else
+			{
+				advanceState(newState);				
+			}
+			proxiedDestination = null;
+		}	
 		
 		public function endDirectedMoveState():void
 		{
@@ -487,10 +505,23 @@ package rock_on
 			
 		}
 		
+		public function adjustInCaseAlreadyMoving():Boolean
+		{		
+			if (state == DIRECTED_MOVE_STATE)
+			{
+				updateDestination(destinationLocation);	
+				return true;
+			}
+			return false;
+		}
+		
 		public function startExitOffstageState():void
 		{
+			if (!adjustInCaseAlreadyMoving())
+			{
+				movePerson(exitLocation);			
+			}
 			state = EXIT_OFFSTAGE_STATE;
-			movePerson(exitLocation);
 		}
 		
 		public function endExitOffstageState():void

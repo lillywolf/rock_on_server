@@ -18,6 +18,7 @@ package rock_on
 	import world.ActiveAssetStack;
 	import world.Point3D;
 	import world.World;
+	import world.WorldEvent;
 	
 	public class Person extends ActiveAssetStack
 	{
@@ -25,10 +26,11 @@ package rock_on
 		public var moodCursorID:int;
 		public var moodClip:ExpandingMovieclip;		
 		public var currentDirection:Point3D;
+		public var proxiedDestination:Point3D;
 		
 		public var _myWorld:World;
 		public var _myStage:World;
-		public var _stageManager:StageManager;
+		public var _stageManager:StageManager;		
 		
 		public function Person(creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
@@ -266,6 +268,104 @@ package rock_on
 			doAnimation(animation, false, frameNumber);
 			switchToBitmap();
 		}
+		
+		public function updateDestination(newDestination:Point3D):void
+		{
+			if (!proxiedDestination)
+			{
+				proxiedDestination = newDestination;
+				adjustForPathfinding();
+			}
+			else
+			{
+				proxiedDestination = newDestination;
+				adjustForPathfinding();
+			}	
+		}			
+
+		public function adjustForPathfinding():void
+		{
+			// Don't move out of bounds!
+			// Don't move into structures
+			
+			var nextPoint:Point3D;
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			
+			if (directionality.x > 0)
+			{
+				nextPoint = new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
+				if (occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				{
+					nextPoint = new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
+				}
+				_myWorld.moveAssetTo(this, nextPoint);
+			}
+			else if (directionality.x < 0)
+			{
+				nextPoint = new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
+				if (occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				{
+					nextPoint = new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
+				}					
+				_myWorld.moveAssetTo(this, nextPoint);
+			}
+			else if (directionality.z > 0)
+			{
+				nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z));
+				if (occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				{
+					nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z));
+				}					
+				_myWorld.moveAssetTo(this, nextPoint);
+			}
+			else if (directionality.z < 0)
+			{
+				nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z));
+				if (occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				{
+					nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z));
+				}						
+				_myWorld.moveAssetTo(this, nextPoint);					
+//				_myWorld.assetRenderer.addEventListener(WorldEvent.DESTINATION_REACHED, onAdjustedForPathfinding);								
+//				validatePoint(nextPoint);
+			}
+			else 
+			{
+				doNextActivityAfterAdjusting();				
+			}							
+		}
+		
+		private function onAdjustedForPathfinding(evt:WorldEvent):void
+		{			
+			if (evt.activeAsset == this)
+			{
+				_myWorld.assetRenderer.removeEventListener(WorldEvent.DESTINATION_REACHED, onAdjustedForPathfinding);
+				doNextActivityAfterAdjusting();				
+			}
+		}			
+		
+		private function doNextActivityAfterAdjusting():void
+		{
+			movePerson(proxiedDestination);
+			proxiedDestination = null;
+		}	
+		
+		private function validatePoint(nextPoint:Point3D):void
+		{
+			if (nextPoint.x > _myWorld.tilesWide || nextPoint.z > _myWorld.tilesDeep)
+			{
+				throw new Error("Outside of world");
+			}
+			if (nextPoint.y != 0)
+			{
+				throw new Error("Height not zero");
+			}
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			if (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(nextPoint)))
+			{
+				throw new Error("Occupied space");
+			}
+		}					
 		
 		public function movePerson(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
 		{

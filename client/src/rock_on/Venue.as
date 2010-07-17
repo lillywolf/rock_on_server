@@ -168,8 +168,8 @@ package rock_on
 			var occupiedSpaces:ArrayCollection = worldSprite.getOccupiedSpaces(avoidStructures, avoidPeople, exemptStructures);
 			do
 			{
-				pt3D.x = Math.round(rect.right - Math.random() * (rect.right - rect.left));
-				pt3D.z = Math.round(rect.bottom - Math.random() * (rect.bottom - rect.top));
+				pt3D.x = Math.floor(rect.right - Math.random() * (rect.right - rect.left - 1) - 1);
+				pt3D.z = Math.floor(rect.bottom - Math.random() * (rect.bottom - rect.top - 1) - 1);
 			}
 			while (occupiedSpaces.contains(pt3D));	
 			return pt3D;

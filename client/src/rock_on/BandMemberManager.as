@@ -195,10 +195,11 @@ package rock_on
 				}
 				else if (bm.state == BandMember.DIRECTED_MOVE_STATE)
 				{
-					bm.advanceState(BandMember.DIRECTED_STOP_STATE);
+					bm.checkIfProxiedMove(BandMember.DIRECTED_STOP_STATE);
 				}
 				else if (bm.state == BandMember.STAGE_ENTER_STATE)
 				{
+					bm.advanceState(BandMember.STOP_STATE);
 					if (bm.itemDropRecipient)
 					{
 						bm.tossItem(bm.itemDropRecipient.recipient as ActiveAsset, bm.itemDropRecipient.view as WorldView);						
@@ -218,7 +219,7 @@ package rock_on
 				var bm:BandMember = evt.activeAsset as BandMember;				
 				if (bm.state == BandMember.DIRECTED_MOVE_STATE)
 				{
-					bm.advanceState(BandMember.DIRECTED_STOP_STATE);
+					bm.checkIfProxiedMove(BandMember.DIRECTED_STOP_STATE);
 				}
 				else if (bm.state == BandMember.EXIT_OFFSTAGE_STATE)
 				{

@@ -74,7 +74,6 @@ package rock_on
 		public var isSuperFan:Boolean;
 		public var _boothBoss:BoothBoss;
 		public var _venue:Venue;
-		public var proxiedDestination:Point3D;
 		
 		public var itemPickupAnimations:Array;
 		public var pickupBooth:Booth;
@@ -774,105 +773,7 @@ package rock_on
 		public function doWantsMusicMood():void
 		{
 			
-		}
-		
-		private function updateDestination(newDestination:Point3D):void
-		{
-			if (!proxiedDestination)
-			{
-				proxiedDestination = newDestination;
-				adjustForPathfinding();
-			}
-			else
-			{
-				proxiedDestination = newDestination;
-				adjustForPathfinding();
-			}	
-		}
-		
-		public function adjustForPathfinding():void
-		{
-			// Don't move out of bounds!
-			// Don't move into structures
-						
-			var nextPoint:Point3D;
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
-			
-			if (directionality.x > 0)
-			{
-				nextPoint = new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				if (occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
-				{
-					nextPoint = new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				}
-				_myWorld.moveAssetTo(this, nextPoint);
-			}
-			else if (directionality.x < 0)
-			{
-				nextPoint = new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				if (occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
-				{
-					nextPoint = new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				}					
-				_myWorld.moveAssetTo(this, nextPoint);
-			}
-			else if (directionality.z > 0)
-			{
-				nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z));
-				if (occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
-				{
-					nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z));
-				}					
-				_myWorld.moveAssetTo(this, nextPoint);
-			}
-			else if (directionality.z < 0)
-			{
-				nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z));
-				if (occupiedSpaces.contains(_world.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
-				{
-					nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z));
-				}						
-				_myWorld.moveAssetTo(this, nextPoint);					
-				_myWorld.assetRenderer.addEventListener(WorldEvent.DESTINATION_REACHED, onAdjustedForPathfinding);								
-				validatePoint(nextPoint);
-			}
-			else 
-			{
-				doNextActivityAfterAdjusting();				
-			}							
-		}			
-		
-		private function validatePoint(nextPoint:Point3D):void
-		{
-			if (nextPoint.x > _myWorld.tilesWide || nextPoint.z > _myWorld.tilesDeep)
-			{
-				throw new Error("Outside of world");
-			}
-			if (nextPoint.y != 0)
-			{
-				throw new Error("Height not zero");
-			}
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
-			if (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(nextPoint)))
-			{
-				throw new Error("Occupied space");
-			}
-		}
-		
-		private function onAdjustedForPathfinding(evt:WorldEvent):void
-		{			
-			if (evt.activeAsset == this)
-			{
-				_myWorld.assetRenderer.removeEventListener(WorldEvent.DESTINATION_REACHED, onAdjustedForPathfinding);
-				doNextActivityAfterAdjusting();				
-			}
-		}				
-		
-		private function doNextActivityAfterAdjusting():void
-		{
-			movePerson(proxiedDestination);
-			proxiedDestination = null;
-		}
+		}		
 		
 		public function getPathToBoothLength(routedCustomer:Boolean=false, queuedCustomer:Boolean=false):int
 		{
