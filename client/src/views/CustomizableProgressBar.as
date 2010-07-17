@@ -7,6 +7,8 @@ package views
 	import mx.controls.ProgressBar;
 	import mx.core.UIComponent;
 	
+	import world.WorldEvent;
+	
 	public class CustomizableProgressBar extends UIComponent
 	{
 		public var progressBar:ProgressBar;
@@ -24,12 +26,14 @@ package views
 		public var totalTime:int;
 		public var numFillables:int;
 		
+		public static const Y_ADJUSTMENT:int = 0;
+		
 		public function CustomizableProgressBar(_barHeight:int, _overlayHeight:int, _overlayWidth:int, _barMask:Image = null, _totalTime:int = 1000, _timerInterval:int = 50, overlaySource:Class = null, _trackSkin:Class = null, _barSkin:Class = null, _x:int = 0, _y:int = 0, _numFillables:int = 5, _maxFillables:int = 5, _max:int = 100, _min:int = 0)
 		{
 			super();
 			
 			this.x = _x;
-			this.y = _y;
+			this.y = _y + Y_ADJUSTMENT;
 			
 			barHeight = _barHeight;
 			numFillables = _numFillables;
@@ -94,6 +98,7 @@ package views
 				{
 					t.stop();
 					t.removeEventListener(TimerEvent.TIMER, onProgressTimerComplete);
+					dispatchEvent(new WorldEvent(WorldEvent.PROGRESS_BAR_COMPLETE, null));
 				}
 			});						
 		}

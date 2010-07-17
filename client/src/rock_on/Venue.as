@@ -190,14 +190,20 @@ package rock_on
 		
 		public function clearFilters():void
 		{
-			var sprite:Sprite;
+			var sprite:ActiveAsset;
 			for each (sprite in _myWorld.assetRenderer.unsortedAssets)
 			{
-				sprite.filters = null;
+				if (!sprite.doNotClearFilters)
+				{
+					sprite.filters = null;				
+				}
 			}
 			for each (sprite in stageManager.myStage.assetRenderer.unsortedAssets)
 			{
-				sprite.filters = null;
+				if (!sprite.doNotClearFilters)
+				{
+					sprite.filters = null;				
+				}
 			}
 			clearUIFilters();
 		}

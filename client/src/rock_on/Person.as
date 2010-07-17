@@ -30,7 +30,7 @@ package rock_on
 		
 		public var _myWorld:World;
 		public var _myStage:World;
-		public var _stageManager:StageManager;		
+		public var _stageManager:StageManager;	
 		
 		public function Person(creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{

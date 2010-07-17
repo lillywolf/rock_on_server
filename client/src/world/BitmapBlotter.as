@@ -449,7 +449,10 @@ package world
 		{
 			for each (var abd:AssetBitmapData in this.bitmapReferences)
 			{
-				abd.bitmap.filters = null;
+				if (!(abd.activeAsset as Person).doNotClearFilters)
+				{
+					abd.bitmap.filters = null;				
+				}
 			}		
 		}
 		

@@ -135,7 +135,10 @@ package rock_on
 		{
 			for each (var bm:BandMember in this)
 			{
-				bm.filters = null;
+				if (!bm.doNotClearFilters)
+				{
+					bm.filters = null;				
+				}
 			}
 		}	
 		

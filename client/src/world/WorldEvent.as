@@ -9,6 +9,7 @@ package world
 		public static const DIRECTION_CHANGED:String = "World:DirectionChanged";	
 		public static const STRUCTURE_PLACED:String = "World:StructurePlaced";
 		public static const ITEM_DROPPED:String = "World:ItemDropped";
+		public static const PROGRESS_BAR_COMPLETE:String = "World:ProgressBarComplete";
 		public static const WORLD_ASSIGNED:String = "World:WorldAdded";
 		public static const ASSETS_DRAWN:String = "World:AssetsDrawn";
 		

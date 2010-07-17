@@ -30,11 +30,11 @@ package helpers
 		public var rate:Point;
 		public var startTime:Number;
 		public var totalTime:Number;
-		public var accelerationY:Number = .001;
+		public var accelerationY:Number;
 		public var dropDestination:Point;
 		public var bounds:Point;
 		
-		public function CollectibleDrop(_subject:ActiveAsset, mc:MovieClip, _bounds:Point, world:World, view:WorldView, _delay:Number=0, _totalTime:Number=1000, guidedDrop:Point=null)
+		public function CollectibleDrop(_subject:ActiveAsset, mc:MovieClip, _bounds:Point, world:World, view:WorldView, _delay:Number=0, _totalTime:Number=1000, _accelerationY:Number=.001, guidedDrop:Point=null)
 		{
 			super();
 			subject = _subject;
@@ -45,6 +45,7 @@ package helpers
 			startTime = getTimer();
 			totalTime = _totalTime;
 			bounds = _bounds;
+			accelerationY = _accelerationY;
 			_view = view;
 			_world = world;
 			

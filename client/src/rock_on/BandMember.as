@@ -390,13 +390,15 @@ package rock_on
 		public function tossItem(recipient:ActiveAsset, view:WorldView):void
 		{
 			var itemDestination:Point = World.worldToActualCoords(recipient.worldCoords);
-			var item:CollectibleDrop = new CollectibleDrop(this, new Hamburger(), new Point(10, 10), _venue.myWorld, view, 0, 1000, itemDestination);
-			item.addEventListener(WorldEvent.ITEM_DROPPED, function onItemDropped():void
+			itemDestination.y -= (this.height - 70);
+			var item:CollectibleDrop = new CollectibleDrop(this, new Hamburger(), new Point(10, 10), _venue.myWorld, view, 0, 600, .0008, itemDestination);
+			item.addEventListener(WorldEvent.ITEM_DROPPED, function onItemDropped(evt:WorldEvent):void
 			{
 				item.removeEventListener(WorldEvent.ITEM_DROPPED, onItemDropped);
-				_myWorld.removeChild(item);
+				_venue.myWorld.removeChild(item);
+				dispatchEvent(evt);
 			});
-			_myWorld.addChild(item);
+			_venue.myWorld.addChild(item);
 			itemDropRecipient = null;
 		}
 		
@@ -512,7 +514,7 @@ package rock_on
 		
 		public function adjustInCaseAlreadyMoving(currentDestination:Point3D):Boolean
 		{		
-			if (state == DIRECTED_MOVE_STATE)
+			if (state == DIRECTED_MOVE_STATE || state == EXIT_OFFSTAGE_STATE)
 			{
 				updateDestination(currentDestination);	
 				return true;

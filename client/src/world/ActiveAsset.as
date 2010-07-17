@@ -46,6 +46,7 @@ package world
 		
 		public var bitmapData:BitmapData;
 		public var bitmap:Bitmap;
+		public var doNotClearFilters:Boolean;		
 		public var reflected:Boolean;
 		public var _scale:Number;
 		

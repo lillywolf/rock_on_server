@@ -27,6 +27,7 @@ package views
 	import mx.controls.Text;
 	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
+	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	import mx.managers.PopUpManager;
 	import mx.skins.halo.ProgressBarSkin;
@@ -49,6 +50,7 @@ package views
 	import world.BitmapBlotter;
 	import world.Point3D;
 	import world.World;
+	import world.WorldEvent;
 	
 	public class WorldBitmapInterface extends EventDispatcher
 	{
@@ -158,7 +160,10 @@ package views
 		{
 			if (this.currentHoveredObject)
 			{
-				_bottomBar.replaceCreature((this.currentHoveredObject as Person).creature);
+				if (currentHoveredObject is Person)
+				{
+					_bottomBar.replaceCreature((this.currentHoveredObject as Person).creature);				
+				}
 				hoverTimer.removeEventListener(TimerEvent.TIMER, onHoverTimerComplete);
 				hoverTimer.stop();
 			}
@@ -197,11 +202,38 @@ package views
 		public function checkBitmapHover(abd:AssetBitmapData, view:WorldView, concertStageView:StageView):Object
 		{
 			var cursorClip:MovieClip = null;
-			var gf:GlowFilter = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
-			abd.bitmap.filters = [gf];
+			applyGlowFilterToBitmappedPerson(abd);
 			var cursorMessage:UIComponent = (abd.activeAsset as Person).generateMoodMessage((abd.activeAsset as Person).mood);			
 //			return {cursorClip: cursorClip, cursorMessage: cursorMessage};
 			return null;
+		}
+		
+		public function applyGlowFilterToBitmappedPerson(abd:AssetBitmapData):void
+		{
+			var gf:GlowFilter;
+			if ((abd.activeAsset as Person).doNotClearFilters)
+			{
+				gf = new GlowFilter(0xFFEE00, 1, 2, 2, 20, 20);	
+			}
+			else
+			{
+				gf = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
+			}
+			abd.bitmap.filters = [gf];				
+		}
+		
+		public function applyGlowFilterToPerson(asset:Person):void
+		{
+			var gf:GlowFilter;
+			if (asset.doNotClearFilters)
+			{
+				gf = new GlowFilter(0xFFDD00, 1, 2, 2, 20, 20);	
+			}
+			else
+			{
+				gf = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
+			}
+			asset.filters = [gf];				
 		}
 		
 		public function checkCreatureHover(asset:ActiveAsset, view:WorldView, concertStageView:StageView):Object
@@ -210,8 +242,7 @@ package views
 			
 			if (asset is Person)
 			{
-				var gf:GlowFilter = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
-				asset.filters = [gf];	
+				applyGlowFilterToPerson(asset as Person);
 				if ((asset as Person).mood)
 				{
 					var cursorClip:MovieClip = (asset as Person).generateMoodCursor((asset as Person).mood);
@@ -233,7 +264,7 @@ package views
 		{
 			var gf:GlowFilter = new GlowFilter(0xFFEE00, 1, 2, 2, 20, 20);
 			sprite.filters = [gf];
-			return null;s
+			return null;
 		}
 		
 		public static function getTypicalTextFilter():GlowFilter
@@ -731,13 +762,23 @@ package views
 			if (sprite is Person)
 			{
 				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
-				WorldBitmapInterface.doCollectibleDrop(sprite as ActiveAsset, _worldView);
-				createChiliProgressBar(sprite);
 				_venueManager.venue.bandMemberManager.goToStageAndTossItem(sprite as ActiveAsset, _worldView);
+				_venueManager.venue.bandMemberManager.myAvatar.addEventListener(WorldEvent.ITEM_DROPPED, function onItemTossedByAvatar():void
+				{
+					_venueManager.venue.bandMemberManager.myAvatar.removeEventListener(WorldEvent.ITEM_DROPPED, onItemTossedByAvatar);
+				});
+				createHeartProgressBar(sprite);					
 				return true;
 			}
 			return false;
 		}
+		
+		private function addFilterForHeartProgressBar(asset:Sprite, customizableBar:CustomizableProgressBar):void
+		{
+			var gf:GlowFilter = new GlowFilter(0xFFDD00, 1, 2, 2, 20, 20);
+			asset.filters = [gf];		
+			customizableBar.filters = [gf];
+		}			
 		
 		private function objectDoubleClicked(sprite:Sprite):Boolean
 		{
@@ -835,7 +876,7 @@ package views
 				(sprite as ActiveAsset).realCoords.y + wgRect.height/2 - sprite.height/2);			
 		}
 				
-		public function createChiliProgressBar(sprite:Sprite):void
+		public function createHeartProgressBar(sprite:Sprite):void
 		{
 			var barCoords:Point = getCenterPointAboveSprite(sprite, _worldView);
 			
@@ -844,7 +885,19 @@ package views
 			img.width = 135;
 			img.height = 25;
 			
-			var customizableBar:CustomizableProgressBar = new CustomizableProgressBar(21, 24, 22, img, 1000, 50, HeartEmpty, plainSkinBlack, plainSkinRed, barCoords.x, barCoords.y, Math.ceil(Math.random() * MAX_FILLERS));
+			(sprite as Person).doNotClearFilters = true;
+			var numFillers:int = Math.ceil(Math.random() * MAX_FILLERS);
+			var totalTime:int = numFillers * 600;
+			var customizableBar:CustomizableProgressBar = new CustomizableProgressBar(21, 24, 22, img, totalTime, 50, HeartEmpty, plainSkinBlack, plainSkinRed, barCoords.x, barCoords.y, numFillers);
+			customizableBar.addEventListener(WorldEvent.PROGRESS_BAR_COMPLETE, function onProgressBarComplete():void
+			{
+				customizableBar.removeEventListener(WorldEvent.PROGRESS_BAR_COMPLETE, onProgressBarComplete);
+				(sprite as Person).doNotClearFilters = false;
+				_worldView.removeChild(customizableBar);
+				WorldBitmapInterface.doCollectibleDrop(sprite as ActiveAsset, _worldView);				
+			});
+			customizableBar.x = customizableBar.x + (sprite.width - customizableBar.width)/2 - 10;
+			addFilterForHeartProgressBar(sprite, customizableBar);
 			_worldView.addChild(customizableBar);
 			customizableBar.startBar();
 		}
