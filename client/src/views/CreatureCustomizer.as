@@ -16,8 +16,10 @@ package views
 	import mx.controls.Button;
 	import mx.core.UIComponent;
 	
+	import rock_on.Person;
 	import rock_on.SpecialButton;
 	
+	import world.ActiveAssetStack;
 	import world.AssetStack;
 
 	public class CreatureCustomizer extends UIComponent
@@ -25,7 +27,7 @@ package views
 		public var _creatureController:CreatureController;
 		public var _creature:Creature;
 		
-		public var constructedCreature:AssetStack;
+		public var constructedCreature:Person;
 		public var currentLayerables:ArrayCollection;
 		public var availableLayerables:Dictionary;
 		
@@ -138,8 +140,8 @@ package views
 			createCreaturePreview();
 
 			var layerableOrder:Array = creatureController.getLayerableOrderByCreatureType(_creature.type);
-			constructedCreature = _creature.getConstructedCreature(layerableOrder, animation, 1, 1);
-			constructedCreature.doAnimation(constructedCreature.orientation, animation, currentFrame);
+			constructedCreature = new Person(_creature);
+			constructedCreature.doAnimation(animation, false, currentFrame);
 			constructedCreature.x = creaturePreview.width / 2;
 			var uic:ContainerUIC = new ContainerUIC();
 			uic.y = constructedCreature.height;
@@ -321,11 +323,11 @@ package views
 			{
 				var mcMatch:MovieClip = getMovieClipByLayerable(olMatch, "walk_toward");	
 //				var index:int = constructedCreature.movieClips.getItemIndex(mcMatch);
-				constructedCreature.movieClips.setItemAt(mc, index);							
+				constructedCreature.displayMovieClips.setItemAt(mc, index);							
 			}
 			else
 			{
-				constructedCreature.movieClips.setItemAt(mc, index);
+				constructedCreature.displayMovieClips.setItemAt(mc, index);
 			}
 		}
 		
@@ -386,7 +388,7 @@ package views
 		{
 			var className:String = flash.utils.getQualifiedClassName(ol.layerable.mc);
 			
-			for each (var mc:MovieClip in constructedCreature.movieClips)
+			for each (var mc:MovieClip in constructedCreature.displayMovieClips)
 			{			
 				var tempName:String = flash.utils.getQualifiedClassName(mc);
 				if (tempName == className)

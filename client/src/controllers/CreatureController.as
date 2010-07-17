@@ -12,6 +12,7 @@ package controllers
 	
 	import views.CreatureCustomizer;
 	
+	import world.ActiveAssetStack;
 	import world.AssetStack;
 
 	public class CreatureController extends Controller
@@ -74,34 +75,33 @@ package controllers
 			}
 		}
 				
-		public function getConstructedCreaturesByType(type:String, sizeX:Number, sizeY:Number):ArrayCollection
+		public function getConstructedCreaturesByType(type:String):ArrayCollection
 		{
 			var matchingCreatures:ArrayCollection = new ArrayCollection();
-			var assetStack:AssetStack;
 			for each (var creature:Creature in _creatures)
 			{
 				if (creature.type == type)
 				{
 					var layerableOrder:Array = getLayerableOrderByCreatureType(creature.type);
-					assetStack = creature.getConstructedCreature(layerableOrder, 'walk_toward', sizeX, sizeY);
-					matchingCreatures.addItem(assetStack);
+//					asset = creature.getConstructedCreature(layerableOrder, 'walk_toward', size);
+					matchingCreatures.addItem(creature);
 				}
 			}
 			return matchingCreatures;
 		}
 		
-		public function getConstructedCreatureById(id:int, sizeX:Number, sizeY:Number):AssetStack
+		public function getConstructedCreatureById(id:int, sizeX:Number, sizeY:Number):ActiveAssetStack
 		{
 			for each (var creature:Creature in _creatures)
 			{
 				if (creature.id == id)
 				{
 					var layerableOrder:Array = getLayerableOrderByCreatureType(creature.type);
-					var assetStack:AssetStack = creature.getConstructedCreature(layerableOrder, 'walk_toward', sizeX, sizeY);
+					var asset:ActiveAssetStack = creature.getConstructedCreature(layerableOrder, 'walk_toward', sizeX);
 					break;
 				}
 			}	
-			return assetStack;		
+			return asset;		
 		}
 		
 //		public function getConstructedCreature(creature:Creature, animation:String):void

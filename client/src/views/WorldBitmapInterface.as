@@ -762,12 +762,13 @@ package views
 			if (sprite is Person)
 			{
 				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
+				var bar:CustomizableProgressBar = createHeartProgressBar(sprite);					
 				_venueManager.venue.bandMemberManager.goToStageAndTossItem(sprite as ActiveAsset, _worldView);
 				_venueManager.venue.bandMemberManager.myAvatar.addEventListener(WorldEvent.ITEM_DROPPED, function onItemTossedByAvatar():void
 				{
 					_venueManager.venue.bandMemberManager.myAvatar.removeEventListener(WorldEvent.ITEM_DROPPED, onItemTossedByAvatar);
+					bar.startBar();
 				});
-				createHeartProgressBar(sprite);					
 				return true;
 			}
 			return false;
@@ -876,7 +877,7 @@ package views
 				(sprite as ActiveAsset).realCoords.y + wgRect.height/2 - sprite.height/2);			
 		}
 				
-		public function createHeartProgressBar(sprite:Sprite):void
+		public function createHeartProgressBar(sprite:Sprite):CustomizableProgressBar
 		{
 			var barCoords:Point = getCenterPointAboveSprite(sprite, _worldView);
 			
@@ -887,7 +888,7 @@ package views
 			
 			(sprite as Person).doNotClearFilters = true;
 			var numFillers:int = Math.ceil(Math.random() * MAX_FILLERS);
-			var totalTime:int = numFillers * 600;
+			var totalTime:int = numFillers * 800;
 			var customizableBar:CustomizableProgressBar = new CustomizableProgressBar(21, 24, 22, img, totalTime, 50, HeartEmpty, plainSkinBlack, plainSkinRed, barCoords.x, barCoords.y, numFillers);
 			customizableBar.addEventListener(WorldEvent.PROGRESS_BAR_COMPLETE, function onProgressBarComplete():void
 			{
@@ -896,10 +897,10 @@ package views
 				_worldView.removeChild(customizableBar);
 				WorldBitmapInterface.doCollectibleDrop(sprite as ActiveAsset, _worldView);				
 			});
-			customizableBar.x = customizableBar.x + (sprite.width - customizableBar.width)/2 - 10;
+			customizableBar.x = customizableBar.x + (sprite.width - customizableBar.width)/2 - 35;
 			addFilterForHeartProgressBar(sprite, customizableBar);
 			_worldView.addChild(customizableBar);
-			customizableBar.startBar();
+			return customizableBar;
 		}
 		
 		public function set bandBoss(val:BandBoss):void

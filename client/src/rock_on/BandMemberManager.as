@@ -53,7 +53,7 @@ package rock_on
 		
 		public function showBandMembers():void
 		{
-			var bandMembers:ArrayCollection = _venue.creatureController.getConstructedCreaturesByType("BandMember", 1, 1);
+//			var bandMembers:ArrayCollection = _venue.creatureController.getConstructedCreaturesByType("BandMember");
 //			
 //			for each (var assetStack:AssetStack in bandMembers)
 //			{

@@ -88,6 +88,7 @@ package rock_on
 		public var customerPersonManager:CustomerPersonManager;
 		public var listeningStationBoss:ListeningStationBoss;		
 		public var stageManager:StageManager;
+		public var techManager:TechManager;
 		public var fullyLoaded:Boolean;		
 
 		public var _wbi:WorldBitmapInterface;
@@ -272,6 +273,7 @@ package rock_on
 			trace("moving customers added");
 			groupieBoss.setInMotion();
 			trace("groupies started");
+			addTechsToVenue();
 			showBandMembersRaceCondition();		
 		}		
 		
@@ -360,6 +362,18 @@ package rock_on
 				cp.isSuperFan = true;
 				customerPersonManager.add(cp, true, -1, stageBufferRect, stageRect, worldToUpdate);
 			}					
+		}
+		
+		public function addTechsToVenue():void
+		{
+			techManager = new TechManager(this, _myWorld);
+			var techs:ArrayCollection = this._creatureController.getConstructedCreaturesByType("Tech");
+			for each (var c:Creature in techs)
+			{
+				var tech:Tech = new Tech(c, null, c.layerableOrder, 0.5);
+				tech.speed = 0.11;
+				techManager.add(tech);
+			}
 		}
 		
 		public function addMovingCustomersToVenue():void

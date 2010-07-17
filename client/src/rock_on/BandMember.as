@@ -3,6 +3,7 @@ package rock_on
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	import flash.utils.Timer;
 	
@@ -387,11 +388,22 @@ package rock_on
 			return true;
 		}
 		
+		public function getYellowGlowfilter():GlowFilter
+		{
+			var gf:GlowFilter = new GlowFilter(0xFFDD00, 1, 2, 2, 20, 20);	
+			return gf;
+		}
+		
 		public function tossItem(recipient:ActiveAsset, view:WorldView):void
 		{
 			var itemDestination:Point = World.worldToActualCoords(recipient.worldCoords);
 			itemDestination.y -= (this.height - 70);
-			var item:CollectibleDrop = new CollectibleDrop(this, new Hamburger(), new Point(10, 10), _venue.myWorld, view, 0, 600, .0008, itemDestination);
+			var itemMc:MovieClip = new Hamburger();
+			itemMc.scaleX = 0.5;
+			itemMc.scaleY = 0.5;
+			var gf:GlowFilter = getYellowGlowfilter();
+			itemMc.filters = [gf];
+			var item:CollectibleDrop = new CollectibleDrop(this, itemMc, new Point(10, 10), _venue.myWorld, view, 0, 600, .0008, itemDestination);
 			item.addEventListener(WorldEvent.ITEM_DROPPED, function onItemDropped(evt:WorldEvent):void
 			{
 				item.removeEventListener(WorldEvent.ITEM_DROPPED, onItemDropped);

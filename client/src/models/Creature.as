@@ -7,6 +7,7 @@ package models
 	import mx.collections.ArrayCollection;
 	
 	import world.ActiveAsset;
+	import world.ActiveAssetStack;
 	import world.AssetStack;
 	import world.Point3D;
 
@@ -82,10 +83,10 @@ package models
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];
 		}
 		
-		public function getConstructedCreature(layerablerOrder:Array, animation:String, sizeX:Number, sizeY:Number):AssetStack
+		public function getConstructedCreature(layerablerOrder:Array, animation:String, size:Number):ActiveAssetStack
 		{
 //			var movieClipStack:MovieClip = new MovieClip();
-			var constructedCreature:AssetStack = new AssetStack();
+//			var constructedCreature:AssetStack = new AssetStack();
 //			for each (var str:String in layerableOrder[animation])
 //			{
 //				for each (var ol:OwnedLayerable in owned_layerables)
@@ -103,29 +104,32 @@ package models
 //				}
 //			}
 			
-			var movieClips:ArrayCollection = new ArrayCollection();
-			for each (var str:String in layerableOrder[animation])
-			{
-				for each (var ol:OwnedLayerable in owned_layerables)
-				{
-					if (ol.layerable.layer_name == str && ol.in_use)
-					{
-						var mc:MovieClip = new MovieClip();
-						mc = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
-						mc.scaleX = sizeX;
-						mc.scaleY = sizeY;
-						mc.name = ol.layerable.layer_name;
-						movieClips.addItem(mc);
-//						constructedCreature.movieClip = mc;
-					}
-				}
-			}
+//			var movieClips:ArrayCollection = new ArrayCollection();
+//			for each (var str:String in layerableOrder[animation])
+//			{
+//				for each (var ol:OwnedLayerable in owned_layerables)
+//				{
+//					if (ol.layerable.layer_name == str && ol.in_use)
+//					{
+//						var mc:MovieClip = new MovieClip();
+//						mc = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
+//						mc.scaleX = sizeX;
+//						mc.scaleY = sizeY;
+//						mc.name = ol.layerable.layer_name;
+//						movieClips.addItem(mc);
+////						constructedCreature.movieClip = mc;
+//					}
+//				}
+//			}
 			
 //			constructedCreature.movieClipStack.buttonMode = true;
-			constructedCreature.creature = this;
-			constructedCreature.layerableOrder = layerableOrder;
-			constructedCreature.movieClips = movieClips;
-			return constructedCreature;
+//			constructedCreature.creature = this;
+//			constructedCreature.layerableOrder = layerableOrder;
+//			constructedCreature.movieClips = movieClips;
+//			return constructedCreature;
+			
+			var asset:ActiveAssetStack = new ActiveAssetStack(this, null, this.layerableOrder, size);
+			return asset;
 		}	
 		
 		private function onMouseDown(evt:MouseEvent):void
