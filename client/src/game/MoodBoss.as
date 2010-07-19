@@ -52,6 +52,8 @@ package game
 		public static const GROUPIE:String = "Groupie";
 		public static const BAND_MEMBER:String = "BandMember";
 		public static const CONCERT_GOER:String = "Concert Goer";
+		public static const FAN:String = "Fan";
+		public static const NEW_FAN:String = "New Fan";
 		
 		public static const XP:String = "XP";
 		public static const COINS:String = "COINS";
@@ -94,7 +96,7 @@ package game
 				possible_rewards: []
 			},				
 			WANTS_HAMBURGER: {				
-				creature_types:[GROUPIE, CONCERT_GOER],	
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
 				symbol_name: HAMBURGER,
 				message: "Can I get a burger?",
 				music_credits: 3,		
@@ -108,7 +110,7 @@ package game
 				possible_rewards: []
 			},
 			WANTS_COFFEE: {
-				creature_types:[GROUPIE, CONCERT_GOER],	
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
 				symbol_name: COFFEE,
 				message: "I need caffeine",
 				music_credits: 2,  
@@ -122,7 +124,7 @@ package game
 				possible_rewards: []
 			},
 			WANTS_PINK_HEADPHONES: {
-				creature_types:[GROUPIE, CONCERT_GOER],		
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],		
 				symbol_name: null,
 				message: "Looking for the pink headphones",
 				music_credits: 5,  
@@ -136,7 +138,7 @@ package game
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2}]
 			},
 			WANTS_RED_HEADPHONES: {
-				creature_types:[GROUPIE, CONCERT_GOER],	
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
 				symbol_name: null,
 				message: "I want red heaphones",
 				music_credits: 5,  
@@ -164,7 +166,7 @@ package game
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.5}]
 			},
 			FEELS_HOT: {
-				creature_types:[GROUPIE, CONCERT_GOER],	
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
 				symbol_name: null,
 				message: "I'm kinda hot",
 				music_credits: 0,  
@@ -178,7 +180,7 @@ package game
 				possible_rewards: []
 			},
 			FEELS_COLD:	{
-				creature_types:[GROUPIE, CONCERT_GOER],		
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],		
 				symbol_name: HAMBURGER,
 				message: "It's cold in here",
 				music_credits: 0,  
@@ -192,7 +194,7 @@ package game
 				possible_rewards: []
 			},
 			WANTS_AUTOGRAPH: {
-				creature_types:[GROUPIE, CONCERT_GOER],	
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
 				symbol_name: HAMBURGER,
 				message: "Can I get an autograph?",
 				music_credits: 3,  

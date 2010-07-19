@@ -84,7 +84,7 @@ package rock_on
 		private function generateStationListener():StationListener
 		{
 //			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "StationListener");
-			var c:Creature = _creatureGenerator.createImposterCreature("StationListener");
+			var c:Creature = _creatureGenerator.createImposterCreature("New Fan");
 			var sl:StationListener = new StationListener(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.5);	
 			return sl;		
 		}

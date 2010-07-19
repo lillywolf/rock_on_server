@@ -33,8 +33,9 @@ package helpers
 		public var accelerationY:Number;
 		public var dropDestination:Point;
 		public var bounds:Point;
+		public var origin:Point;
 		
-		public function CollectibleDrop(_subject:ActiveAsset, mc:MovieClip, _bounds:Point, world:World, view:WorldView, _delay:Number=0, _totalTime:Number=1000, _accelerationY:Number=.001, guidedDrop:Point=null)
+		public function CollectibleDrop(_subject:ActiveAsset, mc:MovieClip, _bounds:Point, world:World, view:WorldView, _delay:Number=0, _totalTime:Number=1000, _accelerationY:Number=.001, guidedDropDestination:Point=null, guidedDropOrigin:Point=null)
 		{
 			super();
 			subject = _subject;
@@ -49,20 +50,38 @@ package helpers
 			_view = view;
 			_world = world;
 			
-			setDestination(guidedDrop);			
-			
-			rate = new Point();
-			rate.x = (dropDestination.x - subject.x)/totalTime;
-			rate.y = (dropDestination.y - subject.y - (accelerationY * totalTime * totalTime))/(totalTime);
+			setDestination(guidedDropDestination);
+			setOrigin(guidedDropOrigin);
+			setRate();
+		
 			this.addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			this.addEventListener(MouseEvent.CLICK, onMouseClicked);
 		}
 		
-		public function setDestination(guidedDrop:Point):void
+		public function setOrigin(guidedDropOrigin:Point):void
 		{
-			if (guidedDrop)
+			rate = new Point();
+			if (guidedDropOrigin)
 			{
-				dropDestination = guidedDrop;
+				origin = guidedDropOrigin;
+			}
+			else
+			{
+				origin = new Point(subject.x, subject.y);
+			}
+		}
+		
+		public function setRate():void
+		{
+				rate.x = (dropDestination.x - origin.x)/totalTime;
+				rate.y = (dropDestination.y - origin.y - (accelerationY * totalTime * totalTime))/(totalTime);						
+		}
+		
+		public function setDestination(guidedDropDestination:Point):void
+		{
+			if (guidedDropDestination)
+			{
+				dropDestination = guidedDropDestination;
 			}
 			else
 			{
@@ -91,8 +110,8 @@ package helpers
 			var deltaTime:Number = getTimer() - startTime;
 			if (deltaTime < totalTime)
 			{
-				x = subject.x + (rate.x * deltaTime);
-				y = subject.y + (rate.y * deltaTime) + accelerationY * (deltaTime * deltaTime);
+				x = origin.x + (rate.x * deltaTime);
+				y = origin.y + (rate.y * deltaTime) + accelerationY * (deltaTime * deltaTime);
 			}
 			else
 			{

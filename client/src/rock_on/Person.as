@@ -1,5 +1,9 @@
 package rock_on
 {
+	import com.flashdynamix.motion.Tweensy;
+	
+	import fl.motion.easing.Bounce;
+	
 	import flash.display.MovieClip;
 	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
@@ -14,6 +18,7 @@ package rock_on
 	import mx.core.UIComponent;
 	
 	import views.ExpandingMovieclip;
+	import views.HoverTextBox;
 	
 	import world.ActiveAssetStack;
 	import world.Point3D;
@@ -61,16 +66,18 @@ package rock_on
 			return null;
 		}	
 		
-		public function generateMoodMessage(mood:Object):UIComponent
+		public function generateMoodMessage(mood:Object):HoverTextBox
 		{
-			return new UIComponent();
+			return new HoverTextBox("blah");
 		}
 		
 		public function startMood(mood:Object):void
 		{
 			var cursor:MovieClip = generateMoodOverheadHover(mood);
-			moodClip = new ExpandingMovieclip(0.6, cursor);
+			moodClip = new ExpandingMovieclip(0.75, cursor);
 			moodClip.y = -(height + 5);
+			moodClip.x = (this.width - moodClip.width)/8;
+			moodClip.doBounce(20);		
 			addChild(moodClip);			
 		}		
 		

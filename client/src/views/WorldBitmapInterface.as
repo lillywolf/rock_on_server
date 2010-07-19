@@ -203,7 +203,7 @@ package views
 		{
 			var cursorClip:MovieClip = null;
 			applyGlowFilterToBitmappedPerson(abd);
-			var cursorMessage:UIComponent = (abd.activeAsset as Person).generateMoodMessage((abd.activeAsset as Person).mood);			
+			var cursorMessage:HoverTextBox = (abd.activeAsset as Person).generateMoodMessage((abd.activeAsset as Person).mood);			
 //			return {cursorClip: cursorClip, cursorMessage: cursorMessage};
 			return null;
 		}
@@ -246,7 +246,7 @@ package views
 				if ((asset as Person).mood)
 				{
 					var cursorClip:MovieClip = (asset as Person).generateMoodCursor((asset as Person).mood);
-					var cursorMessage:UIComponent = (asset as Person).generateMoodMessage((asset as Person).mood);
+					var cursorMessage:HoverTextBox = (asset as Person).generateMoodMessage((asset as Person).mood);
 					return {cursorClip: cursorClip, cursorMessage: cursorMessage};
 				}
 			}
@@ -598,13 +598,13 @@ package views
 			cursorUIC = null;
 		}
 		
-		public function addCursorUIC(cursorClip:MovieClip, cursorMessage:UIComponent=null):void
+		public function addCursorUIC(cursorClip:MovieClip, cursorMessage:HoverTextBox=null):void
 		{
 			createNewCursorUIC(cursorClip, cursorMessage);
 			_worldView.addChild(cursorUIC);
 		}
 		
-		public function swapCursorClip(cursorClip:MovieClip, cursorMessage:UIComponent=null):void
+		public function swapCursorClip(cursorClip:MovieClip, cursorMessage:HoverTextBox=null):void
 		{
 			if (_worldView.contains(cursorUIC))
 			{
@@ -614,7 +614,7 @@ package views
 			_worldView.addChild(cursorUIC);
 		}
 		
-		public function createNewCursorUIC(cursorClip:MovieClip, cursorMessage:UIComponent=null):void
+		public function createNewCursorUIC(cursorClip:MovieClip, cursorMessage:HoverTextBox=null):void
 		{
 			cursorUIC = new ContainerUIC();
 			var bp:Bitmap = BitmapBlotter.getBitmapForMovieClip(cursorClip);
@@ -736,9 +736,9 @@ package views
 		
 		public static function doCollectibleDrop(asset:ActiveAsset, viewToUpdate:WorldView):void
 		{
-			var radius:Point = new Point(100, 100);
+			var radius:Point = new Point(100, 50);
 			var mc:MovieClip = new Heart();
-			var collectibleDrop:CollectibleDrop = new CollectibleDrop(asset, mc, radius, viewToUpdate.myWorld, viewToUpdate, 0, 400);
+			var collectibleDrop:CollectibleDrop = new CollectibleDrop(asset, mc, radius, viewToUpdate.myWorld, viewToUpdate, 0, 400, .001, null, new Point(asset.x, asset.y - 70));
 			collectibleDrop.addEventListener("removeCollectible", function onRemoveCollectible():void
 			{
 				viewToUpdate.myWorld.removeChild(collectibleDrop);

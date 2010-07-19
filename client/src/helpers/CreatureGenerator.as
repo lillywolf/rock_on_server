@@ -133,7 +133,7 @@ package helpers
 				
 		public function addLayersToCreatureByType(type:String, animation:String, imposter:ImposterCreature):ImposterCreature
 		{
-			if (type == "Concert Goer" || type == "Passerby" || type == "StationListener")
+			if (type == "Concert Goer" || type == "Passerby" || type == "StationListener" || type == "Fan" || type == "New Fan")
 			{	
 				for each (var str:String in imposter.layerableOrder[animation])
 				{	
@@ -149,7 +149,7 @@ package helpers
 		public function generateCreatureByType(type:String, animation:String, imposter:ImposterCreature):AssetStack
 		{
 			var renderOrder:Array = new Array();;
-			if (type == "Concert Goer" || type == "Passerby")
+			if (type == "Concert Goer" || type == "Passerby" || type == "Fan" || type == "New Fan")
 			{
 				renderOrder['walk_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
 				renderOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];

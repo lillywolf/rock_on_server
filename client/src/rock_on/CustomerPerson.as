@@ -30,6 +30,7 @@ package rock_on
 	
 	import views.AssetBitmapData;
 	import views.ExpandingMovieclip;
+	import views.HoverTextBox;
 	import views.WorldBitmapInterface;
 	import views.WorldView;
 	
@@ -291,22 +292,26 @@ package rock_on
 			state = INITIALIZED_STATE;
 		}
 		
-		override public function generateMoodMessage(mood:Object):UIComponent
+		override public function generateMoodMessage(mood:Object):HoverTextBox
 		{
 			if (mood)
 			{		
-				var usablesText:Text = new Text();
-				var costUIC:UIComponent = MoodBoss.getUIComponentForMoodCost(mood);
-				var usablesContainer:UIComponent = new UIComponent();
-				usablesContainer.width = 250;
-				usablesText.width = 250;
-				usablesText.text = mood.message as String;
-				usablesText.validateProperties();
-				costUIC.y = (usablesText.textHeight + 7) * (Math.ceil(usablesText.textWidth / 250));
-				WorldBitmapInterface.setStylesForNurtureText(usablesText);
-				usablesContainer.addChild(usablesText);
-				usablesContainer.addChild(costUIC);
-				return usablesContainer;			
+//				var usablesText:Text = new Text();
+//				var costUIC:UIComponent = MoodBoss.getUIComponentForMoodCost(mood);
+//				var usablesContainer:UIComponent = new UIComponent();
+//				usablesContainer.width = 250;
+//				usablesText.width = 250;
+//				usablesText.text = mood.message as String;
+				var hoverBox:HoverTextBox = new HoverTextBox(mood.message as String);
+//				hoverBox.width = 250;
+//				hoverBox.height = 40;
+				return hoverBox;
+//				usablesText.validateProperties();
+//				costUIC.y = (usablesText.textHeight + 7) * (Math.ceil(usablesText.textWidth / 250));
+//				WorldBitmapInterface.setStylesForNurtureText(usablesText);
+//				usablesContainer.addChild(usablesText);
+//				usablesContainer.addChild(costUIC);
+//				return usablesContainer;			
 			}
 			return null;
 		}		

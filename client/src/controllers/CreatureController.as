@@ -132,10 +132,10 @@ package controllers
 //				layerableOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
 //				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
 //				layerableOrder['stand_still_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];								
-				layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front"];
-				layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front"];
-				layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front"];
-				layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];								
+				layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "hair band"];
+				layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];
+				layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "hair band"];
+				layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];								
 			}
 			else
 			{

@@ -337,7 +337,7 @@ package rock_on
 			}
 			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
-				var c:Creature = creatureGenerator.createImposterCreature("Concert Goer");
+				var c:Creature = creatureGenerator.createImposterCreature("Fan");
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
 //				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
 				cp.speed = 0.11;
@@ -354,7 +354,7 @@ package rock_on
 			}
 			for (var i:int = 0; i < numSuperCustomers; i++)
 			{
-				var imposter:ImposterCreature = creatureGenerator.createImposterCreature("Concert Goer");
+				var imposter:ImposterCreature = creatureGenerator.createImposterCreature("Fan");
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, imposter, null, imposter.layerableOrder, 0.5);
 				cp.stageManager = stageManager;
 //				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
@@ -384,7 +384,7 @@ package rock_on
 			}
 			for (var i:int = 0; i < numMovingCustomers; i++)
 			{
-				var c:ImposterCreature = creatureGenerator.createImposterCreature("Concert Goer");
+				var c:ImposterCreature = creatureGenerator.createImposterCreature("Fan");
 				c.has_moods = true;
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
 				cp.stageManager = stageManager;

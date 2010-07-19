@@ -228,10 +228,11 @@
 				vbox.setStyle("verticalGap", 4);
 				vbox.y = 40;
 				var typeLabel:Text = getCreatureType(creature);
-				vbox.addChild(typeLabel);
 				var starCanvas:Canvas = getCreatureStars(creature);
-				starCanvas.y = typeLabel.textHeight + typeLabel.y + 13;
 				vbox.addChild(starCanvas);
+				typeLabel.y = 40;
+				vbox.addChild(typeLabel);
+//				starCanvas.y = typeLabel.textHeight + typeLabel.y + 13;
 				displayedCreatureInfo.addChild(vbox);
 //				var buttonCanvas:Canvas = getCreatureButtons(creature);
 //				displayedCreatureInfo.addChild(buttonCanvas);
@@ -263,34 +264,57 @@
 			{
 				var canvas:Canvas = new Canvas();
 				var star:Image;
+				var overlay:Image;
 				var numStars:int = Math.floor(Math.random() * 5);
 
 				for (var i:int = 0; i < (numStars + 1); i++)
 				{
 					star = new Image();
+					overlay = new Image();
 					switch (numStars)
 					{
 						case 0:
-							star.source = miniChili1;
+							star.source = HeartFilledYellowGreen;
+							overlay.source = HeartEmpty;
 							break;
 						case 1:
-							star.source = miniChili2;
+							star.source = HeartFilledYellow;
+							overlay.source = HeartEmpty;
 							break;
 						case 2:
-							star.source = miniChili3;
+							star.source = HeartFilledOrange;
+							overlay.source = HeartEmpty;
 							break;
 						case 3:
-							star.source = miniChili4;
+							star.source = HeartFilledOrangeRed;
+							overlay.source = HeartEmpty;
 							break;
 						case 4:
-							star.source = miniChili5;
+							star.source = HeartFilledRed;
+							overlay.source = HeartEmpty;
 							break;
 					}
+					overlay.x = i * 22;
+					overlay.height = 22;
 					star.x = i * 22;
+					star.height = 18;
 					canvas.addChild(star);
+					canvas.addChild(overlay);
+				}
+				if (numStars == 4 && Math.random() > 0.5)
+				{
+					star = new Image();
+					overlay = new Image();
+					star.source = HeartFilledGreen;
+					overlay.source = HeartEmpty;
+					overlay.x = 5 * 22;
+					overlay.height = 22;
+					star.x = 5 * 22;
+					star.height = 18;
+					canvas.addChild(star);
+					canvas.addChild(overlay);
 				}
 				return canvas;
-				
 			}
 			
 			public function getCreatureType(creature:Creature):Text
@@ -299,11 +323,7 @@
 				var text:Text = new Text();
 				text.width = 140;
 				var textFilter:GlowFilter = createTextFilter();
-				if (creature.type == "Groupie")
-				{
-					text.text = "SuperFan";				
-				}
-				else if (creature.type == "BandMember")
+				if (creature.type == "BandMember")
 				{
 					text.text = "Band Member";
 				}
@@ -313,9 +333,9 @@
 				}
 				text.setStyle("color", 0xffffff);
 				text.setStyle("fontFamily", "Museo-Slab-900");
-				text.setStyle("fontSize", 13);
+				text.setStyle("fontSize", 14);
 				text.filters = [textFilter];
-				text.y = 40;
+				text.y = 70;
 				return text;
 			}
 			
@@ -334,7 +354,7 @@
 				nameLabel.filters = [createTextFilter()];
 				nameLabel.setStyle("color", 0xffffff);
 				nameLabel.setStyle("fontFamily", "Museo-Slab-900");
-				nameLabel.setStyle("fontSize", 16);
+				nameLabel.setStyle("fontSize", 18);
 				return nameLabel;
 			}
 			
