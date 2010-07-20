@@ -220,7 +220,7 @@ package rock_on
 				
 			do
 			{
-				stationFront = new Point3D(Math.floor(station.x + station.structure.width/2 + 1 + Math.round(Math.random()*station.radius.x)), 0, Math.floor(station.z - Math.round(Math.random()*station.radius.z*2)));										
+				stationFront = new Point3D(Math.ceil(station.x + station.structure.width/2) + Math.ceil(Math.random()*station.radius.x), 0, Math.ceil(station.z - station.structure.depth/2) + Math.ceil(Math.random()*station.radius.z));										
 			}			
 			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stationFront)));
 			trace("station front found");

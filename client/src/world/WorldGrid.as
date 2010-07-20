@@ -44,6 +44,7 @@ package world
 			var yCoord:Number = xCoord * GRID_ANGLE;
 			
 //			mc.graphics.beginFill(0x92C5E8, 1);
+			
 			mc.graphics.lineTo(xCoord, yCoord);
 			mc.graphics.lineTo(xCoord*2, 0);
 			mc.graphics.lineTo(xCoord, -yCoord);

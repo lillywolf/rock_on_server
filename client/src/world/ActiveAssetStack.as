@@ -58,16 +58,21 @@ package world
 				bitmapData = new BitmapData(mc.width + 10, mc.height + 8, true, 0x000000);
 				var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width + 10, heightDiff/_scale);
 				var rect:Rectangle = new Rectangle(0, 0, mc.width + 10, mc.height + 8);
-				scaleMatrix(matrix);
+				scaleMatrix(matrix, mc.width + 10);
 				bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
 				bitmap = new Bitmap(bitmapData);
 //				bitmap.x = -mc.width/2;
-//				bitmap.y = -heightDiff * _scale;
-				bitmap.x = -mc.width/2;
-				bitmap.y = -heightDiff;
+//				bitmap.y = -heightDiff;
+				placeBitmap(bitmap, mc, heightDiff, mc.width + 10);
 				bitmap.opaqueBackground = null;
 				addChild(bitmap);
 			}
+		}
+		
+		override public function placeBitmap(bitmap:Bitmap, mc:Sprite, heightDiff:Number, tx:Number = 0):void
+		{
+			bitmap.y = -heightDiff;
+			bitmap.x = -mc.width/2;
 		}
 		
 		public function createMovieClipsForBitmap():Sprite

@@ -50,6 +50,7 @@ package world
 		public var reflected:Boolean;
 		public var _scale:Number;
 		
+		public static const X_BITMAP_BUFFER:int = 40;
 		public static const MOVE_DELAY_TIME:int = 200;
 		
 		public function ActiveAsset(movieClip:MovieClip=null, scale:Number=1)
@@ -93,13 +94,13 @@ package world
 			var heightDiff:Number = Math.abs(mcBounds.top - this.y);
 			var widthDiff:Number = getWidthDifferential(mcBounds);			
 			scaleMovieClip(mc);
-			bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
-			var matrix:Matrix = new Matrix(1, 0, 0, 1, widthDiff/2, heightDiff);
-			var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height);
-			scaleMatrix(matrix);
+			bitmapData = new BitmapData(mc.width + X_BITMAP_BUFFER, mc.height, true, 0x000000);
+			var matrix:Matrix = new Matrix(1, 0, 0, 1, widthDiff/2 + X_BITMAP_BUFFER, heightDiff);
+			var rect:Rectangle = new Rectangle(0, 0, mc.width + X_BITMAP_BUFFER, mc.height);
+			scaleMatrix(matrix, mc.width);
 			bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
 			bitmap = new Bitmap(bitmapData);
-			bitmap.x = -mc.width/2;
+			bitmap.x = -mc.width/2 - X_BITMAP_BUFFER;
 			bitmap.y = -heightDiff * _scale;
 			bitmap.opaqueBackground = null;
 			addChild(bitmap);	
@@ -116,11 +117,22 @@ package world
 		{
 			var widthDiff:Number = Math.abs(mcBounds.width);
 			return widthDiff;
-		}		
+		}	
 		
-		public function scaleMatrix(matrix:Matrix):void
+		public function placeBitmap(bitmap:Bitmap, mc:Sprite, heightDiff:Number, tx:Number = 0):void
 		{
-			if (_scale)
+			bitmap.y = -heightDiff * _scale;				
+			bitmap.x = -mc.width/2 - X_BITMAP_BUFFER;
+		}
+		
+		public function scaleMatrix(matrix:Matrix, tx:Number = 0):void
+		{
+			if (reflected && _scale)
+			{
+				matrix.scale(-(_scale), _scale);
+				matrix.tx += tx;
+			}
+			else if (_scale)
 			{
 				matrix.scale(_scale, _scale);			
 			}

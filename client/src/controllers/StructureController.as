@@ -30,7 +30,7 @@ package controllers
 
 	public class StructureController extends Controller
 	{
-		public static const STRUCTURE_SCALE:Number = 1.3;
+		public static const STRUCTURE_SCALE:Number = 1;
 		
 		[Bindable] public var structures:ArrayCollection;
 		[Bindable] public var owned_structures:ArrayCollection;

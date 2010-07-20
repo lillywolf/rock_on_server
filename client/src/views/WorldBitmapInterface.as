@@ -441,7 +441,7 @@ package views
 		{	
 			var cursorObject:Object = null;
 			var bounds:Rectangle;
-			for each (var sprite:Sprite in worldViewToCheck.myWorld.assetRenderer.unsortedAssets)				
+			for each (var sprite:Sprite in worldViewToCheck.myWorld.assetRenderer.sortedAssets)				
 			{
 				bounds = sprite.getBounds(worldViewToCheck);
 				if (bounds.contains(worldViewToCheck.mouseX, worldViewToCheck.mouseY))
@@ -470,11 +470,12 @@ package views
 				if (worldViewToCheck.myWorld.getChildAt(i) is CollectibleDrop)
 				{
 					var sprite:Sprite = worldViewToCheck.myWorld.getChildAt(i) as Sprite;
-					bounds = sprite.getBounds(worldViewToCheck);
-					if (bounds.contains(worldViewToCheck.mouseX, worldViewToCheck.mouseY))
+					bounds = sprite.getBounds(worldViewToCheck.myWorld);
+					if (bounds.contains(worldViewToCheck.myWorld.mouseX, worldViewToCheck.myWorld.mouseY))
 					{
 						clearFilters();
 						cursorObject = checkCollectibleItemHover(sprite, worldViewToCheck, stageViewToCheck);
+						cursorObject = new Object();
 						currentHoveredObject = sprite;
 					}
 				}
@@ -487,21 +488,21 @@ package views
 			var cursorObject:Object;
 			currentHoveredObject = null;
 			
-			cursorObject = checkBitmapForHover(view, concertStageView);
-			if (cursorObject)
-			{
-				return cursorObject;
-			}
-			cursorObject = checkAssetRendererForHover(view, concertStageView);
-			if (cursorObject)
-			{
-				return cursorObject;
-			}			
 			cursorObject = checkWorldUIForHover(view, concertStageView);
 			if (cursorObject)
 			{
 				return cursorObject;
 			}		
+			cursorObject = checkAssetRendererForHover(view, concertStageView);
+			if (cursorObject)
+			{
+				return cursorObject;
+			}			
+			cursorObject = checkBitmapForHover(view, concertStageView);
+			if (cursorObject)
+			{
+				return cursorObject;
+			}
 			return null;
 		}
 		
@@ -540,6 +541,7 @@ package views
 			{
 				cursorObject = worldHovered(view, concertStageView);
 			}
+			
 			handleCursorObject(cursorObject);
 		}	
 		
@@ -600,8 +602,11 @@ package views
 		
 		public function addCursorUIC(cursorClip:MovieClip, cursorMessage:HoverTextBox=null):void
 		{
-			createNewCursorUIC(cursorClip, cursorMessage);
-			_worldView.addChild(cursorUIC);
+			if (cursorClip || cursorMessage)
+			{
+				createNewCursorUIC(cursorClip, cursorMessage);
+				_worldView.addChild(cursorUIC);
+			}
 		}
 		
 		public function swapCursorClip(cursorClip:MovieClip, cursorMessage:HoverTextBox=null):void
@@ -610,8 +615,12 @@ package views
 			{
 				_worldView.removeChild(cursorUIC);				
 			}
-			createNewCursorUIC(cursorClip, cursorMessage);
-			_worldView.addChild(cursorUIC);
+			
+			if (cursorClip || cursorMessage)
+			{
+				createNewCursorUIC(cursorClip, cursorMessage);
+				_worldView.addChild(cursorUIC);
+			}
 		}
 		
 		public function createNewCursorUIC(cursorClip:MovieClip, cursorMessage:HoverTextBox=null):void
@@ -621,13 +630,15 @@ package views
 			cursorUIC.setStyles(_worldView.mouseX, _worldView.mouseY, cursorClip.width, cursorClip.height);
 			cursorUIC.mc = cursorClip;
 			cursorUIC.bitmap = bp;
-			cursorUIC.addChild(bp);	
 			if (cursorMessage)
 			{
-				cursorMessage.y = bp.height + bp.y;
-				cursorMessage.x = bp.x - 3;
+//				cursorMessage.y = bp.height + bp.y - 25;
+//				cursorMessage.x = bp.x + bp.width - 15;
+//				cursorMessage.y = bp.y;
+//				cursorMessage.x = bp.x;
 				cursorUIC.addChild(cursorMessage);
 			}
+//			cursorUIC.addChild(bp);	
 		}
 		
 		public function updateCursorUIC():void

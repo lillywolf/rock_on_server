@@ -144,7 +144,7 @@ package rock_on
 			
 			if (currentStation.isPermanentSlotAvailable() || isStatic)
 			{
-				addLeftovers();
+//				addLeftovers();
 			}
 			else
 			{

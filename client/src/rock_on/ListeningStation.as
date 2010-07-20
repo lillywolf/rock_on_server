@@ -62,7 +62,7 @@ package rock_on
 		public function setProperties():void
 		{
 			radius = new Point3D(0, 0, 0);
-			radius.x = structure.capacity;
+			radius.x = Math.ceil(structure.capacity/structure.depth);
 			radius.z = structure.depth;
 		}	
 		

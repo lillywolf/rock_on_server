@@ -68,7 +68,8 @@ package rock_on
 		
 		public function generateMoodMessage(mood:Object):HoverTextBox
 		{
-			return new HoverTextBox("blah");
+//			return new HoverTextBox("blah");
+			return null;
 		}
 		
 		public function startMood(mood:Object):void
@@ -105,7 +106,7 @@ package rock_on
 			_frameNumber = evaluateHorizontalAndVerticalRelationship(relationship, frameNumber, os, strictFacing);						
 			var reflection:Boolean = getReflection(relationship);	
 			var standAnimation:String = getStandAnimation(_frameNumber);
-			stand(standAnimation, _frameNumber);	
+			stand(standAnimation, _frameNumber, relationship);
 			return {frameNumber: _frameNumber, animation: standAnimation, reflection: reflection};			
 		}
 		
@@ -196,22 +197,18 @@ package rock_on
 			if (relationship["verticalRelationship"] == "bottom")
 			{
 				frameNumber = 39;
-				changeScale(-(_scale), _scale);
 			}
 			else if (relationship["horizontalRelationship"] == "left")
 			{
 				frameNumber = 37;
-				changeScale(_scale, _scale);
 			}
 			else if (relationship["verticalRelationship"] == "top")
 			{
 				frameNumber = 37;
-				changeScale(-(_scale), _scale);
 			}
 			else if (relationship["horizontalRelationship"] == "right")
 			{
 				frameNumber = 39;
-				changeScale(_scale, _scale);
 			}
 			else
 			{
@@ -219,6 +216,26 @@ package rock_on
 			}
 			return frameNumber;
 		}	
+		
+		public function adjustScaleToSpatialRelationship(relationship:Array):void
+		{
+			if (relationship["verticalRelationship"] == "bottom")
+			{
+				changeScale(-(_scale), _scale);
+			}
+			else if (relationship["horizontalRelationship"] == "left")
+			{
+				changeScale(_scale, _scale);
+			}
+			else if (relationship["verticalRelationship"] == "top")
+			{
+				changeScale(-(_scale), _scale);
+			}
+			else if (relationship["horizontalRelationship"] == "right")
+			{
+				changeScale(_scale, _scale);
+			}			
+		}
 		
 		public function getClosestAvailableSpot(pt3D:Point3D):Point3D
 		{
@@ -270,9 +287,13 @@ package rock_on
 			return concentricArray;
 		}
 		
-		public function stand(animation:String, frameNumber:int):void
+		public function stand(animation:String, frameNumber:int, relationship:Array = null):void
 		{
 			doAnimation(animation, false, frameNumber);
+			if (relationship)
+			{
+				adjustScaleToSpatialRelationship(relationship);						
+			}
 			switchToBitmap();
 		}
 		
