@@ -6,12 +6,14 @@ package world
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.ui.Mouse;
 	import flash.ui.MouseCursor;
+	import flash.utils.Timer;
 	
 	import models.EssentialModelReference;
 	import models.OwnedDwelling;
@@ -348,10 +350,10 @@ package world
 				{
 					abd.moodClip.x = abd.bitmap.x + (abd.activeAsset.width - abd.moodClip.width)/2 + 15;
 					abd.moodClip.y = abd.bitmap.y + yAdjustment - 5;
-					abd.moodClip.doBounce(20);
 					_myWorld.addChild(abd.moodClip);
+					abd.startMoodClipBounce();
 				}
-			}
+			}		
 		}
 		
 		public function getYAdjustment():Number

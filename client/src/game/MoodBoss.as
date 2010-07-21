@@ -1,7 +1,11 @@
 package game
 {
+	import flash.display.MovieClip;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
+	import flash.utils.getDefinitionByName;
+	
+	import models.EssentialModelReference;
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Text;
@@ -261,6 +265,13 @@ package game
 		public function MoodBoss(target:IEventDispatcher=null)
 		{
 			super(target);
+		}
+		
+		public static function getMovieClipForMood(mood:Object):MovieClip
+		{
+			var className:String = mood.symbol_name;
+			var klass:Class = getDefinitionByName(className) as Class;
+			return new klass() as MovieClip;
 		}
 		
 		public static function assignMoodByString(moodName:String):Object

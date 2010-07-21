@@ -5,7 +5,9 @@ package rock_on
 	import fl.motion.easing.Bounce;
 	
 	import flash.display.MovieClip;
+	import flash.events.TimerEvent;
 	import flash.utils.Dictionary;
+	import flash.utils.Timer;
 	import flash.utils.getDefinitionByName;
 	
 	import models.Creature;
@@ -21,6 +23,7 @@ package rock_on
 	import views.HoverTextBox;
 	
 	import world.ActiveAssetStack;
+	import world.MoodEvent;
 	import world.Point3D;
 	import world.World;
 	import world.WorldEvent;
@@ -71,7 +74,7 @@ package rock_on
 			return null;
 		}	
 		
-		public function generateMoodMessage(mood:Object):HoverTextBox
+		public function generateMoodMessage():HoverTextBox
 		{
 			if (mood)
 			{
@@ -98,9 +101,19 @@ package rock_on
 			}
 			else
 			{
-				moodClip.doBounce(20);
 				addChild(moodClip);
+				var t:Timer = new Timer(Math.random() * 1000);
+				t.addEventListener(TimerEvent.TIMER, onBounceWaitComplete);
+				t.start();
 			}
+		}
+		
+		private function onBounceWaitComplete(evt:TimerEvent):void
+		{
+			moodClip.doBounce(20);
+			var timer:Timer = evt.target as Timer;
+			timer.removeEventListener(TimerEvent.TIMER, onBounceWaitComplete);
+			timer = null;			
 		}
 		
 		public function endMood():void
@@ -108,6 +121,16 @@ package rock_on
 			if (contains(moodClip))
 			{
 				removeChild(moodClip);
+			}
+			else if (this.personType == Person.STATIC)
+			{
+				if (moodClip)
+				{
+					if (myWorld.contains(moodClip))
+					{
+						_myWorld.removeChild(moodClip);					
+					}
+				}
 			}
 			mood = null;
 		}		

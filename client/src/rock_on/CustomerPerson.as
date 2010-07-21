@@ -292,7 +292,7 @@ package rock_on
 			state = INITIALIZED_STATE;
 		}
 		
-		override public function generateMoodMessage(mood:Object):HoverTextBox
+		override public function generateMoodMessage():HoverTextBox
 		{
 			if (mood)
 			{		

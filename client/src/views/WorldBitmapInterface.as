@@ -203,8 +203,8 @@ package views
 		{
 			var cursorClip:MovieClip = null;
 			applyGlowFilterToBitmappedPerson(abd);
-			var cursorMessage:HoverTextBox = (abd.activeAsset as Person).generateMoodMessage((abd.activeAsset as Person).mood);			
-			return {cursorClip: cursorClip, cursorMessage: cursorMessage};
+			var cursorMessage:HoverTextBox = (abd.activeAsset as Person).generateMoodMessage();			
+			return {cursorClip: cursorClip, cursorMessage: cursorMessage, cursorAsset: abd.activeAsset};
 		}
 		
 		public function applyGlowFilterToBitmappedPerson(abd:AssetBitmapData):void
@@ -246,8 +246,8 @@ package views
 				if ((asset as Person).mood)
 				{
 					var cursorClip:MovieClip = (asset as Person).generateMoodCursor((asset as Person).mood);
-					var cursorMessage:HoverTextBox = (asset as Person).generateMoodMessage((asset as Person).mood);
-					return {cursorClip: cursorClip, cursorMessage: cursorMessage};
+					var cursorMessage:HoverTextBox = (asset as Person).generateMoodMessage();
+					return {cursorClip: cursorClip, cursorMessage: cursorMessage, cursorAsset: asset};
 				}
 			}
 			return null;
@@ -553,15 +553,15 @@ package views
 			}
 			else if (!cursorUIC && cursorObject)
 			{
-				addCursorUIC(cursorObject.cursorClip, cursorObject.cursorMessage);
+				addCursorUIC(cursorObject.cursorClip, cursorObject.cursorMessage, cursorObject.cursorAsset);
 			}
 			else if (!cursorObject && cursorUIC)
 			{
 				removeCursorUIC();
 			}
-			else if (getQualifiedClassName(cursorUIC.mc) != getQualifiedClassName(cursorObject.cursorClip))
+			else if (cursorUIC.thinger != cursorObject.cursorAsset)
 			{
-				swapCursorClip(cursorObject.cursorClip, cursorObject.cursorMessage);
+				swapCursorClip(cursorObject.cursorClip, cursorObject.cursorMessage, cursorObject.cursorAsset);
 			}
 			else
 			{
@@ -600,16 +600,16 @@ package views
 			cursorUIC = null;
 		}
 		
-		public function addCursorUIC(cursorClip:MovieClip, cursorMessage:HoverTextBox=null):void
+		public function addCursorUIC(cursorClip:MovieClip, cursorMessage:HoverTextBox=null, cursorAsset:ActiveAsset=null):void
 		{
 			if (cursorClip || cursorMessage)
 			{
-				createNewCursorUIC(cursorClip, cursorMessage);
+				createNewCursorUIC(cursorClip, cursorMessage, cursorAsset);
 				_worldView.addChild(cursorUIC);
 			}
 		}
 		
-		public function swapCursorClip(cursorClip:MovieClip, cursorMessage:HoverTextBox=null):void
+		public function swapCursorClip(cursorClip:MovieClip, cursorMessage:HoverTextBox=null, cursorAsset:ActiveAsset=null):void
 		{
 			if (_worldView.contains(cursorUIC))
 			{
@@ -618,14 +618,15 @@ package views
 			
 			if (cursorClip || cursorMessage)
 			{
-				createNewCursorUIC(cursorClip, cursorMessage);
+				createNewCursorUIC(cursorClip, cursorMessage, cursorAsset);
 				_worldView.addChild(cursorUIC);
 			}
 		}
 		
-		public function createNewCursorUIC(cursorClip:MovieClip, cursorMessage:HoverTextBox=null):void
+		public function createNewCursorUIC(cursorClip:MovieClip, cursorMessage:HoverTextBox=null, cursorAsset:ActiveAsset=null):void
 		{
 			cursorUIC = new ContainerUIC();
+			cursorUIC.thinger = cursorAsset;
 			if (cursorClip)
 			{
 				var bp:Bitmap = BitmapBlotter.getBitmapForMovieClip(cursorClip);			
@@ -639,6 +640,8 @@ package views
 //				cursorMessage.x = bp.x + bp.width - 15;
 //				cursorMessage.y = bp.y;
 //				cursorMessage.x = bp.x;
+				cursorUIC.x = _worldView.mouseX;
+				cursorUIC.y = _worldView.mouseY;
 				cursorUIC.addChild(cursorMessage);
 			}
 //			cursorUIC.addChild(bp);	
@@ -781,6 +784,7 @@ package views
 				_venueManager.venue.bandMemberManager.myAvatar.addEventListener(WorldEvent.ITEM_DROPPED, function onItemTossedByAvatar():void
 				{
 					_venueManager.venue.bandMemberManager.myAvatar.removeEventListener(WorldEvent.ITEM_DROPPED, onItemTossedByAvatar);
+					(sprite as Person).endMood();
 					bar.startBar();
 				});
 				return true;

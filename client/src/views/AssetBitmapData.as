@@ -2,6 +2,10 @@ package views
 {
 	import flash.display.Bitmap;
 	import flash.display.MovieClip;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
+	
+	import org.osmf.events.TimeEvent;
 	
 	import world.ActiveAsset;
 	import world.AssetStack;
@@ -28,6 +32,24 @@ package views
 		
 		public function AssetBitmapData()
 		{
+		}
+		
+		public function startMoodClipBounce():void
+		{
+			if (moodClip)
+			{
+				var t:Timer = new Timer(Math.random() * 1000);
+				t.addEventListener(TimerEvent.TIMER, onBounceWaitComplete);
+				t.start();
+			}
+		}
+		
+		private function onBounceWaitComplete(evt:TimerEvent):void
+		{
+			moodClip.doBounce(20);
+			var t:Timer = evt.target as Timer;
+			t.removeEventListener(TimerEvent.TIMER, onBounceWaitComplete);
+			t.stop();
 		}
 		
 		public function set assetStack(val:AssetStack):void

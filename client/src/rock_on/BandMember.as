@@ -7,6 +7,8 @@ package rock_on
 	import flash.geom.Point;
 	import flash.utils.Timer;
 	
+	import game.MoodBoss;
+	
 	import helpers.CollectibleDrop;
 	
 	import models.Creature;
@@ -394,11 +396,27 @@ package rock_on
 			return gf;
 		}
 		
+		public function getMovieClipForRecipient(recipient:Person):MovieClip
+		{
+			if (recipient.mood)
+			{
+				var itemMc:MovieClip = MoodBoss.getMovieClipForMood(recipient.mood);							
+			}
+			return itemMc;
+		}
+		
 		public function tossItem(recipient:ActiveAsset, view:WorldView):void
 		{
 			var itemDestination:Point = World.worldToActualCoords(recipient.worldCoords);
 			itemDestination.y -= (this.height - 70);
-			var itemMc:MovieClip = new Hamburger();
+			if (recipient is Person)
+			{
+				var itemMc:MovieClip = getMovieClipForRecipient(recipient as Person);
+			}
+			else
+			{
+				throw new Error("attempted to toss item to a non-person");
+			}
 			itemMc.scaleX = 0.5;
 			itemMc.scaleY = 0.5;
 			var gf:GlowFilter = getYellowGlowfilter();
