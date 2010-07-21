@@ -35,7 +35,12 @@ package rock_on
 		
 		public var _myWorld:World;
 		public var _myStage:World;
-		public var _stageManager:StageManager;	
+		public var _stageManager:StageManager;
+		
+		public var personType:int;
+		public static const STATIC:int = 0;
+		public static const SUPER:int = 1;
+		public static const MOVING:int = 2;		
 		
 		public function Person(creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
@@ -68,7 +73,11 @@ package rock_on
 		
 		public function generateMoodMessage(mood:Object):HoverTextBox
 		{
-//			return new HoverTextBox("blah");
+			if (mood)
+			{
+				var hoverBox:HoverTextBox = new HoverTextBox(mood.message as String);
+				return hoverBox;
+			}
 			return null;
 		}
 		
@@ -76,11 +85,23 @@ package rock_on
 		{
 			var cursor:MovieClip = generateMoodOverheadHover(mood);
 			moodClip = new ExpandingMovieclip(0.75, cursor);
-			moodClip.y = -(height + 5);
+			moodClip.y = -(height);
 			moodClip.x = (this.width - moodClip.width)/8;
-			moodClip.doBounce(20);		
-			addChild(moodClip);			
+			handleMoodForStaticPeople(mood, moodClip);	
 		}		
+		
+		public function handleMoodForStaticPeople(mood:Object, moodClip:ExpandingMovieclip):void
+		{
+			if (this.personType == Person.STATIC)
+			{
+				_myWorld.bitmapBlotter.addMoodToAssetBitmapData(this, mood, moodClip);
+			}
+			else
+			{
+				moodClip.doBounce(20);
+				addChild(moodClip);
+			}
+		}
 		
 		public function endMood():void
 		{

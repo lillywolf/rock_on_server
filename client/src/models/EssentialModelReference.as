@@ -173,7 +173,7 @@ package models
 		
 		public static function getRoseLeftover(clickable:Boolean):Leftover
 		{
-			var mc:Rose = new Rose();
+			var mc:RoseLeftover = new RoseLeftover();
 			mc.cacheAsBitmap = true;
 			var leftover:Leftover = new Leftover(mc);
 			leftover.clickable = clickable;			
@@ -215,6 +215,18 @@ package models
 			return leftover;
 		}
 		
+		public static function getCandyLeftover(clickable:Boolean):Leftover
+		{
+			var mc:CandyLeftover = new CandyLeftover();
+			mc.cacheAsBitmap = true;
+			mc.scaleX = 1.1;
+			mc.scaleY = 1.1;
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;
+			leftover.type = "food";			
+			return leftover;
+		}
+		
 		public static function getEggLeftover(clickable:Boolean):Leftover
 		{
 			var mc:EggLeftover = new EggLeftover();
@@ -222,7 +234,7 @@ package models
 			leftover.clickable = clickable;
 			leftover.type = "rare";
 			return leftover;
-		}		
+		}				
 		
 	}
 }

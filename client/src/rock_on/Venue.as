@@ -338,11 +338,14 @@ package rock_on
 			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
 				var c:Creature = creatureGenerator.createImposterCreature("Fan");
+				c.has_moods = true;
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
+				cp.personType = Person.STATIC;
 //				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
 				cp.speed = 0.11;
 				cp.stageManager = stageManager;
-				customerPersonManager.add(cp, false, i);				
+				customerPersonManager.add(cp, false, i);
+				cp.setMood();
 			}
 		}
 		
@@ -356,6 +359,7 @@ package rock_on
 			{
 				var imposter:ImposterCreature = creatureGenerator.createImposterCreature("Fan");
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, imposter, null, imposter.layerableOrder, 0.5);
+				cp.personType = Person.SUPER;
 				cp.stageManager = stageManager;
 //				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
 				cp.speed = 0.11;
@@ -371,6 +375,7 @@ package rock_on
 			for each (var c:Creature in techs)
 			{
 				var tech:Tech = new Tech(c, null, c.layerableOrder, 0.5);
+				tech.personType = Person.MOVING;
 				tech.speed = 0.11;
 				techManager.add(tech);
 			}
@@ -387,6 +392,7 @@ package rock_on
 				var c:ImposterCreature = creatureGenerator.createImposterCreature("Fan");
 				c.has_moods = true;
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
+				cp.personType = Person.MOVING;
 				cp.stageManager = stageManager;
 				cp.speed = 0.11;
 				customerPersonManager.add(cp, true, -1, boothsRect);

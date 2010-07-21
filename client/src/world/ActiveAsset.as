@@ -65,8 +65,6 @@ package world
 			if (movieClip)
 			{
 				_movieClip = movieClip;
-//				_movieClip.scaleX = _scale;
-//				_movieClip.scaleY = _scale;
 				switchToBitmap();				
 //				addChild(_movieClip);			
 				_movieClip.addEventListener(MouseEvent.CLICK, onMouseClicked);

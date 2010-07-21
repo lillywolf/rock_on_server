@@ -55,6 +55,10 @@ package game
 		public static const FAN:String = "Fan";
 		public static const NEW_FAN:String = "New Fan";
 		
+		public static const STATIC:int = 0;
+		public static const SUPER:int = 1;
+		public static const MOVING:int = 2;
+		
 		public static const XP:String = "XP";
 		public static const COINS:String = "COINS";
 		public static const MUSIC_CREDITS:String = "MUSIC_CREDITS";
@@ -63,12 +67,18 @@ package game
 		
 		public static const HAMBURGER:String = "Hamburger";
 		public static const COFFEE:String = "CoffeeLeftover";
+		public static const HEART:String = "Heart";
+		public static const RED_HEADPHONES:String = "RoseLeftover";
+		public static const PINK_HEADPHONES:String = "CandyLeftover";
+		public static const CANDY:String = "CandyLeftover";
+		public static const EGG:String = "EggLeftover";
 		
 		public static const TEXT_BUFFER:int = 5;
 		
 		public static const MOODS:Object = {
 			HUNGRY: {								
 				creature_types:[BAND_MEMBER],
+				person_types:[MOVING],
 				symbol_name: HAMBURGER,
 				message: "Feed me!",
 				music_credits: 1, 	
@@ -83,6 +93,7 @@ package game
 			},
 			THIRSTY: {							
 				creature_types:[BAND_MEMBER],
+				person_types:[MOVING],
 				symbol_name: COFFEE,
 				message: "I'm thirsty",
 				music_credits: 1, 	
@@ -96,7 +107,8 @@ package game
 				possible_rewards: []
 			},				
 			WANTS_HAMBURGER: {				
-				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
+				creature_types:[GROUPIE, CONCERT_GOER, FAN],	
+				person_types:[MOVING],
 				symbol_name: HAMBURGER,
 				message: "Can I get a burger?",
 				music_credits: 3,		
@@ -110,7 +122,8 @@ package game
 				possible_rewards: []
 			},
 			WANTS_COFFEE: {
-				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
+				creature_types:[GROUPIE, CONCERT_GOER, FAN],	
+				person_types:[MOVING],
 				symbol_name: COFFEE,
 				message: "I need caffeine",
 				music_credits: 2,  
@@ -123,29 +136,46 @@ package game
 				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: FAN_CREDITS, total: 1, min_bonus: 1, max_bonus: 4}],
 				possible_rewards: []
 			},
+			WANTS_CANDY: {
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
+				person_types:[MOVING, SUPER, STATIC],
+				symbol_name: CANDY,
+				message: "I want candy!",
+				music_credits: 5,  
+				fan_credits: 0,  
+				coins: 0,						
+				requires:[],
+				min_level: 1,
+				move_to: true,
+				animation: ["walk_toward"],
+				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4}],
+				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2}]
+			},
 			WANTS_PINK_HEADPHONES: {
-				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],		
-				symbol_name: null,
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
+				person_types:[MOVING, SUPER, STATIC],
+				symbol_name: HAMBURGER,
 				message: "Looking for the pink headphones",
 				music_credits: 5,  
 				fan_credits: 0,  
 				coins: 0,						
 				requires:["Pink Paint", "Headphones"],
-				min_level: 3,
+				min_level: 1,
 				move_to: true,
 				animation: ["walk_toward"],
 				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2}]
 			},
 			WANTS_RED_HEADPHONES: {
-				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
-				symbol_name: null,
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],
+				person_types:[MOVING, SUPER, STATIC],
+				symbol_name: RED_HEADPHONES,
 				message: "I want red heaphones",
 				music_credits: 5,  
 				fan_credits: 0,  
 				coins: 0, 					
 				requires:["Red Paint", "Headphones"],
-				min_level: 4, 
+				min_level: 1, 
 				move_to: true,
 				animation: ["walk_toward"],
 				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4}],
@@ -153,7 +183,8 @@ package game
 			},
 			IS_HEARTBROKEN:	{
 				creature_types:[BAND_MEMBER],
-				symbol_name: null,
+				person_types:[MOVING],
+				symbol_name: HEART,
 				message: "My heart's broken",
 				music_credits: 10, 
 				fan_credits: 0,  
@@ -166,23 +197,10 @@ package game
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.5}]
 			},
 			FEELS_HOT: {
-				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
+				creature_types:[GROUPIE, CONCERT_GOER, FAN],
+				person_types:[MOVING],
 				symbol_name: null,
-				message: "I'm kinda hot",
-				music_credits: 0,  
-				fan_credits: 0,  
-				coins: 0,      
-				requires:["Space Heater"],
-				min_level: 3,
-				move_to: true,
-				animation: ["stand_still_toward"],
-				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
-				possible_rewards: []
-			},
-			FEELS_COLD:	{
-				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],		
-				symbol_name: HAMBURGER,
-				message: "It's cold in here",
+				message: "It's too warm in here",
 				music_credits: 0,  
 				fan_credits: 0,  
 				coins: 0,      
@@ -193,8 +211,24 @@ package game
 				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
 				possible_rewards: []
 			},
+			FEELS_COLD:	{
+				creature_types:[GROUPIE, CONCERT_GOER, FAN],
+				person_types:[MOVING],
+				symbol_name: HAMBURGER,
+				message: "It's cold in here",
+				music_credits: 0,  
+				fan_credits: 0,  
+				coins: 0,      
+				requires:["Space Heater"],
+				min_level: 3,
+				move_to: true,
+				animation: ["stand_still_toward"],
+				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
+				possible_rewards: []
+			},
 			WANTS_AUTOGRAPH: {
-				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],
+				person_types:[MOVING],
 				symbol_name: HAMBURGER,
 				message: "Can I get an autograph?",
 				music_credits: 3,  
@@ -209,6 +243,7 @@ package game
 			},
 			IS_SLEEPY: {
 				creature_types:[BAND_MEMBER],
+				person_types:[MOVING],
 				symbol_name: COFFEE,
 				message: "I'm sleepy...",
 				music_credits: 0,  
@@ -233,25 +268,32 @@ package game
 			return MoodBoss.MOODS[moodName];
 		}
 		
-		public static function assignMoodByCreatureType(creatureType:String, userLevel:int):Object
+		public static function assignMoodByCreatureAndPersonType(creatureType:String, personType:int, userLevel:int):Object
 		{
 			var potentialMoods:ArrayCollection = new ArrayCollection();
 			for each (var mood:Object in MoodBoss.MOODS)
 			{
 				if (mood.min_level < (userLevel + 1))
 				{
-					for each (var ct:String in mood.creature_types)
+					for each (var pt:int in mood.person_types)
 					{
-						if (ct == creatureType)
+						for each (var ct:String in mood.creature_types)
 						{
-							potentialMoods.addItem(mood);
-							break;
+							if (pt == personType && ct == creatureType)
+							{
+								potentialMoods.addItem(mood);
+								break;
+							}
 						}
 					}
 				}
 			}
-			var rand:Number = Math.floor(Math.random() * potentialMoods.length);
-			return potentialMoods[rand];
+			if (potentialMoods.length > 0)
+			{
+				var rand:Number = Math.floor(Math.random() * potentialMoods.length);
+				return potentialMoods[rand];			
+			}
+			return null;
 		}
 		
 		public static function getUIComponentForMoodCost(mood:Object):UIComponent

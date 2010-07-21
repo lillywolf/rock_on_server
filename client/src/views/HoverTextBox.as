@@ -60,6 +60,7 @@ package views
 			this.verticalScrollPolicy = "off";
 			this.horizontalScrollPolicy = "off";
 			this.clipContent = false;
+			this.visible = false;
 		}
 		
 		public function getGlowFilter():GlowFilter
@@ -95,6 +96,8 @@ package views
 		{
 			this.width = _textBox.width;
 			this.height = _textBox.height;
+			this.drawRoundRect(0, 0, this.width, this.height, 8, [0xffffff, 0xB0FF5C], [1, 1], verticalGradientMatrix(0, 0, this.width, this.height), GradientType.LINEAR);
+			this.visible = true;			
 //			var bg:GreenGradientBox = new GreenGradientBox();
 //			bg.width = this.width;
 //			bg.height = this.height;
@@ -107,7 +110,6 @@ package views
 //			removeChild(_textBox);
 //			addChild(uic);
 //			addChild(_textBox);
-			this.drawRoundRect(0, 0, this.width, this.height, 8, [0xffffff, 0xB0FF5C], [1, 1], verticalGradientMatrix(0, 0, this.width, this.height), GradientType.LINEAR);
 //			var gf:GlowFilter = getInnerGlowFilter();
 //			this.filters = [gf];
 //			var textWidth:Number = measureText(_textBox.text).width;

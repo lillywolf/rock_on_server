@@ -204,8 +204,7 @@ package views
 			var cursorClip:MovieClip = null;
 			applyGlowFilterToBitmappedPerson(abd);
 			var cursorMessage:HoverTextBox = (abd.activeAsset as Person).generateMoodMessage((abd.activeAsset as Person).mood);			
-//			return {cursorClip: cursorClip, cursorMessage: cursorMessage};
-			return null;
+			return {cursorClip: cursorClip, cursorMessage: cursorMessage};
 		}
 		
 		public function applyGlowFilterToBitmappedPerson(abd:AssetBitmapData):void
@@ -219,7 +218,8 @@ package views
 			{
 				gf = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
 			}
-			abd.bitmap.filters = [gf];				
+			abd.bitmap.filters = [gf];		
+			abd.moodClip.filters = [gf];
 		}
 		
 		public function applyGlowFilterToPerson(asset:Person):void
@@ -626,10 +626,13 @@ package views
 		public function createNewCursorUIC(cursorClip:MovieClip, cursorMessage:HoverTextBox=null):void
 		{
 			cursorUIC = new ContainerUIC();
-			var bp:Bitmap = BitmapBlotter.getBitmapForMovieClip(cursorClip);
-			cursorUIC.setStyles(_worldView.mouseX, _worldView.mouseY, cursorClip.width, cursorClip.height);
-			cursorUIC.mc = cursorClip;
-			cursorUIC.bitmap = bp;
+			if (cursorClip)
+			{
+				var bp:Bitmap = BitmapBlotter.getBitmapForMovieClip(cursorClip);			
+				cursorUIC.setStyles(_worldView.mouseX, _worldView.mouseY, cursorClip.width, cursorClip.height);
+				cursorUIC.mc = cursorClip;
+				cursorUIC.bitmap = bp;
+			}
 			if (cursorMessage)
 			{
 //				cursorMessage.y = bp.height + bp.y - 25;

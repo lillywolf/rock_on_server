@@ -125,7 +125,7 @@ package rock_on
 				}
 				else
 				{
-					mood = MoodBoss.assignMoodByCreatureType(_creature.type, FlexGlobals.topLevelApplication.gdi.user.level.rank);
+					mood = MoodBoss.assignMoodByCreatureAndPersonType(_creature.type, personType, FlexGlobals.topLevelApplication.gdi.user.level.rank);
 				}
 				
 				if (mood)
@@ -296,22 +296,8 @@ package rock_on
 		{
 			if (mood)
 			{		
-//				var usablesText:Text = new Text();
-//				var costUIC:UIComponent = MoodBoss.getUIComponentForMoodCost(mood);
-//				var usablesContainer:UIComponent = new UIComponent();
-//				usablesContainer.width = 250;
-//				usablesText.width = 250;
-//				usablesText.text = mood.message as String;
 				var hoverBox:HoverTextBox = new HoverTextBox(mood.message as String);
-//				hoverBox.width = 250;
-//				hoverBox.height = 40;
-				return hoverBox;
-//				usablesText.validateProperties();
-//				costUIC.y = (usablesText.textHeight + 7) * (Math.ceil(usablesText.textWidth / 250));
-//				WorldBitmapInterface.setStylesForNurtureText(usablesText);
-//				usablesContainer.addChild(usablesText);
-//				usablesContainer.addChild(costUIC);
-//				return usablesContainer;			
+				return hoverBox;		
 			}
 			return null;
 		}		

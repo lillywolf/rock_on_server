@@ -27,6 +27,7 @@ package world
 	import rock_on.Person;
 	
 	import views.AssetBitmapData;
+	import views.ExpandingMovieclip;
 	
 	public class BitmapBlotter extends EventDispatcher
 	{
@@ -55,6 +56,7 @@ package world
 			{
 				bitmapReferences.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onNewBitmapReference);
 				renderInitialBitmap();
+				renderAssociatedMovieClips();
 			}
 		}
 		
@@ -337,6 +339,27 @@ package world
 			trace("initial bitmap rendered");
 		}
 		
+		public function renderAssociatedMovieClips():void
+		{
+			var yAdjustment:Number = getYAdjustment();
+			for each (var abd:AssetBitmapData in this.bitmapReferences)
+			{
+				if (abd.moodClip)
+				{
+					abd.moodClip.x = abd.bitmap.x + (abd.activeAsset.width - abd.moodClip.width)/2 + 15;
+					abd.moodClip.y = abd.bitmap.y + yAdjustment - 5;
+					abd.moodClip.doBounce(20);
+					_myWorld.addChild(abd.moodClip);
+				}
+			}
+		}
+		
+		public function getYAdjustment():Number
+		{
+			var rect:Rectangle = _backgroundCanvas.getBounds(_myWorld);
+			return rect.y;
+		}
+		
 		public function renderReplacedBitmaps():void
 		{
 			updateBitmapLocations();
@@ -394,7 +417,7 @@ package world
 					bp = null;
 					i++;
 				}
-			}			
+			}
 		}
 		
 		public function getNewBitmap(abd:AssetBitmapData):Bitmap
@@ -451,7 +474,11 @@ package world
 			{
 				if (!(abd.activeAsset as Person).doNotClearFilters)
 				{
-					abd.bitmap.filters = null;				
+					abd.bitmap.filters = null;	
+					if (abd.moodClip)
+					{
+						abd.moodClip.filters = null;					
+					}
 				}
 			}		
 		}
@@ -512,6 +539,13 @@ package world
 			//					_backgroundCanvas.rawChildren.removeChildAt(0);				
 			//				}
 			//			}
+		}
+		
+		public function addMoodToAssetBitmapData(asset:ActiveAssetStack, mood:Object, moodClip:ExpandingMovieclip = null):void
+		{
+			var abd:AssetBitmapData = getMatchFromBitmapReferences(asset);
+			abd.mood = mood;
+			abd.moodClip = moodClip;
 		}
 		
 		private function onMouseMove(evt:MouseEvent):void

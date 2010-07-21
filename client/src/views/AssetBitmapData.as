@@ -23,6 +23,9 @@ package views
 		public var transformedWidth:Number;
 		public var transformedHeight:Number;
 		
+		public var moodClip:ExpandingMovieclip;
+		public var mood:Object;
+		
 		public function AssetBitmapData()
 		{
 		}
@@ -75,6 +78,6 @@ package views
 		public function get reference():Object
 		{
 			return _reference;
-		}
+		}		
 	}
 }
