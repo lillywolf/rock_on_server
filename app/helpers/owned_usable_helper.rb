@@ -1,0 +1,2 @@
+module OwnedUsableHelper
+end

@@ -9,6 +9,7 @@ class OwnedSongController < ApplicationController
       hash["belongs_to"] = ["user", "song"]
       hash["belongs_to_id"] = [user_reference, song_reference]
       hash["instance"] = owned_song
+      hash["model"] = "owned_song"
       @array.push hash            
     end            
     render :json => @array.to_json         
