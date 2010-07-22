@@ -20,6 +20,7 @@ package world
 	
 	import rock_on.CustomerPerson;
 	
+	import views.BouncyBitmap;
 	import views.ExpandingMovieclip;
 	
 	public class ActiveAssetStack extends ActiveAsset
@@ -245,7 +246,7 @@ package world
 			{
 				var currentChildren:int = this.numChildren;
 				var index:int = currentChildren - 1 - skips;
-				if (!(this.getChildAt(index) is ExpandingMovieclip))
+				if (!(this.getChildAt(index) is BouncyBitmap))
 				{
 					this.removeChildAt(index);					
 				}
@@ -324,7 +325,7 @@ package world
 				{
 					var currentChildren:int = this.numChildren;
 					var index:int = currentChildren - 1 - skips;
-					if (this.getChildAt(index) is Sprite && !(this.getChildAt(index) is ExpandingMovieclip))
+					if (this.getChildAt(index) is Sprite && !(this.getChildAt(index) is BouncyBitmap))
 					{
 						this.removeChildAt(index);					
 					}

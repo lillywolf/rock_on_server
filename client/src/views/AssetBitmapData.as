@@ -27,7 +27,7 @@ package views
 		public var transformedWidth:Number;
 		public var transformedHeight:Number;
 		
-		public var moodClip:ExpandingMovieclip;
+		public var moodClip:BouncyBitmap;
 		public var mood:Object;
 		
 		public function AssetBitmapData()

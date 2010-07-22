@@ -84,7 +84,7 @@ package views
 			_textBox.setStyle("paddingBottom", topPadding);
 			_textBox.setStyle("fontFamily", "Otari-Bold");
 			_textBox.setStyle("color", 0x182900);
-			_textBox.setStyle("fontSize", 15);
+			_textBox.setStyle("fontSize", 14);
 			_textBox.maxWidth = _maxWidth;
 			_textBox.text = _text;			
 			var gf:GlowFilter = getGlowFilter();

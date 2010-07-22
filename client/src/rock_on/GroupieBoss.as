@@ -9,6 +9,7 @@ package rock_on
 	
 	import mx.collections.ArrayCollection;
 	
+	import views.BouncyBitmap;
 	import views.ExpandingMovieclip;
 	
 	import world.AssetStack;
@@ -57,8 +58,8 @@ package rock_on
 					var lo:Array = _creatureController.getLayerableOrderByCreatureType("Groupie");
 					c.layerableOrder = lo;
 					var cp:CustomerPerson = new CustomerPerson(_boothBoss, c, null, lo, 0.5);
-					var star:ExpandingMovieclip = new ExpandingMovieclip(0.6, new FlatStarBlue());
-					cp.addChild(star);
+					var star:BouncyBitmap = new BouncyBitmap(new FlatStarBlue(), 0.6);
+//					cp.addChild(star);
 					cp.speed = 0.11;
 					cp.doInitialAnimation("walk_toward");
 					cp.stageManager = _venue.stageManager;

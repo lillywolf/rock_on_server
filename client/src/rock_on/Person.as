@@ -19,6 +19,7 @@ package rock_on
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
 	
+	import views.BouncyBitmap;
 	import views.ExpandingMovieclip;
 	import views.HoverTextBox;
 	
@@ -32,7 +33,7 @@ package rock_on
 	{
 		public var mood:Object;
 		public var moodCursorID:int;
-		public var moodClip:ExpandingMovieclip;		
+		public var moodClip:BouncyBitmap;		
 		public var currentDirection:Point3D;
 		public var proxiedDestination:Point3D;
 		
@@ -87,13 +88,13 @@ package rock_on
 		public function startMood(mood:Object):void
 		{
 			var cursor:MovieClip = generateMoodOverheadHover(mood);
-			moodClip = new ExpandingMovieclip(0.75, cursor);
-			moodClip.y = -(height);
-			moodClip.x = (this.width - moodClip.width)/8;
+			moodClip = new BouncyBitmap(cursor, 0.75);
+			moodClip.y = -(height + moodClip.height - 8);
+			moodClip.x = -moodClip.width/4;
 			handleMoodForStaticPeople(mood, moodClip);	
 		}		
 		
-		public function handleMoodForStaticPeople(mood:Object, moodClip:ExpandingMovieclip):void
+		public function handleMoodForStaticPeople(mood:Object, moodClip:BouncyBitmap):void
 		{
 			if (this.personType == Person.STATIC)
 			{

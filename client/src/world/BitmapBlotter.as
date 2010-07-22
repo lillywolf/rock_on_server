@@ -29,6 +29,7 @@ package world
 	import rock_on.Person;
 	
 	import views.AssetBitmapData;
+	import views.BouncyBitmap;
 	import views.ExpandingMovieclip;
 	
 	public class BitmapBlotter extends EventDispatcher
@@ -348,8 +349,8 @@ package world
 			{
 				if (abd.moodClip)
 				{
-					abd.moodClip.x = abd.bitmap.x + (abd.activeAsset.width - abd.moodClip.width)/2 + 15;
-					abd.moodClip.y = abd.bitmap.y + yAdjustment - 5;
+					abd.moodClip.x = abd.bitmap.x + (abd.activeAsset.width - abd.moodClip.width)/2;
+					abd.moodClip.y = abd.bitmap.y + yAdjustment - abd.moodClip.height + 5;
 					_myWorld.addChild(abd.moodClip);
 					abd.startMoodClipBounce();
 				}
@@ -543,7 +544,7 @@ package world
 			//			}
 		}
 		
-		public function addMoodToAssetBitmapData(asset:ActiveAssetStack, mood:Object, moodClip:ExpandingMovieclip = null):void
+		public function addMoodToAssetBitmapData(asset:ActiveAssetStack, mood:Object, moodClip:BouncyBitmap = null):void
 		{
 			var abd:AssetBitmapData = getMatchFromBitmapReferences(asset);
 			abd.mood = mood;
