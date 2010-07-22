@@ -489,6 +489,7 @@ package rock_on
 			{
 				WorldBitmapInterface.doCollectibleDrop(this, _myWorld.parent as WorldView);			
 			}
+			removeMoodClip();
 			endMood();
 		}
 		

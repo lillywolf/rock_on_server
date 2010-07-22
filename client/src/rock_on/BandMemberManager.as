@@ -205,7 +205,7 @@ package rock_on
 					bm.advanceState(BandMember.STOP_STATE);
 					if (bm.itemDropRecipient)
 					{
-						bm.tossItem(bm.itemDropRecipient.recipient as ActiveAsset, bm.itemDropRecipient.view as WorldView);						
+						bm.tossItem(bm.itemDropRecipient.recipient as Person, bm.itemDropRecipient.view as WorldView);						
 					}
 				}
 				else
@@ -235,7 +235,7 @@ package rock_on
 			}
 		}
 		
-		public function goToStageAndTossItem(recipient:ActiveAsset, view:WorldView):void
+		public function goToStageAndTossItem(recipient:Person, view:WorldView):void
 		{
 			myAvatar.itemDropRecipient = {recipient: recipient, view: view};
 			if (myAvatar.goToStage())

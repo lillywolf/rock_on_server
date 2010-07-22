@@ -236,5 +236,68 @@ package models
 			return leftover;
 		}				
 		
+		public static function getCollectibleHamburgerLeftover(clickable:Boolean):Leftover
+		{
+			var mc:CollectibleHamburger = new CollectibleHamburger();
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;
+			leftover.type = "rare";
+			return leftover;
+		}	
+		
+		public static function getCollectiblePizzaLeftover(clickable:Boolean):Leftover
+		{
+			var mc:CollectiblePizza = new CollectiblePizza();
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;
+			leftover.type = "rare";
+			return leftover;
+		}				
+		
+		public static function getCollectibleGuitarLeftover(clickable:Boolean):Leftover
+		{
+			var mc:CollectibleGuitarOrange = new CollectibleGuitarOrange();
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;
+			leftover.type = "rare";
+			return leftover;
+		}		
+		
+		public static function getCollectiblePianoLeftover(clickable:Boolean):Leftover
+		{
+			var mc:CollectiblePiano = new CollectiblePiano();
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;
+			leftover.type = "rare";
+			return leftover;
+		}				
+		
+		public static function getCollectibleCoffeeLeftover(clickable:Boolean):Leftover
+		{
+			var mc:CollectibleCoffee = new CollectibleCoffee();
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;
+			leftover.type = "rare";
+			return leftover;
+		}				
+		
+		public static function getCollectibleMicrophoneLeftover(clickable:Boolean):Leftover
+		{
+			var mc:Heart = new Heart();
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;
+			leftover.type = "rare";
+			return leftover;
+		}				
+
+		public static function getFanCreditsIcon(clickable:Boolean):Leftover
+		{
+			var mc:CollectibleMicrophone = new CollectibleMicrophone();
+			var leftover:Leftover = new Leftover(mc);
+			leftover.clickable = clickable;
+			leftover.type = "rare";
+			return leftover;
+		}				
+		
 	}
 }

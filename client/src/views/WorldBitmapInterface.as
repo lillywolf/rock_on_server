@@ -15,8 +15,11 @@ package views
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
+	import game.MoodBoss;
+	
 	import helpers.CollectibleDrop;
 	
+	import models.EssentialModelReference;
 	import models.Usable;
 	
 	import mx.collections.ArrayCollection;
@@ -753,14 +756,48 @@ package views
 		
 		public static function doCollectibleDrop(asset:ActiveAsset, viewToUpdate:WorldView):void
 		{
+			if (asset is Person)
+			{
+				doCollectibleDropForPerson(asset as Person, viewToUpdate);
+				(asset as Person).endMood();
+			}
+			else
+			{
+				doCollectibleDropForStructure(asset, viewToUpdate);
+			}
+		}
+		
+		public static function doCollectibleDropForStructure(asset:ActiveAsset, viewToUpdate:WorldView):void
+		{
+			
+		}
+		
+		public static function doCollectibleDropForPerson(asset:Person, viewToUpdate:WorldView):void
+		{
+			for each (var reward:Object in asset.mood.rewards)
+			{	
+				if (reward.mc)
+				{
+					var klass:Class = getDefinitionByName(reward.mc) as Class;
+					var mc:MovieClip = new klass() as MovieClip;
+					createCollectibleDrop(mc, asset, viewToUpdate);	
+				}
+			}
+			if ((asset.mood.possible_rewards as Array).length > 0)
+			{
+				createCollectibleDrop(MoodBoss.getRandomItemByMood(asset.mood), asset, viewToUpdate);
+			}
+		}
+		
+		public static function createCollectibleDrop(mc:MovieClip, asset:Person, viewToUpdate:WorldView):void
+		{
 			var radius:Point = new Point(100, 50);
-			var mc:MovieClip = new Heart();
 			var collectibleDrop:CollectibleDrop = new CollectibleDrop(asset, mc, radius, viewToUpdate.myWorld, viewToUpdate, 0, 400, .001, null, new Point(asset.x, asset.y - 70));
 			collectibleDrop.addEventListener("removeCollectible", function onRemoveCollectible():void
 			{
 				viewToUpdate.myWorld.removeChild(collectibleDrop);
 			});
-			viewToUpdate.myWorld.addChild(collectibleDrop);
+			viewToUpdate.myWorld.addChild(collectibleDrop);				
 		}
 			
 		private function bitmapClicked(evt:MouseEvent):Boolean
@@ -780,11 +817,11 @@ package views
 			{
 				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
 				var bar:CustomizableProgressBar = createHeartProgressBar(sprite);					
-				_venueManager.venue.bandMemberManager.goToStageAndTossItem(sprite as ActiveAsset, _worldView);
+				_venueManager.venue.bandMemberManager.goToStageAndTossItem(sprite as Person, _worldView);
 				_venueManager.venue.bandMemberManager.myAvatar.addEventListener(WorldEvent.ITEM_DROPPED, function onItemTossedByAvatar():void
 				{
 					_venueManager.venue.bandMemberManager.myAvatar.removeEventListener(WorldEvent.ITEM_DROPPED, onItemTossedByAvatar);
-					(sprite as Person).endMood();
+					(sprite as Person).removeMoodClip();
 					bar.startBar();
 				});
 				return true;

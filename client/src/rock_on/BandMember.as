@@ -405,31 +405,31 @@ package rock_on
 			return itemMc;
 		}
 		
-		public function tossItem(recipient:ActiveAsset, view:WorldView):void
+		public function tossItem(recipient:Person, view:WorldView):void
 		{
-			var itemDestination:Point = World.worldToActualCoords(recipient.worldCoords);
-			itemDestination.y -= (this.height - 70);
-			if (recipient is Person)
+			if (recipient.mood)
 			{
+				var itemDestination:Point = World.worldToActualCoords(recipient.worldCoords);
+				itemDestination.y -= (this.height - 70);
 				var itemMc:MovieClip = getMovieClipForRecipient(recipient as Person);
+				itemMc.scaleX = 0.5;
+				itemMc.scaleY = 0.5;
+				var gf:GlowFilter = getYellowGlowfilter();
+				itemMc.filters = [gf];
+				var item:CollectibleDrop = new CollectibleDrop(this, itemMc, new Point(10, 10), _venue.myWorld, view, 0, 600, .0008, itemDestination);
+				item.addEventListener(WorldEvent.ITEM_DROPPED, function onItemDropped(evt:WorldEvent):void
+				{
+					item.removeEventListener(WorldEvent.ITEM_DROPPED, onItemDropped);
+					_venue.myWorld.removeChild(item);
+					dispatchEvent(evt);
+				});
+				_venue.myWorld.addChild(item);
+				itemDropRecipient = null;
 			}
-			else
-			{
-				throw new Error("attempted to toss item to a non-person");
-			}
-			itemMc.scaleX = 0.5;
-			itemMc.scaleY = 0.5;
-			var gf:GlowFilter = getYellowGlowfilter();
-			itemMc.filters = [gf];
-			var item:CollectibleDrop = new CollectibleDrop(this, itemMc, new Point(10, 10), _venue.myWorld, view, 0, 600, .0008, itemDestination);
-			item.addEventListener(WorldEvent.ITEM_DROPPED, function onItemDropped(evt:WorldEvent):void
-			{
-				item.removeEventListener(WorldEvent.ITEM_DROPPED, onItemDropped);
-				_venue.myWorld.removeChild(item);
-				dispatchEvent(evt);
-			});
-			_venue.myWorld.addChild(item);
-			itemDropRecipient = null;
+//			else
+//			{
+//				throw new Error("attempted to toss item to a non-mood person");
+//			}
 		}
 		
 		public function validateDestinationLocation():Boolean

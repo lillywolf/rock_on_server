@@ -53,6 +53,8 @@ package game
 		public static const WANTS_MAGAZINE:String = "WANTS_MAGAZINE";
 		public static const WANTS_DANCE_LESSON:String = "WANTS_DANCE_LESSON";
 		
+		public static const BASIC:String = "BASIC";
+		
 		public static const GROUPIE:String = "Groupie";
 		public static const BAND_MEMBER:String = "BandMember";
 		public static const CONCERT_GOER:String = "Concert Goer";
@@ -70,14 +72,25 @@ package game
 		public static const RANDOM_ITEM:String = "RANDOM_ITEM";
 		
 		public static const HAMBURGER:String = "Hamburger";
-		public static const COFFEE:String = "CoffeeLeftover";
+		public static const COFFEE:String = "CollectibleCoffee";
 		public static const HEART:String = "Heart";
 		public static const RED_HEADPHONES:String = "RoseLeftover";
 		public static const PINK_HEADPHONES:String = "CandyLeftover";
 		public static const CANDY:String = "CandyLeftover";
 		public static const EGG:String = "EggLeftover";
+		public static const MUSIC_CREDITS_ICON:String = "MusicCredits";
+		public static const FAN_CREDITS_ICON:String = "Heart";	
+		public static const CREDITS_ICON:String = "CoinsLeftover";
+		public static const PIZZA:String = "CollectiblePizza";
+		public static const GUITAR:String = "CollectibleGuitarOrange";
+		public static const MICROPHONE:String = "CollectibleMicrophone";
+		public static const PIANO:String = "CollectiblePiano";
 		
 		public static const TEXT_BUFFER:int = 5;
+		
+		public static const RANDOM_ITEMS:Object = {
+			BASIC: [MICROPHONE, PIZZA, GUITAR, EGG, CANDY, COFFEE, HAMBURGER, PIANO]
+		}
 		
 		public static const MOODS:Object = {
 			HUNGRY: {								
@@ -92,7 +105,7 @@ package game
 				min_level: 1,
 				move_to: true,
 				animation: null,	
-				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 4}],
+				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2, mc: GUITAR}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 4, mc: MUSIC_CREDITS_ICON}],
 				possible_rewards: []
 			},
 			THIRSTY: {							
@@ -107,7 +120,7 @@ package game
 				min_level: 1,
 				move_to: true,
 				animation: null,	
-				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 4}],
+				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2, mc: GUITAR}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 4, mc: MUSIC_CREDITS_ICON}],
 				possible_rewards: []
 			},				
 			WANTS_HAMBURGER: {				
@@ -122,7 +135,7 @@ package game
 				min_level: 1,
 				move_to: true,
 				animation: null,	
-				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: FAN_CREDITS, total: 1, min_bonus: 1, max_bonus: 4}],
+				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2, mc: GUITAR}, {type: FAN_CREDITS, total: 1, min_bonus: 1, max_bonus: 4, mc: FAN_CREDITS_ICON}],
 				possible_rewards: []
 			},
 			WANTS_COFFEE: {
@@ -137,7 +150,7 @@ package game
 				min_level: 1,
 				move_to: true,
 				animation: null,	
-				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: FAN_CREDITS, total: 1, min_bonus: 1, max_bonus: 4}],
+				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2, mc: GUITAR}, {type: FAN_CREDITS, total: 1, min_bonus: 1, max_bonus: 4, mc: FAN_CREDITS_ICON}],
 				possible_rewards: []
 			},
 			WANTS_CANDY: {
@@ -152,8 +165,8 @@ package game
 				min_level: 1,
 				move_to: true,
 				animation: ["walk_toward"],
-				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4}],
-				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2}]
+				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
+				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2, group: BASIC}]
 			},
 			WANTS_PINK_HEADPHONES: {
 				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],	
@@ -167,8 +180,8 @@ package game
 				min_level: 1,
 				move_to: true,
 				animation: ["walk_toward"],
-				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4}],
-				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2}]
+				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
+				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2, group: BASIC}]
 			},
 			WANTS_RED_HEADPHONES: {
 				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],
@@ -182,8 +195,8 @@ package game
 				min_level: 1, 
 				move_to: true,
 				animation: ["walk_toward"],
-				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4}],
-				possible_rewards: [{type: RANDOM_ITEM, probability: 0.3}]
+				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
+				possible_rewards: [{type: RANDOM_ITEM, probability: 0.3, group: BASIC}]
 			},
 			IS_HEARTBROKEN:	{
 				creature_types:[BAND_MEMBER],
@@ -197,8 +210,8 @@ package game
 				min_level: 10,
 				move_to: false,
 				animation: ["walk_toward"],
-				rewards: [{type: XP, total: 10, min_bonus: 4, max_bonus: 8}, {type: MUSIC_CREDITS, total: 4, min_bonus: 2, max_bonus: 6}],
-				possible_rewards: [{type: RANDOM_ITEM, probability: 0.5}]
+				rewards: [{type: XP, total: 10, min_bonus: 4, max_bonus: 8}, {type: MUSIC_CREDITS, total: 4, min_bonus: 2, max_bonus: 6, mc: MUSIC_CREDITS_ICON}],
+				possible_rewards: [{type: RANDOM_ITEM, probability: 0.5, group: BASIC}]
 			},
 			FEELS_HOT: {
 				creature_types:[GROUPIE, CONCERT_GOER, FAN],
@@ -227,7 +240,7 @@ package game
 				min_level: 3,
 				move_to: true,
 				animation: ["stand_still_toward"],
-				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
+				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1, mc: FAN_CREDITS_ICON}], 
 				possible_rewards: []
 			},
 			WANTS_AUTOGRAPH: {
@@ -242,7 +255,7 @@ package game
 				min_level: 1,
 				move_to: true,
 				animation: null,
-				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 5}], 
+				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 5, mc: FAN_CREDITS_ICON}], 
 				possible_rewards: []				
 			},
 			IS_SLEEPY: {
@@ -257,7 +270,7 @@ package game
 				min_level: 4,
 				move_to: true,
 				animation: null,
-				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
+				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 1, mc: MUSIC_CREDITS_ICON}], 
 				possible_rewards: []				
 			}
 		}
@@ -272,6 +285,19 @@ package game
 			var className:String = mood.symbol_name;
 			var klass:Class = getDefinitionByName(className) as Class;
 			return new klass() as MovieClip;
+		}
+		
+		public static function getRandomItemByMood(mood:Object):MovieClip
+		{
+			if ((mood.possible_rewards as Array).length > 0)
+			{
+				var randomGroup:String = mood.possible_rewards[0].group;
+				var rand:int = Math.floor(Math.random() * (MoodBoss.RANDOM_ITEMS[randomGroup] as Array).length);
+				var className:String = MoodBoss.RANDOM_ITEMS[randomGroup][rand];
+				var klass:Class = getDefinitionByName(className) as Class;
+				return new klass() as MovieClip;
+			}
+			return null;
 		}
 		
 		public static function assignMoodByString(moodName:String):Object

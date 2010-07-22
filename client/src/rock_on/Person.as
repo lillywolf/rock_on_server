@@ -116,8 +116,8 @@ package rock_on
 			timer = null;			
 		}
 		
-		public function endMood():void
-		{
+		public function removeMoodClip():void
+		{		
 			if (contains(moodClip))
 			{
 				removeChild(moodClip);
@@ -132,6 +132,10 @@ package rock_on
 					}
 				}
 			}
+		}
+		
+		public function endMood():void
+		{
 			mood = null;
 		}		
 		
