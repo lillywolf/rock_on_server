@@ -142,12 +142,13 @@ package controllers
 		{
 			if ((evt.items[0] as Layerable).mc == null)
 			{
-				(evt.items[0] as Layerable).addEventListener('movieClipLoaded', onLayerableMovieClipAssigned);			
+				(evt.items[0] as Layerable).addEventListener("movieClipLoaded", onLayerableMovieClipAssigned);			
 			}
 			else
 			{
 				layerableMovieClipsLoaded++;
 				checkForLoadingComplete();
+				checkIfFriendAvatarsLoaded();
 			}
 		}
 		
@@ -166,12 +167,33 @@ package controllers
 		
 		public function checkIfFriendAvatarsLoaded():Boolean
 		{
-			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAssignedToParents())
+			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAssignedToParents() && checkIfAllLayerablesLoaded() && checkIfAllLayerableMovieClipsLoaded())
 			{
 				if (friendOwnedLayerablesLoaded)
 				{
 					return true;
 				}
+			}
+			return false;
+		}
+		
+		private function checkIfAllLayerableMovieClipsLoaded():Boolean
+		{
+			for each (var l:Layerable in _layerables)
+			{
+				if (!l.mc)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		private function checkIfAllLayerablesLoaded():Boolean
+		{
+			if (_layerables.length == EssentialModelReference.numInstancesToLoad["layerable"])
+			{
+				return true;
 			}
 			return false;
 		}
@@ -240,10 +262,11 @@ package controllers
 		
 		private function onParentMovieClipAssigned(evt:DynamicEvent):void
 		{
-			(evt.target as OwnedLayerable).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
+			(evt.target as OwnedLayerable).removeEventListener("parentMovieClipAssigned", onParentMovieClipAssigned);
 			ownedLayerableMovieClipsLoaded++;
 			
 			checkForLoadingComplete();		
+			checkIfFriendAvatarsLoaded();
 		}
 		
 		private function onLayerableMovieClipAssigned(evt:DynamicEvent):void

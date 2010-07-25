@@ -32,6 +32,10 @@ package models
 					_mc = displayObject as MovieClip;
 				}
 			}
+			else if (params.mc)
+			{
+				_mc = EssentialModelReference.getMovieClipCopy(params.mc);
+			}
 			setProperties(params);
 		}
 		
