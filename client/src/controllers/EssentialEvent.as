@@ -9,7 +9,9 @@ package controllers
 	public class EssentialEvent extends Event
 	{
 		public static const INSTANCE_LOADED:String = "Essential:InstanceLoaded";
-		public static const PARENT_ASSIGNED:String = "Essential:ParentAssigned";	
+		public static const PARENT_ASSIGNED:String = "Essential:ParentAssigned";
+		public static const CHILD_ASSIGNED:String = "Essential:ChildAssigned";
+		public static const ASSIGNED_TO_PARENT:String = "Essential:AssignedToParent";
 		public static const LOADING_AND_INSTANTIATION_COMPLETE:String = "Essential:LoadingAndInstantiationComplete";
 		public static const OWNED_SONGS_LOADED:String = "Essential:OwnedSongsLoaded";	
 		public static const OWNED_STRUCTURES_LOADED:String = "Essential:OwnedStructuresLoaded";	

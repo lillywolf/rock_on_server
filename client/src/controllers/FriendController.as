@@ -104,6 +104,7 @@ package controllers
 				var evt:DynamicEvent = new DynamicEvent("friendDataLoaded", true, true);
 				dispatchEvent(evt);
 			}
+			this.getFriendAvatar(friendUser.id);
 		}
 		
 		public function getBasicFriendGDIs():void
@@ -146,6 +147,11 @@ package controllers
 				var evt:DynamicEvent = new DynamicEvent("friendDataLoaded", true, true);
 				dispatchEvent(evt);
 			}
+		}
+		
+		public function getFriendAvatar(uid:int):void
+		{
+			this.mainGDI.getUserAvatar(uid);			
 		}
 		
 		public function processRandomBandMemberData(creature:Creature, method:String):void
@@ -220,6 +226,7 @@ package controllers
 			var friendUser:User = evt.user;
 			numLoadedUsers++;
 			basicFriendDataLoaded();
+			getFriendAvatar(friendUser.id);
 		}
 
 		private function onGameContentLoaded(evt:ServerDataEvent):void

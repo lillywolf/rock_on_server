@@ -37,7 +37,7 @@ package models
 		public function setPropertiesFromParams(params:Object):void
 		{
 			_id = params.id;
-			_user_id = params.id;
+			_user_id = params.user_id;
 			
 			if (params.creature_type)
 			{

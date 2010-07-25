@@ -136,6 +136,11 @@ package models
 			_user_id = val;
 		}
 		
+		public function get user_id():int
+		{
+			return _user_id;
+		}
+		
 		public function set x(val:Number):void
 		{
 			_x = val;

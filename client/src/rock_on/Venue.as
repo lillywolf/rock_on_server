@@ -11,6 +11,7 @@ package rock_on
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.filters.BitmapFilter;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
@@ -31,6 +32,9 @@ package rock_on
 	import mx.controls.Button;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
+	import mx.graphics.BitmapFill;
+	
+	import server.ServerDataEvent;
 	
 	import spark.primitives.Rect;
 	
@@ -64,6 +68,7 @@ package rock_on
 		public static const CROWD_BUFFER_FRACTION:Number = 0.3;
 		
 		public var state:int;
+		public var friendAvatarsAdded:Boolean;
 		public var assignedSeats:ArrayCollection;
 		public var numAssignedSeats:int;
 		public var startShowButton:Button;
@@ -89,6 +94,8 @@ package rock_on
 		public var listeningStationBoss:ListeningStationBoss;		
 		public var stageManager:StageManager;
 		public var techManager:TechManager;
+		public var haterBoss:HaterBoss;
+		public var friendBoss:FriendBoss;
 		public var fullyLoaded:Boolean;		
 
 		public var _wbi:WorldBitmapInterface;
@@ -109,6 +116,8 @@ package rock_on
 			super(params, target);
 			
 			_layerableController = layerableController;
+			_layerableController.addEventListener(ServerDataEvent.FRIEND_AVATARS_LOADED, onFriendAvatarsLoaded);
+			
 			_structureController = structureController;
 			_venueManager = venueManager;
 			_wbi = wbi;
@@ -172,7 +181,7 @@ package rock_on
 				pt3D.x = Math.floor(rect.right - Math.random() * (rect.right - rect.left - 1) - 1);
 				pt3D.z = Math.floor(rect.bottom - Math.random() * (rect.bottom - rect.top - 1) - 1);
 			}
-			while (occupiedSpaces.contains(pt3D));	
+			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(pt3D)));	
 			return pt3D;
 		}
 		
@@ -196,17 +205,22 @@ package rock_on
 			{
 				if (!sprite.doNotClearFilters)
 				{
-					sprite.filters = null;				
+					clearSpriteFilters(sprite);
 				}
 			}
 			for each (sprite in stageManager.myStage.assetRenderer.unsortedAssets)
 			{
 				if (!sprite.doNotClearFilters)
 				{
-					sprite.filters = null;				
+					clearSpriteFilters(sprite);			
 				}
 			}
 			clearUIFilters();
+		}
+		
+		public function clearSpriteFilters(sprite:ActiveAsset):void
+		{
+			sprite.filters = sprite.unclearableFilters;
 		}
 		
 		private function clearUIFilters():void
@@ -274,6 +288,7 @@ package rock_on
 			groupieBoss.setInMotion();
 			trace("groupies started");
 			addTechsToVenue();
+			addHatersToVenue();
 			showBandMembersRaceCondition();		
 		}		
 		
@@ -371,13 +386,55 @@ package rock_on
 		public function addTechsToVenue():void
 		{
 			techManager = new TechManager(this, _myWorld);
-			var techs:ArrayCollection = this._creatureController.getConstructedCreaturesByType("Tech");
+			var techs:ArrayCollection = _creatureController.getConstructedCreaturesByType("Tech");
 			for each (var c:Creature in techs)
 			{
 				var tech:Tech = new Tech(c, null, c.layerableOrder, 0.5);
 				tech.personType = Person.MOVING;
 				tech.speed = 0.11;
 				techManager.add(tech);
+			}
+		}
+		
+		public function addHatersToVenue():void
+		{
+			haterBoss = new HaterBoss(this, _myWorld);
+			var haters:ArrayCollection = _creatureController.getConstructedCreaturesByType("Hater");
+			for each (var c:Creature in haters)
+			{
+				var hater:Hater = new Hater(this, c, null, c.layerableOrder, 0.5);
+				hater.personType = Person.MOVING;
+				hater.speed = 0.11;
+				haterBoss.add(hater);
+			}
+		}
+		
+		private function onFriendAvatarsLoaded(evt:ServerDataEvent):void
+		{
+			if (!friendAvatarsAdded)
+			{
+				addFriendsToVenue();			
+			}
+		}
+		
+		public function addFriendsToVenue():void
+		{
+			friendAvatarsAdded = true;
+			friendBoss = new FriendBoss(this, _myWorld);
+			var friends:ArrayCollection = _creatureController.getConstructedCreaturesByType("Friend");
+			for each (var c:Creature in friends)
+			{
+				var friend:Friend = new Friend(this, c, null, c.layerableOrder, 0.5);
+				friend.personType = Person.MOVING;
+				friend.speed = 0.11;
+				friendBoss.add(friend);
+			}
+			for (var i:int = 0; i < _creatureController.friend_creatures.length; i++)
+			{
+				var realFriend:Friend = new Friend(this, _creatureController.friend_creatures[i] as Creature, null, (_creatureController.friend_creatures[i] as Creature).layerableOrder, 0.5);
+				realFriend.personType = Person.MOVING;
+				realFriend.speed = 0.11;
+				friendBoss.add(realFriend);
 			}
 		}
 		

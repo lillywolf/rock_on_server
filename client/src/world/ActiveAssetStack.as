@@ -8,6 +8,7 @@ package world
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
+	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
 	import models.Creature;

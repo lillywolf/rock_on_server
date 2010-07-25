@@ -169,6 +169,11 @@ package game
 			snid = uid;
 			getDataForModel({snid: uid}, "user", "get_basic_info_by_snid");
 		}
+		
+		public function getUserAvatar(uid:Number):void
+		{
+			getDataForModel({user_id: uid, creature_type: "Me"}, "creature", "find_avatar_by_user_id");
+		}
 	
 		public function getStaticGameContent():void
 		{
@@ -391,7 +396,8 @@ package game
 		
 		public function checkForLoadedLayerables():void
 		{
-			if (layerableController.ownedLayerableReferencesUpdated == EssentialModelReference.numInstancesToLoad["owned_layerable"] && EssentialModelReference.numInstancesToLoad["layerable"] == layerableController.layerableMovieClipsLoaded)
+//			if (layerableController.ownedLayerableReferencesUpdated == EssentialModelReference.numInstancesToLoad["owned_layerable"] && EssentialModelReference.numInstancesToLoad["layerable"] == layerableController.layerableMovieClipsLoaded)
+			if (layerableController.areLayerablesAssignedToOwnedLayerables() && EssentialModelReference.numInstancesToLoad["layerable"] == layerableController.layerableMovieClipsLoaded)
 			{
 				layerableController.fullyLoaded = true;
 				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_LAYERABLES_LOADED);

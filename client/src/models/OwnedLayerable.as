@@ -25,6 +25,7 @@ package models
 			_layerable_id = params.layerable_id;
 			_creature_id = params.creature_id;
 			_in_use = params.in_use;
+			_user_id = params.user_id;
 		}
 
 		public function set id(val:int):void
@@ -101,5 +102,10 @@ package models
 		{
 			_user_id = val;
 		}	
+		
+		public function get user_id():int
+		{
+			return _user_id;
+		}
 	}
 }

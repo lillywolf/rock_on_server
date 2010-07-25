@@ -159,6 +159,14 @@ package rock_on
 			return {frameNumber: _frameNumber, animation: standAnimation, reflection: reflection};			
 		}
 		
+		public function getDirectionalRelationshipsArray():Array
+		{
+			var relationships:Array = new Array();
+			relationships["horizontalRelationship"] = ["right", "left"];
+			relationships["verticalRelationship"] = ["top", "bottom"];			
+			return relationships;
+		}		
+		
 		public function standFacingCurrentDirection():void
 		{
 			if (this.animation == "walk_away")
@@ -442,7 +450,16 @@ package rock_on
 			{
 				throw new Error("Occupied space");
 			}
-		}					
+		}
+		
+		public function onDirectionChanged(evt:WorldEvent):void
+		{
+			if (evt.activeAsset == this)
+			{
+				var nextPoint:Point3D = getNextPointAlongPath();
+				setDirection(nextPoint);
+			}
+		}		
 		
 		public function movePerson(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
 		{

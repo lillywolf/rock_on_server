@@ -14,18 +14,26 @@ package controllers
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
+	import rock_on.VenueEvent;
+	
+	import server.ServerDataEvent;
+	
 	import views.ContainerUIC;
 
 	public class LayerableController extends Controller
 	{
 		public var _layerables:ArrayCollection;
 		public var _owned_layerables:ArrayCollection;
+		public var _friend_owned_layerables:ArrayCollection;
 		public var ownedLayerableMovieClipsLoaded:int;
 		public var layerableMovieClipsLoaded:int;
-		public var ownedLayerableReferencesUpdated:int;
+		public var ownedLayerableParentsAssigned:int;
+		public var ownedLayerablesAssignedToParents:int;
 		public var ownedLayerablesLoaded:int;
 		public var layerablesLoaded:int;
 		public var fullyLoaded:Boolean;
+		
+		public var friendOwnedLayerablesLoaded:Boolean;
 		
 		public static const EYE_SCALE:Number = 1;
 		public static const INSTRUMENT_SCALE:Number = 0.5;
@@ -36,30 +44,100 @@ package controllers
 			super(essentialModelController, target);
 			_layerables = essentialModelController.layerables;
 			_owned_layerables = essentialModelController.owned_layerables;
+			_friend_owned_layerables = essentialModelController.friend_owned_layerables;
 			_layerables.addEventListener(CollectionEvent.COLLECTION_CHANGE, onLayerablesCollectionChange);
 			_owned_layerables.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedLayerablesCollectionChange);
+			_friend_owned_layerables.addEventListener(CollectionEvent.COLLECTION_CHANGE, onFriendOwnedLayerablesCollectionChange);
 			essentialModelController.addEventListener(EssentialEvent.INSTANCE_LOADED, onInstanceLoaded);
-			essentialModelController.addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);			
+			essentialModelController.addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);	
+			essentialModelController.addEventListener(EssentialEvent.ASSIGNED_TO_PARENT, onAssignedToParent);
 			
 			ownedLayerableMovieClipsLoaded = 0;
 			ownedLayerablesLoaded = 0;
 			layerablesLoaded = 0;
 		}
 		
+		private function onFriendOwnedLayerablesCollectionChange(evt:CollectionEvent):void
+		{
+			if (checkIfOwnedLayerableLoadingComplete())
+			{
+				friendOwnedLayerablesLoaded = true;
+				if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAssignedToParents())
+				{
+					friendAvatarsLoaded();
+				}
+			}
+		}
+		
+		public function friendAvatarsLoaded():void
+		{
+			var event:ServerDataEvent = new ServerDataEvent(ServerDataEvent.FRIEND_AVATARS_LOADED);
+			dispatchEvent(event);			
+		}
+		
+		public function checkIfAllOwnedLayerableParentsAssigned():Boolean
+		{
+			if (ownedLayerableParentsAssigned == _owned_layerables.length)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		public function checkIfAllOwnedLayerablesAssignedToParents():Boolean
+		{
+			if (ownedLayerablesAssignedToParents == _owned_layerables.length)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		public function checkIfOwnedLayerableLoadingComplete():Boolean
+		{
+			var numOwnedLayerables:int = _owned_layerables.length;
+			if (_essentialModelController.gdi.sc.allOutoingRequestsReceived("owned_layerable"))
+			{
+				if (numOwnedLayerables == EssentialModelReference.numInstancesToLoad["owned_layerable"])
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		private function checkIfValidOwnedLayerable(ol:OwnedLayerable):Boolean
+		{
+			if (ol.layerable_id == 0)
+			{
+				throw new Error("No layerable id for owned layerable");
+			}	
+			if (ol.creature_id == 0)
+			{
+				throw new Error("No creature id for owned layerable");
+			}
+			if (ol.user_id == 0)
+			{
+				throw new Error("No user id for owned layerable");
+			}
+			return true;
+		}
+		
 		private function onOwnedLayerablesCollectionChange(evt:CollectionEvent):void
 		{
-//			(evt.items[0] as OwnedLayerable).addEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
+			checkIfValidOwnedLayerable(evt.items[0] as OwnedLayerable);
 			if ((evt.items[0] as OwnedLayerable).layerable == null)
 			{
-				(evt.items[0] as OwnedLayerable).addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);						
+				(evt.items[0] as OwnedLayerable).addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);	
+//				(evt.items[0] as OwnedLayerable).addEventListener(EssentialEvent.ASSIGNED_TO_PARENT, onAssignedToParent);	
 			}
 			else
 			{
-				ownedLayerableReferencesUpdated++;
+				ownedLayerableParentsAssigned++;
 				checkForLoadingComplete();
 			}
 		}
-
+	
 		private function onLayerablesCollectionChange(evt:CollectionEvent):void
 		{
 			if ((evt.items[0] as Layerable).mc == null)
@@ -73,18 +151,69 @@ package controllers
 			}
 		}
 		
+		private function onAssignedToParent(evt:EssentialEvent):void
+		{
+			if (evt.instance is OwnedLayerable)
+			{
+				var ol:OwnedLayerable = evt.instance as OwnedLayerable;
+				ownedLayerablesAssignedToParents++;
+				if (checkIfFriendAvatarsLoaded())
+				{
+					friendAvatarsLoaded();
+				}
+			}
+		}
+		
+		public function checkIfFriendAvatarsLoaded():Boolean
+		{
+			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAssignedToParents())
+			{
+				if (friendOwnedLayerablesLoaded)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
 		private function onParentAssigned(evt:EssentialEvent):void
 		{
 			var ol:OwnedLayerable = evt.currentTarget as OwnedLayerable;
 			ol.removeEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
-			ownedLayerableReferencesUpdated++;
+			ownedLayerableParentsAssigned++;			
 			
 			if (ol.layerable.mc)
 			{
 				ownedLayerableMovieClipsLoaded++;
 			}	
 			
-			checkForLoadingComplete();		
+			checkForLoadingComplete();	
+			
+			if (checkIfFriendAvatarsLoaded())
+			{
+				friendAvatarsLoaded();
+			}			
+		}
+		
+		public function areLayerablesAssignedToOwnedLayerables():Boolean
+		{
+			var total:int = 0;
+			for each (var ol:OwnedLayerable in _owned_layerables)
+			{
+				if (ol.layerable)
+				{
+					total++;
+				}
+			}
+			if (total == _owned_layerables.length)
+			{
+				return true;
+			}
+			else
+			{
+				trace("layerable refs: " + total.toString());
+			}
+			return false;
 		}
 		
 		private function checkForLoadingComplete():void

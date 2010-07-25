@@ -9,7 +9,7 @@ package models
 		public var _artist_name:String;
 		public var _band_id:int;
 		public var _genre:String;
-		public var _user_id:int;
+		public var _artist_id:int;
 		public var _points:int;
 		
 		public function Song(params:Object=null, target:IEventDispatcher=null)
@@ -25,7 +25,7 @@ package models
 			_artist_name = params.artist_name;
 			_band_id = params.id;
 			_genre = params.genre;
-			_user_id = params.user_id;
+			_artist_id = params.artist_id;
 			_points = params.points;
 		}
 		
@@ -78,14 +78,14 @@ package models
 			return _points;
 		}
 		
-		public function set user_id(val:int):void
+		public function set artist_id(val:int):void
 		{
-			_user_id = val;
+			_artist_id = val;
 		}
 		
-		public function get user_id():int
+		public function get artist_id():int
 		{
-			return _user_id;
+			return _artist_id;
 		}
 		
 		public function get id():int

@@ -18,6 +18,7 @@ package controllers
 	public class CreatureController extends Controller
 	{
 		public var _creatures:ArrayCollection;
+		public var _friend_creatures:ArrayCollection;
 		public var _owned_layerables:ArrayCollection;
 		public var _serverController:ServerController;
 		public var _creature_groups:ArrayCollection;
@@ -26,6 +27,7 @@ package controllers
 		{
 			super(essentialModelController, target);
 			_creatures = essentialModelController.creatures;
+			_friend_creatures = essentialModelController.friend_creatures;
 			_owned_layerables = essentialModelController.owned_layerables;
 			_creature_groups = essentialModelController.creature_groups;
 		}
@@ -137,12 +139,15 @@ package controllers
 				layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "hair band"];
 				layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];								
 			}
+			else if (creatureType == "Hater")
+			{							
+				layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "hair band"];
+				layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];
+				layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "hair band"];
+				layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];								
+			}
 			else
-			{
-//				layerableOrder['walk_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
-//				layerableOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
-//				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
-//				layerableOrder['stand_still_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];								
+			{							
 				layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
 				layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
 				layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
@@ -224,6 +229,11 @@ package controllers
 		public function get creatures():ArrayCollection
 		{
 			return _creatures;
+		}
+		
+		public function get friend_creatures():ArrayCollection
+		{
+			return _friend_creatures;
 		}
 		
 		public function get owned_layerables():ArrayCollection

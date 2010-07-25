@@ -54,7 +54,7 @@ package server
 			var route:String = calculateRoute(controller, action);
 			setHttpServiceUrl(route);
 			var token:AsyncToken = httpService.send(params);
-			httpServiceRequests[token] = controller;
+			httpServiceRequests[token] = {controller: controller, received: false};
 //			Alert.show("sent " + controller.toString());
 		}
 		
@@ -74,7 +74,8 @@ package server
 		private function onServerResponse(evt:ResultEvent):void
 		{	
 			var params:Object = getParams( evt );						
-			var requestKey:String = httpServiceRequests[evt.token];
+			var requestKey:String = httpServiceRequests[evt.token].controller;
+			httpServiceRequests[evt.token].received = true;
 //			Alert.show("received " + requestKey.toString());
 //			requestCache.cacheRequest( params.hashkey, params );
 //			params = requestCache.retrieveRequest( params.hashkey );
@@ -87,6 +88,18 @@ package server
 			{
 				handleParams(params, requestKey);
 			}
+		}
+		
+		public function allOutoingRequestsReceived(controllerName:String):Boolean
+		{
+			for each (var obj:Object in httpServiceRequests)
+			{
+				if (obj.received == false && obj.controller == controllerName)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 		
 		private function getParams(evt:ResultEvent):Object

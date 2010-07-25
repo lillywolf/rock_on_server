@@ -160,14 +160,6 @@ package rock_on
 			
 		}
 		
-		public function getDirectionalRelationshipsArray():Array
-		{
-			var relationships:Array = new Array();
-			relationships["horizontalRelationship"] = ["right", "left"];
-			relationships["verticalRelationship"] = ["top", "bottom"];			
-			return relationships;
-		}
-		
 		public function startStoppedState():void
 		{
 			state = STOPPED_STATE;

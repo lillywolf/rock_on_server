@@ -129,6 +129,11 @@ package models
 			_user_id = val;
 		}
 		
+		public function get user_id():int
+		{
+			return _user_id;
+		}
+		
 		public function get last_state():String
 		{
 			return _last_state;

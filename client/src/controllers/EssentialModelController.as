@@ -72,6 +72,8 @@ package controllers
 		[Bindable] public var owned_songs:ArrayCollection;
 		[Bindable] public var usables:ArrayCollection;
 		[Bindable] public var owned_usables:ArrayCollection;
+		[Bindable] public var friend_creatures:ArrayCollection;
+		[Bindable] public var friend_owned_layerables:ArrayCollection;
 		
 		public var layerable:Layerable;
 		public var creature:Creature;
@@ -125,6 +127,8 @@ package controllers
 			owned_dwellings = new ArrayCollection();
 			booth_structures = new ArrayCollection();
 			friend_users = new ArrayCollection();
+			friend_creatures = new ArrayCollection();
+			friend_owned_layerables = new ArrayCollection();
 			essentialModelReference = new EssentialModelReference();
 		}
 		
@@ -247,6 +251,7 @@ package controllers
 			
 			var evt:EssentialEvent = new EssentialEvent(EssentialEvent.PARENT_ASSIGNED, isChild.instance, isChild.model, true, true);
 			isChild.instance.dispatchEvent(evt);			
+//			dispatchEvent(evt);			
 			
 			// Add our copy to list of class copies
 			var classCopiesArray:Array = [belongsTo.instance, isChild.instance[belongsTo.model]];
@@ -285,8 +290,26 @@ package controllers
 		{
 			if (isChild.model+'s' in belongsTo.instance)
 			{
-				(belongsTo.instance[isChild.model+'s'] as ArrayCollection).addItem(isChild.instance); 			
+				(belongsTo.instance[isChild.model+'s'] as ArrayCollection).addItem(isChild.instance); 
+				
+				var parentEvt:EssentialEvent = new EssentialEvent(EssentialEvent.CHILD_ASSIGNED, belongsTo.instance, belongsTo.model);
+				belongsTo.instance.dispatchEvent(parentEvt);
+				var childEvt:EssentialEvent = new EssentialEvent(EssentialEvent.ASSIGNED_TO_PARENT, isChild.instance, isChild.model); 
+	//			isChild.instance.dispatchEvent(childEvt);
+				dispatchEvent(childEvt);
 			}
+		}
+		
+		public function doesInstanceBelongToFriend(isChild:UnprocessedModel):Boolean
+		{
+			if (isChild.instance.hasOwnProperty("user_id"))
+			{
+				if (isChild.instance.user_id != _gdi.user.id && isChild.instance.user_id != 0)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 		
 		public function removeFromToLoad(toLoad:Object):void
@@ -321,8 +344,16 @@ package controllers
 			
 			instancesLoaded.addItem(um);
 			essentialModelReference.allInstancesLoaded.addItem(um);
-							
-			(this[um.model+'s'] as ArrayCollection).addItem(um.instance); 
+			
+			if (doesInstanceBelongToFriend(um))
+			{
+				(this[um.model+'s'] as ArrayCollection).addItem(um.instance); 							
+				(this["friend_"+um.model+"s"] as ArrayCollection).addItem(um.instance);				
+			}
+			else
+			{
+				(this[um.model+'s'] as ArrayCollection).addItem(um.instance); 			
+			}
 		}	
 		
 		public function convertToClassCase(str:String):String

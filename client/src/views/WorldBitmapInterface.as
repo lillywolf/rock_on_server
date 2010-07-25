@@ -41,6 +41,7 @@ package views
 	import rock_on.BandMember;
 	import rock_on.CustomerPerson;
 	import rock_on.CustomerPersonManager;
+	import rock_on.Hater;
 	import rock_on.Person;
 	import rock_on.Venue;
 	
@@ -231,6 +232,10 @@ package views
 			if (asset.doNotClearFilters)
 			{
 				gf = new GlowFilter(0xFFDD00, 1, 2, 2, 20, 20);	
+			}
+			else if (asset is Hater)
+			{
+				gf = new GlowFilter(0xFF054C, 1, 2, 2, 20, 20);
 			}
 			else
 			{

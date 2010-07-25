@@ -46,7 +46,8 @@ package world
 		
 		public var bitmapData:BitmapData;
 		public var bitmap:Bitmap;
-		public var doNotClearFilters:Boolean;		
+		public var doNotClearFilters:Boolean;
+		public var unclearableFilters:Array;				
 		public var reflected:Boolean;
 		public var _scale:Number;
 		
@@ -69,6 +70,7 @@ package world
 //				addChild(_movieClip);			
 				_movieClip.addEventListener(MouseEvent.CLICK, onMouseClicked);
 			}
+			unclearableFilters = new Array();	
 		}
 		
 		public function getNextPointAlongPath():Point3D
