@@ -256,7 +256,7 @@ package controllers
 		{
 			var friendGDI:GameDataInterface = evt.gdi;
 			friendGDI.removeEventListener(EssentialEvent.OWNED_STRUCTURES_LOADED, onStructuresLoaded);
-			if (evt.gdi.dwellingController.fullyLoaded)
+			if (evt.gdi.dwellingController.ownedDwellingsLoaded)
 			{
 				FlexGlobals.topLevelApplication.attemptToInitializeVenueForFriend(friendGDI);
 				FlexGlobals.topLevelApplication.friendView.venueLoaded = true;
@@ -281,7 +281,7 @@ package controllers
 			var friendGDI:GameDataInterface = evt.gdi;
 			friendGDI.removeEventListener(EssentialEvent.OWNED_DWELLINGS_LOADED, onDwellingsLoaded);
 			
-			if (friendGDI.structureController.fullyLoaded)
+			if (friendGDI.structureController.ownedStructuresLoaded)
 			{
 				FlexGlobals.topLevelApplication.attemptToInitializeVenueForFriend(friendGDI);				
 				FlexGlobals.topLevelApplication.venueLoaded = true;

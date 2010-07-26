@@ -483,15 +483,9 @@ package controllers
 				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.LOADING_AND_INSTANTIATION_COMPLETE);
 				evt.user = _gdi.user;
 				evt.gdi = _gdi;
-				dispatchEvent(evt);	
-				
+				dispatchEvent(evt);					
 				_gdi.checkForLoadedMovieClips();
 			}
-//			
-//			if (_gdi.user)
-//			{
-//				_gdi.checkForLoadedDwellings();				
-//			}
 		}
 		
 		public function set gdi(val:GameDataInterface):void

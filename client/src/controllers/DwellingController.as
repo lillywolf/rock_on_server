@@ -3,6 +3,7 @@ package controllers
 	import flash.events.IEventDispatcher;
 	
 	import models.Dwelling;
+	import models.EssentialModel;
 	import models.EssentialModelReference;
 	import models.OwnedDwelling;
 	
@@ -14,12 +15,15 @@ package controllers
 
 	public class DwellingController extends Controller
 	{
-		public var fullyLoaded:Boolean;
 		public var dwellings:ArrayCollection;
 		public var owned_dwellings:ArrayCollection;
-		public var dwellingsLoaded:int;
-		public var ownedDwellingsLoaded:int;
-		public var ownedDwellingMovieClipsLoaded:int;
+		
+		public var dwellingsLoaded:Boolean;
+		public var ownedDwellingsLoaded:Boolean;
+		
+		public var ownedDwellingParentsAssigned:int;
+		public var dwellingMovieClipsLoaded:int;
+		
 		public var _serverController:ServerController;
 		
 		public function DwellingController(essentialModelController:EssentialModelController, target:IEventDispatcher=null)
@@ -27,13 +31,12 @@ package controllers
 			super(essentialModelController, target);
 			dwellings = essentialModelController.dwellings;
 			owned_dwellings = essentialModelController.owned_dwellings;
-			owned_dwellings.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedDwellingsCollectionChange);			
-			essentialModelController.addEventListener(EssentialEvent.INSTANCE_LOADED, onInstanceLoaded);
-			essentialModelController.addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
 			
-			dwellingsLoaded = 0;
-			ownedDwellingsLoaded = 0;
-			ownedDwellingMovieClipsLoaded = 0;						
+			dwellings.addEventListener(CollectionEvent.COLLECTION_CHANGE, onDwellingsCollectionChange);
+			owned_dwellings.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedDwellingsCollectionChange);	
+			
+//			essentialModelController.addEventListener(EssentialEvent.INSTANCE_LOADED, onInstanceLoaded);
+//			essentialModelController.addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);				
 		}
 		
 		public function updateLoadedMovieClips(className:String):int
@@ -70,22 +73,101 @@ package controllers
 			return matchingStructures;
 		}		
 		
+		private function onDwellingsCollectionChange(evt:CollectionEvent):void
+		{
+//			Temporary fix
+			
+			if ((evt.items[0] as Dwelling).mc == null)
+			{
+//				(evt.items[0] as Dwelling).addEventListener("movieClipLoaded", onDwellingMovieClipAssigned);
+//			}
+//			else
+//			{
+				this.dwellingMovieClipsLoaded++;
+				checkIfDwellingsFullyLoaded();
+				runEssentialChecks();
+			}
+		}
+		
+		private function onDwellingMovieClipAssigned(evt:DynamicEvent):void
+		{
+			(evt.target as Dwelling).removeEventListener("movieClipLoaded", onDwellingMovieClipAssigned);
+			dwellingMovieClipsLoaded++;
+			checkIfDwellingsFullyLoaded();
+			runEssentialChecks();
+		}
+		
 		private function onOwnedDwellingsCollectionChange(evt:CollectionEvent):void
 		{
-			(evt.items[0] as OwnedDwelling).addEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
-			(evt.items[0] as OwnedDwelling).addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
+//			(evt.items[0] as OwnedDwelling).addEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
+			if ((evt.items[0] as OwnedDwelling).dwelling == null)
+			{
+				(evt.items[0] as OwnedDwelling).addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);			
+			}
+			else
+			{
+				this.ownedDwellingParentsAssigned++;
+				checkIfOwnedDwellingsFullyLoaded();
+				runEssentialChecks();
+			}
+		}
+		
+		private function checkIfDwellingsFullyLoaded():Boolean
+		{
+			if (checkIfAllDwellingsAdded())
+			{
+				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.DWELLINGS_LOADED);
+				this.dispatchEvent(evt);
+				return true;
+			}
+			return false;
+		}
+		
+		private function checkIfOwnedDwellingsFullyLoaded():Boolean
+		{
+			if (checkIfAllOwnedDwellingsAdded() && checkIfOwnedDwellingParentsAssigned())
+			{
+				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_DWELLINGS_LOADED);
+				this.dispatchEvent(evt);
+				return true;
+			}
+			return false;
+		}
+		
+		private function checkIfAllDwellingsAdded():Boolean
+		{
+			if (this.dwellings.length == EssentialModelReference.numInstancesToLoad["dwelling"] && dwellings.length > 0)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		private function checkIfAllOwnedDwellingsAdded():Boolean
+		{
+			if (this.owned_dwellings.length == EssentialModelReference.numInstancesToLoad["owned_dwelling"] && owned_dwellings.length > 0)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		private function checkIfOwnedDwellingParentsAssigned():Boolean
+		{
+			if (this.owned_dwellings.length == this.ownedDwellingParentsAssigned)
+			{
+				return true;
+			}
+			return false;
 		}
 		
 		private function onParentAssigned(evt:EssentialEvent):void
 		{
 			var od:OwnedDwelling = evt.currentTarget as OwnedDwelling;
 			od.removeEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
-			if (od.dwelling['mc'])
-			{
-				ownedDwellingMovieClipsLoaded++;
-			}
-			
-			checkForLoadingComplete();		
+			ownedDwellingParentsAssigned++;
+			checkIfOwnedDwellingsFullyLoaded();
+			runEssentialChecks();
 		}
 		
 //		public function updateOwnedDwellingState(stateName:String, venueId:int):void
@@ -104,36 +186,41 @@ package controllers
 			dwellings.removeItemAt(i);
 		}
 		
-		private function checkForLoadingComplete():void
+		private function runEssentialChecks():void
 		{
-			if (ownedDwellingMovieClipsLoaded == EssentialModelReference.numInstancesToLoad["owned_dwelling"] && ownedDwellingsLoaded == EssentialModelReference.numInstancesToLoad["owned_dwelling"])
-			{
-				essentialModelController.checkIfLoadingAndInstantiationComplete();	
-			}			
+			essentialModelController.checkIfLoadingAndInstantiationComplete();				
 		}
 		
-		private function onParentMovieClipAssigned(evt:DynamicEvent):void
-		{
-			(evt.target as OwnedDwelling).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
-			ownedDwellingMovieClipsLoaded++;
-			
-			checkForLoadingComplete();
-		}
+//		private function checkForLoadingComplete():void
+//		{
+//			if (ownedDwellingMovieClipsLoaded == EssentialModelReference.numInstancesToLoad["owned_dwelling"] && ownedDwellingsLoaded == EssentialModelReference.numInstancesToLoad["owned_dwelling"])
+//			{
+//				essentialModelController.checkIfLoadingAndInstantiationComplete();	
+//			}			
+//		}
 		
-		private function onInstanceLoaded(evt:EssentialEvent):void
-		{
-			if (evt.instance is Dwelling)
-			{
-				dwellingsLoaded++;
-				trace("dwellings loaded: " + dwellingsLoaded.toString());
-			}
-			else if (evt.instance is OwnedDwelling)
-			{
-				ownedDwellingsLoaded++;
-				trace("owned dwellings loaded: " + ownedDwellingsLoaded.toString());
-			}
-			essentialModelController.checkIfLoadingAndInstantiationComplete();
-		}	
+//		private function onParentMovieClipAssigned(evt:DynamicEvent):void
+//		{
+//			(evt.target as OwnedDwelling).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
+//			ownedDwellingMovieClipsLoaded++;
+//			
+//			checkForLoadingComplete();
+//		}
+		
+//		private function onInstanceLoaded(evt:EssentialEvent):void
+//		{
+//			if (evt.instance is Dwelling)
+//			{
+//				dwellingsLoaded++;
+//				trace("dwellings loaded: " + dwellingsLoaded.toString());
+//			}
+//			else if (evt.instance is OwnedDwelling)
+//			{
+//				ownedDwellingsLoaded++;
+//				trace("owned dwellings loaded: " + ownedDwellingsLoaded.toString());
+//			}
+//			essentialModelController.checkIfLoadingAndInstantiationComplete();
+//		}	
 		
 		public function set serverController(val:ServerController):void
 		{

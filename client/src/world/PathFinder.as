@@ -27,10 +27,10 @@ package world
 			createPathGrid(worldHeight);
 		}
 		
-		public function add(asset:ActiveAsset, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null):ArrayCollection
+		public function add(asset:ActiveAsset, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):ArrayCollection
 		{
 			addItem(asset);
-			var assetPathFinder:ArrayCollection = calculatePathGrid(asset, asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures);
+			var assetPathFinder:ArrayCollection = calculatePathGrid(asset, asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures, extraStructures);
 			var finalPath:ArrayCollection = determinePath(asset, assetPathFinder);
 			return finalPath;
 		}
@@ -242,7 +242,7 @@ package world
 			return outsidePoints;
 		}
 		
-		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutStructureOccupiedSpaces:Boolean=true, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null):ArrayCollection
+		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutStructureOccupiedSpaces:Boolean=true, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null, extraStructures:ArrayCollection=null):ArrayCollection
 		{
 			trace("create path grid");
 			var pathGridComplete:Boolean = false;
@@ -250,7 +250,7 @@ package world
 			var assetPathFinder:ArrayCollection = initializePath(destination);
 			var unorganizedPoints:ArrayCollection = initializeUnorganizedPoints(destination);
 			
-			var occupiedSpaces:ArrayCollection = updateOccupiedSpaces(careAboutPeopleOccupiedSpaces, careAboutStructureOccupiedSpaces, exemptStructures);
+			var occupiedSpaces:ArrayCollection = updateOccupiedSpaces(careAboutPeopleOccupiedSpaces, careAboutStructureOccupiedSpaces, exemptStructures, extraStructures);
 			validateDestination(asset, destination, occupiedSpaces);		
 			
 			var startPoint:Point3D = mapPointToPathGrid(currentPoint);
@@ -345,7 +345,7 @@ package world
 			return peopleOccupiedSpaces;
 		}
 		
-		public function updateOccupiedSpaces(getPeopleOccupiedSpaces:Boolean, getStructureOccupiedSpaces:Boolean, exemptStructures:ArrayCollection=null):ArrayCollection
+		public function updateOccupiedSpaces(getPeopleOccupiedSpaces:Boolean, getStructureOccupiedSpaces:Boolean, exemptStructures:ArrayCollection=null, extraStructures:ArrayCollection=null):ArrayCollection
 		{
 			var allOccupiedSpaces:ArrayCollection = new ArrayCollection();
 			var pt:Point3D;
@@ -353,20 +353,17 @@ package world
 			{
 				trace("get structure occupied spaces");
 				var structureOccupiedSpaces:ArrayCollection = establishStructureOccupiedSpaces(exemptStructures);
-//				Alert.show("sos: " + structureOccupiedSpaces.length.toString());
-				for each (pt in structureOccupiedSpaces)
-				{
-					allOccupiedSpaces.addItem(pt);
-				}			
+				allOccupiedSpaces.addAll(structureOccupiedSpaces);			
 			}
 			if (getPeopleOccupiedSpaces)
 			{
 				var peopleOccupiedSpaces:ArrayCollection = establishPeopleOccupiedSpaces();	
-//				Alert.show("pos: " + peopleOccupiedSpaces.length.toString());				
-				for each (pt in peopleOccupiedSpaces)
-				{
-					allOccupiedSpaces.addItem(pt);
-				}		
+				allOccupiedSpaces.addAll(peopleOccupiedSpaces);		
+			}
+			if (extraStructures)
+			{
+				var extraOccupiedSpaces:ArrayCollection = getExtraOccupiedSpaces(extraStructures);
+				allOccupiedSpaces.addAll(extraOccupiedSpaces);
 			}
 			validateOccupiedSpaces(allOccupiedSpaces);
 			return allOccupiedSpaces;
@@ -423,6 +420,16 @@ package world
 				}
 			}
 			return structureOccupiedSpaces;			
+		}
+		
+		private function getExtraOccupiedSpaces(rectangles:ArrayCollection):ArrayCollection
+		{
+			var rectSpaces:ArrayCollection = new ArrayCollection();
+			for each (var rect:Rectangle in rectangles)
+			{
+				rectSpaces.addAll(this.getEstimatedPoint3DForRectangle(rect));
+			}
+			return rectSpaces;
 		}
 		
 		private function getStructureOccupiedSpacesForArray(sourceArray:ArrayCollection, exemptStructures:ArrayCollection=null):ArrayCollection
@@ -498,6 +505,20 @@ package world
 			} 
 			
 			return structureSpaces;
+		}
+
+		public function getEstimatedPoint3DForRectangle(rect:Rectangle, rectHeight:int=0):ArrayCollection
+		{		
+			var rectSpaces:ArrayCollection = new ArrayCollection();
+			for (var xPt:int = rect.left; xPt < rect.right; xPt++)
+			{
+				for (var zPt:int = rect.top; zPt < rect.bottom; zPt++)
+				{
+					var osPt3D:Point3D = pathGrid[xPt][rectHeight][zPt];
+					rectSpaces.addItem(osPt3D);										
+				}
+			}
+			return rectSpaces;
 		}
 
 		public function getPoint3DForStructure(asset:ActiveAsset, structureSpaces:ArrayCollection):ArrayCollection

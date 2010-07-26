@@ -7,6 +7,8 @@ package rock_on
 	
 	import models.Creature;
 	
+	import mx.collections.ArrayCollection;
+	
 	import world.Point3D;
 	import world.World;
 	import world.WorldEvent;
@@ -17,7 +19,7 @@ package rock_on
 		public static const STOPPED_STATE:int = 1;
 		
 		public static const STOP_TIME_MULTIPLIER:int = 20000;
-		public static const STOP_TIME_MIN:int = 2000;
+		public static const STOP_TIME_MIN:int = 10000;
 
 		public var _venue:Venue;
 		public var state:int;
@@ -27,9 +29,16 @@ package rock_on
 		public function Friend(venue:Venue, creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
 			super(creature, movieClip, layerableOrder, scale);
-			updateLayerableOrder();
 			_venue = venue;			
+			setRectanglesToAvoid();
+			updateLayerableOrder();
 		}
+		
+		public function setRectanglesToAvoid():void
+		{
+			rectanglesToAvoid = new ArrayCollection();
+			rectanglesToAvoid.addItem(_venue.mainCrowdRect);			
+		}		
 		
 		private function updateLayerableOrder():void
 		{
@@ -74,7 +83,7 @@ package rock_on
 		public function startRouteState():void
 		{
 			state = ROUTE_STATE;
-			movePerson(this.currentDestination, true, false);
+			movePerson(this.currentDestination, true, false, null, 0, rectanglesToAvoid);
 		}
 		
 		public function endRouteState():void
@@ -117,7 +126,7 @@ package rock_on
 		
 		public function pickNewRandomDestination():Point3D
 		{
-			var destination:Point3D = _venue.pickRandomAvailablePointWithinRect(_venue.boothsRect, _myWorld, 0, true, true);
+			var destination:Point3D = _venue.pickRandomAvailablePointWithinRect(_venue.boothsRect, _myWorld, 0, _venue.crowdBufferRect, true, true);
 			return destination;
 		}
 		

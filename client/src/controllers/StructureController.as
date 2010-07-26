@@ -34,10 +34,13 @@ package controllers
 		
 		[Bindable] public var structures:ArrayCollection;
 		[Bindable] public var owned_structures:ArrayCollection;
-		public var ownedStructureMovieClipsLoaded:int;
-		public var ownedStructuresLoaded:int;
-		public var structuresLoaded:int;
-		public var fullyLoaded:Boolean;
+		
+		public var structureMovieClipsLoaded:int;
+		public var ownedStructureParentsAssigned:int;
+		
+		public var ownedStructuresLoaded:Boolean;
+		public var structuresLoaded:Boolean;
+		
 		public var _serverController:ServerController;
 		
 		public function StructureController(essentialModelController:EssentialModelController, target:IEventDispatcher=null)
@@ -45,13 +48,12 @@ package controllers
 			super(essentialModelController, target);
 			structures = essentialModelController.structures;
 			owned_structures = essentialModelController.owned_structures;
+
+			structures.addEventListener(CollectionEvent.COLLECTION_CHANGE, onStructuresCollectionChange);
 			owned_structures.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedStructuresCollectionChange);
-			essentialModelController.addEventListener(EssentialEvent.INSTANCE_LOADED, onInstanceLoaded);
-			essentialModelController.addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
 			
-			structuresLoaded = 0;
-			ownedStructuresLoaded = 0;
-			ownedStructureMovieClipsLoaded = 0;
+//			essentialModelController.addEventListener(EssentialEvent.INSTANCE_LOADED, onInstanceLoaded);
+			essentialModelController.addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
 		}
 		
 		public function updateLoadedMovieClips(className:String):int
@@ -88,22 +90,61 @@ package controllers
 			return matchingStructures;
 		}
 		
+		private function onStructuresCollectionChange(evt:CollectionEvent):void
+		{
+			if ((evt.items[0] as Structure).mc == null)
+			{
+				(evt.items[0] as Structure).addEventListener("movieClipLoaded", onStructureMovieClipAssigned); 
+			}
+			else
+			{
+				this.structureMovieClipsLoaded++;
+				checkIfStructuresFullyLoaded();
+				runEssentialChecks();
+			}
+		}
+		
+		private function onStructureMovieClipAssigned(evt:DynamicEvent):void
+		{
+			(evt.target as Structure).removeEventListener("movieClipLoaded", onStructureMovieClipAssigned);
+			structureMovieClipsLoaded++;
+			checkIfStructuresFullyLoaded();
+			runEssentialChecks();
+		}
+		
+		private function checkIfStructuresFullyLoaded():Boolean
+		{
+			if (checkIfAllStructuresAdded() && checkIfStructureMovieClipsAssigned())
+			{
+				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.STRUCTURES_LOADED);
+				this.dispatchEvent(evt);
+				return true;
+			}
+			return false;
+		}
+		
 		private function onOwnedStructuresCollectionChange(evt:CollectionEvent):void
 		{
-			(evt.items[0] as OwnedStructure).addEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
-			(evt.items[0] as OwnedStructure).addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
+			if ((evt.items[0] as OwnedStructure).structure == null)
+			{
+				(evt.items[0] as OwnedStructure).addEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);			
+			}
+			else
+			{
+				this.ownedStructureParentsAssigned++;
+				checkIfOwnedStructuresFullyLoaded();
+				runEssentialChecks();
+			}
+//			(evt.items[0] as OwnedStructure).addEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
 		}
 		
 		private function onParentAssigned(evt:EssentialEvent):void
 		{
 			var os:OwnedStructure = evt.currentTarget as OwnedStructure;
 			os.removeEventListener(EssentialEvent.PARENT_ASSIGNED, onParentAssigned);
-			if (os.structure['mc'])
-			{
-				ownedStructureMovieClipsLoaded++;
-			}	
-			
-			checkForLoadingComplete();
+			ownedStructureParentsAssigned++;
+			checkIfOwnedStructuresFullyLoaded();
+			runEssentialChecks();
 		}
 		
 		public function add(structure:Structure):void
@@ -117,35 +158,90 @@ package controllers
 			structures.removeItemAt(i);
 		}		
 		
-		private function onParentMovieClipAssigned(evt:DynamicEvent):void
+//		private function onParentMovieClipAssigned(evt:DynamicEvent):void
+//		{
+//			(evt.target as OwnedStructure).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
+//			ownedStructureMovieClipsLoaded++;
+//			
+//			checkForLoadingComplete();
+//		}
+		
+		private function checkIfOwnedStructuresFullyLoaded():Boolean
 		{
-			(evt.target as OwnedStructure).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);
-			ownedStructureMovieClipsLoaded++;
-			
-			checkForLoadingComplete();
+			if (checkIfAllOwnedStructureParentsAssigned() && checkIfAllOwnedStructuresAdded())
+			{
+				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_STRUCTURES_LOADED);
+				this.dispatchEvent(evt);
+				return true;
+			}
+			return false;
 		}
 		
-		private function checkForLoadingComplete():void
+		private function checkIfStructureMovieClipsAssigned():Boolean
 		{
-			if (ownedStructureMovieClipsLoaded == EssentialModelReference.numInstancesToLoad["owned_structure"] && ownedStructuresLoaded == EssentialModelReference.numInstancesToLoad["owned_structure"])
+			for each (var s:Structure in structures)
 			{
-				essentialModelController.checkIfLoadingAndInstantiationComplete();			
-			}			
+				if (!s.mc)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 		
-		private function onInstanceLoaded(evt:EssentialEvent):void
+		private function checkIfAllStructuresAdded():Boolean
 		{
-			if (evt.instance is Structure)
+			if (structures.length == EssentialModelReference.numInstancesToLoad["structure"])
 			{
-				structuresLoaded++;
+				return true;
 			}
-			else if (evt.instance is OwnedStructure)
+			return false;			
+		}
+		
+		public function checkIfAllOwnedStructureParentsAssigned():Boolean
+		{
+			if (ownedStructureParentsAssigned == owned_structures.length && owned_structures.length > 0)
 			{
-				ownedStructuresLoaded++;
+				return true;
 			}
+			return false;
+		}	
+		
+		private function checkIfAllOwnedStructuresAdded():Boolean
+		{
+			if (owned_structures.length == EssentialModelReference.numInstancesToLoad["owned_structure"] && owned_structures.length > 0)
+			{
+				return true;
+			}
+			return false;
+		}		
+		
+//		private function checkForLoadingComplete():void
+//		{
+//			if (ownedStructureMovieClipsLoaded == EssentialModelReference.numInstancesToLoad["owned_structure"] && ownedStructuresLoaded == EssentialModelReference.numInstancesToLoad["owned_structure"])
+//			{
+//				essentialModelController.checkIfLoadingAndInstantiationComplete();			
+//			}			
+//		}
+		
+		private function runEssentialChecks():void
+		{
 			essentialModelController.checkIfLoadingAndInstantiationComplete();
 		}
 		
+//		private function onInstanceLoaded(evt:EssentialEvent):void
+//		{
+//			if (evt.instance is Structure)
+//			{
+//				structuresLoaded++;
+//			}
+//			else if (evt.instance is OwnedStructure)
+//			{
+//				ownedStructuresLoaded++;
+//			}
+//			essentialModelController.checkIfLoadingAndInstantiationComplete();
+//		}
+//		
 		public function getListeningStationTypeByMovieClip(mc:MovieClip):String
 		{
 			if (mc is Ticket_01)

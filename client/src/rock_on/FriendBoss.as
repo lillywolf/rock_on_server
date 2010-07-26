@@ -22,7 +22,7 @@ package rock_on
 			this.addItem(friend);
 			friend.myWorld = _myWorld;
 					
-			var destination:Point3D = _venue.pickRandomAvailablePointWithinRect(_venue.boothsRect, _myWorld, 0, true);
+			var destination:Point3D = _venue.pickRandomAvailablePointWithinRect(_venue.boothsRect, _myWorld, 0, null, true);
 			_myWorld.addAsset(friend, destination);
 			friend.addGlowFilter();
 			friend.advanceState(Friend.STOPPED_STATE);

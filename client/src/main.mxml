@@ -431,14 +431,14 @@
 			private function onStructuresLoaded(evt:EssentialEvent):void
 			{
 				gdi.removeEventListener(EssentialEvent.OWNED_STRUCTURES_LOADED, onStructuresLoaded);
-				if (isLoggedInUser(evt.user) && evt.gdi.dwellingController.fullyLoaded)
+				if (isLoggedInUser(evt.user) && evt.gdi.dwellingController.ownedDwellingsLoaded)
 //				if (true)
 				{
 					attemptToInitializeVenueForUser();	
 					venueLoaded = true;
 					attemptToPopulateVenueForUser();
 				}
-				else if (isLoggedInUser(evt.user) && !evt.gdi.dwellingController.fullyLoaded)
+				else if (isLoggedInUser(evt.user) && !evt.gdi.dwellingController.ownedDwellingsLoaded)
 				{
 //					throw new Error("Dwelling not set");
 				}
@@ -471,7 +471,7 @@
 			private function onDwellingsLoaded(evt:EssentialEvent):void
 			{
 				gdi.removeEventListener(EssentialEvent.OWNED_DWELLINGS_LOADED, onDwellingsLoaded);
-				if (isLoggedInUser(evt.user) && evt.gdi.structureController.fullyLoaded)
+				if (isLoggedInUser(evt.user) && evt.gdi.structureController.ownedStructuresLoaded)
 				{
 					attemptToInitializeVenueForUser();					
 					venueLoaded = true;

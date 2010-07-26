@@ -73,13 +73,21 @@ package game
 			essentialModelController.gdi = this;
 			
 			songController = new SongController(essentialModelController);
+			songController.addEventListener(EssentialEvent.SONGS_LOADED, onSongsLoaded);
+			songController.addEventListener(EssentialEvent.OWNED_SONGS_LOADED, onOwnedSongsLoaded);
 			layerableController = new LayerableController(essentialModelController);
+			layerableController.addEventListener(EssentialEvent.OWNED_LAYERABLES_LOADED, onOwnedLayerablesLoaded);
+			layerableController.addEventListener(EssentialEvent.LAYERABLES_LOADED, onLayerablesLoaded);
 			usableController = new UsableController(essentialModelController);
 			creatureController = new CreatureController(essentialModelController);
 			thingerController = new ThingerController(essentialModelController);
 			storeController = new StoreController(essentialModelController);
 			structureController = new StructureController(essentialModelController);
+			structureController.addEventListener(EssentialEvent.OWNED_STRUCTURES_LOADED, onOwnedStructuresLoaded);
+			structureController.addEventListener(EssentialEvent.STRUCTURES_LOADED, onStructuresLoaded);
 			dwellingController = new DwellingController(essentialModelController);
+			dwellingController.addEventListener(EssentialEvent.OWNED_DWELLINGS_LOADED, onOwnedDwellingsLoaded);
+			dwellingController.addEventListener(EssentialEvent.DWELLINGS_LOADED, onDwellingsLoaded);
 			userController = new UserController(essentialModelController);
 			levelController = new LevelController(essentialModelController);
 			
@@ -346,10 +354,10 @@ package game
 		
 		public function checkForLoadedMovieClips():void
 		{
-			checkForLoadedDwellings();
-			checkForLoadedStructures();
-			checkForLoadedLayerables();
-			checkForLoadedSongs();
+//			checkForLoadedDwellings();
+//			checkForLoadedStructures();
+//			checkForLoadedLayerables();
+//			checkForLoadedSongs();
 			checkForLoadedUsables();
 		}
 		
@@ -358,27 +366,51 @@ package game
 			essentialModelController.checkIfLoadingAndInstantiationComplete();
 		}
 		
-		public function checkForLoadedSongs():void
+		private function onSongsLoaded(evt:EssentialEvent):void
 		{
-			if (songController.ownedSongsLoaded != 0)
+			if (!songController.songsLoaded)
 			{
-				songController.fullyLoaded = true;
-				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_SONGS_LOADED);
-				evt.user = this.user;
-				evt.gdi = this;
-				dispatchEvent(evt);
+				songController.songsLoaded = true;
 			}
 		}
 		
-		public function checkForLoadedStructures():void
+		public function onOwnedSongsLoaded(evt:EssentialEvent):void
 		{
-			if (structureController.ownedStructureMovieClipsLoaded == structureController.ownedStructuresLoaded && structureController.ownedStructuresLoaded != 0)
+			if (!songController.ownedSongsLoaded)
 			{
-				structureController.fullyLoaded = true;
-				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_STRUCTURES_LOADED);
-				evt.user = this.user;
-				evt.gdi = this;
-				dispatchEvent(evt);
+				songController.ownedSongsLoaded = true;
+				if (!songController.songsLoaded)
+				{
+					throw new Error("attempting to load owned songs before songs");
+				}
+				var newEvent:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_SONGS_LOADED);
+				newEvent.user = this.user;
+				newEvent.gdi = this;
+				dispatchEvent(newEvent);
+			}
+		}
+		
+		public function onStructuresLoaded(evt:EssentialEvent):void
+		{
+			if (!structureController.structuresLoaded)
+			{
+				structureController.structuresLoaded = true;
+			}
+		}
+		
+		public function onOwnedStructuresLoaded(evt:EssentialEvent):void
+		{
+			if (!structureController.ownedStructuresLoaded)
+			{
+				structureController.ownedStructuresLoaded = true;
+				if (!structureController.structuresLoaded)
+				{
+					throw new Error("trying to load owned structures before structures");
+				}
+				var newEvent:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_STRUCTURES_LOADED);
+				newEvent.user = this.user;
+				newEvent.gdi = this;
+				dispatchEvent(newEvent);
 			}	
 		}
 
@@ -394,24 +426,47 @@ package game
 			}	
 		}
 		
-		public function checkForLoadedLayerables():void
+		public function onLayerablesLoaded(evt:EssentialEvent):void
 		{
-//			if (layerableController.ownedLayerableReferencesUpdated == EssentialModelReference.numInstancesToLoad["owned_layerable"] && EssentialModelReference.numInstancesToLoad["layerable"] == layerableController.layerableMovieClipsLoaded)
-			if (layerableController.areLayerablesAssignedToOwnedLayerables() && EssentialModelReference.numInstancesToLoad["layerable"] == layerableController.layerableMovieClipsLoaded)
+			if (!layerableController.layerablesLoaded)
 			{
-				layerableController.fullyLoaded = true;
-				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_LAYERABLES_LOADED);
-				evt.user = this.user;
-				evt.gdi = this;
-				dispatchEvent(evt);
-			}			
-		}	
+				layerableController.layerablesLoaded = true;
+			}
+		}
 		
-		public function checkForLoadedDwellings():void
+		public function onOwnedLayerablesLoaded(evt:EssentialEvent):void
 		{
-			if (dwellingController.ownedDwellingMovieClipsLoaded == dwellingController.ownedDwellingsLoaded && dwellingController.ownedDwellingsLoaded != 0)
+			if (!layerableController.ownedLayerablesLoaded)
 			{
-				dwellingController.fullyLoaded = true;
+				layerableController.ownedLayerablesLoaded = true;
+				if (!layerableController.layerablesLoaded)
+				{
+					throw new Error("owned layerables loaded before layerables?");
+				}
+				var newEvent:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_LAYERABLES_LOADED);
+				newEvent.user = this.user;
+				newEvent.gdi = this;
+				dispatchEvent(newEvent);
+			}			
+		}
+		
+		private function onDwellingsLoaded(evt:EssentialEvent):void
+		{
+			if (!dwellingController.dwellingsLoaded)
+			{
+				dwellingController.dwellingsLoaded = true;
+			}
+		}
+		
+		public function onOwnedDwellingsLoaded(evt:EssentialEvent):void
+		{
+			if (!dwellingController.ownedDwellingsLoaded)
+			{
+				dwellingController.ownedDwellingsLoaded = true;
+				if (!dwellingController.dwellingsLoaded)
+				{
+					throw new Error("attempting to load owned dwellings before dwellings");
+				}
 				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_DWELLINGS_LOADED);
 				evt.user = this.user;
 				evt.gdi = this;

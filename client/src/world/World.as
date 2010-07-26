@@ -232,7 +232,7 @@ package world
 			activeAsset.lastWorldPoint.z = (activeAsset.worldCoords.z.valueOf());
 		}
 		
-		public function moveAssetTo(activeAsset:ActiveAsset, destination:Point3D, fourDirectional:Boolean = false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0):void
+		public function moveAssetTo(activeAsset:ActiveAsset, destination:Point3D, fourDirectional:Boolean = false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):void
 		{	
 			validateDestination(destination);
 			updatePointReferences(activeAsset, destination);
@@ -249,7 +249,7 @@ package world
 				}
 				else
 				{
-					moveFourDirectional(activeAsset, avoidStructures, avoidPeople, exemptStructures);
+					moveFourDirectional(activeAsset, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);
 				}
 			}
 			else
@@ -260,9 +260,9 @@ package world
 			activeAsset.isMoving = true;			
 		}
 		
-		private function moveFourDirectional(asset:ActiveAsset, avoidStructures:Boolean, avoidPeople:Boolean, exemptStructures:ArrayCollection):void
+		private function moveFourDirectional(asset:ActiveAsset, avoidStructures:Boolean, avoidPeople:Boolean, exemptStructures:ArrayCollection, heightBase:int=0, extraStructures:ArrayCollection=null):void
 		{
-			var tilePath:ArrayCollection = pathFinder.add(asset, avoidStructures, avoidPeople, exemptStructures);		
+			var tilePath:ArrayCollection = pathFinder.add(asset, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);		
 			asset.currentPath = tilePath;
 			asset.pathStep = 0;
 			var nextPoint:Point3D = asset.currentPath[asset.pathStep];

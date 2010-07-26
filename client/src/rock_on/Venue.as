@@ -172,7 +172,7 @@ package rock_on
 			return false;
 		}
 		
-		public function pickRandomAvailablePointWithinRect(rect:Rectangle, worldSprite:World, heightBase:int, avoidStructures:Boolean = true, avoidPeople:Boolean = true, exemptStructures:ArrayCollection = null):Point3D
+		public function pickRandomAvailablePointWithinRect(rect:Rectangle, worldSprite:World, heightBase:int, rect2:Rectangle = null, avoidStructures:Boolean = true, avoidPeople:Boolean = true, exemptStructures:ArrayCollection = null):Point3D
 		{
 			var pt3D:Point3D = new Point3D(0, heightBase, 0);				
 			var occupiedSpaces:ArrayCollection = worldSprite.getOccupiedSpaces(avoidStructures, avoidPeople, exemptStructures);
@@ -180,6 +180,14 @@ package rock_on
 			{
 				pt3D.x = Math.floor(rect.right - Math.random() * (rect.right - rect.left - 1) - 1);
 				pt3D.z = Math.floor(rect.bottom - Math.random() * (rect.bottom - rect.top - 1) - 1);
+				if (rect2)
+				{
+					if (Math.random() < 0.5)
+					{
+						pt3D.x = Math.floor(rect2.right - Math.random() * (rect2.right - rect2.left - 1) - 1);
+						pt3D.z = Math.floor(rect2.bottom - Math.random() * (rect2.bottom - rect2.top - 1) - 1);						
+					}
+				}
 			}
 			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(pt3D)));	
 			return pt3D;
@@ -191,11 +199,11 @@ package rock_on
 			boothsRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, Math.round(_myWorld.tilesDeep * BOOTH_SECTION_FRACTION))
 			stageBufferRect = new Rectangle(0, (_myWorld.tilesDeep - stageManager.concertStage.structure.depth - STAGE_BUFFER_SQUARES), stageManager.concertStage.structure.width + STAGE_BUFFER_SQUARES, stageManager.concertStage.structure.depth + STAGE_BUFFER_SQUARES);	
 			stageRect = new Rectangle(0, (_myWorld.tilesDeep - stageManager.concertStage.structure.depth), stageManager.concertStage.structure.width, stageManager.concertStage.structure.depth);	
-			crowdBufferRect = new Rectangle(Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width), boothsRect.bottom, venueRect.right - (Math.ceil((1 - CROWD_BUFFER_FRACTION) * venueRect.width)), venueRect.height - boothsRect.height);
-			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom - 1));
 			audienceRect = new Rectangle(0, boothsRect.bottom, venueRect.width, venueRect.height - boothsRect.height - 1);
 			
 			assignedSeats = _myWorld.pathFinder.createSeatingArrangement(audienceRect, stageBufferRect, this.dwelling.capacity);
+			crowdBufferRect = new Rectangle(stageRect.width + stageBufferRect.top - audienceRect.top - 2, boothsRect.bottom, venueRect.right - (stageRect.width + stageBufferRect.top - audienceRect.top - 2), venueRect.height - boothsRect.height);
+			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom - 1));
 		}
 		
 		public function clearFilters():void

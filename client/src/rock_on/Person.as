@@ -36,6 +36,7 @@ package rock_on
 		public var moodClip:BouncyBitmap;		
 		public var currentDirection:Point3D;
 		public var proxiedDestination:Point3D;
+		public var rectanglesToAvoid:ArrayCollection;
 		
 		public var _myWorld:World;
 		public var _myStage:World;
@@ -461,11 +462,11 @@ package rock_on
 			}
 		}		
 		
-		public function movePerson(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false):void
+		public function movePerson(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):void
 		{
 			if (worldCoords.x%1 == 0 && worldCoords.y%1 == 0 && worldCoords.z%1 == 0)
 			{			
-				_myWorld.moveAssetTo(this, destination, true, avoidStructures, avoidPeople);			
+				_myWorld.moveAssetTo(this, destination, true, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);			
 			}
 			else
 			{

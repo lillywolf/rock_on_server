@@ -383,7 +383,7 @@ package rock_on
 				var exemptStructures:ArrayCollection = new ArrayCollection();
 				exemptStructures.addItem(_venue.stageManager.concertStage);
 				exitLocation = _venue.mainEntrance;
-				destinationLocation = _venue.pickRandomAvailablePointWithinRect(_venue.stageRect, _venue.stageManager.myStage, _venue.stageManager.concertStage.structure.height, true, true, exemptStructures);
+				destinationLocation = _venue.pickRandomAvailablePointWithinRect(_venue.stageRect, _venue.stageManager.myStage, _venue.stageManager.concertStage.structure.height, null, true, true, exemptStructures);
 				advanceState(EXIT_OFFSTAGE_STATE);
 				return false;
 			}
