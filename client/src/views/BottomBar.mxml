@@ -412,9 +412,9 @@
 //				this.addChild(creatureCanvas);
 //			}
 			
-			public function expandCreatureCanvas():void
+			public function expandCreatureCanvas(creature:Creature):void
 			{
-				creatureInfoComponent.expandComponent();
+				creatureInfoComponent.expandComponent(creature);
 			}
 			
 			private function createInventoryCanvas():void

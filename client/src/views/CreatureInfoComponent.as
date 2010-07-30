@@ -1,5 +1,6 @@
 package views
 {	
+	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
 	
 	import models.Creature;
@@ -7,10 +8,13 @@ package views
 	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
 	import mx.containers.VBox;
+	import mx.controls.Button;
 	import mx.controls.Image;
 	import mx.controls.Label;
 	import mx.controls.Text;
 	import mx.core.UIComponent;
+	import mx.events.CloseEvent;
+	import mx.events.DynamicEvent;
 	
 	import world.ActiveAssetStack;
 	
@@ -20,6 +24,8 @@ package views
 		public var nameComponent:Label;
 		public var avatarComponent:ActiveAssetStack;
 		public var infoComponent:Canvas;
+		public var locked:Boolean;
+		public var closeButton:Button;
 		
 		public function CreatureInfoComponent()
 		{
@@ -27,12 +33,42 @@ package views
 			createBackCanvas();
 		}
 		
-		public function expandComponent():void
+		public function expandComponent(creature:Creature):void
 		{
-			var pushComponents:ArrayCollection = new ArrayCollection();
-			pushComponents.addItem(nameComponent);
-			backingComponent.expand("up", 200, pushComponents);
+			if (!locked)
+			{				
+				replaceCreature(creature);
+				locked = true;
+				closeButton = new Button();
+				closeButton.right = 6;
+				closeButton.top = 6;
+				closeButton.addEventListener(MouseEvent.CLICK, onCloseButtonClicked);
+				backingComponent.addChild(closeButton);
+				
+//				var pushComponents:ArrayCollection = new ArrayCollection();
+//				pushComponents.addItem(nameComponent);
+				backingComponent.expand("up", 200);
+				
+				removeChild(infoComponent);
+				removeChild(nameComponent);
+			}
 		}		
+		
+		private function onCloseButtonClicked(evt:MouseEvent):void
+		{
+			backingComponent.addEventListener("shrinkComplete", onShrinkComplete);
+			closeButton.removeEventListener(MouseEvent.CLICK, onCloseButtonClicked);
+			backingComponent.removeChild(closeButton);
+			backingComponent.shrink();
+		}
+		
+		private function onShrinkComplete(evt:DynamicEvent):void
+		{
+			backingComponent.removeEventListener("shrinkComplete", onShrinkComplete);
+			addChild(infoComponent);
+			addChild(nameComponent);
+			locked = false;
+		}
 		
 		private function createBackCanvas():void
 		{
@@ -64,24 +100,31 @@ package views
 		
 		public function replaceCreature(creature:Creature):void
 		{
-			if (avatarComponent)
+			if (!locked)
 			{
-				removeChild(avatarComponent);
+				if (avatarComponent)
+				{
+					removeChild(avatarComponent);
+				}
+				if (infoComponent)
+				{
+					removeChild(infoComponent);
+				}
+				if (nameComponent)
+				{
+					removeChild(nameComponent);
+				}
 				setDisplayedCreature(creature, 0.55);
 				setAvatarDimensions();
-				displayCreatureInfo(creature);
 				addChild(avatarComponent);
-			}
-			if (infoComponent)
-			{
-				removeChild(infoComponent);
+				displayCreatureInfo(creature);
 			}
 		}	
 		
 		public function setAvatarDimensions():void
 		{
-			avatarComponent.x = avatarComponent.width/2 - 5;
-			avatarComponent.y = avatarComponent.height - 80;
+			avatarComponent.x = avatarComponent.width/2;
+			avatarComponent.y = avatarComponent.height - 70;
 		}	
 		
 		public function setCreatureName(name:String):void
@@ -92,7 +135,12 @@ package views
 			nameComponent.setStyle("color", 0xffffff);
 			nameComponent.setStyle("fontFamily", "Museo-Slab-900");
 			nameComponent.setStyle("fontSize", 18);	
+			nameComponent.x = 100;
+			nameComponent.y = -30;
+			nameComponent.height = 18;
+//			nameComponent.width = this.width;
 			addChild(nameComponent);
+			nameComponent.width = 200;
 		}
 		
 		public function createTextFilter():GlowFilter
@@ -108,15 +156,15 @@ package views
 			infoComponent = new Canvas();
 			infoComponent.clipContent = false;
 			infoComponent.x = 100;
-			infoComponent.y = -30;
-			infoComponent.addChild(nameComponent);
+			infoComponent.y = 0;
+//			infoComponent.addChild(nameComponent);
 			var vbox:VBox = new VBox();
 			vbox.setStyle("verticalGap", 4);
-			vbox.y = 40;
+			vbox.y = 10;
 			var typeLabel:Text = getCreatureType(creature);
 			var starCanvas:Canvas = getCreatureStars(creature);
 			vbox.addChild(starCanvas);
-			typeLabel.y = 40;
+			typeLabel.y = 10;
 			vbox.addChild(typeLabel);
 			infoComponent.addChild(vbox);
 			addChild(infoComponent);				

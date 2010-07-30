@@ -60,6 +60,8 @@ package game
 		public static const CONCERT_GOER:String = "Concert Goer";
 		public static const FAN:String = "Fan";
 		public static const NEW_FAN:String = "New Fan";
+		public static const RIVAL:String = "Rival";
+		public static const FRIEND:String = "Friend";
 		
 		public static const STATIC:int = 0;
 		public static const SUPER:int = 1;
@@ -164,7 +166,7 @@ package game
 				requires:[],
 				min_level: 1,
 				move_to: true,
-				animation: ["walk_toward"],
+				animation: null,
 				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2, group: BASIC}]
 			},
@@ -179,7 +181,7 @@ package game
 				requires:["Pink Paint", "Headphones"],
 				min_level: 1,
 				move_to: true,
-				animation: ["walk_toward"],
+				animation: null,
 				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2, group: BASIC}]
 			},
@@ -194,7 +196,7 @@ package game
 				requires:["Red Paint", "Headphones"],
 				min_level: 1, 
 				move_to: true,
-				animation: ["walk_toward"],
+				animation: null,
 				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.3, group: BASIC}]
 			},
@@ -209,7 +211,7 @@ package game
 				requires:["Love Potion"],
 				min_level: 10,
 				move_to: false,
-				animation: ["walk_toward"],
+				animation: null,
 				rewards: [{type: XP, total: 10, min_bonus: 4, max_bonus: 8}, {type: MUSIC_CREDITS, total: 4, min_bonus: 2, max_bonus: 6, mc: MUSIC_CREDITS_ICON}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.5, group: BASIC}]
 			},
@@ -224,7 +226,7 @@ package game
 				requires:["Cooling Fan"],
 				min_level: 3,
 				move_to: true,
-				animation: ["stand_still_toward"],
+				animation: null,
 				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
 				possible_rewards: []
 			},
@@ -239,12 +241,12 @@ package game
 				requires:["Space Heater"],
 				min_level: 3,
 				move_to: true,
-				animation: ["stand_still_toward"],
+				animation: null,
 				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1, mc: FAN_CREDITS_ICON}], 
 				possible_rewards: []
 			},
 			WANTS_AUTOGRAPH: {
-				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN],
+				creature_types:[GROUPIE, CONCERT_GOER, NEW_FAN, FAN, FRIEND, RIVAL],
 				person_types:[MOVING],
 				symbol_name: HAMBURGER,
 				message: "Can I get an autograph?",

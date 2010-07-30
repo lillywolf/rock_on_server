@@ -939,7 +939,7 @@ package views
 		
 		public function questInfoRequested(person:Person):void
 		{
-			_bottomBar.expandCreatureCanvas();
+			_bottomBar.expandCreatureCanvas(person.creature);
 		}
 				
 		public function createHeartProgressBar(sprite:Sprite):CustomizableProgressBar

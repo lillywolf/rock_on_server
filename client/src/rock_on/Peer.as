@@ -43,6 +43,7 @@ package rock_on
 		private function onMouseClicked(evt:MouseEvent):void
 		{
 			var moodEvent:MoodEvent = new MoodEvent(MoodEvent.QUEST_INFO_REQUESTED, true);
+			moodEvent.person = this;
 			_venue.dispatchEvent(moodEvent);
 		}
 		
