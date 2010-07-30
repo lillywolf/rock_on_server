@@ -308,7 +308,7 @@ package world
 		
 		public function establishPeopleOccupiedSpaces():ArrayCollection
 		{
-			trace("get people occupied spaces");
+//			trace("get people occupied spaces");
 			var peopleOccupiedSpaces:ArrayCollection = getPeopleOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets);
 			if (_world.bitmapBlotter)
 			{
@@ -351,7 +351,7 @@ package world
 			var pt:Point3D;
 			if (getStructureOccupiedSpaces)
 			{
-				trace("get structure occupied spaces");
+//				trace("get structure occupied spaces");
 				var structureOccupiedSpaces:ArrayCollection = establishStructureOccupiedSpaces(exemptStructures);
 				allOccupiedSpaces.addAll(structureOccupiedSpaces);			
 			}

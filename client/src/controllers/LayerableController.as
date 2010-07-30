@@ -171,9 +171,22 @@ package controllers
 			return false;
 		}
 		
+		public function checkIfOwnedLayerablesBelongToUser():Boolean
+		{
+			for each (var ol:OwnedLayerable in _owned_layerables)
+			{
+				if (ol.user_id != -1)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
 		public function checkIfOwnedLayerablesFullyLoaded():Boolean
 		{
-			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAssignedToParents() && checkIfAllOwnedLayerablesAdded())
+//			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAssignedToParents() && checkIfAllOwnedLayerablesAdded())
+			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAdded() && checkIfOwnedLayerablesBelongToUser())
 			{
 				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_LAYERABLES_LOADED);
 				this.dispatchEvent(evt);
@@ -184,7 +197,8 @@ package controllers
 		
 		public function checkIfFriendAvatarsLoaded():Boolean
 		{
-			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAssignedToParents() && checkIfAllOwnedLayerablesAdded())
+//			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAssignedToParents() && checkIfAllOwnedLayerablesAdded())
+			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAdded())
 			{
 				if (friendOwnedLayerablesLoaded)
 				{
@@ -241,7 +255,7 @@ package controllers
 			}
 			else
 			{
-				trace("layerable refs: " + total.toString());
+//				trace("layerable refs: " + total.toString());
 			}
 			return false;
 		}

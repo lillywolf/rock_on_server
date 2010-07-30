@@ -22,7 +22,7 @@ package models
 		public var _name:String;
 		public var location:Point3D;
 		public var _layerableOrder:Array;
-		public var _last_fed:String;
+		public var _last_nurture:String;
 		public var has_moods:Boolean;
 		
 		public function Creature(params:Object, target:IEventDispatcher=null)
@@ -63,9 +63,9 @@ package models
 			{
 				_name = params.name;
 			}
-			if (params.last_fed)
+			if (params.last_nurture)
 			{
-				_last_fed = params.last_fed;
+				_last_nurture = params.last_nurture;
 				has_moods = true;
 			}
 		}
@@ -77,10 +77,10 @@ package models
 //			layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
 //			layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
 //			layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "instrument"];
-			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "instrument"];
-			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
+			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
+			layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
+			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
 		}
 		
 		public function getConstructedCreature(layerablerOrder:Array, animation:String, size:Number):ActiveAssetStack
@@ -212,14 +212,14 @@ package models
 			return _layerableOrder;
 		}
 		
-		public function set last_fed(val:String):void
+		public function set last_nurture(val:String):void
 		{
-			_last_fed = val;
+			_last_nurture = val;
 		}
 		
-		public function get last_fed():String
+		public function get last_nurture():String
 		{
-			return _last_fed;
+			return _last_nurture;
 		}
 		
 		public function set creature_group_id(val:int):void

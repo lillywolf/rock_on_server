@@ -1,6 +1,7 @@
 package rock_on
 {
 	import flash.display.MovieClip;
+	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.filters.GlowFilter;
 	import flash.utils.Timer;
@@ -9,29 +10,40 @@ package rock_on
 	
 	import mx.collections.ArrayCollection;
 	
+	import views.BouncyBitmap;
+	
+	import world.MoodEvent;
 	import world.Point3D;
 	import world.World;
 	import world.WorldEvent;
 	
-	public class Friend extends Person
+	public class Peer extends Person
 	{
 		public static const ROUTE_STATE:int = 0;
 		public static const STOPPED_STATE:int = 1;
 		
 		public static const STOP_TIME_MULTIPLIER:int = 20000;
 		public static const STOP_TIME_MIN:int = 10000;
-
+		
 		public var _venue:Venue;
 		public var state:int;
 		public var stoppedTimer:Timer;
-		public var currentDestination:Point3D;		
+		public var currentDestination:Point3D;	
 		
-		public function Friend(venue:Venue, creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
+		public function Peer(venue:Venue, creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
 			super(creature, movieClip, layerableOrder, scale);
 			_venue = venue;			
 			setRectanglesToAvoid();
-			updateLayerableOrder();
+			updateLayerableOrder();	
+			
+			addEventListener(MouseEvent.CLICK, onMouseClicked);			
+		}
+		
+		private function onMouseClicked(evt:MouseEvent):void
+		{
+			var moodEvent:MoodEvent = new MoodEvent(MoodEvent.QUEST_INFO_REQUESTED, true);
+			_venue.dispatchEvent(moodEvent);
 		}
 		
 		public function setRectanglesToAvoid():void
@@ -44,7 +56,7 @@ package rock_on
 		{
 			layerableOrder = new Array();
 			layerableOrder['walk_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
-			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
+			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "bottom custom", "top custom", "hair front", "hair band"];
 			layerableOrder['stand_still_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];			
 		}		
@@ -54,6 +66,15 @@ package rock_on
 			var gf:GlowFilter = new GlowFilter(0x86FF24, 1, 16, 16, 1.5);
 			unclearableFilters.push(gf);
 			this.filters = [gf];
+		}
+		
+		public function setQuestStatus():void
+		{
+			var cursor:MovieClip = new ChatBubbleBlue();
+			moodClip = new BouncyBitmap(cursor, .8);
+			moodClip.y = -(height + moodClip.height - 8);
+			moodClip.x = -moodClip.width/4;
+			addChild(moodClip);		
 		}
 		
 		public function advanceState(destinationState:int):void
@@ -148,6 +169,6 @@ package rock_on
 			{
 				advanceState(Friend.STOPPED_STATE);
 			}
-		}		
+		}				
 	}
 }

@@ -7,6 +7,7 @@ package controllers
 	import models.OwnedLayerable;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.FlexGlobals;
 	
 	import server.ServerController;
 	
@@ -134,10 +135,10 @@ package controllers
 //				layerableOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
 //				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
 //				layerableOrder['stand_still_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];								
-				layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "hair band"];
-				layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];
-				layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "hair band"];
-				layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];								
+				layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
+				layerableOrder['walk_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
+				layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
+				layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];								
 			}
 			else if (creatureType == "Hater")
 			{							
@@ -148,12 +149,27 @@ package controllers
 			}
 			else
 			{							
-				layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
-				layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
-				layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
-				layerableOrder['stand_still_away'] = ["shoes", "bottom", "top", "hair front"];								
+				layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
+				layerableOrder['walk_away'] = ["shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
+				layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
+				layerableOrder['stand_still_away'] = ["shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];								
 			}
 			return layerableOrder;
+		}
+		
+		public function getFans():ArrayCollection
+		{
+			var matchingCreatures:ArrayCollection = new ArrayCollection();
+			for each (var c:Creature in _creatures)
+			{
+				if (c.user_id == FlexGlobals.topLevelApplication.gdi.user.id && c.type == "Fan")
+				{
+					var matchId:int = int(c.additional_info.split(": ")[1]);
+					var creature:Creature = this.getCreatureById(matchId);
+					matchingCreatures.addItem(creature);
+				}
+			}
+			return matchingCreatures;
 		}
 		
 		public function getCreaturesByType(type:String):ArrayCollection
@@ -162,6 +178,19 @@ package controllers
 			for each (var creature:Creature in _creatures)
 			{
 				if (creature.type == type)
+				{
+					matchingCreatures.addItem(creature);
+				}
+			}
+			return matchingCreatures;
+		}
+		
+		public function getPeers(uid:int):ArrayCollection
+		{
+			var matchingCreatures:ArrayCollection = new ArrayCollection();
+			for each (var creature:Creature in _creatures)
+			{
+				if (creature.user_id == uid && creature.type != "Fan")
 				{
 					matchingCreatures.addItem(creature);
 				}

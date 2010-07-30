@@ -44,6 +44,7 @@ package rock_on
 	
 	import world.ActiveAsset;
 	import world.BitmapBlotter;
+	import world.MoodEvent;
 	import world.Point3D;
 	import world.World;
 
@@ -96,6 +97,7 @@ package rock_on
 		public var techManager:TechManager;
 		public var haterBoss:HaterBoss;
 		public var friendBoss:FriendBoss;
+		public var peerBoss:PeerBoss;
 		public var fullyLoaded:Boolean;		
 
 		public var _wbi:WorldBitmapInterface;
@@ -128,13 +130,10 @@ package rock_on
 			
 			entryPoints = new ArrayCollection();
 			setEntrance(params);
-			setAdditionalProperties(params);
+			setAdditionalProperties(params);		
 			
-			numStaticCustomers = Math.floor(fancount * VenueManager.STATIC_CUSTOMER_FRACTION);
-			numSuperCustomers = Math.floor(fancount * VenueManager.SUPER_CUSTOMER_FRACTION);
-			numMovingCustomers = fancount - numStaticCustomers - numSuperCustomers;			
-			
-			addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);			
+			addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);	
+			addEventListener(MoodEvent.QUEST_INFO_REQUESTED, onQuestInfoRequested);
 			
 			addStageManager();	
 		}
@@ -263,9 +262,7 @@ package rock_on
 		{
 			setLayout();
 			updateState();	
-			
-			getNumberOfBitmaps();
-			
+						
 			stageManager.myWorld = _myWorld;
 			customerPersonManager = new CustomerPersonManager(_myWorld, this);
 			boothBoss = new BoothBoss(_structureController, _myWorld, this);
@@ -278,6 +275,8 @@ package rock_on
 		
 		public function addMovingStuffToVenue():void
 		{
+			var fans:ArrayCollection = getFans();
+			updateAudienceNumbers();
 			creatureGenerator = new CreatureGenerator(_layerableController);
 			_wbi.customerPersonManager = customerPersonManager;
 			groupieBoss = new GroupieBoss(customerPersonManager, boothBoss, stageManager.concertStage, _creatureController, _myWorld, this);
@@ -287,7 +286,7 @@ package rock_on
 			
 			_creatureController.makeSureOwnedLayerablesAreAssignedToCreatures();
 			
-			addStaticCustomersToVenue();
+			addStaticCustomersToVenue(fans);
 			trace("static customers added");
 			addSuperCustomersToVenue(stageManager.myStage);
 			trace("super customers added");
@@ -297,8 +296,26 @@ package rock_on
 			trace("groupies started");
 			addTechsToVenue();
 			addHatersToVenue();
-			showBandMembersRaceCondition();		
-		}		
+			addSpecialPeopleToVenue();
+			showBandMembersRaceCondition();	
+			trace("band members checked");
+		}	
+		
+		public function getFans():ArrayCollection
+		{
+			var fans:ArrayCollection = _creatureController.getFans();
+			this.fancount = fans.length;			
+			return fans;
+		}
+		
+		public function updateAudienceNumbers():void
+		{
+			numStaticCustomers = Math.floor(fancount * VenueManager.STATIC_CUSTOMER_FRACTION);
+			numSuperCustomers = Math.ceil(fancount * VenueManager.SUPER_CUSTOMER_FRACTION);
+			numMovingCustomers = fancount - numStaticCustomers - numSuperCustomers;	
+			
+			getNumberOfBitmaps();			
+		}
 		
 		public function showBandMembersRaceCondition():void
 		{
@@ -323,14 +340,6 @@ package rock_on
 		
 		private function getNumberOfBitmaps():void
 		{
-			var totalStructures:int = 0;
-			for each (var os:OwnedStructure in _structureController.owned_structures)
-			{
-				if (os.structure.structure_type == "Booth")
-				{
-					totalStructures++;
-				}
-			}
 			_bitmapBlotter.expectedAssetCount = numStaticCustomers;				
 		}		
 		
@@ -352,7 +361,7 @@ package rock_on
 			return timeSinceStateChanged;
 		}
 		
-		public function addStaticCustomersToVenue():void
+		public function addStaticCustomersToVenue(fans:ArrayCollection):void
 		{
 			if (!customerPersonManager.concertStage)
 			{
@@ -361,6 +370,8 @@ package rock_on
 			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
 				var c:Creature = creatureGenerator.createImposterCreature("Fan");
+				c.name = (fans[i] as Creature).name;
+				c.owned_layerables = (fans[i] as Creature).owned_layerables;
 				c.has_moods = true;
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
 				cp.personType = Person.STATIC;
@@ -414,6 +425,19 @@ package rock_on
 				hater.personType = Person.MOVING;
 				hater.speed = 0.11;
 				haterBoss.add(hater);
+			}
+		}
+		
+		public function addSpecialPeopleToVenue():void
+		{
+			peerBoss = new PeerBoss(this);
+			var peers:ArrayCollection = _creatureController.getPeers(-1);
+			for each (var c:Creature in peers)
+			{
+				var peer:Peer = new Peer(this, c, null, c.layerableOrder, 0.5);
+				peer.personType = Person.MOVING;
+				peer.speed = 0.11;
+				peerBoss.add(peer);
 			}
 		}
 		
@@ -602,6 +626,11 @@ package rock_on
 		public function endCrowdedState():void
 		{
 			
+		}
+		
+		private function onQuestInfoRequested(evt:MoodEvent):void
+		{
+			_wbi.questInfoRequested(evt.person);
 		}
 		
 		public function checkForVenueTurnover():void

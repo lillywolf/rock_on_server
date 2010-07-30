@@ -115,9 +115,9 @@ package rock_on
 		{
 			if (_creature.has_moods)
 			{
-				if (_creature.last_fed)
+				if (_creature.last_nurture)
 				{
-					var timeSinceLastMeal:Number = new Date().getTime() - GameClock.convertStringTimeToUnixTime(_creature.last_fed);				
+					var timeSinceLastMeal:Number = new Date().getTime() - GameClock.convertStringTimeToUnixTime(_creature.last_nurture);				
 					if (timeSinceLastMeal > CustomerPerson.HUNGER_DELAY)
 					{
 						mood = MoodBoss.assignMoodByString(CustomerPerson.HUNGRY);

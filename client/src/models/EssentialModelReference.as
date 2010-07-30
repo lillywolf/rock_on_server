@@ -48,7 +48,7 @@ package models
 			loadedSwfs = new ArrayCollection();
 			classesToLoad = new ArrayCollection();
 			loadedClasses = new ArrayCollection();
-			allInstancesLoaded = new ArrayCollection();			
+			allInstancesLoaded = new ArrayCollection();	
 		}
 		
 		public static function updateLoadedModels(className:String, klass:Class, appDomain:ApplicationDomain):void

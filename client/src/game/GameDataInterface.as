@@ -169,7 +169,9 @@ package game
 		public function getUserContent(uid:Number):void
 		{
 			snid = uid;
-			getDataForModel({snid: uid}, "user", "find_by_snid");
+			getDataForModel({snid: uid}, "user", "find_by_snid");	
+			getDataForModel({user_id: -1}, "creature", "find_by_user_id");			
+			getDataForModel({user_id: -1}, "owned_layerable", "find_by_game_id");				
 		}
 		
 		public function getBasicUserContent(uid:Number):void
@@ -191,7 +193,7 @@ package game
 			getDataForModel({}, "dwelling", "get_all");
 			getDataForModel({}, "store", "get_all");
 			getDataForModel({}, "song", "get_all");
-			getDataForModel({}, "usable", "get_all");
+			getDataForModel({}, "usable", "get_all");			
 		}
 		
 		public function getDataForModel(params:Object, modelName:String, methodName:String):void

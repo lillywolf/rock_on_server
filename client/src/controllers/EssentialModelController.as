@@ -245,18 +245,18 @@ package controllers
 		
 		public function assignParentInstanceToChild(belongsTo:UnprocessedModel, isChild:UnprocessedModel):void
 		{
-			var className:String = convertToClassCase(belongsTo.model);			
-			var newClass:Class = getDefinitionByName('models.'+className) as Class;				
-			isChild.instance[belongsTo.model] = new newClass(belongsTo.instance);
+//			var className:String = convertToClassCase(belongsTo.model);			
+//			var newClass:Class = getDefinitionByName('models.'+className) as Class;				
+//			isChild.instance[belongsTo.model] = new newClass(belongsTo.instance);
+			isChild.instance[belongsTo.model] = belongsTo.instance;
 			
 			var evt:EssentialEvent = new EssentialEvent(EssentialEvent.PARENT_ASSIGNED, isChild.instance, isChild.model, true, true);
 			isChild.instance.dispatchEvent(evt);			
-//			dispatchEvent(evt);			
 			
 			// Add our copy to list of class copies
 			var classCopiesArray:Array = [belongsTo.instance, isChild.instance[belongsTo.model]];
 			essentialModelReference.classCopies.push(classCopiesArray);
-			trace(essentialModelReference.classCopies.length.toString());
+//			trace(essentialModelReference.classCopies.length.toString());
 //			isChild.instance[belongsTo.model] = belongsTo.instance;			
 		}		
 		
@@ -276,7 +276,12 @@ package controllers
 				var className:String = belongsTo.instance.symbol_name;
 				var newClass:Class = appDomain.getDefinition(className) as Class;	
 //				var newClass:Class = EssentialModelReference.getClassCopy(className);			
-				isChild.instance[belongsTo.model].setMovieClipFromClass(newClass);			
+				isChild.instance[belongsTo.model].setMovieClipFromClass(newClass);	
+				
+				if (!EssentialModelReference.loadedModels[className])
+				{
+					EssentialModelReference.updateLoadedModels(className, newClass, null);
+				}
 			}
 			else if (belongsTo.instance['swf_url'])
 			{
@@ -302,7 +307,7 @@ package controllers
 		
 		public function doesInstanceBelongToFriend(isChild:UnprocessedModel):Boolean
 		{
-			if (isChild.instance.hasOwnProperty("user_id"))
+			if (isChild.instance.hasOwnProperty("user_id") && isChild.instance.user_id != -1)
 			{
 				if (isChild.instance.user_id != _gdi.user.id && isChild.instance.user_id != 0)
 				{

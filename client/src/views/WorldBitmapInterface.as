@@ -166,7 +166,7 @@ package views
 			{
 				if (currentHoveredObject is Person)
 				{
-					_bottomBar.replaceCreature((this.currentHoveredObject as Person).creature);				
+					_bottomBar.replaceCreatureInfo((this.currentHoveredObject as Person).creature);				
 				}
 				hoverTimer.removeEventListener(TimerEvent.TIMER, onHoverTimerComplete);
 				hoverTimer.stop();
@@ -424,7 +424,7 @@ package views
 					var hitRect:Rectangle = new Rectangle(asset.x - asset.width/2, asset.y - asset.height, asset.width, asset.height);
 					if (hitRect.contains(currentMouseX, currentMouseY))
 					{
-						_bottomBar.replaceCreature((asset as AssetStack).creature);
+						_bottomBar.replaceCreatureInfo((asset as AssetStack).creature);
 					}
 				}
 			}
@@ -820,7 +820,7 @@ package views
 		{
 			if (sprite is Person)
 			{
-				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
+				_bottomBar.replaceCreatureInfo((sprite as ActiveAssetStack).creature);
 				var bar:CustomizableProgressBar = createHeartProgressBar(sprite);					
 				_venueManager.venue.bandMemberManager.goToStageAndTossItem(sprite as Person, _worldView);
 				_venueManager.venue.bandMemberManager.myAvatar.addEventListener(WorldEvent.ITEM_DROPPED, function onItemTossedByAvatar():void
@@ -845,7 +845,7 @@ package views
 		{
 			if (sprite is Person)
 			{
-				_bottomBar.replaceCreature((sprite as ActiveAssetStack).creature);
+				_bottomBar.replaceCreatureInfo((sprite as ActiveAssetStack).creature);
 				return true;
 			}
 			return false;
@@ -935,6 +935,11 @@ package views
 			var wgRect:Rectangle = view.myWorld.wg.getBounds(view.myWorld);
 			return new Point((sprite as ActiveAsset).realCoords.x + worldRect.x, 
 				(sprite as ActiveAsset).realCoords.y + wgRect.height/2 - sprite.height/2);			
+		}
+		
+		public function questInfoRequested(person:Person):void
+		{
+			_bottomBar.expandCreatureCanvas();
 		}
 				
 		public function createHeartProgressBar(sprite:Sprite):CustomizableProgressBar
