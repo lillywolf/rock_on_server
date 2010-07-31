@@ -54,6 +54,7 @@ package views
 		{
 			for each (var bmm:BandMemberManager in bands)
 			{
+				trace("draw band members");
 				bmm.showBandMembers();
 			}
 		}

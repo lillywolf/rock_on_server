@@ -322,7 +322,7 @@ package rock_on
 			if (fullyLoaded)
 			{
 				_bandBoss.showBandMembers();
-				trace("band members drawn");
+				trace("band members loaded");
 			}
 			else
 			{
@@ -367,6 +367,7 @@ package rock_on
 			{
 				customerPersonManager.concertStage = stageManager.concertStage;
 			}
+			trace("number of static customers:" + numStaticCustomers.toString());
 			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
 				var c:Creature = creatureGenerator.createImposterCreature("Fan");

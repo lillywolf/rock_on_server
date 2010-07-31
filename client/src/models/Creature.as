@@ -77,10 +77,11 @@ package models
 //			layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
 //			layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
 //			layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
+			layerableOrder['walk_toward'] = ["body", "hair back", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
 			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
-			layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
+			layerableOrder['stand_still_toward'] = ["body", "hair back", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
+			layerableOrder['sing'] = ["body", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
 		}
 		
 		public function getConstructedCreature(layerablerOrder:Array, animation:String, size:Number):ActiveAssetStack

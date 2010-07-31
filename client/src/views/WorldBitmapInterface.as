@@ -764,7 +764,8 @@ package views
 			if (asset is Person)
 			{
 				doCollectibleDropForPerson(asset as Person, viewToUpdate);
-				(asset as Person).endMood();
+				trace("collectible drop complete");
+//				(asset as Person).endMood();
 			}
 			else
 			{

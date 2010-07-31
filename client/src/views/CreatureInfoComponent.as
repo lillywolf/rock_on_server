@@ -87,12 +87,12 @@ package views
 		public function setDisplayedCreature(creature:Creature, dimension:Number):void
 		{
 			avatarComponent = new ActiveAssetStack(creature, null, creature.layerableOrder, dimension);
-			avatarComponent.doAnimation("walk_toward", false, 39);
+			avatarComponent.doAnimation("stand_still_toward", false);
 		}	
 		
 		public function showInitialCreature(asset:ActiveAssetStack):void
 		{
-			setDisplayedCreature(asset.creature, 0.55);
+			setDisplayedCreature(asset.creature, 0.6);
 			setAvatarDimensions();
 			displayCreatureInfo(asset.creature);
 			addChild(avatarComponent);					
@@ -114,7 +114,7 @@ package views
 				{
 					removeChild(nameComponent);
 				}
-				setDisplayedCreature(creature, 0.55);
+				setDisplayedCreature(creature, 0.6);
 				setAvatarDimensions();
 				addChild(avatarComponent);
 				displayCreatureInfo(creature);
@@ -123,8 +123,8 @@ package views
 		
 		public function setAvatarDimensions():void
 		{
-			avatarComponent.x = avatarComponent.width/2;
-			avatarComponent.y = avatarComponent.height - 70;
+			avatarComponent.x += 40;
+			avatarComponent.y += 94;
 		}	
 		
 		public function setCreatureName(name:String):void
@@ -135,9 +135,9 @@ package views
 			nameComponent.setStyle("color", 0xffffff);
 			nameComponent.setStyle("fontFamily", "Museo-Slab-900");
 			nameComponent.setStyle("fontSize", 18);	
-			nameComponent.x = 100;
+			nameComponent.x = 90;
 			nameComponent.y = -30;
-			nameComponent.height = 18;
+			nameComponent.height = 30;
 //			nameComponent.width = this.width;
 			addChild(nameComponent);
 			nameComponent.width = 200;
@@ -155,7 +155,7 @@ package views
 
 			infoComponent = new Canvas();
 			infoComponent.clipContent = false;
-			infoComponent.x = 100;
+			infoComponent.x = 90;
 			infoComponent.y = 0;
 //			infoComponent.addChild(nameComponent);
 			var vbox:VBox = new VBox();

@@ -87,8 +87,6 @@ package rock_on
 			_boothBoss = boothBoss;
 			startInitializedState();
 			addEventListener(MouseEvent.CLICK, onMouseClicked);
-
-			trace("customer person created");
 		}
 		
 		public function reInitialize():void
@@ -145,6 +143,7 @@ package rock_on
 				
 		public function handleMood(mood:Object):void
 		{
+			trace("mood: " + mood.toString());
 			itemPickupAnimations = mood.animation;			
 			
 			if (mood.move_to)
@@ -490,6 +489,7 @@ package rock_on
 				WorldBitmapInterface.doCollectibleDrop(this, _myWorld.parent as WorldView);			
 			}
 			removeMoodClip();
+			trace("item pickup complete");
 			endMood();
 		}
 		

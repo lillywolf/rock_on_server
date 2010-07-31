@@ -66,6 +66,7 @@ package rock_on
 //				var newState:int = mapVenueStateToBandMemberState();
 //				bandMember.advanceState(newState);
 //			}
+			trace("band members in creatures: " + _venue.creatureController.creatures.length.toString());
 			for each (var c:Creature in _venue.creatureController.creatures)
 			{
 				if (c.type == "BandMember" || c.type == "Me")
@@ -82,7 +83,9 @@ package rock_on
 						this.myAvatar = bm;
 					}
 					
-					bm.advanceState(mapVenueStateToBandMemberState());
+					trace("band member created");
+					
+					bm.advanceState(mapVenueStateToBandMemberState(bm));
 				}
 			}
 		}		
@@ -103,11 +106,18 @@ package rock_on
 			}
 		}
 		
-		public function mapVenueStateToBandMemberState():int
+		public function mapVenueStateToBandMemberState(bm:BandMember):int
 		{
 			if (_venue.state == Venue.EMPTY_STATE)
 			{
-				return BandMember.WAIT_STATE;
+				if (bm.creature.type == "Me")
+				{
+					return BandMember.SING_STATE;
+				}
+				else
+				{
+					return BandMember.WAIT_STATE;				
+				}
 			}
 			else if (_venue.state == Venue.ENCORE_STATE)
 			{
@@ -123,7 +133,14 @@ package rock_on
 			}
 			else if (_venue.state == Venue.SHOW_WAIT_STATE)
 			{
-				return BandMember.WAIT_STATE;
+				if (bm.creature.type == "Me")
+				{
+					return BandMember.SING_STATE;
+				}
+				else
+				{
+					return BandMember.WAIT_STATE;				
+				}			
 			}
 			else
 			{

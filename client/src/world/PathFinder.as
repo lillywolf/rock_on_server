@@ -244,7 +244,6 @@ package world
 		
 		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutStructureOccupiedSpaces:Boolean=true, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null, extraStructures:ArrayCollection=null):ArrayCollection
 		{
-			trace("create path grid");
 			var pathGridComplete:Boolean = false;
 			
 			var assetPathFinder:ArrayCollection = initializePath(destination);
@@ -283,9 +282,7 @@ package world
 					}
 				}
 				while (!startPointReached);
-				trace("path grid calculated");
-			}
-			
+			}			
 			
 			return assetPathFinder;		
 		}	
@@ -332,7 +329,6 @@ package world
 		
 		public function getPeopleOccupiedSpacesForBitmap(sourceArray:ArrayCollection):ArrayCollection
 		{
-			trace("get people occupied spaces for bitmap");
 			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
 			for each (var abd:AssetBitmapData in sourceArray)
 			{
@@ -581,6 +577,10 @@ package world
 				
 		public function mapPointToPathGrid(point3D:Point3D):Point3D
 		{
+			if (point3D.x < 0 || point3D.y < 0 || point3D.z < 0)
+			{
+				return null;
+			}
 			if (pathGrid[point3D.x][point3D.y][point3D.z])
 			{
 				return pathGrid[point3D.x][point3D.y][point3D.z];			

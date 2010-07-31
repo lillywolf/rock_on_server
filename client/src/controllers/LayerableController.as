@@ -186,7 +186,7 @@ package controllers
 		public function checkIfOwnedLayerablesFullyLoaded():Boolean
 		{
 //			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAssignedToParents() && checkIfAllOwnedLayerablesAdded())
-			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAdded() && checkIfOwnedLayerablesBelongToUser())
+			if (checkIfAllOwnedLayerableParentsAssigned() && checkIfAllOwnedLayerablesAdded() && checkIfOwnedLayerablesBelongToUser() && checkIfOwnedLayerableLoadingComplete())
 			{
 				var evt:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_LAYERABLES_LOADED);
 				this.dispatchEvent(evt);

@@ -169,13 +169,26 @@ package world
 		
 		public function animateMc(move:Boolean, animation:String, frameNumber:int, mc:MovieClip):void
 		{
-			if (move)
+			var hasLabel:Boolean = false;
+			for (var i:int = 0; i < mc.currentLabels.length; i++)
+			{
+				if (mc.currentLabels[i].name == animation)
+				{
+					hasLabel = true;
+				}
+			}
+			
+			if (move && hasLabel)				
 			{
 				mc.gotoAndPlay(animation);
 			}
+			else if (move && !hasLabel)
+			{
+				mc.gotoAndStop("stand_still_toward");
+			}
 			else
 			{
-				mc.gotoAndStop(frameNumber);
+				mc.gotoAndStop(animation);
 			}
 		}
 		

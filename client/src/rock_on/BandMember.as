@@ -36,6 +36,7 @@ package rock_on
 		public static const DIRECTED_MOVE_STATE:int = 7;
 		public static const DIRECTED_STOP_STATE:int = 8;
 		public static const EXIT_OFFSTAGE_STATE:int = 9;
+		public static const SING_STATE:int = 10;
 		
 		private static const ROAM_TIME:int = Math.random()*5000 + 500;
 		private static const STOP_TIME:int = 10000;
@@ -76,12 +77,23 @@ package rock_on
 //			stopTime = new Timer(STOP_TIME);
 //			stopTime.addEventListener(TimerEvent.TIMER, roam);
 //			stopTime.start();
-		}	
+		}
+		
+		public function startSingState():void
+		{
+			state = SING_STATE;
+			standAndSing();
+		}
 		
 		public function endStopState():void
 		{
 //			stopTime.stop();
 //			stopTime.removeEventListener(TimerEvent.TIMER, roam);
+		}
+		
+		public function endSingState():void
+		{
+			
 		}
 		
 		public function roam(evt:TimerEvent):void
@@ -191,7 +203,12 @@ package rock_on
 			
 			var standAnimation:String = getStandAnimation(frameNumber);
 			stand(standAnimation, frameNumber);			
-		}	
+		}
+		
+		public function standAndSing():void
+		{
+			doAnimation("sing", true, 39);
+		}
 		
 		public function startWaitState():void
 		{
@@ -297,6 +314,8 @@ package rock_on
 				case EXIT_OFFSTAGE_STATE:
 					doExitOffstageState(deltaTime);
 					break;
+				case SING_STATE:
+					break;
 				case GONE_STATE:
 					doGoneState(deltaTime);	
 					return true;
@@ -336,6 +355,9 @@ package rock_on
 				case EXIT_OFFSTAGE_STATE:
 					endExitOffstageState();
 					break;
+				case SING_STATE:
+					endSingState();
+					break;
 				case GONE_STATE:
 					break;					
 				default: throw new Error('no state to advance from!');
@@ -371,6 +393,9 @@ package rock_on
 					break;
 				case EXIT_OFFSTAGE_STATE:
 					startExitOffstageState();
+					break;
+				case SING_STATE:
+					startSingState();
 					break;
 				default: throw new Error('no state to advance to!');	
 			}

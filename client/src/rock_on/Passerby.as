@@ -176,7 +176,6 @@ package rock_on
 		
 		public function setInitialDestination():Point3D
 		{
-			trace("select destination");
 			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
 			var destination:Point3D;
 			
@@ -186,7 +185,7 @@ package rock_on
 			}	
 			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(destination)) || isAnyoneElseThere(destination));		
 			
-			trace("destination selected");
+//			trace("destination selected");
 			return destination;
 		}		
 

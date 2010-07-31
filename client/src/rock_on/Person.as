@@ -92,7 +92,8 @@ package rock_on
 			moodClip = new BouncyBitmap(cursor, 0.75);
 			moodClip.y = -(height + moodClip.height - 8);
 			moodClip.x = -moodClip.width/4;
-			handleMoodForStaticPeople(mood, moodClip);	
+			handleMoodForStaticPeople(mood, moodClip);
+			trace("mood started");
 		}		
 		
 		public function handleMoodForStaticPeople(mood:Object, moodClip:BouncyBitmap):void
@@ -139,6 +140,7 @@ package rock_on
 		public function endMood():void
 		{
 			mood = null;
+			trace("mood ended");
 		}		
 		
 		public function doMultipleAnimations(animations:Array):void
