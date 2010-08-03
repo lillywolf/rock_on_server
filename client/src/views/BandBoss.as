@@ -52,6 +52,7 @@ package views
 		
 		public function showBandMembers():void
 		{
+			trace("number of bands: " + bands.length.toString());
 			for each (var bmm:BandMemberManager in bands)
 			{
 				trace("draw band members");

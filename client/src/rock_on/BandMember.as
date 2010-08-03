@@ -6,12 +6,14 @@ package rock_on
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	import flash.utils.Timer;
+	import flash.utils.getQualifiedClassName;
 	
 	import game.MoodBoss;
 	
 	import helpers.CollectibleDrop;
 	
 	import models.Creature;
+	import models.OwnedLayerable;
 	
 	import mx.collections.ArrayCollection;
 	
@@ -37,10 +39,24 @@ package rock_on
 		public static const DIRECTED_STOP_STATE:int = 8;
 		public static const EXIT_OFFSTAGE_STATE:int = 9;
 		public static const SING_STATE:int = 10;
+		public static const SING_BOB_STATE:int = 11;
+		public static const BOB_STATE:int = 12;
 		
 		private static const ROAM_TIME:int = Math.random()*5000 + 500;
 		private static const STOP_TIME:int = 10000;
 		private static const ENTER_TIME:int = 1000;
+		private static const BOB_MULTIPLIER:int = 10000;
+		private static const BOB_CONSTANT:int = 1000;
+		private static const BOB_WAIT_MULTIPLIER:int = 10000;
+		private static const BOB_WAIT_CONSTANT:int = 1000;
+		private static const SING_MULTIPLIER:int = 20000;
+		private static const SING_CONSTANT:int = 2000;
+		private static const SING_WAIT_MULTIPLIER:int = 20000;
+		private static const SING_WAIT_CONSTANT:int = 2000;
+		private static const BOB_SING_MULTIPLIER:int = 20000;
+		private static const BOB_SING_CONSTANT:int = 2000;
+		private static const BOB_SING_WAIT_MULTIPLIER:int = 20000;
+		private static const BOB_SING_WAIT_CONSTANT:int = 2000;
 		
 		public var _venue:Venue;
 		public var inWorld:Boolean;
@@ -51,12 +67,49 @@ package rock_on
 		public var state:int;
 		public var stopTime:Timer;
 		public var enterTime:Timer;
+		public var bobTime:Timer;
+		public var bobWaitTime:Timer;
+		public var singTime:Timer;
+		public var singWaitTime:Timer;
+		public var bobSingTime:Timer;
+		public var bobSingWaitTime:Timer;
+		
+		private var bandAnimations:Object = {
+			walk_toward: 						{"body": "walk_toward", "eyes": "walk_toward", "shoes": "walk_toward", "bottom": "walk_toward", "bottom custom": "walk_toward", "top": "walk_toward", "top custom": "walk_toward", "hair front": "walk_toward", "hair band": "walk_toward", "instrument": "walk_toward"},
+			walk_toward_and_sing: 				{},
+			walk_away: 							{},
+			bob_head: 							{"body": "head_bob", "eyes": "head_bob", "mouth": "head_bob", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward"},
+			bob_head_and_sing: 					{"body": "head_bob", "eyes": "head_bob", "mouth": "sing_head_bob", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward"},
+			bob_head_and_walk_toward:			{},
+			bob_head_and_walk_away:				{},
+			bob_head_and_strum:					{},
+			bob_head_and_strum_and_sing:		{},
+			strum:								{},
+			strum_and_sing:						{},
+			strum_and_walk_toward:				{},
+			strum_and_sing_and_walk_toward:		{},
+			strum_and_walk_away:				{},
+			sing:								{"body": "stand_still_toward", "eyes": "stand_still_toward", "mouth": "sing", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "stand_still_toward", "hair band": "stand_still_toward", "instrument": "stand_still_toward"}
+		}
 		
 		public function BandMember(creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
 			super(creature, movieClip, layerableOrder, scale);			
 			addEventListener(MouseEvent.CLICK, showBandMemberPopup);
+			updateLayerableOrder();
 		}
+		
+		private function updateLayerableOrder():void
+		{
+			layerableOrder = new Array();
+			layerableOrder['walk_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];
+			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "bottom custom", "top custom", "hair front", "hair band", "instrument"];
+			layerableOrder['stand_still_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];
+			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band", "instrument"];			
+			layerableOrder['sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];			
+			layerableOrder['bob_head_and_sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];			
+			layerableOrder['bob_head'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];			
+		}		
 		
 		public function addExemptStructures():void
 		{
@@ -85,15 +138,197 @@ package rock_on
 			standAndSing();
 		}
 		
-		public function endStopState():void
+		public function startBobState():void
 		{
-//			stopTime.stop();
-//			stopTime.removeEventListener(TimerEvent.TIMER, roam);
+			state = BOB_STATE;
+			startBobTimer();
 		}
 		
 		public function endSingState():void
 		{
+			if (singTime)
+			{
+				this.singTime.stop();			
+				this.singTime = null;
+			}
+			if (singWaitTime)
+			{
+				this.singWaitTime.stop();
+				this.singWaitTime = null;
+			}
+		}
+		
+		public function endSingBobState():void
+		{
+			this.bobSingTime.stop();
+			this.bobSingWaitTime.stop();
+			this.bobSingTime = null;
+			this.bobSingWaitTime = null;
+		}
+		
+		public function endBobState():void
+		{
+			this.bobTime.stop();
+			this.bobWaitTime.stop();
+			this.bobTime = null;
+			this.bobWaitTime = null;
+		}
+		
+		public function startSingBobState():void
+		{
+			state = SING_BOB_STATE;
+			startBobSingTimer();
+		}
+		
+		public function doSingBob():void
+		{
+			doComplexAnimation("bob_head_and_sing");
+		}
+		
+		public function stopSingBob():void
+		{
+			standFacingCrowd();
+		}
+		
+		public function doBob():void
+		{
+			doComplexAnimation("bob_head");
+		}
+		
+		public function stopBob():void
+		{
+			standFacingCrowd();
+		}
+		
+		public function doComplexAnimation(complexAnimation:String):void
+		{
+			var layeredAnimations:Object = this.bandAnimations[complexAnimation];
 			
+			clearMovieClips();
+			clearBitmap();
+			
+			if (!_layerableOrder[complexAnimation])
+			{
+				throw new Error("No order for this animation");
+			}			
+			
+			for each (var str:String in _layerableOrder[complexAnimation])
+			{
+				if (!layeredAnimations[str])
+				{
+					throw new Error("no animation exists for this layer");
+				}
+				else
+				{
+					var layerAnimation:String = layeredAnimations[str];
+					for each (var ol:OwnedLayerable in _creature.owned_layerables)
+					{
+						if (ol.layerable.layer_name == str && ol.in_use)
+						{
+							var className:String = getQualifiedClassName(ol.layerable.mc);
+							var mc:MovieClip = getMovieClipFromClassName(className);
+							animateMc(true, layerAnimation, -1, mc);
+							_displayMovieClips.addItem(mc);
+						}
+					}
+				}
+			}
+			
+			changeScale(_scale, _scale);
+		}
+		
+		private function startBobTimer():void
+		{
+			doBob();
+			bobTime = new Timer(Math.random() * BOB_MULTIPLIER + BOB_CONSTANT);
+			bobTime.addEventListener(TimerEvent.TIMER, onBobTimeComplete);
+			bobTime.start();			
+		}
+		
+		private function startSingTimer():void
+		{
+			singTime = new Timer(Math.random() * SING_MULTIPLIER + SING_CONSTANT);
+			singTime.addEventListener(TimerEvent.TIMER, onSingTimeComplete);
+			singTime.start();
+		}
+		
+		private function startBobSingTimer():void
+		{
+			doSingBob();
+			bobSingTime = new Timer(Math.random() * BOB_SING_MULTIPLIER + BOB_SING_CONSTANT);
+			bobSingTime.addEventListener(TimerEvent.TIMER, onBobSingComplete);
+			bobSingTime.start();
+		}
+		
+		private function onBobSingComplete(evt:TimerEvent):void
+		{
+			stopSingBob();
+			bobSingTime.stop();
+			bobSingTime.removeEventListener(TimerEvent.TIMER, onBobSingComplete);
+			startBobSingWaitTimer();
+		}
+		
+		private function startBobSingWaitTimer():void
+		{
+			bobSingWaitTime = new Timer(Math.random() * BOB_SING_WAIT_MULTIPLIER + BOB_SING_CONSTANT);
+			bobSingWaitTime.addEventListener(TimerEvent.TIMER, onBobSingWaitComplete);
+			bobSingWaitTime.start();
+		}
+		
+		private function onBobSingWaitComplete(evt:TimerEvent):void
+		{
+			bobSingWaitTime.stop();
+			bobSingWaitTime.removeEventListener(TimerEvent.TIMER, onBobSingWaitComplete);
+			startBobSingTimer();
+		}
+		
+		private function onBobTimeComplete(evt:TimerEvent):void
+		{
+			stopBob();
+			bobTime.stop();
+			bobTime.removeEventListener(TimerEvent.TIMER, onBobTimeComplete);
+			startBobWaitTimer();
+		}
+		
+		private function startBobWaitTimer():void
+		{
+			bobWaitTime = new Timer(Math.random() * BOB_WAIT_MULTIPLIER + BOB_WAIT_CONSTANT);
+			bobWaitTime.addEventListener(TimerEvent.TIMER, onBobWaitComplete);
+			bobWaitTime.start();			
+		}
+		
+		private function onBobWaitComplete(evt:TimerEvent):void
+		{
+			bobWaitTime.stop();
+			bobWaitTime.removeEventListener(TimerEvent.TIMER, onBobWaitComplete);
+			startBobTimer();
+		}
+		
+		private function onSingTimeComplete(evt:TimerEvent):void
+		{
+			singTime.stop();
+			singTime.removeEventListener(TimerEvent.TIMER, onSingTimeComplete);
+			startSingWaitTimer();
+		}
+		
+		private function startSingWaitTimer():void
+		{
+			singWaitTime = new Timer(Math.random() * SING_WAIT_MULTIPLIER + SING_WAIT_CONSTANT);
+			singWaitTime.addEventListener(TimerEvent.TIMER, onSingWaitComplete);
+			singWaitTime.start();			
+		}	
+		
+		private function onSingWaitComplete(evt:TimerEvent):void
+		{
+			singWaitTime.stop();
+			singWaitTime.removeEventListener(TimerEvent.TIMER, onSingWaitComplete);
+			startSingTimer();
+		}		
+		
+		public function endStopState():void
+		{
+//			stopTime.stop();
+//			stopTime.removeEventListener(TimerEvent.TIMER, roam);
 		}
 		
 		public function roam(evt:TimerEvent):void
@@ -316,6 +551,10 @@ package rock_on
 					break;
 				case SING_STATE:
 					break;
+				case SING_BOB_STATE:
+					break;
+				case BOB_STATE:
+					break;
 				case GONE_STATE:
 					doGoneState(deltaTime);	
 					return true;
@@ -358,6 +597,12 @@ package rock_on
 				case SING_STATE:
 					endSingState();
 					break;
+				case SING_BOB_STATE:
+					endSingBobState();
+					break;
+				case BOB_STATE:
+					endBobState();
+					break;
 				case GONE_STATE:
 					break;					
 				default: throw new Error('no state to advance from!');
@@ -396,6 +641,12 @@ package rock_on
 					break;
 				case SING_STATE:
 					startSingState();
+					break;
+				case SING_BOB_STATE:
+					startSingBobState();
+					break;
+				case BOB_STATE:
+					startBobState();
 					break;
 				default: throw new Error('no state to advance to!');	
 			}
