@@ -295,7 +295,7 @@ package rock_on
 			var exemptStructures:ArrayCollection = new ArrayCollection();
 			exemptStructures.addItem(os);
 			var occupiedSpaces:ArrayCollection = new ArrayCollection();
-			var structureOccupiedSpaces:ArrayCollection = _myWorld.pathFinder.establishStructureOccupiedSpaces(exemptStructures);
+			var structureOccupiedSpaces:ArrayCollection = _myWorld.pathFinder.getStructureOccupiedSpaces(exemptStructures);
 			var peopleOccupiedSpaces:ArrayCollection = _myWorld.pathFinder.establishPeopleOccupiedSpaces();
 			occupiedSpaces.addAll(structureOccupiedSpaces);
 			occupiedSpaces.addAll(peopleOccupiedSpaces);

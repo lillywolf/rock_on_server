@@ -1,6 +1,7 @@
 package rock_on
 {
 	import flash.display.MovieClip;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.filters.GlowFilter;
@@ -16,6 +17,7 @@ package rock_on
 	import models.OwnedLayerable;
 	
 	import mx.collections.ArrayCollection;
+	import mx.events.DynamicEvent;
 	
 	import org.osmf.events.TimeEvent;
 	
@@ -45,8 +47,8 @@ package rock_on
 		private static const ROAM_TIME:int = Math.random()*5000 + 500;
 		private static const STOP_TIME:int = 10000;
 		private static const ENTER_TIME:int = 1000;
-		private static const BOB_MULTIPLIER:int = 10000;
-		private static const BOB_CONSTANT:int = 1000;
+		private static const BOB_MULTIPLIER:int = 10;
+		private static const BOB_CONSTANT:int = 1;
 		private static const BOB_WAIT_MULTIPLIER:int = 10000;
 		private static const BOB_WAIT_CONSTANT:int = 1000;
 		private static const SING_MULTIPLIER:int = 20000;
@@ -78,7 +80,7 @@ package rock_on
 			walk_toward: 						{"body": "walk_toward", "eyes": "walk_toward", "shoes": "walk_toward", "bottom": "walk_toward", "bottom custom": "walk_toward", "top": "walk_toward", "top custom": "walk_toward", "hair front": "walk_toward", "hair band": "walk_toward", "instrument": "walk_toward"},
 			walk_toward_and_sing: 				{},
 			walk_away: 							{},
-			bob_head: 							{"body": "head_bob", "eyes": "head_bob", "mouth": "head_bob", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward"},
+			bob_head: 							{"body": "head_bob", "eyes": "head_bob", "mouth": "head_bob", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "head_bob", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward"},
 			bob_head_and_sing: 					{"body": "head_bob", "eyes": "head_bob", "mouth": "sing_head_bob", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward"},
 			bob_head_and_walk_toward:			{},
 			bob_head_and_walk_away:				{},
@@ -107,8 +109,8 @@ package rock_on
 			layerableOrder['stand_still_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band", "instrument"];			
 			layerableOrder['sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];			
-			layerableOrder['bob_head_and_sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];			
-			layerableOrder['bob_head'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];			
+			layerableOrder['bob_head_and_sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument"];			
+			layerableOrder['bob_head'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument"];			
 		}		
 		
 		public function addExemptStructures():void
@@ -141,7 +143,7 @@ package rock_on
 		public function startBobState():void
 		{
 			state = BOB_STATE;
-			startBobTimer();
+			startBob();
 		}
 		
 		public function endSingState():void
@@ -172,6 +174,10 @@ package rock_on
 			this.bobWaitTime.stop();
 			this.bobTime = null;
 			this.bobWaitTime = null;
+			if (this.hasEventListener("loopComplete"))
+			{
+				this.removeEventListener("loopComplete", onBobLoopComplete);
+			}
 		}
 		
 		public function startSingBobState():void
@@ -190,9 +196,9 @@ package rock_on
 			standFacingCrowd();
 		}
 		
-		public function doBob():void
+		public function doBob(loops:int):void
 		{
-			doComplexAnimation("bob_head");
+			doComplexAnimation("bob_head", loops);
 		}
 		
 		public function stopBob():void
@@ -200,7 +206,7 @@ package rock_on
 			standFacingCrowd();
 		}
 		
-		public function doComplexAnimation(complexAnimation:String):void
+		public function doComplexAnimation(complexAnimation:String, loops:int=0):void
 		{
 			var layeredAnimations:Object = this.bandAnimations[complexAnimation];
 			
@@ -227,7 +233,7 @@ package rock_on
 						{
 							var className:String = getQualifiedClassName(ol.layerable.mc);
 							var mc:MovieClip = getMovieClipFromClassName(className);
-							animateMc(true, layerAnimation, -1, mc);
+							animateMc(true, layerAnimation, -1, mc, loops);
 							_displayMovieClips.addItem(mc);
 						}
 					}
@@ -237,12 +243,17 @@ package rock_on
 			changeScale(_scale, _scale);
 		}
 		
-		private function startBobTimer():void
+		private function startBob():void
 		{
-			doBob();
-			bobTime = new Timer(Math.random() * BOB_MULTIPLIER + BOB_CONSTANT);
-			bobTime.addEventListener(TimerEvent.TIMER, onBobTimeComplete);
-			bobTime.start();			
+			this.addEventListener("loopComplete", onBobLoopComplete);
+			var loops:int = Math.ceil(BOB_CONSTANT + Math.random() * BOB_MULTIPLIER);
+			doBob(loops);					
+		}
+		
+		private function onBobLoopComplete(evt:DynamicEvent):void
+		{
+			startBobWaitTimer();
+			this.removeEventListener("loopComplete", onBobLoopComplete);
 		}
 		
 		private function startSingTimer():void
@@ -301,7 +312,7 @@ package rock_on
 		{
 			bobWaitTime.stop();
 			bobWaitTime.removeEventListener(TimerEvent.TIMER, onBobWaitComplete);
-			startBobTimer();
+			startBob();
 		}
 		
 		private function onSingTimeComplete(evt:TimerEvent):void
@@ -472,7 +483,7 @@ package rock_on
 			trace("set initial dest");
 			destinationLocation = tryDestination();			
 			
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.occupiedByStructures;
 			if (occupiedSpaces.length >= _world.tilesDeep*_world.tilesWide)
 			{
 				throw new Error("No free spaces for band member!");

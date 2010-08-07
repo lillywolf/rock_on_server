@@ -271,6 +271,9 @@ package rock_on
 //			add UI layer to boothBoss
 			boothBoss.setInMotion();
 			listeningStationBoss.setInMotion();
+			
+			_myWorld.setOccupiedSpaces();
+			this.stageManager.myStage.setOccupiedSpaces();
 		}	
 		
 		public function addMovingStuffToVenue():void

@@ -3,8 +3,10 @@ package world
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
+	import flash.display.FrameLabel;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
@@ -18,6 +20,7 @@ package world
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
+	import mx.events.DynamicEvent;
 	
 	import rock_on.CustomerPerson;
 	
@@ -42,6 +45,8 @@ package world
 			
 			setMovieClips();
 			setLayerableOrder(layerableOrder);
+			
+			this.cacheAsBitmap = true;
 		}
 		
 		override public function switchToBitmap():void
@@ -67,6 +72,7 @@ package world
 //				bitmap.y = -heightDiff;
 				placeBitmap(bitmap, mc, heightDiff, mc.width + 10);
 				bitmap.opaqueBackground = null;
+				bitmap.cacheAsBitmap = true;
 				addChild(bitmap);
 			}
 		}
@@ -135,7 +141,7 @@ package world
 			return _layerableOrder;
 		}
 		
-		public function doAnimation(animation:String, move:Boolean=false, frameNumber:int=-1):void
+		public function doAnimation(animation:String, move:Boolean=false, frameNumber:int=-1, loops:int=0):void
 		{
 			_animation = animation;
 			
@@ -160,14 +166,35 @@ package world
 					{
 						var className:String = getQualifiedClassName(ol.layerable.mc);
 						var mc:MovieClip = getMovieClipFromClassName(className);
-						animateMc(move, animation, frameNumber, mc);
+						mc.cacheAsBitmap = true;
+						animateMc(move, animation, frameNumber, mc, loops);
 						_displayMovieClips.addItem(mc);
 					}
 				}
 			}
 		}
 		
-		public function animateMc(move:Boolean, animation:String, frameNumber:int, mc:MovieClip):void
+		public function doBitmappedAnimation(mc:MovieClip):void
+		{
+			removeCurrentChildren();
+			scaleMovieClip(mc);
+//			addChild(mc);
+			var mcBounds:Rectangle = mc.getBounds(this);
+//			removeChild(mc);
+			var heightDiff:Number = getHeightDifferential(mcBounds);
+			var widthDiff:Number = getWidthDifferential(mcBounds);
+			bitmapData = new BitmapData(mc.width + 10, mc.height + 8, true, 0x000000);
+			var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width + 10, heightDiff/_scale);
+			var rect:Rectangle = new Rectangle(0, 0, mc.width + 10, mc.height + 8);
+			scaleMatrix(matrix, mc.width + 10);
+			bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
+			bitmap = new Bitmap(bitmapData);
+			placeBitmap(bitmap, mc, heightDiff, mc.width + 10);
+			bitmap.opaqueBackground = null;
+			addChild(bitmap);			
+		}
+		
+		public function animateMc(move:Boolean, animation:String, frameNumber:int, mc:MovieClip, loops:int=0):void
 		{
 			var hasLabel:Boolean = false;
 			for (var i:int = 0; i < mc.currentLabels.length; i++)
@@ -180,7 +207,14 @@ package world
 			
 			if (move && hasLabel)				
 			{
-				mc.gotoAndPlay(animation);
+//				if (loops != 0)
+//				{
+//					animateLoopedMc(mc, animation, loops);
+//				}
+//				else
+//				{
+					mc.gotoAndPlay(animation);				
+//				}
 			}
 			else if (move && !hasLabel)
 			{
@@ -190,6 +224,40 @@ package world
 			{
 				mc.gotoAndStop(animation);
 			}
+		}
+		
+		public function animateLoopedMc(mc:MovieClip, animation:String, loops:int):void
+		{
+			var loopCount:int = 0;
+			for each (var label:FrameLabel in mc.currentLabels)
+			{
+				if (label.name == animation)
+				{
+					var frameNumber:int = label.frame;
+				}
+			}
+			
+			mc.addEventListener(Event.ENTER_FRAME, function onMovieClipEnterFrame():void
+			{
+				if (mc.currentFrame == frameNumber)
+				{
+					loopCount++;
+					if (loopCount >= loops)
+					{
+						mc.stop();
+						mc.removeEventListener(Event.ENTER_FRAME, onMovieClipEnterFrame);
+						dispatchLoopCompleteEvent();
+					}
+				}
+			});
+			mc.cacheAsBitmap = true;
+			mc.gotoAndPlay(animation);
+		}
+		
+		private function dispatchLoopCompleteEvent():void
+		{
+			var evt:DynamicEvent = new DynamicEvent("loopComplete", true);
+			this.dispatchEvent(evt);			
 		}
 		
 		public function doInitialAnimation(animation:String):void
@@ -242,6 +310,8 @@ package world
 					}
 				}
 			}
+			bitmapData = null;
+			bitmap = null;
 		}
 		
 		public function clearMovieClips():void

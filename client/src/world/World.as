@@ -44,6 +44,11 @@ package world
 			addEventListener(Event.ADDED, onAdded);			
 		}
 		
+		public function setOccupiedSpaces():void
+		{
+			this.pathFinder.populateOccupiedSpaces();
+		}
+		
 		public function drawInitialGrid():void
 		{
 			wg = new WorldGrid(_worldWidth, _worldDepth, _blockSize);

@@ -24,7 +24,7 @@ package rock_on
 			
 			var destination:Point3D = _venue.pickRandomAvailablePointWithinRect(_venue.boothsRect, _myWorld, 0);
 			_myWorld.addAsset(hater, destination);
-			hater.addGlowFilter();
+//			hater.addGlowFilter();
 			hater.advanceState(Hater.STOPPED_STATE);
 		}
 	}

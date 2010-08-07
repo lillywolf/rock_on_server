@@ -31,7 +31,7 @@ package rock_on
 		public var _listeningStationBoss:ListeningStationBoss;
 		public static const STATIONLISTENER_CONVERSION_PROBABILITY:Number = 0.3;
 		public static const SPAWN_INTERVAL_BASE:int = 200;
-		public static const SPAWN_INTERVAL_MULTIPLIER:int = 100;
+		public static const SPAWN_INTERVAL_MULTIPLIER:int = 400;
 				
 		public function PasserbyManager(listeningStationBoss:ListeningStationBoss, myWorld:World, creatureGenerator:CreatureGenerator, venue:Venue, source:Array=null)
 		{

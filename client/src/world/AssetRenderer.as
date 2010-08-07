@@ -23,7 +23,8 @@ package world
 		[Bindable] public var myMemory:Number;
 		[Bindable] public var fps:Number;
 		[Bindable] public var aux:Number;	
-		private var lastTime:Number;		
+		private var lastTime:Number;	
+		private var frameCount:int = 0;
 					
 		public function AssetRenderer()
 		{
@@ -45,15 +46,20 @@ package world
 		{
 			var time:Number = getTimer();
 			var deltaTime:Number = time - lastTime;
-			var lockedDelta:Number = Math.min(100, deltaTime);
-			fps = 1000/deltaTime;
-			myMemory = System.totalMemory;
-			aux = sortedAssets.length;
+			var lockedDelta:Number = Math.min(200, deltaTime);
 			lastTime = time;
-						
-			removeExistingAssets();
-			updateSortedAssets(lockedDelta);
-			drawAssets();
+			
+			if (frameCount%4 == 1)
+			{
+				removeExistingAssets();
+				updateSortedAssets(lockedDelta);
+				drawAssets();
+			}
+			else
+			{
+				updateCoords(lockedDelta);
+			}
+			frameCount++;
 		}
 		
 		private function drawAssets():void
