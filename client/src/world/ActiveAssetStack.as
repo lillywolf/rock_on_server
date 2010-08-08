@@ -322,6 +322,27 @@ package world
 			}
 		}
 		
+		public function killEventListeners():void
+		{
+			_displayMovieClips.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onDisplayMovieClipsCollectionChange);			
+		}
+		
+		public function cleanUpChildren():void
+		{
+			var totalChildren:int = this.numChildren.valueOf();
+			for (var i:int = totalChildren; i > 0; i--)
+			{
+				var currentChildren:int = this.numChildren;
+				var index:int = currentChildren - 1;
+				var currentChild:Object = this.getChildAt(index);
+				this.removeChildAt(index);					
+				if (currentChild)
+				{
+					currentChild = null;
+				}
+			}			
+		}
+		
 		public function removeCurrentChildren():void
 		{
 			var totalChildren:int = this.numChildren.valueOf();
@@ -443,6 +464,11 @@ package world
 		{
 			return _displayMovieClips;
 		}
+		
+		public function get allMovieClips():ArrayCollection
+		{
+			return _allMovieClips;
+		}		
 		
 		public function set animation(val:String):void
 		{

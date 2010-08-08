@@ -200,6 +200,7 @@ package world
 			if (assetRenderer.unsortedAssets.contains(activeAsset))
 			{
 				var index:int = assetRenderer.unsortedAssets.getItemIndex(activeAsset);
+				pathFinder.remove(activeAsset);
 				assetRenderer.unsortedAssets.removeItemAt(index);
 			}
 //			else if (bitmapBlotter.getMatchingBitmap(activeAsset) != null)

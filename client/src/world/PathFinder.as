@@ -20,10 +20,8 @@ package world
 		public var pathGrid:ArrayCollection;
 		public var occupiedByStructures:ArrayCollection;
 		public var occupiedByPeople:ArrayCollection;
-		[Bindable] public var _world:World;
-		
-		public static const ASTAR_COST_CONST:int = 10;
-		
+		public var _world:World;
+				
 		public function PathFinder(world:World, worldHeight:int=0, source:Array=null)
 		{
 			super(source);

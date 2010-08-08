@@ -33,12 +33,6 @@ package world
 			unsortedAssets = new ArrayCollection();
 			unsortedAssets.addEventListener(CollectionEvent.COLLECTION_CHANGE, updateUnsortedAssets);
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
-			this.addEventListener(MouseEvent.CLICK, onMouseClicked);
-		}
-		
-		private function onMouseClicked(evt:MouseEvent):void
-		{
-			
 		}
 		
 		private function onEnterFrame(evt:Event):void

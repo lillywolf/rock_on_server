@@ -1,6 +1,7 @@
 package views
 {
 	import com.flashdynamix.motion.Tweensy;
+	import com.flashdynamix.motion.TweensyTimeline;
 	
 	import fl.motion.easing.Bounce;
 	import fl.motion.easing.Cubic;
@@ -44,24 +45,27 @@ package views
 		public function doBounce(_bounceHeight:int, duration:int = 1):void
 		{
 			bounceHeight = _bounceHeight;
-			Tweensy.to(this, {x: this.x, y: this.y - bounceHeight}, 1, Cubic.easeIn, 0.5, null, function onUpTweenComplete():void
+			var tt:TweensyTimeline = Tweensy.to(this, {x: this.x, y: this.y - bounceHeight}, 1, Cubic.easeIn, 0.5, null, function onUpTweenComplete():void
 			{
+				tt.dispose();
 				doDownTween();
 			});	
 		}
 		
 		public function doUpTween():void
 		{
-			Tweensy.to(this, {x: this.x, y: this.y - bounceHeight}, 1, Cubic.easeIn, 0.5, null, function onUpTweenComplete():void
+			var tt:TweensyTimeline = Tweensy.to(this, {x: this.x, y: this.y - bounceHeight}, 1, Cubic.easeIn, 0.5, null, function onUpTweenComplete():void
 			{
+				tt.dispose();
 				doDownTween();
 			});		
 		}
 		
 		public function doDownTween():void
 		{
-			Tweensy.to(this, {x: this.x, y: this.y + bounceHeight}, 1, Bounce.easeOut, 0, null, function onDownTweenComplete():void
+			var tt:TweensyTimeline = Tweensy.to(this, {x: this.x, y: this.y + bounceHeight}, 1, Bounce.easeOut, 0, null, function onDownTweenComplete():void
 			{
+				tt.dispose();
 				doUpTween();
 			});				
 		}		

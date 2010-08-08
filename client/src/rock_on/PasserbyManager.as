@@ -1,5 +1,6 @@
 package rock_on
 {
+	import flash.display.MovieClip;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	
@@ -12,6 +13,7 @@ package rock_on
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
+	import mx.events.CollectionEvent;
 	
 	import world.ActiveAsset;
 	import world.ActiveAssetStack;
@@ -267,12 +269,38 @@ package rock_on
 //				_myWorld.assetRenderer.sortedAssets.removeItemAt(movingSkinIndex);
 				var personIndex:Number = getItemIndex(person);
 				removeItemAt(personIndex);
+				removePasserby(person);
 			}
 			else 
 			{
 				throw new Error("how the hell did this happen?");
 			}
-		}		
+		}	
+		
+		private function removePasserby(person:Passerby):void
+		{
+			var mc:MovieClip;
+			for each (var ol:OwnedLayerable in person.creature.owned_layerables)
+			{
+				ol = null;
+			}
+			person.creature.owned_layerables.removeAll();
+			for each (mc in person.displayMovieClips)
+			{
+				mc = null;
+			}
+			for each (mc in person.allMovieClips)
+			{
+				mc = null;
+			}
+			person.cleanUpChildren();
+			person.killEventListeners();
+			person.displayMovieClips.removeAll();
+			person.allMovieClips.removeAll();
+			person.bitmap = null;
+			person.bitmapData = null;
+			person = null;
+		}
 		
 		private function onDirectionChanged(evt:WorldEvent):void
 		{
