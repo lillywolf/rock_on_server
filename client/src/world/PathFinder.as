@@ -311,6 +311,7 @@ package world
 			var nextPointData:Object = calculateAStarNeighbors(startingPointData, startingPoint, destination, unwalkables, openList, closedList);
 			var parentDataArray:ArrayCollection = new ArrayCollection();
 			parentDataArray.addItem(startingPointData);
+			parentDataArray.addItem(nextPointData);
 			
 			while (!closedList.contains(mapPointToPathGrid(destination)))
 			{				
@@ -322,12 +323,8 @@ package world
 				}
 				if (closedList.length > 1000 || openList.length > 10000)
 				{
-					var check:int;
+					throw new Error("Bad news");
 				}
-			}
-			if (parentDataArray.length < 2)
-			{
-				var blah:int;
 			}
 			return parentDataArray;
 		}
@@ -342,10 +339,7 @@ package world
 			for each (var neighborData:Object in neighbors)
 			{
 				openList.addItem(neighborData.node);
-			}
-//			var index:int = openList.getItemIndex(pointData.node);
-//			openList.removeItemAt(index);
-//			closedList.addItem(pointData.node);		
+			}	
 			var lowestNeighbor:Object = addLowestFScore(neighbors, startingPoint, pointData, openList, closedList);
 			return lowestNeighbor;
 		}
@@ -369,17 +363,21 @@ package world
 				var index:int = openList.getItemIndex(lowestNeighbor.node);
 				openList.removeItemAt(index);
 			}
+			else
+			{
+				lowestNeighbor = pointData;
+			}
 			return lowestNeighbor;
 		}
 		
 		private function updateGScore(neighborData:Object, startingPoint:Point3D):Boolean
 		{
 			var startingGScore:Number = Math.abs(startingPoint.x - (neighborData.node as Point3D).x) + Math.abs(startingPoint.z - (neighborData.node as Point3D).z);
-			if (neighborData.gScore > startingGScore)
-			{
-				neighborData.gScore = startingGScore;
-				return true;
-			}
+//			if (neighborData.gScore > startingGScore)
+//			{
+//				neighborData.gScore = startingGScore;
+//				return true;
+//			}
 			return false;
 		}
 		
@@ -757,6 +755,10 @@ package world
 			for (var i:int = tempPath.length-1; i >= 0; i--)
 			{
 				finalPath.addItem(tempPath[i]);
+			}
+			if (finalPath.length == 0)
+			{
+				throw new Error("No path");
 			}
 			return finalPath;
 		}
