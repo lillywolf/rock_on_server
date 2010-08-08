@@ -82,6 +82,7 @@ package models
 			layerableOrder['stand_still_toward'] = ["body", "hair back", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
 			layerableOrder['sing'] = ["body", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
+			layerableOrder['head_bob_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
 		}
 		
 		public function getConstructedCreature(layerablerOrder:Array, animation:String, size:Number):ActiveAssetStack

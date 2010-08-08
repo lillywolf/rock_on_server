@@ -139,20 +139,23 @@ package controllers
 				layerableOrder['walk_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
 				layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
 				layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];								
+				layerableOrder['head_bob_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];								
 			}
 			else if (creatureType == "Hater")
 			{							
 				layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "hair band"];
 				layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];
 				layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "top", "hair front", "hair band"];
-				layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];								
+				layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];	
+				layerableOrder['head_bob_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];												
 			}
 			else
 			{							
 				layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
 				layerableOrder['walk_away'] = ["shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
 				layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
-				layerableOrder['stand_still_away'] = ["shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];								
+				layerableOrder['stand_still_away'] = ["shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];	
+				layerableOrder['head_bob_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];												
 			}
 			return layerableOrder;
 		}

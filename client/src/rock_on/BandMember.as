@@ -43,6 +43,8 @@ package rock_on
 		public static const SING_STATE:int = 10;
 		public static const SING_BOB_STATE:int = 11;
 		public static const BOB_STATE:int = 12;
+		public static const STRUM_STATE:int = 13;
+		public static const BOB_AND_STRUM_STATE:int = 14;
 		
 		private static const ROAM_TIME:int = Math.random()*5000 + 500;
 		private static const STOP_TIME:int = 10000;
@@ -84,13 +86,10 @@ package rock_on
 			bob_head_and_sing: 					{"body": "head_bob", "eyes": "head_bob", "mouth": "sing_head_bob", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward"},
 			bob_head_and_walk_toward:			{},
 			bob_head_and_walk_away:				{},
-			bob_head_and_strum:					{},
-			bob_head_and_strum_and_sing:		{},
-			strum:								{},
-			strum_and_sing:						{},
-			strum_and_walk_toward:				{},
-			strum_and_sing_and_walk_toward:		{},
-			strum_and_walk_away:				{},
+			bob_head_and_strum_guitar:			{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "stand_still_toward", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "head_bob", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
+			bob_head_and_strum_guitar_and_sing:	{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "sing", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "head_bob", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
+			strum_guitar:						{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "stand_still_toward", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "stand_still_toward", "hair front": "stand_still_toward", "hair band": "stand_still_toward", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
+			strum_guitar_and_sing:				{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "sing", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "stand_still_toward", "hair front": "stand_still_toward", "hair band": "stand_still_toward", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
 			sing:								{"body": "stand_still_toward", "eyes": "stand_still_toward", "mouth": "sing", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "stand_still_toward", "hair band": "stand_still_toward", "instrument": "stand_still_toward"}
 		}
 		
@@ -111,6 +110,9 @@ package rock_on
 			layerableOrder['sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];			
 			layerableOrder['bob_head_and_sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument"];			
 			layerableOrder['bob_head'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument"];			
+			layerableOrder['bob_head_and_strum_guitar'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "instrument", "left arm", "right arm", "head", "mouth", "hair front", "hair band"];			
+			layerableOrder['strum_guitar'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument", "left arm", "right arm"];			
+			layerableOrder['strum_guitar_and_sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument", "left arm", "right arm"];			
 		}		
 		
 		public function addExemptStructures():void
@@ -144,6 +146,18 @@ package rock_on
 		{
 			state = BOB_STATE;
 			startBob();
+		}
+		
+		public function startStrumState():void
+		{
+			state = STRUM_STATE;
+			startStrum();
+		}
+		
+		public function startBobAndStrumState():void
+		{
+			state = STRUM_STATE;
+			startBobAndStrum();
 		}
 		
 		public function endSingState():void
@@ -180,6 +194,16 @@ package rock_on
 			}
 		}
 		
+		private function endStrumState():void
+		{
+			
+		}
+
+		private function endBobAndStrumState():void
+		{
+			
+		}
+		
 		public function startSingBobState():void
 		{
 			state = SING_BOB_STATE;
@@ -188,12 +212,22 @@ package rock_on
 		
 		public function doSingBob():void
 		{
-			doComplexAnimation("bob_head_and_sing");
+			doComplexAnimation("bob_head_and_sing", this.bandAnimations["bob_head_and_sing"]);
 		}
 		
 		public function stopSingBob():void
 		{
 			standFacingCrowd();
+		}
+		
+		private function startStrum():void
+		{
+			doComplexAnimation("strum_guitar", this.bandAnimations["strum_guitar"]);
+		}
+
+		private function startBobAndStrum():void
+		{
+			doComplexAnimation("bob_head_and_strum_guitar", this.bandAnimations["bob_head_and_strum_guitar"]);
 		}
 		
 		public function doBob(loops:int):void
@@ -206,41 +240,9 @@ package rock_on
 			standFacingCrowd();
 		}
 		
-		public function doComplexAnimation(complexAnimation:String, loops:int=0):void
+		public function stopStrum():void
 		{
-			var layeredAnimations:Object = this.bandAnimations[complexAnimation];
-			
-			clearMovieClips();
-			clearBitmap();
-			
-			if (!_layerableOrder[complexAnimation])
-			{
-				throw new Error("No order for this animation");
-			}			
-			
-			for each (var str:String in _layerableOrder[complexAnimation])
-			{
-				if (!layeredAnimations[str])
-				{
-					throw new Error("no animation exists for this layer");
-				}
-				else
-				{
-					var layerAnimation:String = layeredAnimations[str];
-					for each (var ol:OwnedLayerable in _creature.owned_layerables)
-					{
-						if (ol.layerable.layer_name == str && ol.in_use)
-						{
-							var className:String = getQualifiedClassName(ol.layerable.mc);
-							var mc:MovieClip = getMovieClipFromClassName(className);
-							animateMc(true, layerAnimation, -1, mc, loops);
-							_displayMovieClips.addItem(mc);
-						}
-					}
-				}
-			}
-			
-			changeScale(_scale, _scale);
+			standFacingCrowd();
 		}
 		
 		private function startBob():void
@@ -357,48 +359,6 @@ package rock_on
 			state = ROAM_STATE;
 			adjustForPathfinding();
 		}	
-		
-//		public function adjustForPathfinding():void
-//		{
-//			// Don't move out of bounds!
-//			// Don't move into structures
-//			
-//			if (worldCoords.x%1 != 0 || worldCoords.y%1 != 0 || worldCoords.z%1 != 0)
-//			{
-//				if (directionality.x > 0)
-//				{
-//					_myWorld.moveAssetTo(this, new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z)));
-//				}
-//				else if (directionality.x < 0)
-//				{
-//					_myWorld.moveAssetTo(this, new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z)));
-//				}
-//				else if (directionality.z > 0)
-//				{
-//					_myWorld.moveAssetTo(this, new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z)));
-//				}
-//				else if (directionality.z < 0)
-//				{
-//					_myWorld.moveAssetTo(this, new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z)));					
-//				}
-//				else 
-//				{
-//					// Something?
-//				}
-//				_myWorld.assetRenderer.addEventListener(WorldEvent.DESTINATION_REACHED, onAdjustedForPathfinding);								
-//			}
-//			else
-//			{
-//				if (state == ROAM_STATE)
-//				{
-//					findNextPath();									
-//				}
-//				if (state == STOP_STATE)
-//				{
-//					setPathToCurrentCoords();
-//				}
-//			}
-//		}	
 		
 		public function findNextPath():void
 		{
@@ -566,6 +526,10 @@ package rock_on
 					break;
 				case BOB_STATE:
 					break;
+				case STRUM_STATE:
+					break;
+				case BOB_AND_STRUM_STATE:
+					break;
 				case GONE_STATE:
 					doGoneState(deltaTime);	
 					return true;
@@ -614,6 +578,12 @@ package rock_on
 				case BOB_STATE:
 					endBobState();
 					break;
+				case STRUM_STATE:
+					endStrumState();
+					break;
+				case BOB_AND_STRUM_STATE:
+					endBobAndStrumState();
+					break;
 				case GONE_STATE:
 					break;					
 				default: throw new Error('no state to advance from!');
@@ -658,6 +628,12 @@ package rock_on
 					break;
 				case BOB_STATE:
 					startBobState();
+					break;
+				case STRUM_STATE:
+					startStrumState();
+					break;
+				case BOB_AND_STRUM_STATE:
+					startBobAndStrumState();
 					break;
 				default: throw new Error('no state to advance to!');	
 			}

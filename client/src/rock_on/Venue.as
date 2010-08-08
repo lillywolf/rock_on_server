@@ -403,6 +403,7 @@ package rock_on
 				cp.speed = 0.11;
 				cp.isSuperFan = true;
 				customerPersonManager.add(cp, true, -1, stageBufferRect, stageRect, worldToUpdate);
+				cp.advanceState(CustomerPerson.HEAD_BOB_STATE);
 			}					
 		}
 		

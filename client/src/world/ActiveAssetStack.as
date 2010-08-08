@@ -194,6 +194,40 @@ package world
 			addChild(bitmap);			
 		}
 		
+		public function doComplexAnimation(complexAnimation:String, layeredAnimations:Object):void
+		{			
+			clearMovieClips();
+			clearBitmap();
+			
+			if (!_layerableOrder[complexAnimation])
+			{
+				throw new Error("No order for this animation");
+			}			
+			
+			for each (var str:String in _layerableOrder[complexAnimation])
+			{
+				if (!layeredAnimations[str])
+				{
+					throw new Error("no animation exists for this layer");
+				}
+				else
+				{
+					var layerAnimation:String = layeredAnimations[str];
+					for each (var ol:OwnedLayerable in _creature.owned_layerables)
+					{
+						if (ol.layerable.layer_name == str && ol.in_use)
+						{
+							var className:String = getQualifiedClassName(ol.layerable.mc);
+							var mc:MovieClip = getMovieClipFromClassName(className);
+							animateMc(true, layerAnimation, -1, mc);
+							_displayMovieClips.addItem(mc);
+						}
+					}
+				}
+			}	
+			changeScale(_scale, _scale);
+		}	
+		
 		public function animateMc(move:Boolean, animation:String, frameNumber:int, mc:MovieClip, loops:int=0):void
 		{
 			var hasLabel:Boolean = false;

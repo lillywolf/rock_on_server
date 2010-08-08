@@ -50,6 +50,7 @@ package rock_on
 		public static const HEADTODOOR_STATE:int = 7;
 		public static const BITMAPPED_ENTHRALLED_STATE:int = 8;
 		public static const ITEM_PICKUP_STATE:int = 9;
+		public static const HEAD_BOB_STATE:int = 10;
 
 		public static const HUNGER_DELAY:int = 360000;
 		public static const HUNGRY:String = "Hungry";
@@ -79,6 +80,10 @@ package rock_on
 		public var itemPickupAnimations:Array;
 		public var pickupBooth:Booth;
 		public var proxiedForItemPickup:Boolean;
+		
+		private var customerAnimations:Object = {
+			head_bob_away: 						{"body": "head_bob_away", "shoes": "stand_still_away", "bottom": "stand_still_away", "bottom custom": "stand_still_away", "top": "stand_still_away", "top custom": "stand_still_away", "hair front": "head_bob_away", "hair band": "head_bob_away"}
+		}
 		
 		public function CustomerPerson(boothBoss:BoothBoss, creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
 		{
@@ -216,9 +221,11 @@ package rock_on
 				case HEADTODOOR_STATE:
 					doHeadToDoorState(deltaTime);	
 					break;
+				case HEAD_BOB_STATE:
+					break;
 				case GONE_STATE:
 					doGoneState(deltaTime);
-					return true;	
+					return true;
 				default: throw new Error('oh noes!');
 			}		
 			return false;
@@ -252,6 +259,9 @@ package rock_on
 				case HEADTODOOR_STATE:
 					endHeadToStageState();
 					break;	
+				case HEAD_BOB_STATE:
+					endHeadBobState();
+					break;
 				case GONE_STATE:
 					break;					
 				default: throw new Error('no state to advance from!');
@@ -278,7 +288,10 @@ package rock_on
 					break;					
 				case HEADTODOOR_STATE:
 					startHeadToDoorState();
-					break;									
+					break;	
+				case HEAD_BOB_STATE:
+					startHeadBobState();
+					break;
 				case GONE_STATE:
 					startGoneState();
 					break;	
@@ -343,6 +356,17 @@ package rock_on
 		}
 		
 		public function doBitmappedEnthralledState(deltaTime:Number):void
+		{
+			
+		}
+		
+		public function startHeadBobState():void
+		{
+			state = HEAD_BOB_STATE;
+			doComplexAnimation("head_bob_away", this.customerAnimations["head_bob_away"]);
+		}
+		
+		public function endHeadBobState():void
 		{
 			
 		}

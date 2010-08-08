@@ -139,7 +139,7 @@ package rock_on
 				}
 				else
 				{
-					return BandMember.BOB_STATE;				
+					return BandMember.BOB_AND_STRUM_STATE;				
 				}			
 			}
 			else
