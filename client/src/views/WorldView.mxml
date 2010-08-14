@@ -77,7 +77,8 @@
 			import world.BitmapBlotter;
 			import world.Point3D;
 			import world.World;
-			import world.WorldEvent;	
+			import world.WorldEvent;
+			import world.WorldGrid;	
 			
 			public var myWorld:World;
 			[Bindable] public var myUser:User;
@@ -176,7 +177,8 @@
 			
 			public function initializeStructures():void
 			{
-				venueManager.updateWorld(myWorld, bitmapBlotter);
+				venueManager.updateWorld(myWorld);
+				venueManager.updateBitmapBlotter(bitmapBlotter);
 				venueManager.venue.addStaticStuffToVenue();				
 			}
 			
@@ -233,8 +235,9 @@
 			}
 			
 			public function addWorld():void
-			{
-				myWorld = new World(worldWidth, worldHeight, tileSize, stageManager.concertStage.structure.height);	
+			{					
+				myWorld = new World(worldWidth, worldHeight, tileSize, stageManager.concertStage.structure.height, this.venueManager.venue.getWorldFloorStructure(), this.venueManager.venue.getWorldFloorStyle());	
+				
 				myWorld.nestLevel = 3;
 				addBackgroundLayer();
 				addChild(myWorld);	

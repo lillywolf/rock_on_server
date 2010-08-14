@@ -25,6 +25,7 @@
 			import models.User;
 			
 			import mx.collections.ArrayCollection;
+			import mx.controls.Button;
 			import mx.controls.Text;
 			import mx.core.Application;
 			import mx.core.FlexGlobals;
@@ -65,11 +66,31 @@
 				editMode = new EditMode(myWorld, this);
 				editMode.addEventListener("structurePlaced", onStructurePlaced);
 				editMode.structureController = structureController;
-				addChild(editMode);		
+				addChild(editMode);	
+				
+				addTileStuff();
 				
 				addUILayer();				
 				
 				dispatchEditViewCreationEvent();			
+			}
+			
+			public function addTileStuff():void
+			{
+				var btn:Button = new Button();
+				btn.addEventListener(MouseEvent.CLICK, switchToTileMode);
+				btn.y = 200;
+				btn.width = 40;
+				btn.height = 40;
+				addChild(btn);
+			}
+			
+			private function switchToTileMode(evt:MouseEvent):void
+			{
+				this.removeChild(editMode);
+				this.removeChild(myWorld);
+				var tileMode:TileMode = new TileMode(this, myWorld.worldWidth, myWorld.worldDepth, myWorld.blockSize);
+				addChild(tileMode);
 			}
 			
 			override public function onEnterFrame(evt:Event):void

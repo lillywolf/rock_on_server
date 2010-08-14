@@ -6,6 +6,7 @@ package world
 	import flash.geom.Rectangle;
 	
 	import models.OwnedStructure;
+	import models.Structure;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
@@ -24,24 +25,28 @@ package world
 		public var tilesWide:int;
 		public var tilesDeep:int;
 		public var wg:WorldGrid;
+		public var _tile:Structure;
+		public var _floorStyle:String;
 		public var _bitmapBlotter:BitmapBlotter;
 		
 		[Bindable] public var assetRenderer:AssetRenderer;
 		[Bindable] public var pathFinder:PathFinder;		
 		
-		public function World(worldWidth:int, worldDepth:int, blockSize:int, maxHeight:int=0)
+		public function World(worldWidth:int, worldDepth:int, blockSize:int, maxHeight:int=0, tile:Structure=null, floorStyle:String=null)
 		{
 			super();
 			_worldWidth = worldWidth;
 			_worldDepth = worldDepth;
 			_blockSize = blockSize;
+			_tile = tile;
+			_floorStyle = floorStyle;
 			drawInitialGrid();
+			pathFinder = new PathFinder(this, maxHeight);
 			assetRenderer = new AssetRenderer();
 			assetRenderer.addEventListener(WorldEvent.DESTINATION_REACHED, onDestinationReached);
 			addEventListener(WorldEvent.DIRECTION_CHANGED, onDirectionChanged);
-			pathFinder = new PathFinder(this, maxHeight);
 			addChild(assetRenderer);
-			addEventListener(Event.ADDED, onAdded);			
+			addEventListener(Event.ADDED, onAdded);						
 		}
 		
 		public function setOccupiedSpaces():void
@@ -51,7 +56,7 @@ package world
 		
 		public function drawInitialGrid():void
 		{
-			wg = new WorldGrid(_worldWidth, _worldDepth, _blockSize);
+			wg = new WorldGrid(_worldWidth, _worldDepth, _blockSize, _tile, _floorStyle);
 			addChild(wg);
 			tilesWide = _worldWidth/_blockSize;
 			tilesDeep = _worldDepth/_blockSize;
@@ -401,6 +406,11 @@ package world
 			return _worldDepth;
 		}
 		
+		public function get blockSize():int
+		{
+			return _blockSize;
+		}
+		
 		public function set bitmapBlotter(val:BitmapBlotter):void
 		{
 			_bitmapBlotter = val;
@@ -409,6 +419,26 @@ package world
 		public function get bitmapBlotter():BitmapBlotter
 		{
 			return _bitmapBlotter;
+		}
+		
+		public function set tile(val:Structure):void
+		{
+			_tile = val;
+		}
+		
+		public function get tile():Structure
+		{
+			return _tile;
+		}
+		
+		public function set floorStyle(val:String):void
+		{
+			_floorStyle = val;
+		}
+		
+		public function get floorStyle():String
+		{
+			return _floorStyle;
 		}
 	}
 }

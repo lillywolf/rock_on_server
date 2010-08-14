@@ -19,6 +19,7 @@ package models
 		public var _z:Number;
 		public var _created_at:String;
 		public var _updated_at:String;
+		public var _in_use:Boolean;
 		
 		public var _inventory_count:int;
 				
@@ -36,6 +37,7 @@ package models
 			_y = params.y;
 			_z = params.z;
 			_created_at = params.created_at;
+			_in_use = params.in_use;
 			
 			if (params.structure)
 			{
@@ -189,6 +191,16 @@ package models
 		public function get owned_dwelling_id():int
 		{
 			return _owned_dwelling_id;
+		}
+		
+		public function set in_use(val:Boolean):void
+		{
+			_in_use = val;
+		}
+		
+		public function get in_use():Boolean
+		{
+			return _in_use;
 		}
 		
 		public function getCornerMatrix():Dictionary

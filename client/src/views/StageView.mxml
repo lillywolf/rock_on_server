@@ -33,6 +33,7 @@
 			import world.Point3D;
 			import world.World;
 			import world.WorldEvent;
+			import world.WorldGrid;
 			
 			public var stageWidth:int = 1200;
 			public var stageHeight:int = 1200;
@@ -75,6 +76,12 @@
 			{	
 				stageManager = venueManager.venue.stageManager;
 				concertStage = venueManager.venue.stageManager.concertStage;
+				
+				var wg:WorldGrid = new WorldGrid(this.stageWidth, this.stageHeight, tileSize*2, this.venueManager.venue.getWorldFloorStructure(), this.venueManager.venue.getWorldFloorStyle());
+				wg.drawFloor();
+				addChild(wg);
+				wg.updateDimensions();				
+				
 				myStage = new World(stageWidth, stageHeight, tileSize, concertStage.structure.height);
 				venueManager.venue.stageManager.myStage = myStage;
 				addChild(myStage);

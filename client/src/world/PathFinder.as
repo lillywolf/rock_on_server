@@ -40,8 +40,11 @@ package world
 		
 		public function remove(asset:ActiveAsset):void
 		{
-			var index:Number = getItemIndex(asset);
-			removeItemAt(index);
+			if (this.contains(asset))
+			{
+				var index:Number = getItemIndex(asset);
+				removeItemAt(index);
+			}
 		}
 		
 		public function createPathGrid(worldHeight:int=0):void

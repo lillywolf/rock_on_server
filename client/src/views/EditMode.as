@@ -49,7 +49,7 @@ package views
 			_myWorld = world;
 			_editView = editView;
 			_uiLayer = editView.uiLayer;
-			_editView.addEventListener(MouseEvent.CLICK, onWorldClicked);
+//			_editView.addEventListener(MouseEvent.CLICK, onWorldClicked);
 
 //			enableMouseDetection();
 
@@ -123,48 +123,6 @@ package views
 		{
 			_myWorld.assetRenderer.removeOwnedThinger(evt.thinger);
 		}
-		
-//		public function evaluateClickedAsset(asset:Object):void
-//		{			
-//			if (asset is ActiveAsset)
-//			{
-//				var assetParent:ActiveAsset = asset as ActiveAsset;
-//				if (!locked && (assetParent.thinger as OwnedStructure).editing == false)
-//				{
-//					resetEditMode();			
-//					activateMoveableStructure(assetParent);
-//					locked = true;
-//					(assetParent.thinger as OwnedStructure).editing = true;
-//				}
-//				else if (locked && (isFurnitureOutOfBounds() || isFurnitureOnInvalidPoint()))
-//				{
-//					locked = false;
-//					this.deactivateStructureWithoutSaving();
-//				}
-//				else if (locked)
-//				{
-//					deactivateMoveableStructure();
-//					locked = false;
-//					(assetParent.thinger as OwnedStructure).editing = false;
-//					if (assetParent.thinger is ImposterOwnedStructure)
-//					{
-//						saveNewOwnedStructure(assetParent.thinger as OwnedStructure, assetParent);
-//					}
-//				}
-//			}			
-//		}
-//		
-//		public function resetEditMode():void
-//		{
-//			if (locked)
-//			{
-//				removeListenersFromWorld();
-//				resetAssetColor();
-//				updateCurrentAssetCoordinates();
-//				updateCurrentAssetMode(false);
-//				removeAllOwnedStructureEditOptions();
-//			}
-//		}
 
 		public function evaluateClickedAsset(clickedParent:Object, clickedObject:Object):void
 		{			
@@ -287,7 +245,6 @@ package views
 		{
 			locked = true;
 			_editView.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-//			_myWorld.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			currentAsset.speed = 1;			
 		}
 		

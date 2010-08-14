@@ -116,13 +116,17 @@ package views
 			venue.myWorld = val;
 		}
 		
-		public function updateWorld(myWorld:World, bitmapBlotter:BitmapBlotter):void
+		public function updateWorld(myWorld:World):void
 		{
 			_myWorld = myWorld;
 			venue.myWorld = myWorld;
+		}
+		
+		public function updateBitmapBlotter(bitmapBlotter:BitmapBlotter):void
+		{
 			_bitmapBlotter = bitmapBlotter;
 			venue.bitmapBlotter = bitmapBlotter;
-			initializeBandBoss();
+			initializeBandBoss();			
 		}
 		
 		public function initializeBandBoss():void

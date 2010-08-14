@@ -27,6 +27,7 @@ package rock_on
 	import models.Creature;
 	import models.OwnedDwelling;
 	import models.OwnedStructure;
+	import models.Structure;
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Button;
@@ -714,6 +715,23 @@ package rock_on
 		public function set myWorld(val:World):void
 		{
 			_myWorld = val;
+		}
+		
+		public function getWorldFloorStructure():Structure
+		{
+			for each (var s:Structure in _structureController.structures)
+			{
+				if (s.id == this.dwelling.floor_structure_id)
+				{
+					return s;
+				}
+			}
+			return null;
+		}
+		
+		public function getWorldFloorStyle():String
+		{
+			return this.dwelling.floor_type;			
 		}
 		
 		public function set bitmapBlotter(val:BitmapBlotter):void

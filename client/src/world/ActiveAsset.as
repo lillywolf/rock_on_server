@@ -52,6 +52,7 @@ package world
 		public var _scale:Number;
 		
 		public static const X_BITMAP_BUFFER:int = 40;
+		public static const Y_BITMAP_BUFFER:int = 12;
 		public static const MOVE_DELAY_TIME:int = 200;
 		
 		public function ActiveAsset(movieClip:MovieClip=null, scale:Number=1)
@@ -96,7 +97,7 @@ package world
 			scaleMovieClip(mc);
 			bitmapData = new BitmapData(mc.width + X_BITMAP_BUFFER, mc.height, true, 0x000000);
 			var matrix:Matrix = new Matrix(1, 0, 0, 1, widthDiff/2 + X_BITMAP_BUFFER, heightDiff);
-			var rect:Rectangle = new Rectangle(0, 0, mc.width + X_BITMAP_BUFFER, mc.height);
+			var rect:Rectangle = new Rectangle(0, 0, mc.width + X_BITMAP_BUFFER, mc.height + Y_BITMAP_BUFFER);
 			scaleMatrix(matrix, mc.width);
 			bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
 			bitmap = new Bitmap(bitmapData);

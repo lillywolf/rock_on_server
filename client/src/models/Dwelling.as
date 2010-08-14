@@ -15,6 +15,8 @@ package models
 		public var _id:int;
 		public var _dwelling_type:String;
 		public var _capacity:int;
+		public var _floor_type:String;
+		public var _floor_structure_id:int;
 		
 		public var _width:Number;
 		public var _height:Number;
@@ -41,6 +43,8 @@ package models
 			_symbol_name = params['symbol_name'];
 			_name = params['name'];
 			_dwelling_type = params['dwelling_type'];
+			_floor_type = params["floor_type"];
+			_floor_structure_id = params["floor_structure_id"];
 			
 			setExtraProperties(params);
 		}
@@ -176,7 +180,28 @@ package models
 		public function get depth():Number
 		{
 			return _depth;
-		}						
+		}
+		
+		public function set floor_structure_id(val:int):void
+		{
+			_floor_structure_id = val;
+		}	
+		
+		public function get floor_structure_id():int
+		{
+			return _floor_structure_id;
+		}	
+		
+		public function set floor_type(val:String):void
+		{
+			_floor_type = val;
+		}
+		
+		public function get floor_type():String
+		{
+			return _floor_type;
+		}
+									   
 			
 	}
 }
