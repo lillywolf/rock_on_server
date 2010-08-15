@@ -26,6 +26,7 @@ package rock_on
 	
 	import models.Creature;
 	import models.OwnedDwelling;
+	import models.OwnedSong;
 	import models.OwnedStructure;
 	import models.Structure;
 	
@@ -501,7 +502,31 @@ package rock_on
 			{
 				customerPersonManager.remove(cp);
 			}
-		}		
+		}	
+		
+		public function updateRenderedStructures(os:OwnedStructure, method:String):void
+		{
+			if (os.structure.structure_type == "Tile")
+			{
+				this.stageManager.updateRenderedTiles(os, method);
+			}
+			else if (os.structure.structure_type == "StageDecoration")
+			{
+				this.stageManager.updateRenderedStageDecorations(os, method);
+			}
+			else if (os.structure.structure_type == "Booth")
+			{
+				this.boothBoss.updateRenderedBooths(os, method);
+			}
+			else if (os.structure.structure_type == "ListeningStation")
+			{
+				this.listeningStationBoss.updateRenderedStations(os, method);
+			}
+			else
+			{
+				throw new Error("No re-rendering handler for structure type");
+			}
+		}
 		
 		public function stateTranslateString():int
 		{

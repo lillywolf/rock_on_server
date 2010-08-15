@@ -13,6 +13,8 @@
 			import flash.utils.getQualifiedClassName;
 			import flash.utils.getTimer;
 			
+			import game.ImposterOwnedStructure;
+			
 			import models.Creature;
 			import models.EssentialModelReference;
 			import models.OwnedLayerable;
@@ -50,7 +52,9 @@
 			import world.BitmapBlotter;
 			import world.Point3D;
 			import world.World;				
-			public var pausedForStateCompletion:OwnedStructure;
+			
+			public var tileMode:TileMode;
+			public var ios:ImposterOwnedStructure;
 			public var stageWidth:int = 1200;
 			public var stageHeight:int = 1200;
 			
@@ -78,19 +82,62 @@
 			public function addTileStuff():void
 			{
 				var btn:Button = new Button();
-				btn.addEventListener(MouseEvent.CLICK, switchToTileMode);
+				btn.addEventListener(MouseEvent.CLICK, onTileModeButtonClicked);
 				btn.y = 200;
 				btn.width = 40;
 				btn.height = 40;
 				addChild(btn);
 			}
 			
-			private function switchToTileMode(evt:MouseEvent):void
+			private function onTileModeButtonClicked(evt:MouseEvent):void
 			{
-				this.removeChild(editMode);
-				this.removeChild(myWorld);
-				var tileMode:TileMode = new TileMode(this, myWorld.worldWidth, myWorld.worldDepth, myWorld.blockSize);
+				switchToTileMode();
+			}
+			
+			private function clearCurrentChildren():void
+			{				
+				if (this.contains(editMode))
+				{
+					this.removeChild(editMode);				
+				}
+				if (myWorld && this.contains(myWorld))
+				{
+					this.removeChild(myWorld);					
+				}
+			}
+			
+			private function switchToTileMode():void
+			{
+				clearCurrentChildren();
+				tileMode = new TileMode(this, myWorld.worldWidth, myWorld.worldDepth, myWorld.blockSize);
+				tileMode.addEventListener("structurePlaced", onStructurePlaced);
 				addChild(tileMode);
+			}
+			
+			public function addTemporaryCoords(os:OwnedStructure):void
+			{
+				os.x = 0;
+				os.y = 0;
+				os.z = 0;
+			}
+			
+			public function newStructurePurchased(ios:ImposterOwnedStructure):void
+			{
+				if (ios.structure.structure_type == "Tile")
+				{
+					switchToTileMode();
+					addTemporaryCoords(ios);
+					var asset:ActiveAsset = tileMode.addTileAsset(ios);
+					tileMode.selectTile(asset);
+				}
+				else if (ios.structure.structure_type == "Booth" || ios.structure.structure_type == "ListeningStation")
+				{
+					
+				}
+				else
+				{
+					
+				}
 			}
 			
 			override public function onEnterFrame(evt:Event):void
@@ -162,11 +209,11 @@
 			override public function updateRenderedStructures(os:OwnedStructure, method:String):void
 			{
 				var asset:ActiveAsset = structureController.findAssetFromOwnedStructure(myWorld.assetRenderer.unsortedAssets, os);
-				if (method == "sell")
+				if (method == "sell" && asset)
 				{
 					myWorld.assetRenderer.removeAsset(asset);
 				}
-				if (method == "save_placement")
+				if (method == "save_placement" && asset)
 				{
 					myWorld.updateAssetCoords(asset, new Point3D(os.x, os.y, os.z), false);
 				}

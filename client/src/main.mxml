@@ -337,13 +337,14 @@
 			private function updateOwnedStructurePostServer(os:OwnedStructure, method:String):void
 			{
 				gdi.structureController.updateOwnedStructureOnServerResponse(os, method, worldView.venueManager.venue);
-				worldView.updateRenderedStructures(os, method);
-				stageView.updateRenderedStructures(os, method, stageView.myStage);
-				
-				if (editView)
-				{
-					editView.updateRenderedStructures(os, method);					
-				}				
+				worldView.venueManager.venue.updateRenderedStructures(os, method);
+//				worldView.updateRenderedStructures(os, method);
+//				stageView.updateRenderedStructures(os, method, stageView.myStage);
+//				
+//				if (editView)
+//				{
+//					editView.updateRenderedStructures(os, method);					
+//				}				
 			}
 			private function updateOwnedLayerablePostServer(ol:OwnedLayerable, method:String):void
 			{
@@ -365,14 +366,15 @@
 			{
 				if (evt.thinger.structure)
 				{
-					var os:OwnedStructure = new ImposterOwnedStructure(evt.thinger);
-					editView.pausedForStateCompletion = os;
+					var ios:ImposterOwnedStructure = new ImposterOwnedStructure(evt.thinger);
+					editView.ios = ios;
 					switchToEditView();
 					if (editView.editMode)
 					{
-						var asset:ActiveAsset = editView.editMode.createPurchaseCopy(os);
-						editView.pausedForStateCompletion = null;					
-						editView.editMode.startMoveWithoutEditOptions(asset);
+//						var asset:ActiveAsset = editView.editMode.createPurchaseCopy(os);
+						editView.newStructurePurchased(editView.ios);
+//						editView.ios = null;					
+//						editView.editMode.startMoveWithoutEditOptions(asset);
 					}
 				}
 			}
@@ -383,11 +385,12 @@
 			}
 			private function onEditViewCreated(evt:DynamicEvent):void
 			{
-				if (editView.pausedForStateCompletion)
+				if (editView.ios)
 				{
-					var asset:ActiveAsset = editView.editMode.createPurchaseCopy(editView.pausedForStateCompletion);
-					editView.pausedForStateCompletion = null;					
-					editView.editMode.startMoveWithoutEditOptions(asset);					
+//					var asset:ActiveAsset = editView.editMode.createPurchaseCopy(editView.pausedForStateCompletion);
+					editView.newStructurePurchased(editView.ios);
+//					editView.ios = null;					
+//					editView.editMode.startMoveWithoutEditOptions(asset);					
 				}
 			}
 			private function addControllerListeners():void

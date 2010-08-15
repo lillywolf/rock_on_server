@@ -2,9 +2,9 @@ package game
 {
 	import flash.events.IEventDispatcher;
 	import flash.utils.getQualifiedClassName;
-	
 	import models.EssentialModelReference;
 	import models.OwnedStructure;
+	
 
 	public class ImposterOwnedStructure extends OwnedStructure
 	{

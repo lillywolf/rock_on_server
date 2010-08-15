@@ -13,6 +13,7 @@ package views
 	import models.OwnedStructure;
 	
 	import mx.core.UIComponent;
+	import mx.events.DynamicEvent;
 	
 	import rock_on.Venue;
 	
@@ -67,12 +68,18 @@ package views
 			{
 				if (os.structure.structure_type == "Tile" && os.in_use)
 				{
-					var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
-					var asset:ActiveAsset = new ActiveAsset(mc);
-					asset.thinger = os;
-					tileWorld.addAsset(asset, new Point3D(os.x, os.y, os.z));
+					addTileAsset(os);
 				}
 			}
+		}
+		
+		public function addTileAsset(os:OwnedStructure):ActiveAsset
+		{
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+			var asset:ActiveAsset = new ActiveAsset(mc);
+			asset.thinger = os;
+			tileWorld.addAsset(asset, new Point3D(os.x, os.y, os.z));	
+			return asset;
 		}
 		
 		public function selectTile(asset:ActiveAsset):void
@@ -83,17 +90,41 @@ package views
 			tileEditing = true;
 			_editView.addEventListener(MouseEvent.MOUSE_MOVE, onTileMouseMove);
 		}
+
+		public function getAccurateClickedTile(coords:Point3D):ActiveAsset
+		{
+			for each (var asset:ActiveAsset in tileWorld.assetRenderer.unsortedAssets)
+			{
+				if (coords.x >= asset.worldCoords.x - 1 && 
+					coords.x < asset.worldCoords.x + 1 &&
+					coords.z >= asset.worldCoords.z - 1 &&
+					coords.z < asset.worldCoords.z + 1)
+				{
+					return asset;
+				}
+			}
+			return null;
+		}
 		
 		public function onClick(evt:MouseEvent):void
 		{
-			var clickTarget:DisplayObject = evt.target as DisplayObject;
-			if (!tileEditing && clickTarget is ActiveAsset)
+			var coords:Point3D = World.actualToWorldCoords(new Point(tileWorld.mouseX, tileWorld.mouseY));
+			var asset:ActiveAsset = getAccurateClickedTile(coords);
+			
+			if (!tileEditing && asset)
 			{
-				selectTile(clickTarget as ActiveAsset);
+				selectTile(asset);
 			}
-			else if (tileEditing)
+			else if (tileEditing && asset)
 			{
-				placeTile();
+				if (isTileInBounds(asset))
+				{
+					placeTile();				
+				}
+				else
+				{
+					revertTile();
+				}
 			}
 		}
 		
@@ -109,6 +140,37 @@ package views
 			resetEditMode();
 		}
 		
+		public function revertTile():void
+		{
+			if (isOwned(currentTile))
+			{
+				var os:OwnedStructure = currentTile.thinger as OwnedStructure;
+				tileWorld.moveAssetTo(currentTile, new Point3D(os.x, os.y, os.z));
+			}
+			else
+			{
+				removeImposterTile(currentTile);
+			}
+			resetEditMode();
+		}
+		
+		public function removeImposterTile(asset:ActiveAsset):void
+		{
+			tileWorld.removeAsset(asset);
+		}
+		
+		public function isOwned(asset:ActiveAsset):Boolean
+		{
+			for each (var os:OwnedStructure in _structureController.owned_structures)
+			{
+				if ((asset.thinger as OwnedStructure).id && (asset.thinger as OwnedStructure).id == os.id)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
 		public function resetEditMode():void
 		{
 			_editView.removeEventListener(MouseEvent.MOUSE_MOVE, onTileMouseMove);
@@ -118,7 +180,17 @@ package views
 		
 		public function saveTileCoords(asset:ActiveAsset):void
 		{
-			
+			if (isOwned(asset))
+			{
+				var evt:DynamicEvent = new DynamicEvent("structurePlaced", true, true);
+				evt.asset = asset;
+				evt.currentPoint = asset.worldCoords;
+				dispatchEvent(evt);
+			}
+			else
+			{
+				_structureController.saveNewOwnedStructure(asset.thinger as OwnedStructure, _venue, asset.worldCoords);
+			}
 		}
 		
 		public function onTileMouseMove(evt:MouseEvent):void
@@ -135,11 +207,7 @@ package views
 		{
 			if (currentTile)
 			{
-				var topPoint:Point3D = new Point3D(currentTile.worldCoords.x - (TILE_SCALE / 2), currentTile.worldCoords.y, currentTile.worldCoords.z + (TILE_SCALE / 2));
-				var bottomPoint:Point3D = new Point3D(currentTile.worldCoords.x + (TILE_SCALE / 2), currentTile.worldCoords.y, currentTile.worldCoords.z + (TILE_SCALE / 2));
-				var leftPoint:Point3D = new Point3D(currentTile.worldCoords.x - (TILE_SCALE / 2), currentTile.worldCoords.y, currentTile.worldCoords.z - (TILE_SCALE / 2));
-				var rightPoint:Point3D = new Point3D(currentTile.worldCoords.x + (TILE_SCALE / 2), currentTile.worldCoords.y, currentTile.worldCoords.z + (TILE_SCALE / 2));
-				if (_venue.isPointInVenueBounds(topPoint) && _venue.isPointInVenueBounds(bottomPoint) && _venue.isPointInVenueBounds(leftPoint) && _venue.isPointInVenueBounds(rightPoint))
+				if (isTileInBounds(currentTile))
 				{
 					showValidTileFilters();
 				}
@@ -148,6 +216,19 @@ package views
 					showInvalidTileFilters();
 				}
 			}
+		}
+		
+		public function isTileInBounds(asset:ActiveAsset):Boolean
+		{
+			var topPoint:Point3D = new Point3D(asset.worldCoords.x - (TILE_SCALE / 2), asset.worldCoords.y, asset.worldCoords.z + (TILE_SCALE / 2));
+			var bottomPoint:Point3D = new Point3D(asset.worldCoords.x + (TILE_SCALE / 2), asset.worldCoords.y, asset.worldCoords.z + (TILE_SCALE / 2));
+			var leftPoint:Point3D = new Point3D(asset.worldCoords.x - (TILE_SCALE / 2), asset.worldCoords.y, asset.worldCoords.z - (TILE_SCALE / 2));
+			var rightPoint:Point3D = new Point3D(asset.worldCoords.x + (TILE_SCALE / 2), asset.worldCoords.y, asset.worldCoords.z + (TILE_SCALE / 2));
+			if (_venue.isPointInVenueBounds(topPoint) && _venue.isPointInVenueBounds(bottomPoint) && _venue.isPointInVenueBounds(leftPoint) && _venue.isPointInVenueBounds(rightPoint))
+			{			
+				return true;
+			}
+			return false;
 		}
 		
 		public function showValidTileFilters():void
@@ -169,9 +250,9 @@ package views
 			}
 		}
 		
-		public function replaceTile(asset:OwnedStructure):void
+		public function replaceTile(os:OwnedStructure):void
 		{
-			
+
 		}
 		
 		public function isTileOccupied(asset:ActiveAsset):OwnedStructure

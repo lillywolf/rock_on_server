@@ -81,6 +81,30 @@ package rock_on
 			return asset;
 		}
 		
+		public function updateRenderedStageDecorations(os:OwnedStructure, method:String):void
+		{
+			if (method == "save_placement")
+			{
+				_myStage.saveStructurePlacement(os);
+			}
+			else if (method == "create_new")
+			{
+				_myStage.createNewStructure(os);
+			}			
+		}
+		
+		public function updateRenderedTiles(os:OwnedStructure, method:String):void
+		{
+			if (method == "save_placement")
+			{
+				_myStage.saveStructurePlacement(os);
+			}
+			else if (method == "create_new")
+			{
+				_myStage.createNewStructure(os);
+			}
+		}
+		
 		public function addStageToWorld(asset:ActiveAsset, addTo:Point3D, myStage:World):void
 		{
 			_myStage = myStage;

@@ -650,7 +650,7 @@ package world
 			}
 			if (!os.structure.width || !os.structure.depth)
 			{
-				throw new Error("No dimensions specified for structure");
+//				throw new Error("No dimensions specified for structure");
 			} 
 			return structurePoints;
 		}

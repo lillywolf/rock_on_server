@@ -15,6 +15,8 @@ package stores
 		public var _storeOwnedThinger:StoreOwnedThinger;
 		public var _mc:MovieClip;
 		public var frameUIC:UIComponent;
+		
+		public static const NUM_COLUMNS:int = 5;
 		public static const CONTAINER_WIDTH:int = 80;
 		public static const CONTAINER_HEIGHT:int = 80;
 		public static const CONTAINER_PADDING_X:int = 4;

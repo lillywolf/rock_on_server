@@ -5,6 +5,7 @@ package world
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
+	import models.EssentialModelReference;
 	import models.OwnedStructure;
 	import models.Structure;
 	
@@ -243,9 +244,50 @@ package world
 			activeAsset.lastWorldPoint.z = (activeAsset.worldCoords.z.valueOf());
 		}
 		
+		public function updatePlacement(asset:ActiveAsset, newCoords:Point3D):void
+		{
+			asset.worldCoords.x = newCoords.x;
+			asset.worldCoords.y = newCoords.y;
+			asset.worldCoords.z = newCoords.z;
+		}
+		
+		public function createNewStructure(os:OwnedStructure):void
+		{
+			var asset:ActiveAsset = World.createStandardAssetFromStructure(os);
+			addAsset(asset, new Point3D(os.x, os.y, os.z));			
+		}
+		
+		public function saveStructurePlacement(os:OwnedStructure):void
+		{
+			for each (var asset:ActiveAsset in assetRenderer.unsortedAssets)
+			{
+				if (asset.thinger == os)
+				{
+					updatePlacement(asset, new Point3D(os.x, os.y, os.z));
+				}
+			}						
+		}
+		
+		public static function createStandardAssetFromStructure(os:OwnedStructure):ActiveAsset
+		{
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+			var asset:ActiveAsset = new ActiveAsset(mc);
+			asset.thinger = os;
+			return asset;
+		}
+		
+		public function validateWorldCoords(asset:ActiveAsset):void
+		{
+			if (!asset.worldCoords.x || !asset.worldCoords.y || !asset.worldCoords.z)
+			{
+//				throw new Error("Missing world coords");
+			}
+		}
+		
 		public function moveAssetTo(activeAsset:ActiveAsset, destination:Point3D, fourDirectional:Boolean = false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):void
 		{	
 			validateDestination(destination);
+			validateWorldCoords(activeAsset);
 			updatePointReferences(activeAsset, destination);
 			activeAsset.currentPath = null;
 			
@@ -307,7 +349,7 @@ package world
 			if (destination.x%1 != 0 || destination.y%1 != 0 || destination.z%1 != 0)
 			{
 				throw new Error("Destination should be a whole number");
-			}			
+			}	
 		}
 		
 		private function moveToNextPathStep(asset:ActiveAsset):void

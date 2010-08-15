@@ -145,6 +145,20 @@ package rock_on
 			}
 		}
 		
+		public function updateRenderedBooths(os:OwnedStructure, method:String):void
+		{
+			if (method == "save_placement")
+			{
+				_myWorld.saveStructurePlacement(os);
+				reInitializeBooths(false);
+				_venue.customerPersonManager.redrawStandAloneCustomers();
+			}
+			else if (method == "create_new")
+			{
+				_myWorld.createNewStructure(os);
+			}
+		}
+		
 		public function showBooths():void
 		{
 			boothAssets = new ArrayCollection();

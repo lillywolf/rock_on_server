@@ -21,6 +21,7 @@ package models
 		{
 			super(params, target);
 			_id = params.id;
+			_user_id = params.user_id;
 			updateProperties(params);			
 		}
 		

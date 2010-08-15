@@ -160,6 +160,19 @@ package rock_on
 			}
 		}
 		
+		public function updateRenderedStations(os:OwnedStructure, method:String):void
+		{
+			if (method == "save_placement")
+			{
+				_myWorld.saveStructurePlacement(os);
+				reInitializeListeningStations();			
+			}
+			else if (method == "create_new")
+			{
+				_myWorld.createNewStructure(os);
+			}
+		}
+		
 		public function addStaticStationListeners():void
 		{
 			for each (var ls:ListeningStation in this.listeningStations)

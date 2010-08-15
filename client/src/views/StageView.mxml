@@ -77,12 +77,14 @@
 				stageManager = venueManager.venue.stageManager;
 				concertStage = venueManager.venue.stageManager.concertStage;
 				
-				var wg:WorldGrid = new WorldGrid(this.stageWidth, this.stageHeight, tileSize*2, this.venueManager.venue.getWorldFloorStructure(), this.venueManager.venue.getWorldFloorStyle());
-				wg.drawFloor();
-				addChild(wg);
-				wg.updateDimensions();				
+//				var wg:WorldGrid = new WorldGrid(this.stageWidth, this.stageHeight, tileSize*2, this.venueManager.venue.getWorldFloorStructure(), this.venueManager.venue.getWorldFloorStyle());
+//				wg.drawFloor();
+//				addChild(wg);
+//				wg.updateDimensions();		
+				
 				
 				myStage = new World(stageWidth, stageHeight, tileSize, concertStage.structure.height);
+				structureController.drawTiles(myStage);
 				venueManager.venue.stageManager.myStage = myStage;
 				addChild(myStage);
 			}

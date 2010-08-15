@@ -7,6 +7,7 @@ package controllers
 	import game.ImposterOwnedStructure;
 	
 	import models.EssentialModelReference;
+	import models.OwnedDwelling;
 	import models.OwnedStructure;
 	import models.Structure;
 	
@@ -27,6 +28,8 @@ package controllers
 	import views.WorldView;
 	
 	import world.ActiveAsset;
+	import world.Point3D;
+	import world.World;
 
 	public class StructureController extends Controller
 	{
@@ -156,7 +159,12 @@ package controllers
 		{
 			var i:int = structures.getItemIndex(structure);
 			structures.removeItemAt(i);
-		}		
+		}
+		
+		public function saveNewOwnedStructure(os:OwnedStructure, od:OwnedDwelling, coords:Point3D):void
+		{
+			_serverController.sendRequest({user_id: od.user_id, owned_dwelling_id: od.id, structure_id: os.structure.id, x: coords.x, y: coords.y, z: coords.z}, "owned_structure", "create_new");			
+		}
 		
 //		private function onParentMovieClipAssigned(evt:DynamicEvent):void
 //		{
@@ -345,6 +353,20 @@ package controllers
 				}
 			}
 			return false;
+		}
+		
+		public function drawTiles(_world:World):void
+		{
+			for each (var os:OwnedStructure in owned_structures)
+			{
+				if (os.structure.structure_type == "Tile")
+				{
+					var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);					
+					var asset:ActiveAsset = new ActiveAsset(mc);
+					asset.thinger = os;
+					_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
+				}
+			}
 		}
 		
 		private function updateListeningStationOnServerResponse(os:OwnedStructure, method:String, listeningStationBoss:ListeningStationBoss):void

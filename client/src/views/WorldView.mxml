@@ -80,7 +80,7 @@
 			import world.WorldEvent;
 			import world.WorldGrid;	
 			
-			public var myWorld:World;
+			[Bindable] public var myWorld:World;
 			[Bindable] public var myUser:User;
 			
 			public static const PERSON_SPEED:Number = 0.07;

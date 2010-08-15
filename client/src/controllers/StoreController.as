@@ -60,8 +60,9 @@ package controllers
 		
 		private function addStoreOwnedThingerToStore(uic:StoreUIComponent, container:StoreOwnedThingerUIComponent, index:int):void
 		{
-			container.x = index * (StoreOwnedThingerUIComponent.CONTAINER_WIDTH + StoreUIComponent.ITEM_PADDING_X) + StoreUIComponent.PADDING_X;
-			var numColumns:int = Math.round((uic.width - (2 * StoreUIComponent.PADDING_X)) / (StoreOwnedThingerUIComponent.CONTAINER_WIDTH + StoreUIComponent.ITEM_PADDING_X));
+			container.x = index % (StoreOwnedThingerUIComponent.NUM_COLUMNS) * (StoreOwnedThingerUIComponent.CONTAINER_WIDTH + StoreUIComponent.ITEM_PADDING_X) + StoreUIComponent.PADDING_X;
+//			var numColumns:int = Math.round((uic.width - (2 * StoreUIComponent.PADDING_X)) / (StoreOwnedThingerUIComponent.CONTAINER_WIDTH + StoreUIComponent.ITEM_PADDING_X));
+			var numColumns:int = StoreOwnedThingerUIComponent.NUM_COLUMNS;
 			container.y = Math.floor(index / numColumns) * (StoreOwnedThingerUIComponent.CONTAINER_HEIGHT + StoreUIComponent.ITEM_PADDING_Y) + StoreUIComponent.PADDING_Y;
 			uic.canvas.addChild(container);
 		}
