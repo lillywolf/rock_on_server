@@ -158,7 +158,7 @@ package world
 						
 						if (asset.worldDestination.x%1 != 0 || asset.worldDestination.y%1 != 0 || asset.worldDestination.z%1 != 0)
 						{
-							throw new Error('destination world coords need to be whole numbers');
+//							throw new Error('destination world coords need to be whole numbers');
 						}
 						
 						var evt:WorldEvent = new WorldEvent(WorldEvent.DESTINATION_REACHED, asset);

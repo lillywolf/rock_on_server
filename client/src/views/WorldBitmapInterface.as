@@ -671,6 +671,10 @@ package views
 		
 		public function getRelevantViewForMouseDown(coords:Point, localStage:StageView, localWorld:WorldView):UIComponent
 		{
+			if (FlexGlobals.topLevelApplication.currentState == "editView")
+			{
+				return FlexGlobals.topLevelApplication.editView;
+			}
 			var pt3D:Point3D = World.actualToWorldCoords(convertPointToWorldPoint(localWorld, coords));
 			var rect:Rectangle = _venueManager.venue.stageRect;
 			if (pt3D.x <= rect.right && pt3D.z >= rect.top)
@@ -689,14 +693,27 @@ package views
 			
 			var v:UIComponent = getRelevantViewForMouseDown(clickPoint, localStage, localWorld);
 			
-			if (v is WorldView)
+			if (v is EditView)
+			{
+				listenForEditMouseUp(v as EditView);
+			}
+			else if (v is WorldView)
 			{
 				listenForWorldMouseUp(localWorld);
 			}
 			else if (v is StageView)
 			{
 				listenForStageMouseUp(localWorld, localStage);
-			}
+			}	
+		}
+		
+		public function listenForEditMouseUp(localWorld:WorldView):void
+		{
+			localWorld.addEventListener(MouseEvent.MOUSE_UP, function onMouseUp(evt:MouseEvent):void
+			{
+				localWorld.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+				isDragging = false;					
+			});			
 		}
 		
 		public function listenForWorldMouseUp(localWorld:WorldView):void

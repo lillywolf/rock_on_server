@@ -41,7 +41,6 @@ package views
 			_structureController = _editView.structureController;
 			_venue = _editView.venueManager.venue;
 			createTileWorld(worldWidth, worldDepth, tileSize);
-//			_editView.addEventListener(MouseEvent.CLICK, onClick);
 			
 			this.addEventListener(Event.ADDED, onAdded);
 		}
@@ -50,14 +49,14 @@ package views
 		{
 			width = parent.width;
 			height = parent.height;	
-			tileWorld.x = _editView.myWorld.x;
-			tileWorld.y = _editView.myWorld.y;
+			tileWorld.x = _editView.worldOriginX;
+			tileWorld.y = _editView.worldOriginY;			
 		}
 		
 		public function createTileWorld(worldWidth:int, worldDepth:int, tileSize:int):void
 		{
 			tileWorld = new World(worldWidth, worldDepth, tileSize);
-			tileWorld.addEventListener(MouseEvent.CLICK, onClick);
+//			tileWorld.addEventListener(MouseEvent.CLICK, onClick);
 			addChild(tileWorld);
 			showTiles();
 		}
@@ -106,7 +105,7 @@ package views
 			return null;
 		}
 		
-		public function onClick(evt:MouseEvent):void
+		public function handleClick(evt:MouseEvent):void
 		{
 			var coords:Point3D = World.actualToWorldCoords(new Point(tileWorld.mouseX, tileWorld.mouseY));
 			var asset:ActiveAsset = getAccurateClickedTile(coords);

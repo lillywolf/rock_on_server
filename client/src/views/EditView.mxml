@@ -2,6 +2,8 @@
 <views:WorldView xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:views="views.*" width="1000" height="1000" creationComplete="onCreationComplete()" clipContent="false" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	<mx:Script>
 		<![CDATA[
+			import clickhandlers.EditViewClickHandler;
+			
 			import controllers.CreatureController;
 			import controllers.DwellingController;
 			import controllers.LayerableController;
@@ -54,39 +56,39 @@
 			import world.World;				
 			
 			public var tileMode:TileMode;
+			public var normalStructureMode:NormalStructureMode;
+			public var currentMode:UIComponent;
+			
 			public var ios:ImposterOwnedStructure;
 			public var stageWidth:int = 1200;
 			public var stageHeight:int = 1200;
+			public var worldOriginX:Number;
+			public var worldOriginY:Number;
 			
 			private function onCreationComplete():void
 			{
 				viewReference = this;
-				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				addEventListener(MouseEvent.MOUSE_DOWN, function onMouseDown(evt:MouseEvent):void
-				{
-					wbi.handleMouseDown(stageView, viewReference, new Point(evt.localX, evt.localY));
-				});	
+				var mouseHandler:EditViewClickHandler = new EditViewClickHandler(venueManager.venue, this);
 				
-				editMode = new EditMode(myWorld, this);
-				editMode.addEventListener("structurePlaced", onStructurePlaced);
-				editMode.structureController = structureController;
-				addChild(editMode);	
-				
-				addTileStuff();
-				
-				addUILayer();				
-				
-				dispatchEditViewCreationEvent();			
+				addButtons();
+				dispatchEditViewCreationEvent();						
 			}
 			
-			public function addTileStuff():void
+			public function addButtons():void
 			{
-				var btn:Button = new Button();
-				btn.addEventListener(MouseEvent.CLICK, onTileModeButtonClicked);
-				btn.y = 200;
-				btn.width = 40;
-				btn.height = 40;
-				addChild(btn);
+				var tilebtn:Button = new Button();
+				tilebtn.addEventListener(MouseEvent.CLICK, onTileModeButtonClicked);
+				tilebtn.y = 200;
+				tilebtn.width = 40;
+				tilebtn.height = 40;
+				FlexGlobals.topLevelApplication.topBarView.addChild(tilebtn);
+				
+				var normalBtn:Button = new Button();
+				normalBtn.addEventListener(MouseEvent.CLICK, onNormalStructureModeButtonClicked);
+				normalBtn.y = 250;
+				normalBtn.width = 40;
+				normalBtn.height = 40;
+				FlexGlobals.topLevelApplication.topBarView.addChild(normalBtn);
 			}
 			
 			private function onTileModeButtonClicked(evt:MouseEvent):void
@@ -94,24 +96,44 @@
 				switchToTileMode();
 			}
 			
+			private function onNormalStructureModeButtonClicked(evt:MouseEvent):void
+			{
+				switchToNormalStructureMode();
+			}
+			
 			private function clearCurrentChildren():void
 			{				
-				if (this.contains(editMode))
+				if (normalStructureMode && this.contains(normalStructureMode))
 				{
-					this.removeChild(editMode);				
+					normalStructureMode.removeChild(normalStructureMode.tileLayer);
+					normalStructureMode.removeChild(normalStructureMode.structureWorld);
+					this.removeChild(normalStructureMode);				
 				}
-				if (myWorld && this.contains(myWorld))
+				if (tileMode && this.contains(tileMode))
 				{
-					this.removeChild(myWorld);					
+					tileMode.removeChild(tileMode.tileWorld);
+					this.removeChild(tileMode);					
 				}
 			}
 			
 			private function switchToTileMode():void
 			{
 				clearCurrentChildren();
-				tileMode = new TileMode(this, myWorld.worldWidth, myWorld.worldDepth, myWorld.blockSize);
+				tileMode = new TileMode(this, FlexGlobals.topLevelApplication.worldWidth, FlexGlobals.topLevelApplication.worldHeight, FlexGlobals.topLevelApplication.tileSize);
 				tileMode.addEventListener("structurePlaced", onStructurePlaced);
+				tileMode.nestLevel = 1;
+				currentMode = tileMode;
 				addChild(tileMode);
+			}
+			
+			private function switchToNormalStructureMode():void
+			{
+				clearCurrentChildren();
+				normalStructureMode = new NormalStructureMode(this, FlexGlobals.topLevelApplication.worldWidth, FlexGlobals.topLevelApplication.worldHeight, FlexGlobals.topLevelApplication.tileSize);
+				normalStructureMode.addEventListener("structurePlaced", onStructurePlaced);
+				normalStructureMode.nestLevel = 1;
+				currentMode = normalStructureMode;
+				addChild(normalStructureMode);
 			}
 			
 			public function addTemporaryCoords(os:OwnedStructure):void
@@ -140,24 +162,21 @@
 				}
 			}
 			
-			override public function onEnterFrame(evt:Event):void
-			{
-				var time:Number = getTimer();
-				var deltaTime:Number = time - lastTime;
-				var lockedDelta:Number = Math.min(100, deltaTime);
-				fps = 1000/deltaTime;
-				myMemory = System.totalMemory;
-				lastTime = time;
-				
-				if (wbi && FlexGlobals.topLevelApplication.currentState == "editView")
-				{
-					wbi.handleEnterFrameEvents(viewReference);			
-				}
-				if (venueManager)
-				{
-					venueManager.update(lockedDelta);				
-				}
-			}			
+//			override public function onEnterFrame(evt:Event):void
+//			{
+//				var time:Number = getTimer();
+//				var deltaTime:Number = time - lastTime;
+//				var lockedDelta:Number = Math.min(100, deltaTime);
+//				
+//				if (wbi && FlexGlobals.topLevelApplication.currentState == "editView")
+//				{
+//					wbi.handleEnterFrameEvents(viewReference);			
+//				}
+//				if (venueManager)
+//				{
+//					venueManager.update(lockedDelta);				
+//				}
+//			}			
 			
 			private function dragStage():void
 			{		
@@ -189,7 +208,7 @@
 			public function initializeStage():void
 			{	
 				stageManager = venueManager.venue.stageManager;
-				myStage = new World(stageWidth, stageHeight, tileSize, stageManager.concertStage.structure.height);
+				myStage = new World(stageWidth, stageHeight, FlexGlobals.topLevelApplication.tileSize, stageManager.concertStage.structure.height);
 				stageManager.myStage = myStage;
 				addChild(myStage);
 			}			

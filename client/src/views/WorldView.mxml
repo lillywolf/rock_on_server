@@ -2,6 +2,8 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:views="views.*" width="1000" height="1000" clipContent="false" creationComplete="onCreationComplete()" verticalScrollPolicy="off" horizontalScrollPolicy="off">	
 	<mx:Script>
 		<![CDATA[
+			import clickhandlers.WorldViewClickHandler;
+			
 			import controllers.CreatureController;
 			import controllers.DwellingController;
 			import controllers.LayerableController;
@@ -87,10 +89,6 @@
 			public static const WINDOW_WIDTH:int = 1000;
 			public static const WINDOW_HEIGHT:int = 1000;
 			
-			public static var worldWidth:int = 1200;
-			public static var worldHeight:int = 1200;
-			public static var tileSize:int = 40;
-			
 			public var stageView:StageView;
 			[Bindable] public var bitmapLayer:Bitmap;
 			public var backgroundRect:Rectangle;
@@ -146,20 +144,21 @@
 			{
 				viewReference = this;
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				this.doubleClickEnabled = true;
+				
+//				this.doubleClickEnabled = true;
 //				addEventListener(MouseEvent.DOUBLE_CLICK, onViewDoubleClicked);
 //				addEventListener(MouseEvent.CLICK, onViewClicked);
 			}
 			
-			private function onViewClicked(evt:MouseEvent):void
-			{
-				wbi.onWorldViewClicked(evt);
-			}
-			
-			private function onViewDoubleClicked(evt:MouseEvent):void
-			{
+//			private function onViewClicked(evt:MouseEvent):void
+//			{
+//				wbi.onWorldViewClicked(evt);
+//			}
+//			
+//			private function onViewDoubleClicked(evt:MouseEvent):void
+//			{
 //				wbi.onWorldViewDoubleClicked(evt);
-			}
+//			}
 			
 			public function initializeWorld():void
 			{
@@ -171,8 +170,11 @@
 			public function initializeVenue():void
 			{
 				venueManager = new VenueManager(wbi, structureController, layerableController, dwellingController, levelController, creatureController, usableController, myWorld);
-				wbi.venueManager = venueManager;
+//				wbi.venueManager = venueManager;
 				venueManager.getVenue();
+				
+				var mouseHandler:WorldViewClickHandler = new WorldViewClickHandler(venueManager.venue, this);
+				mouseHandler.stageView = this.stageView;
 			}
 			
 			public function initializeStructures():void
@@ -236,21 +238,21 @@
 			
 			public function addWorld():void
 			{					
-				myWorld = new World(worldWidth, worldHeight, tileSize, stageManager.concertStage.structure.height, this.venueManager.venue.getWorldFloorStructure(), this.venueManager.venue.getWorldFloorStyle());	
+				myWorld = new World(FlexGlobals.topLevelApplication.worldWidth, FlexGlobals.topLevelApplication.worldHeight, FlexGlobals.topLevelApplication.tileSize, stageManager.concertStage.structure.height, this.venueManager.venue.getWorldFloorStructure(), this.venueManager.venue.getWorldFloorStyle());	
 				
 				myWorld.nestLevel = 3;
 				addBackgroundLayer();
 				addChild(myWorld);	
 				myWorld.assetRenderer.addEventListener(WorldEvent.ASSETS_DRAWN, onAssetsDrawn);	
-				addMouseDownListeners();
+//				addMouseDownListeners();
 			}
 			
 			public function addMouseDownListeners():void
 			{
-				backgroundCanvas.addEventListener(MouseEvent.MOUSE_DOWN, function onBitmapMouseDown(evt:MouseEvent):void
-				{
-					wbi.handleMouseDown(stageView, viewReference, new Point(evt.localX, evt.localY));					
-				});
+//				backgroundCanvas.addEventListener(MouseEvent.MOUSE_DOWN, function onBitmapMouseDown(evt:MouseEvent):void
+//				{
+//					wbi.handleMouseDown(stageView, viewReference, new Point(evt.localX, evt.localY));					
+//				});
 //				myWorld.addEventListener(MouseEvent.MOUSE_DOWN, function onWorldMouseDown(evt:MouseEvent):void
 //				{
 //					wbi.handleMouseDown(stageView, viewReference);
@@ -266,10 +268,10 @@
 				myMemory = System.totalMemory;
 				lastTime = time;
 				
-				if (wbi && FlexGlobals.topLevelApplication.currentState == "stageViewer")
-				{
-					wbi.handleEnterFrameEvents(viewReference, stageView);			
-				}
+//				if (wbi && FlexGlobals.topLevelApplication.currentState == "stageViewer")
+//				{
+//					wbi.handleEnterFrameEvents(viewReference, stageView);			
+//				}
 				if (venueManager)
 				{
 					venueManager.update(lockedDelta);				

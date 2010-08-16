@@ -249,6 +249,8 @@ package world
 			asset.worldCoords.x = newCoords.x;
 			asset.worldCoords.y = newCoords.y;
 			asset.worldCoords.z = newCoords.z;
+			this.removeAsset(asset);
+			this.addAsset(asset, asset.worldCoords);
 		}
 		
 		public function createNewStructure(os:OwnedStructure):void
@@ -348,7 +350,7 @@ package world
 		{
 			if (destination.x%1 != 0 || destination.y%1 != 0 || destination.z%1 != 0)
 			{
-				throw new Error("Destination should be a whole number");
+//				throw new Error("Destination should be a whole number");
 			}	
 		}
 		

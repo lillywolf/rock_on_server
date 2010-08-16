@@ -34,7 +34,7 @@
 		</mx:State>
 		<mx:State name="editView" basedOn="topBar">
 			<mx:AddChild>
-				<views:EditView id="editView" myUser="{gdi.user}" stageView="{stageView}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" boothBoss="{worldView.boothBoss}" venueManager="{worldView.venueManager}" dwellingController="{gdi.dwellingController}"/>
+				<views:EditView id="editView" myUser="{gdi.user}" wbi="{wbi}" stageView="{stageView}" worldOriginX="{worldView.myWorld.x}" worldOriginY="{worldView.myWorld.y}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" boothBoss="{worldView.boothBoss}" venueManager="{worldView.venueManager}" dwellingController="{gdi.dwellingController}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="twoDimensional">
@@ -85,6 +85,10 @@
 			
 			import world.ActiveAsset;
 			import world.AssetStack;
+			
+			public var worldWidth:int = 1200;
+			public var worldHeight:int = 1200;
+			public var tileSize:int = 40;			
 						
 			[Bindable] public var gdi:GameDataInterface;
 			[Bindable] public var wbi:WorldBitmapInterface;
@@ -369,7 +373,7 @@
 					var ios:ImposterOwnedStructure = new ImposterOwnedStructure(evt.thinger);
 					editView.ios = ios;
 					switchToEditView();
-					if (editView.editMode)
+					if (editView)
 					{
 //						var asset:ActiveAsset = editView.editMode.createPurchaseCopy(os);
 						editView.newStructurePurchased(editView.ios);
