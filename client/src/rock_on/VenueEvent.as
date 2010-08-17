@@ -5,6 +5,7 @@ package rock_on
 	public class VenueEvent extends Event
 	{
 		public static const BOOTH_UNSTOCKED:String = "VenueEvent:BoothUnstocked";
+		public static const VENUE_INITIALIZED:String = "VenueEvent:VenueInitialized";
 		
 		public var _booth:Booth;
 		public var _venue:Venue;

@@ -102,7 +102,7 @@ package rock_on
 		public var peerBoss:PeerBoss;
 		public var fullyLoaded:Boolean;		
 
-		public var _wbi:WorldBitmapInterface;
+//		public var _wbi:WorldBitmapInterface;
 		public var _dwellingController:DwellingController;
 		public var _structureController:StructureController;
 		public var _creatureController:CreatureController;
@@ -115,7 +115,7 @@ package rock_on
 		public var numStaticCustomers:int;
 		public var numMovingCustomers:int;		
 		
-		public function Venue(wbi:WorldBitmapInterface, venueManager:VenueManager, dwellingController:DwellingController, creatureController:CreatureController, layerableController:LayerableController, structureController:StructureController, usableController:UsableController, bandBoss:BandBoss, params:Object=null, target:IEventDispatcher=null)
+		public function Venue(venueManager:VenueManager, dwellingController:DwellingController, creatureController:CreatureController, layerableController:LayerableController, structureController:StructureController, usableController:UsableController, bandBoss:BandBoss, params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
 			
@@ -124,7 +124,7 @@ package rock_on
 			
 			_structureController = structureController;
 			_venueManager = venueManager;
-			_wbi = wbi;
+//			_wbi = wbi;
 			_dwellingController = dwellingController;
 			_creatureController = creatureController;
 			_usableController = usableController;
@@ -283,7 +283,6 @@ package rock_on
 			var fans:ArrayCollection = getFans();
 			updateAudienceNumbers();
 			creatureGenerator = new CreatureGenerator(_layerableController);
-			_wbi.customerPersonManager = customerPersonManager;
 			groupieBoss = new GroupieBoss(customerPersonManager, boothBoss, stageManager.concertStage, _creatureController, _myWorld, this);
 
 			listeningStationBoss.addStaticStationListeners();
@@ -661,7 +660,7 @@ package rock_on
 		
 		private function onQuestInfoRequested(evt:MoodEvent):void
 		{
-			_wbi.questInfoRequested(evt.person);
+//			_wbi.questInfoRequested(evt.person);
 		}
 		
 		public function checkForVenueTurnover():void

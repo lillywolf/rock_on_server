@@ -70,19 +70,19 @@
 			{
 				viewReference = this;
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				addEventListener(MouseEvent.MOUSE_DOWN, function onMouseDown(evt:MouseEvent):void
-				{
-					wbi.handleMouseDown(stageView, viewReference, new Point(evt.localX, evt.localY));
-				});	
-				this.doubleClickEnabled = true;
-				addEventListener(MouseEvent.DOUBLE_CLICK, onViewDoubleClicked);				
-				addEventListener(MouseEvent.CLICK, onViewClicked);	
+//				addEventListener(MouseEvent.MOUSE_DOWN, function onMouseDown(evt:MouseEvent):void
+//				{
+//					wbi.handleMouseDown(stageView, viewReference, new Point(evt.localX, evt.localY));
+//				});	
+//				this.doubleClickEnabled = true;
+//				addEventListener(MouseEvent.DOUBLE_CLICK, onViewDoubleClicked);				
+//				addEventListener(MouseEvent.CLICK, onViewClicked);	
 			}
 			
-			private function onViewClicked(evt:MouseEvent):void
-			{
-				wbi.onWorldViewClicked(evt);
-			}
+//			private function onViewClicked(evt:MouseEvent):void
+//			{
+//				wbi.onWorldViewClicked(evt);
+//			}
 
 			private function onViewDoubleClicked(evt:MouseEvent):void
 			{
@@ -112,7 +112,7 @@
 			
 			private function generateManagers():void
 			{
-				venueManager = new VenueManager(wbi, structureController, layerableController, dwellingController, levelController, creatureController, usableController, myWorld);
+				venueManager = new VenueManager(structureController, layerableController, dwellingController, levelController, creatureController, usableController, myWorld);
 			}	
 			
 			private function killManagers():void
@@ -134,10 +134,10 @@
 				myMemory = System.totalMemory;
 				lastTime = time;
 				
-				if (wbi)
-				{
-					wbi.handleEnterFrameEvents(viewReference, stageView);			
-				}				
+//				if (wbi)
+//				{
+//					wbi.handleEnterFrameEvents(viewReference, stageView);			
+//				}				
 			}
 			
 			public function onUserLoaded():void

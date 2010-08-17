@@ -14,12 +14,12 @@
 		</mx:State>
 		<mx:State name="stageViewer" basedOn="worldView">
 			<mx:AddChild position="before" relativeTo="worldView">
-				<views:StageView id="stageView" wbi="{wbi}" bottomBar="{bottomBarView}" venueManager="{worldView.venueManager}" customerPersonManager="{worldView.customerPersonManager}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" boothBoss="{worldView.boothBoss}"/>
+				<views:StageView id="stageView" bottomBar="{bottomBarView}" mouseBoss="{mouseBoss}" worldView="{worldView}" venueManager="{worldView.venueManager}" customerPersonManager="{worldView.customerPersonManager}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" boothBoss="{worldView.boothBoss}"/>
 			</mx:AddChild>			
 		</mx:State>
 		<mx:State name="worldView" basedOn="topBar">
 			<mx:AddChild position="after">
-				<views:WorldView id="worldView" wbi="{wbi}" bottomBar="{bottomBarView}" usableController="{gdi.usableController}" songController="{gdi.songController}" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" dwellingController="{gdi.dwellingController}" levelController="{gdi.levelController}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandBoss="{stageView.bandBoss}"/>
+				<views:WorldView id="worldView" bottomBar="{bottomBarView}" mouseBoss="{mouseBoss}" usableController="{gdi.usableController}" songController="{gdi.songController}" stageView="{stageView}" myUser="{gdi.user}" gameMagicManager="{gameMagicManager}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" dwellingController="{gdi.dwellingController}" levelController="{gdi.levelController}" stageManager="{stageView.stageManager}" concertStage="{stageView.concertStage}" bandBoss="{stageView.bandBoss}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="friendView" basedOn="topBar">
@@ -34,7 +34,7 @@
 		</mx:State>
 		<mx:State name="editView" basedOn="topBar">
 			<mx:AddChild>
-				<views:EditView id="editView" myUser="{gdi.user}" wbi="{wbi}" stageView="{stageView}" worldOriginX="{worldView.myWorld.x}" worldOriginY="{worldView.myWorld.y}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" boothBoss="{worldView.boothBoss}" venueManager="{worldView.venueManager}" dwellingController="{gdi.dwellingController}"/>
+				<views:EditView id="editView" myUser="{gdi.user}" stageView="{stageView}" worldOriginX="{worldView.myWorld.x}" worldOriginY="{worldView.myWorld.y}" userController="{gdi.userController}" thingerController="{gdi.thingerController}" storeController="{gdi.storeController}" creatureController="{gdi.creatureController}" structureController="{gdi.structureController}" layerableController="{gdi.layerableController}" boothBoss="{worldView.boothBoss}" venueManager="{worldView.venueManager}" dwellingController="{gdi.dwellingController}"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="twoDimensional">
@@ -45,6 +45,11 @@
 	</mx:states>
 	<mx:Script>
 		<![CDATA[
+			import clickhandlers.MouseBoss;
+			import clickhandlers.StageViewClickHandler;
+			import clickhandlers.UIBoss;
+			import clickhandlers.WorldViewClickHandler;
+			
 			import com.facebook.data.users.FacebookUser;
 			import com.facebook.events.FacebookEvent;
 			
@@ -91,7 +96,8 @@
 			public var tileSize:int = 40;			
 						
 			[Bindable] public var gdi:GameDataInterface;
-			[Bindable] public var wbi:WorldBitmapInterface;
+			[Bindable] public var mouseBoss:MouseBoss;
+			[Bindable] public var uiBoss:UIBoss;
 			[Bindable] public var loadedModels:Dictionary;
 			[Bindable] public var xGridCoord:Number;
 			[Bindable] public var yGridCoord:Number;
@@ -137,7 +143,8 @@
 				currentState = "stageViewer";
 				gdi.storeController.addEventListener(StoreEvent.THINGER_PURCHASED, onThingerPurchased);
 				
-				wbi = new WorldBitmapInterface(worldView, stageView, editView, bottomBarView);
+				uiBoss = new UIBoss(worldView);
+				mouseBoss = new MouseBoss();
 			}
 			private function initializeFacebookInterface():void
 			{
@@ -232,7 +239,7 @@
 			public function attemptToInitializeVenueForFriend(friendGDI:GameDataInterface):void
 			{
 				currentState = "friendStage";
-				friendView.wbi = new WorldBitmapInterface(friendView, friendStageView, null, null);
+//				friendView.wbi = new WorldBitmapInterface(friendView, friendStageView, null, null);
 				friendView.myUser = friendGDI.user;
 				friendView.userController = friendGDI.userController;
 				friendView.structureController = friendGDI.structureController;

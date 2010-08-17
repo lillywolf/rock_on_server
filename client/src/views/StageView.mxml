@@ -2,6 +2,9 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="1000" height="1000" x="0" y="0" clipContent="false" creationComplete="onCreationComplete()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 	<mx:Script>
 		<![CDATA[
+			import clickhandlers.MouseBoss;
+			import clickhandlers.StageViewClickHandler;
+			
 			import com.google.analytics.debug.Alert;
 			
 			import controllers.CreatureController;
@@ -47,7 +50,9 @@
 			[Bindable] public var structureController:StructureController;
 			[Bindable] public var creatureController:CreatureController;
 			[Bindable] public var boothBoss:BoothBoss;
+			[Bindable] public var mouseBoss:MouseBoss;
 			public var bottomBar:BottomBar;
+			public var worldView:WorldView;
 			[Bindable] public var wbi:WorldBitmapInterface;
 			[Bindable] public var venueManager:VenueManager;
 			
@@ -59,6 +64,7 @@
 			
 			public var mouseIncrementX:Number;
 			public var mouseIncrementY:Number;
+			public var mouseHandler:StageViewClickHandler;
 			
 			private function onCreationComplete():void
 			{
@@ -77,12 +83,9 @@
 				stageManager = venueManager.venue.stageManager;
 				concertStage = venueManager.venue.stageManager.concertStage;
 				
-//				var wg:WorldGrid = new WorldGrid(this.stageWidth, this.stageHeight, tileSize*2, this.venueManager.venue.getWorldFloorStructure(), this.venueManager.venue.getWorldFloorStyle());
-//				wg.drawFloor();
-//				addChild(wg);
-//				wg.updateDimensions();		
-				
-				
+				mouseHandler = new StageViewClickHandler(venueManager.venue, worldView, this);
+				mouseBoss.stageMouseHandler = mouseHandler;
+				mouseHandler.mouseBoss = mouseBoss;
 				myStage = new World(stageWidth, stageHeight, tileSize, concertStage.structure.height);
 				structureController.drawTiles(myStage);
 				venueManager.venue.stageManager.myStage = myStage;
@@ -154,7 +157,7 @@
 				{
 					throw new Error("Not a relevant structure type");
 				}
-			}			
+			}				
 		]]>
 	</mx:Script>
 </mx:Canvas>

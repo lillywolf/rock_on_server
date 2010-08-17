@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:views="views.*" width="1000" height="1000" clipContent="false" creationComplete="onCreationComplete()" verticalScrollPolicy="off" horizontalScrollPolicy="off">	
 	<mx:Script>
 		<![CDATA[
+			import clickhandlers.MouseBoss;
 			import clickhandlers.WorldViewClickHandler;
 			
 			import controllers.CreatureController;
@@ -69,6 +70,7 @@
 			import rock_on.Promoter;
 			import rock_on.PromoterManager;
 			import rock_on.StageManager;
+			import rock_on.VenueEvent;
 			
 			import stores.StoreEvent;
 			
@@ -103,6 +105,7 @@
 			public var editModeActivated:Boolean = false;
 			public var booths:ArrayCollection;
 			public var stages:ArrayCollection;
+			[Bindable] public var mouseBoss:MouseBoss;
 			[Bindable] public var customerPersonManager:CustomerPersonManager;
 			[Bindable] public var bandBoss:BandBoss;
 			[Bindable] public var concertStage:ConcertStage;
@@ -115,7 +118,7 @@
 			public var creditsBox:Text;
 			public var myStage:World;
 			public var creaturesAdded:Boolean;
-			public var wbi:WorldBitmapInterface;
+//			public var wbi:WorldBitmapInterface;
 			
 			[Bindable] public var gameMagicManager:GameMagicManager;			
 			[Bindable] public var layerableController:LayerableController;
@@ -139,6 +142,7 @@
 			public var mouseIncrementX:Number;
 			public var mouseIncrementY:Number;
 			public var viewReference:WorldView;
+			public var mouseHandler:Object;
 			
 			private function onCreationComplete():void
 			{
@@ -169,12 +173,15 @@
 			
 			public function initializeVenue():void
 			{
-				venueManager = new VenueManager(wbi, structureController, layerableController, dwellingController, levelController, creatureController, usableController, myWorld);
-//				wbi.venueManager = venueManager;
+				venueManager = new VenueManager(structureController, layerableController, dwellingController, levelController, creatureController, usableController, myWorld);
 				venueManager.getVenue();
 				
-				var mouseHandler:WorldViewClickHandler = new WorldViewClickHandler(venueManager.venue, this);
+				mouseHandler = new WorldViewClickHandler(venueManager.venue, this);
 				mouseHandler.stageView = this.stageView;
+				mouseBoss.worldMouseHandler = mouseHandler as WorldViewClickHandler;
+				mouseHandler.mouseBoss = mouseBoss;
+				var evt:VenueEvent = new VenueEvent(VenueEvent.VENUE_INITIALIZED);
+				this.dispatchEvent(evt);
 			}
 			
 			public function initializeStructures():void
@@ -214,7 +221,7 @@
 				var relHeight:Number = myWorld.wg.getRect(myWorld).height;
 //				bitmapBlotter = new BitmapBlotter(relWidth, relHeight, true, 0x00000000);
 				bitmapBlotter = new BitmapBlotter();
-				wbi.bitmapBlotter = bitmapBlotter;
+//				wbi.bitmapBlotter = bitmapBlotter;
 				bitmapBlotter.myWorld = myWorld;
 				bitmapBlotter.incrementX = (width - relWidth)/2;
 				bitmapBlotter.incrementY = (height - relHeight)/2;
@@ -222,7 +229,7 @@
 				bitmapBlotter.relHeight = relHeight;
 				myWorld.bitmapBlotter = bitmapBlotter;
 				backgroundCanvas = new Canvas();
-				wbi.backgroundCanvas = backgroundCanvas;
+//				wbi.backgroundCanvas = backgroundCanvas;
 				backgroundCanvas.width = relWidth;
 				backgroundCanvas.height = relHeight;
 				backgroundCanvas.clipContent = false;

@@ -68,7 +68,7 @@
 			private function onCreationComplete():void
 			{
 				viewReference = this;
-				var mouseHandler:EditViewClickHandler = new EditViewClickHandler(venueManager.venue, this);
+				mouseHandler = new EditViewClickHandler(venueManager.venue, this);
 				
 				addButtons();
 				dispatchEditViewCreationEvent();						
@@ -160,36 +160,7 @@
 				{
 					
 				}
-			}
-			
-//			override public function onEnterFrame(evt:Event):void
-//			{
-//				var time:Number = getTimer();
-//				var deltaTime:Number = time - lastTime;
-//				var lockedDelta:Number = Math.min(100, deltaTime);
-//				
-//				if (wbi && FlexGlobals.topLevelApplication.currentState == "editView")
-//				{
-//					wbi.handleEnterFrameEvents(viewReference);			
-//				}
-//				if (venueManager)
-//				{
-//					venueManager.update(lockedDelta);				
-//				}
-//			}			
-			
-			private function dragStage():void
-			{		
-				stageView.x = stageView.x + (mouseX - mouseIncrementX);
-				stageView.y = stageView.y + (mouseY - mouseIncrementY);
-				this.x = this.x + (mouseX - mouseIncrementX);
-				this.y = this.y + (mouseY - mouseIncrementY);
-			}
-			
-			private function onMouseUp(evt:MouseEvent):void
-			{
-				isDragging = false;
-			}			
+			}				
 			
 			private function addUILayer():void
 			{

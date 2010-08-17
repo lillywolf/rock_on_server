@@ -38,7 +38,7 @@ package views
 		public var venue:Venue;
 		public var concertGoers:ArrayCollection;
 		
-		public var _wbi:WorldBitmapInterface;
+//		public var _wbi:WorldBitmapInterface;
 		public var _dwellingController:DwellingController;
 		public var _levelController:LevelController;
 		public var _structureController:StructureController;
@@ -52,10 +52,10 @@ package views
 		
 		public var bandBoss:BandBoss;
 		
-		public function VenueManager(wbi:WorldBitmapInterface, structureController:StructureController, layerableController:LayerableController, dwellingController:DwellingController, levelController:LevelController, creatureController:CreatureController, usableController:UsableController, target:IEventDispatcher=null)
+		public function VenueManager(structureController:StructureController, layerableController:LayerableController, dwellingController:DwellingController, levelController:LevelController, creatureController:CreatureController, usableController:UsableController, target:IEventDispatcher=null)
 		{
 			super(target);
-			_wbi = wbi;
+//			_wbi = wbi;
 			_layerableController = layerableController;
 			_dwellingController = dwellingController;
 			_levelController = levelController;
@@ -67,7 +67,7 @@ package views
 		public function getVenue():void
 		{
 			var venues:ArrayCollection = _dwellingController.getDwellingsByType("Venue");
-			venue = new Venue(_wbi, this, _dwellingController, _creatureController, _layerableController, _structureController, _usableController, bandBoss, venues[0] as OwnedDwelling);				
+			venue = new Venue(this, _dwellingController, _creatureController, _layerableController, _structureController, _usableController, bandBoss, venues[0] as OwnedDwelling);				
 		}
 		
 		public function update(deltaTime:Number):void

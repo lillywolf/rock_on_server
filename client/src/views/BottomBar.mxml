@@ -525,9 +525,9 @@
 			private function switchToEditView():void
 			{
 				FlexGlobals.topLevelApplication.currentState = "editView";
-				if (!editView.wbi)
+				if (!editView)
 				{
-					editView.wbi = worldView.wbi;
+//					editView.wbi = worldView.wbi;
 					editView.initializeVenue();
 					editView.initializeStage();
 					editView.initializeWorld();
