@@ -146,24 +146,14 @@ package clickhandlers
 		
 		private function doStaticPersonMoodActivities(person:Person):void
 		{
-			for each (var reward:Object in person.mood.rewards)
-			{
-				if (reward.mc)
-				{	
-					var klass:Class = getDefinitionByName(reward.mc) as Class;
-					var mc:MovieClip = new klass() as MovieClip;
-					addCollectible(mc, person);
-				}
-			}
-			if ((person.mood.possible_rewards as Array).length > 0)
-				addCollectible(MoodBoss.getRandomItemByMood(person.mood), person);			
+			if (person.mood)
+				tossItemFromStage(person);
 		}
 		
-		private function addCollectible(mc:MovieClip, asset:ActiveAsset):void
+		private function tossItemFromStage(asset:ActiveAsset):void
 		{
-			var evt:UIEvent = new UIEvent(UIEvent.COLLECTIBLE_DROP);
+			var evt:UIEvent = new UIEvent(UIEvent.COLLECTIBLE_DROP_FROM_STAGE);
 			evt.asset = asset;
-			evt.mc = mc;
 			this.dispatchEvent(evt);
 		}
 		
