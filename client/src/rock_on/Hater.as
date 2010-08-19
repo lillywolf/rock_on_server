@@ -133,9 +133,9 @@ package rock_on
 		
 		private function onStoppedTimeComplete(evt:TimerEvent):void
 		{
-			var timer:Timer = evt.target as Timer;
-			timer.stop();
-			timer.removeEventListener(TimerEvent.TIMER, onStoppedTimeComplete);
+//			var timer:Timer = evt.target as Timer;
+//			timer.stop();
+//			timer.removeEventListener(TimerEvent.TIMER, onStoppedTimeComplete);
 			this.currentDestination = pickNewRandomDestination();
 			advanceState(Hater.ROUTE_STATE);
 		}
@@ -148,7 +148,12 @@ package rock_on
 		
 		public function endStoppedState():void
 		{
-			
+			if (stoppedTimer)
+			{
+				stoppedTimer.stop();
+				stoppedTimer.removeEventListener(TimerEvent.TIMER, onStoppedTimeComplete);
+				stoppedTimer = null;
+			}
 		}
 		
 		public function startAnnoyState():void
@@ -185,5 +190,10 @@ package rock_on
 				advanceState(Hater.STOPPED_STATE);
 			}
 		}
+		
+		public function reInitialize():void
+		{
+			advanceState(Hater.STOPPED_STATE);
+		}		
 	}
 }

@@ -472,7 +472,7 @@ package rock_on
 			}
 			else
 			{
-				throw new Error("Cannot move from non whole number coords");
+//				throw new Error("Cannot move from non whole number coords");
 			}
 			
 			if (currentPath)

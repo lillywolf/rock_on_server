@@ -134,9 +134,7 @@ package rock_on
 			setEntrance(params);
 			setAdditionalProperties(params);		
 			
-			addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);	
-			addEventListener(MoodEvent.QUEST_INFO_REQUESTED, onQuestInfoRequested);
-			
+			addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);				
 			addStageManager();	
 		}
 		
@@ -176,7 +174,7 @@ package rock_on
 		public function pickRandomAvailablePointWithinRect(rect:Rectangle, worldSprite:World, heightBase:int, rect2:Rectangle = null, avoidStructures:Boolean = true, avoidPeople:Boolean = true, exemptStructures:ArrayCollection = null):Point3D
 		{
 			var pt3D:Point3D = new Point3D(0, heightBase, 0);				
-			var occupiedSpaces:ArrayCollection = worldSprite.getOccupiedSpaces(avoidStructures, avoidPeople, exemptStructures);
+			var occupiedSpaces:ArrayCollection = worldSprite.pathFinder.updateOccupiedSpaces(avoidPeople, avoidStructures, exemptStructures);
 			do
 			{
 				pt3D.x = Math.floor(rect.right - Math.random() * (rect.right - rect.left - 1) - 1);
@@ -412,7 +410,13 @@ package rock_on
 		{
 			techManager = new TechManager(this, _myWorld);
 			var techs:ArrayCollection = _creatureController.getConstructedCreaturesByType("Tech");
-			for each (var c:Creature in techs)
+			techManager.techCreatures = techs;
+			initializeTechs();
+		}
+		
+		public function initializeTechs():void
+		{			
+			for each (var c:Creature in techManager.techCreatures)
 			{
 				var tech:Tech = new Tech(c, null, c.layerableOrder, 0.5);
 				tech.personType = Person.MOVING;
@@ -425,26 +429,38 @@ package rock_on
 		{
 			haterBoss = new HaterBoss(this, _myWorld);
 			var haters:ArrayCollection = _creatureController.getConstructedCreaturesByType("Hater");
-			for each (var c:Creature in haters)
+			haterBoss.haterCreatures = haters;
+			initializeHaters();
+		}
+		
+		public function initializeHaters():void
+		{
+			for each (var c:Creature in haterBoss.haterCreatures)
 			{
 				var hater:Hater = new Hater(this, c, null, c.layerableOrder, 0.5);
 				hater.personType = Person.MOVING;
 				hater.speed = 0.11;
 				haterBoss.add(hater);
-			}
+			}			
 		}
 		
 		public function addSpecialPeopleToVenue():void
 		{
 			peerBoss = new PeerBoss(this);
 			var peers:ArrayCollection = _creatureController.getPeers(-1);
-			for each (var c:Creature in peers)
+			peerBoss.peerCreatures = peers;
+			initializeSpecialPeople();
+		}
+		
+		public function initializeSpecialPeople():void
+		{
+			for each (var c:Creature in peerBoss.peerCreatures)
 			{
 				var peer:Peer = new Peer(this, c, null, c.layerableOrder, 0.5);
 				peer.personType = Person.MOVING;
 				peer.speed = 0.11;
 				peerBoss.add(peer);
-			}
+			}			
 		}
 		
 		private function onFriendAvatarsLoaded(evt:ServerDataEvent):void
@@ -460,7 +476,13 @@ package rock_on
 			friendAvatarsAdded = true;
 			friendBoss = new FriendBoss(this, _myWorld);
 			var friends:ArrayCollection = _creatureController.getConstructedCreaturesByType("Friend");
-			for each (var c:Creature in friends)
+			friendBoss.friendCreatures = friends;
+			initializeFriends();
+		}
+		
+		public function initializeFriends():void
+		{
+			for each (var c:Creature in friendBoss.friendCreatures)
 			{
 				var friend:Friend = new Friend(this, c, null, c.layerableOrder, 0.5);
 				friend.personType = Person.MOVING;
@@ -473,27 +495,52 @@ package rock_on
 				realFriend.personType = Person.MOVING;
 				realFriend.speed = 0.11;
 				friendBoss.add(realFriend);
-			}
+			}			
 		}
-		
+				
 		public function addMovingCustomersToVenue():void
 		{
 			if (!customerPersonManager.concertStage)
 			{
 				customerPersonManager.concertStage = stageManager.concertStage;
 			}
+			customerPersonManager.customerCreatures = new ArrayCollection();
 			for (var i:int = 0; i < numMovingCustomers; i++)
 			{
 				var c:ImposterCreature = creatureGenerator.createImposterCreature("Fan");
 				c.has_moods = true;
+				customerPersonManager.customerCreatures.addItem(c);
+			}			
+			initializeCustomers();
+		}
+		
+		public function initializeCustomers():void
+		{
+			for each (var c:Creature in customerPersonManager.customerCreatures)
+			{	
 				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
 				cp.personType = Person.MOVING;
 				cp.stageManager = stageManager;
 				cp.speed = 0.11;
 				customerPersonManager.add(cp, true, -1, boothsRect);
 				cp.setMood();							
-			}			
+			}
 		}
+		
+		public function redrawAllMovers():void
+		{
+			peerBoss.removePeers();
+			haterBoss.removeHaters();
+			friendBoss.removeFriends();
+			customerPersonManager.removeCustomers();
+			techManager.removeTechs();
+			
+			initializeCustomers();
+			initializeHaters();
+			initializeSpecialPeople();
+			initializeFriends();
+			initializeTechs();
+		}		
 		
 		public function removeCustomersFromVenue():void
 		{
@@ -658,11 +705,6 @@ package rock_on
 			
 		}
 		
-		private function onQuestInfoRequested(evt:MoodEvent):void
-		{
-//			_wbi.questInfoRequested(evt.person);
-		}
-		
 		public function checkForVenueTurnover():void
 		{
 			if (state == ENCORE_STATE || state == ENCORE_WAIT_STATE)
@@ -791,6 +833,11 @@ package rock_on
 		public function get usableController():UsableController
 		{
 			return _usableController;
+		}
+		
+		public function get structureController():StructureController
+		{
+			return _structureController;
 		}
 		
 	}

@@ -270,6 +270,11 @@ package rock_on
 			
 		}
 		
+		public function reInitialize():void
+		{
+			advanceState(Tech.STOPPED_STATE);
+		}
+		
 		public function set venue(val:Venue):void
 		{
 			_venue = val;

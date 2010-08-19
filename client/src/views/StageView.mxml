@@ -29,6 +29,7 @@
 			import rock_on.CustomerPersonManager;
 			import rock_on.Person;
 			import rock_on.StageManager;
+			import rock_on.VenueEvent;
 			
 			import world.ActiveAsset;
 			import world.AssetStack;
@@ -90,6 +91,9 @@
 				structureController.drawTiles(myStage);
 				venueManager.venue.stageManager.myStage = myStage;
 				addChild(myStage);
+				
+				var evt:VenueEvent = new VenueEvent(VenueEvent.STAGE_INITIALIZED);
+				this.dispatchEvent(evt);
 			}
 			
 			private function onEnterFrame(evt:Event):void

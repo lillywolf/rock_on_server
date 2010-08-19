@@ -67,7 +67,6 @@ package clickhandlers
 		
 		public function onEnterFrame(evt:Event):void
 		{
-			checkForMouseMovement();
 			checkDrag();
 			handleHover();
 		}
@@ -100,14 +99,6 @@ package clickhandlers
 			if (!isDragging)
 				waitForDrag();				
 			listenForMouseUp();			
-		}
-		
-		public function checkForMouseMovement():void
-		{
-			if (lastMouseX != _worldView.mouseX && lastMouseY != _worldView.mouseY)
-				resetHoverTimer();
-			this.lastMouseX = _worldView.mouseX;
-			this.lastMouseY = _worldView.mouseY;
 		}
 		
 		private function listenForMouseUp():void
@@ -198,12 +189,15 @@ package clickhandlers
 		
 		private function onHoverTimerComplete(evt:TimerEvent):void
 		{
-			if (objectOfInterest)
+			hoverTimer.stop();
+			hoverTimer.removeEventListener(TimerEvent.TIMER, onHoverTimerComplete);
+			hoverTimer = null;
+			
+			if (objectOfInterest && objectOfInterest is Person)
 			{	
-				if (objectOfInterest is Person)
-				{
-//					Handle hovered person
-				}
+				var uiEvt:UIEvent = new UIEvent(UIEvent.REPLACE_BOTTOMBAR);
+				uiEvt.asset = objectOfInterest as Person;
+				this.dispatchEvent(uiEvt);
 			}	
 		}
 		
@@ -242,6 +236,7 @@ package clickhandlers
 			var newObjectOfInterest:Object = handleObjectUnderHover();
 			if (newObjectOfInterest != objectOfInterest)
 			{	
+				resetHoverTimer();
 				removeAllHoverBoxes();
 				objectOfInterest = newObjectOfInterest;	
 				handleTransitionalHoverEffects(objectOfInterest as ActiveAsset)

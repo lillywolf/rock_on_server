@@ -14,6 +14,8 @@ package clickhandlers
 	
 	import helpers.CollectibleDrop;
 	
+	import models.OwnedStructure;
+	
 	import rock_on.Person;
 	import rock_on.Venue;
 	
@@ -61,17 +63,8 @@ package clickhandlers
 		
 		public function onEnterFrame(evt:Event):void
 		{
-			checkForMouseMovement();
 			handleHover();
 		}		
-		
-		public function checkForMouseMovement():void
-		{
-			if (lastMouseX != _stageView.mouseX && lastMouseY != _stageView.mouseY)
-				resetHoverTimer();
-			this.lastMouseX = _stageView.mouseX;
-			this.lastMouseY = _stageView.mouseY;
-		}
 		
 		private function waitForDrag():void
 		{
@@ -150,11 +143,15 @@ package clickhandlers
 		
 		private function onHoverTimerComplete(evt:TimerEvent):void
 		{
-			if (objectOfInterest)
+			hoverTimer.stop();
+			hoverTimer.removeEventListener(TimerEvent.TIMER, onHoverTimerComplete);
+			hoverTimer = null;
+			
+			if (objectOfInterest && objectOfInterest is Person)
 			{	
-				if (objectOfInterest is Person)
-				{
-				}
+				var uiEvt:UIEvent = new UIEvent(UIEvent.REPLACE_BOTTOMBAR);
+				uiEvt.asset = objectOfInterest as Person;
+				this.dispatchEvent(uiEvt);
 			}	
 		}
 		
@@ -199,6 +196,7 @@ package clickhandlers
 				newObjectOfInterest = handleObjectUnderHover();
 			if (newObjectOfInterest != objectOfInterest)
 			{	
+				resetHoverTimer();
 				objectOfInterest = newObjectOfInterest;	
 				handleTransitionalHoverEffects(objectOfInterest as ActiveAsset)
 			}	
@@ -240,18 +238,18 @@ package clickhandlers
 		
 		private function moveableObjectUnderHover():Object
 		{
-			var closestSprite:Sprite;
-			for each (var sprite:Sprite in _stageView.myStage.assetRenderer.unsortedAssets)
+			var closestAsset:ActiveAsset;
+			for each (var asset:ActiveAsset in _stageView.myStage.assetRenderer.unsortedAssets)
 			{
-				var bounds:Rectangle = sprite.getBounds(_stageView);
+				var bounds:Rectangle = asset.getBounds(_stageView);
 				if (bounds.contains(_stageView.mouseX, _stageView.mouseY))
 				{
-					if (sprite is ActiveAsset)
-						closestSprite = sprite;
+					if (!(asset.thinger is OwnedStructure && (asset.thinger as OwnedStructure).structure.structure_type == "Tile"))
+						closestAsset = asset;
 				}
 			}
-			handleMoveableObjectUnderHover(closestSprite as ActiveAsset);
-			return closestSprite;
+			handleMoveableObjectUnderHover(closestAsset);
+			return closestAsset;
 		}
 		
 		private function handleMoveableObjectUnderHover(asset:ActiveAsset):void

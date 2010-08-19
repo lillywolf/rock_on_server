@@ -22,15 +22,19 @@ package clickhandlers
 	
 	import views.BottomBar;
 	import views.CustomizableProgressBar;
+	import views.StageView;
 	import views.WorldView;
 	
 	import world.ActiveAsset;
+	import world.MoodEvent;
 	import world.WorldEvent;
 	
 	public class UIBoss extends EventDispatcher
 	{
 		public var _worldView:WorldView;
 		public var _worldViewMouseHandler:WorldViewClickHandler;
+		public var _stageView:StageView;
+		public var _stageViewMouseHandler:StageViewClickHandler;
 		public var _venue:Venue;
 		public var _bottomBar:BottomBar;
 		
@@ -42,20 +46,29 @@ package clickhandlers
 		[Embed(source="../libs/icons/skin_plain_black.png")]
 		public var plainSkinBlack:Class;		
 		
-		public function UIBoss(worldView:WorldView, bottomBar:BottomBar, target:IEventDispatcher=null)
+		public function UIBoss(worldView:WorldView, stageView:StageView, bottomBar:BottomBar, target:IEventDispatcher=null)
 		{
 			super(target);
 			_worldView = worldView;
+			_stageView = stageView;
 			_bottomBar = bottomBar;
 			_worldView.addEventListener(VenueEvent.VENUE_INITIALIZED, onVenueInitialized);
+			_stageView.addEventListener(VenueEvent.STAGE_INITIALIZED, onStageInitialized);
 		}
 		
 		private function onVenueInitialized(evt:VenueEvent):void
 		{
-			_worldViewMouseHandler = _worldView.mouseHandler as WorldViewClickHandler;			
+			_worldViewMouseHandler = _worldView.mouseHandler as WorldViewClickHandler;	
 			_worldViewMouseHandler.addEventListener(UIEvent.COLLECTIBLE_DROP_FROM_STAGE, onCollectibleDropFromStage);
-			_worldViewMouseHandler.addEventListener(UIEvent.REPLACE_BOTTOMBAR, onReplaceBottomBar);	
+			_worldViewMouseHandler.addEventListener(UIEvent.REPLACE_BOTTOMBAR, onReplaceBottomBar);
 			_venue = _worldView.venueManager.venue;
+			_venue.addEventListener(MoodEvent.QUEST_INFO_REQUESTED, onQuestInfoRequested);			
+		}
+		
+		private function onStageInitialized(evt:VenueEvent):void
+		{
+			_stageViewMouseHandler = _stageView.mouseHandler as StageViewClickHandler;
+			_stageViewMouseHandler.addEventListener(UIEvent.REPLACE_BOTTOMBAR, onReplaceBottomBar);			
 		}
 		
 		private function doCollectibleDrop(person:Person):void
@@ -146,6 +159,11 @@ package clickhandlers
 			var gf:GlowFilter = new GlowFilter(0xFFDD00, 1, 2, 2, 20, 20);
 			asset.filters = [gf];		
 			customizableBar.filters = [gf];
-		}			
+		}	
+		
+		private function onQuestInfoRequested(evt:MoodEvent):void
+		{
+			_bottomBar.expandCreatureCanvas(evt.person.creature);			
+		}
 	}
 }

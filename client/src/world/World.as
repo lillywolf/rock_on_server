@@ -253,6 +253,11 @@ package world
 			this.addAsset(asset, asset.worldCoords);
 		}
 		
+		public function updateUnwalkables(os:OwnedStructure):void
+		{
+			this.pathFinder.updateStructureOccupiedSpaces();
+		}
+		
 		public function createNewStructure(os:OwnedStructure):void
 		{
 			var asset:ActiveAsset = World.createStandardAssetFromStructure(os);
@@ -263,8 +268,9 @@ package world
 		{
 			for each (var asset:ActiveAsset in assetRenderer.unsortedAssets)
 			{
-				if (asset.thinger == os)
+				if (asset.thinger && asset.thinger.id == os.id)
 				{
+					updateUnwalkables(os);
 					updatePlacement(asset, new Point3D(os.x, os.y, os.z));
 				}
 			}						

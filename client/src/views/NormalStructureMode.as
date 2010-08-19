@@ -11,6 +11,7 @@ package views
 	import models.EssentialModelReference;
 	import models.OwnedStructure;
 	
+	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
 	
@@ -30,6 +31,7 @@ package views
 		public var tileLayer:World;
 		public var structureEditing:Boolean;
 		public var currentStructure:ActiveAsset;
+		public var currentStructurePoints:ArrayCollection;
 		
 		public function NormalStructureMode(editView:EditView, worldWidth:int, worldDepth:int, tileSize:int)
 		{
@@ -37,7 +39,8 @@ package views
 			_editView = editView;
 			_structureController = _editView.structureController;
 			_venue = _editView.venueManager.venue;
-			createStructureWorld(worldWidth, worldDepth, tileSize);			
+			createStructureWorld(worldWidth, worldDepth, tileSize);
+			currentStructurePoints = new ArrayCollection();
 
 			this.addEventListener(Event.ADDED, onAdded);
 		}
@@ -56,7 +59,6 @@ package views
 		{
 			addTileLayer(worldWidth, worldDepth, tileSize);
 			structureWorld = new World(worldWidth, worldDepth, tileSize);
-//			structureWorld.addEventListener(MouseEvent.CLICK, onClick);
 			addChild(structureWorld);
 			showStructures();
 		}		
@@ -123,7 +125,7 @@ package views
 			}
 			else if (structureEditing && asset)
 			{
-				if (isStructureInBounds(asset))
+				if (isStructureInBounds(asset) && !(doesStructureCollide(asset)))
 				{
 					placeStructure();				
 				}
@@ -136,12 +138,8 @@ package views
 		
 		public function placeStructure():void
 		{
-			var toReplace:OwnedStructure = isStructureOccupied(currentStructure);
-			if (toReplace)
-			{
-				replaceStructure(toReplace);
-			}
 			currentStructure.alpha = 1;
+			currentStructure.filters = null;
 			saveStructureCoords(currentStructure);
 			resetEditMode();
 		}
@@ -242,14 +240,10 @@ package views
 		{
 			if (currentStructure)
 			{
-				if (isStructureInBounds(currentStructure))
-				{
+				if (isStructureInBounds(currentStructure) && !doesStructureCollide(currentStructure))
 					showValidStructureFilters();
-				}
 				else
-				{
 					showInvalidStructureFilters();
-				}
 			}
 		}
 		
@@ -257,14 +251,44 @@ package views
 		{
 			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			
-			if (asset.worldCoords.x - os.structure.width/2 < _venue.venueRect.left || 
+			if ((asset.worldCoords.x - os.structure.width/2 < _venue.venueRect.left || 
 				asset.worldCoords.x + os.structure.width/2 > _venue.venueRect.right ||
 				asset.worldCoords.z - os.structure.depth/2 < _venue.venueRect.top ||
-				asset.worldCoords.z + os.structure.depth/2 > _venue.venueRect.bottom)
+				asset.worldCoords.z + os.structure.depth/2 > _venue.venueRect.bottom) || 
+				(asset.worldCoords.x - os.structure.width/2 >= _venue.audienceRect.left &&
+				asset.worldCoords.x + os.structure.width/2 <= _venue.audienceRect.right - _venue.crowdBufferRect.width &&
+				asset.worldCoords.z - os.structure.depth/2 >= _venue.audienceRect.top &&
+				asset.worldCoords.z + os.structure.depth/2 <= _venue.audienceRect.bottom))
 			{			
 				return false;
 			}
 			return true;
+		}
+		
+		public function doesStructureCollide(asset:ActiveAsset):Boolean
+		{
+			var structurePoints:ArrayCollection = _venue.myWorld.pathFinder.occupiedByStructures;
+			var savedStructurePoints:ArrayCollection = getSavedStructurePoints(asset);
+			currentStructurePoints = getCurrentStructurePoints(asset);
+			for each (var pt3D:Point3D in currentStructurePoints)
+			{
+				if (structurePoints.contains(_venue.myWorld.pathFinder.mapPointToPathGrid(pt3D)) && 
+					!(savedStructurePoints.contains(_venue.myWorld.pathFinder.mapPointToPathGrid(pt3D))))
+					return true;
+			}			
+			return false;
+		}
+		
+		private function getSavedStructurePoints(asset:ActiveAsset):ArrayCollection
+		{
+			var structurePoints:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(asset.thinger as OwnedStructure);
+			return structurePoints;
+		}
+		
+		private function getCurrentStructurePoints(asset:ActiveAsset):ArrayCollection
+		{
+			var structurePoints:ArrayCollection = _venue.myWorld.pathFinder.getPoint3DForMovingStructure(asset);
+			return structurePoints;
 		}
 		
 		public function showValidStructureFilters():void

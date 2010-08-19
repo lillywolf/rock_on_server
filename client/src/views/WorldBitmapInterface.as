@@ -954,11 +954,6 @@ package views
 			return new Point((sprite as ActiveAsset).realCoords.x + worldRect.x, 
 				(sprite as ActiveAsset).realCoords.y + wgRect.height/2 - sprite.height/2);			
 		}
-		
-		public function questInfoRequested(person:Person):void
-		{
-			_bottomBar.expandCreatureCanvas(person.creature);
-		}
 				
 		public function createHeartProgressBar(sprite:Sprite):CustomizableProgressBar
 		{

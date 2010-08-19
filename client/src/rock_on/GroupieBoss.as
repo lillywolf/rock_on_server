@@ -67,7 +67,7 @@ package rock_on
 					groupies.addItem(cp);
 				}
 			}
-		}		
+		}	
 		
 		public function removeGroupies():void
 		{

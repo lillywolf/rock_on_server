@@ -6,6 +6,7 @@ package rock_on
 	{
 		public static const BOOTH_UNSTOCKED:String = "VenueEvent:BoothUnstocked";
 		public static const VENUE_INITIALIZED:String = "VenueEvent:VenueInitialized";
+		public static const STAGE_INITIALIZED:String = "VenueEvent:StageInitialized";
 		
 		public var _booth:Booth;
 		public var _venue:Venue;

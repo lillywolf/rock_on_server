@@ -117,9 +117,6 @@ package rock_on
 		
 		private function onStoppedTimeComplete(evt:TimerEvent):void
 		{
-			var timer:Timer = evt.target as Timer;
-			timer.stop();
-			timer.removeEventListener(TimerEvent.TIMER, onStoppedTimeComplete);
 			this.currentDestination = pickNewRandomDestination();
 			advanceState(Friend.ROUTE_STATE);
 		}
@@ -132,7 +129,12 @@ package rock_on
 		
 		public function endStoppedState():void
 		{
-			
+			if (stoppedTimer)
+			{
+				stoppedTimer.stop();
+				stoppedTimer.removeEventListener(TimerEvent.TIMER, onStoppedTimeComplete);
+				stoppedTimer = null;
+			}
 		}
 		
 		override public function set myWorld(val:World):void
@@ -148,6 +150,11 @@ package rock_on
 			{
 				advanceState(Friend.STOPPED_STATE);
 			}
-		}		
+		}
+		
+		public function reInitialize():void
+		{
+			advanceState(Friend.STOPPED_STATE);
+		}			
 	}
 }

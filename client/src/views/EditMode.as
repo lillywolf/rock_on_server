@@ -397,7 +397,7 @@ package views
 			
 			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.establishStructureOccupiedSpaces(exemptStructures);
 			var structureSpaces:ArrayCollection = new ArrayCollection();
-			structureSpaces = _myWorld.pathFinder.getPoint3DForMovingStructure(currentAsset, currentAsset.thinger as OwnedStructure, structureSpaces);
+//			structureSpaces = _myWorld.pathFinder.getPoint3DForMovingStructure(currentAsset, currentAsset.thinger as OwnedStructure, structureSpaces);
 			for each (var pt3D:Point3D in structureSpaces)
 			{
 				if (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(pt3D)))

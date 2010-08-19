@@ -21,6 +21,7 @@ package rock_on
 		private var _myWorld:World;
 		private var _concertStage:ConcertStage;
 		private var _venue:Venue;
+		public var customerCreatures:ArrayCollection;
 		
 		public function CustomerPersonManager(myWorld:World, venue:Venue, source:Array=null)
 		{
@@ -72,6 +73,7 @@ package rock_on
 		{
 			if (_myWorld)
 			{
+				remove(cp);
 				cp.lastWorldPoint = null;
 				cp.worldCoords = null;
 				cp.proxiedDestination = null;
@@ -271,6 +273,16 @@ package rock_on
 				else 
 				{
 				}
+			}
+		}
+		
+		public function removeCustomers():void
+		{
+			var cpLength:int = length;
+			for (var i:int = (cpLength - 1); i >= 0; i--)				
+			{
+				var cp:CustomerPerson = this[i] as CustomerPerson;
+				remove(cp);
 			}
 		}
 		

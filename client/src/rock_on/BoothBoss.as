@@ -151,7 +151,8 @@ package rock_on
 			{
 				_myWorld.saveStructurePlacement(os);
 				reInitializeBooths(false);
-				_venue.customerPersonManager.redrawStandAloneCustomers();
+				_venue.redrawAllMovers();
+//				_venue.customerPersonManager.redrawStandAloneCustomers();
 			}
 			else if (method == "create_new")
 			{
