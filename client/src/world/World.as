@@ -13,6 +13,7 @@ package world
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
+	import mx.events.CollectionEvent;
 	
 	import views.AssetBitmapData;
 	import views.WorldView;
@@ -45,6 +46,7 @@ package world
 			pathFinder = new PathFinder(this, maxHeight);
 			assetRenderer = new AssetRenderer();
 			assetRenderer.addEventListener(WorldEvent.DESTINATION_REACHED, onDestinationReached);
+			pathFinder.addEventListener(WorldEvent.PATHFINDING_FAILED, onPathfindingFailed);
 			addEventListener(WorldEvent.DIRECTION_CHANGED, onDirectionChanged);
 			addChild(assetRenderer);
 			addEventListener(Event.ADDED, onAdded);						
@@ -292,7 +294,7 @@ package world
 			}
 		}
 		
-		public function moveAssetTo(activeAsset:ActiveAsset, destination:Point3D, fourDirectional:Boolean = false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):void
+		public function moveAssetTo(activeAsset:ActiveAsset, destination:Point3D, fourDirectional:Boolean = false, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):void
 		{	
 			validateDestination(destination);
 			validateWorldCoords(activeAsset);
@@ -310,7 +312,7 @@ package world
 				}
 				else
 				{
-					moveFourDirectional(activeAsset, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);
+					moveFourDirectional(activeAsset, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);
 				}
 			}
 			else
@@ -321,14 +323,17 @@ package world
 			activeAsset.isMoving = true;			
 		}
 		
-		private function moveFourDirectional(asset:ActiveAsset, avoidStructures:Boolean, avoidPeople:Boolean, exemptStructures:ArrayCollection, heightBase:int=0, extraStructures:ArrayCollection=null):void
+		private function moveFourDirectional(asset:ActiveAsset, fallBack:Boolean, avoidStructures:Boolean, avoidPeople:Boolean, exemptStructures:ArrayCollection, heightBase:int=0, extraStructures:ArrayCollection=null):void
 		{
-			var tilePath:ArrayCollection = pathFinder.add(asset, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);		
-			asset.currentPath = tilePath;
-			asset.pathStep = 0;
-			var nextPoint:Point3D = asset.currentPath[asset.pathStep];
-			asset.worldDestination = nextPoint;
-			asset.directionality = new Point3D(nextPoint.x - Math.round(asset.worldCoords.x), nextPoint.y - Math.round(asset.worldCoords.y), nextPoint.z - Math.round(asset.worldCoords.z));	
+			var tilePath:ArrayCollection = pathFinder.add(asset, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);		
+			if (tilePath && tilePath.length != 0)
+			{	
+				asset.currentPath = tilePath;
+				asset.pathStep = 0;
+				var nextPoint:Point3D = asset.currentPath[asset.pathStep];
+				asset.worldDestination = nextPoint;
+				asset.directionality = new Point3D(nextPoint.x - Math.round(asset.worldCoords.x), nextPoint.y - Math.round(asset.worldCoords.y), nextPoint.z - Math.round(asset.worldCoords.z));	
+			}
 		}
 		
 		private function checkIfAtDestination(asset:ActiveAsset):Boolean
@@ -380,6 +385,14 @@ package world
 				var evt:WorldEvent = new WorldEvent(WorldEvent.DIRECTION_CHANGED, asset);
 				dispatchEvent(evt);
 			}			
+		}
+		
+		private function onPathfindingFailed(evt:WorldEvent):void
+		{
+			var asset:ActiveAsset = evt.activeAsset;
+			asset.isMoving = false;
+			var newEvt:WorldEvent = new WorldEvent(WorldEvent.PATHFINDING_FAILED, asset);
+			asset.dispatchEvent(newEvt);
 		}
 		
 		private function onDestinationReached(evt:WorldEvent):void

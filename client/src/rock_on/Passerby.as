@@ -107,7 +107,7 @@ package rock_on
 			state = ROUTE_STATE;
 			
 			var destination:Point3D = setInitialDestination();
-			movePerson(destination);		
+			movePerson(destination, true);		
 			
 //			testTimer = new Timer(testTime);
 //			testTimer.start();

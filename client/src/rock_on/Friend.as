@@ -32,12 +32,19 @@ package rock_on
 			_venue = venue;			
 			setRectanglesToAvoid();
 			updateLayerableOrder();
+			
+			addEventListener(WorldEvent.PATHFINDING_FAILED, onPathfindingFailed);
+		}
+		
+		private function onPathfindingFailed(evt:WorldEvent):void
+		{
+			advanceState(Friend.STOPPED_STATE);
 		}
 		
 		public function setRectanglesToAvoid():void
 		{
 			rectanglesToAvoid = new ArrayCollection();
-			rectanglesToAvoid.addItem(_venue.mainCrowdRect);			
+			rectanglesToAvoid.addItem(_venue.unwalkableRect);
 		}		
 		
 		private function updateLayerableOrder():void
@@ -83,7 +90,7 @@ package rock_on
 		public function startRouteState():void
 		{
 			state = ROUTE_STATE;
-			movePerson(this.currentDestination, true, false, null, 0, rectanglesToAvoid);
+			movePerson(this.currentDestination, false, true, false, null, 0, rectanglesToAvoid);
 		}
 		
 		public function endRouteState():void

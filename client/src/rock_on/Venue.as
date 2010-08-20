@@ -86,6 +86,7 @@ package rock_on
 		public var stageBufferRect:Rectangle;
 		public var audienceRect:Rectangle;
 		public var stageRect:Rectangle;
+		public var unwalkableRect:Rectangle;
 		
 		public var _bandBoss:BandBoss;
 		public var _bandMemberManager:BandMemberManager;
@@ -203,6 +204,7 @@ package rock_on
 			assignedSeats = _myWorld.pathFinder.createSeatingArrangement(audienceRect, stageBufferRect, this.dwelling.capacity);
 			crowdBufferRect = new Rectangle(stageRect.width + stageBufferRect.top - audienceRect.top - 2, boothsRect.bottom, venueRect.right - (stageRect.width + stageBufferRect.top - audienceRect.top - 2), venueRect.height - boothsRect.height);
 			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom - 1));
+			unwalkableRect = new Rectangle(0, boothsRect.bottom, mainCrowdRect.right, (stageBufferRect.bottom - boothsRect.bottom));
 		}
 		
 		public function clearFilters():void

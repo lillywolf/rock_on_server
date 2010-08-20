@@ -92,6 +92,12 @@ package rock_on
 			_boothBoss = boothBoss;
 			startInitializedState();
 			addEventListener(MouseEvent.CLICK, onMouseClicked);
+			addEventListener(WorldEvent.PATHFINDING_FAILED, onPathfindingFailed);
+		}
+		
+		private function onPathfindingFailed(evt:WorldEvent):void
+		{
+			advanceState(CustomerPerson.ENTHRALLED_STATE);
 		}
 		
 		public function reInitialize():void

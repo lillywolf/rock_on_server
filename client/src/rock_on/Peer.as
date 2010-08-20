@@ -37,7 +37,13 @@ package rock_on
 			setRectanglesToAvoid();
 			updateLayerableOrder();	
 			
-			addEventListener(MouseEvent.CLICK, onMouseClicked);			
+			addEventListener(MouseEvent.CLICK, onMouseClicked);	
+			addEventListener(WorldEvent.PATHFINDING_FAILED, onPathfindingFailed);
+		}
+		
+		private function onPathfindingFailed(evt:WorldEvent):void
+		{
+			advanceState(Peer.STOPPED_STATE);
 		}
 		
 		private function onMouseClicked(evt:MouseEvent):void
@@ -50,7 +56,7 @@ package rock_on
 		public function setRectanglesToAvoid():void
 		{
 			rectanglesToAvoid = new ArrayCollection();
-			rectanglesToAvoid.addItem(_venue.mainCrowdRect);			
+			rectanglesToAvoid.addItem(_venue.unwalkableRect);
 		}		
 		
 		private function updateLayerableOrder():void
@@ -105,7 +111,7 @@ package rock_on
 		public function startRouteState():void
 		{
 			state = ROUTE_STATE;
-			movePerson(this.currentDestination, true, false, null, 0, rectanglesToAvoid);
+			movePerson(this.currentDestination, false, true, false, null, 0, rectanglesToAvoid);
 		}
 		
 		public function endRouteState():void

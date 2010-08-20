@@ -50,7 +50,7 @@ package rock_on
 				currentStation = station;
 				currentStation.currentQueue++;
 				var destination:Point3D = setInitialDestination();
-				movePerson(destination);
+				movePerson(destination, true);
 			}			
 		}
 		
@@ -204,7 +204,7 @@ package rock_on
 		{
 			state = LEAVING_STATE;
 			var destination:Point3D = setLeaveDestination();
-			movePerson(destination);			
+			movePerson(destination, true);			
 		}
 		
 		public function setLeaveDestination():Point3D

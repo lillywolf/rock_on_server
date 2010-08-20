@@ -464,11 +464,11 @@ package rock_on
 			}
 		}		
 		
-		public function movePerson(destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):void
+		public function movePerson(destination:Point3D, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):void
 		{
 			if (worldCoords.x%1 == 0 && worldCoords.y%1 == 0 && worldCoords.z%1 == 0)
 			{			
-				_myWorld.moveAssetTo(this, destination, true, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);			
+				_myWorld.moveAssetTo(this, destination, true, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);			
 			}
 			else
 			{
