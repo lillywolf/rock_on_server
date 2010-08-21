@@ -87,6 +87,7 @@ package rock_on
 		public var audienceRect:Rectangle;
 		public var stageRect:Rectangle;
 		public var unwalkableRect:Rectangle;
+		public var outsideRect:Rectangle;
 		
 		public var _bandBoss:BandBoss;
 		public var _bandMemberManager:BandMemberManager;
@@ -205,6 +206,7 @@ package rock_on
 			crowdBufferRect = new Rectangle(stageRect.width + stageBufferRect.top - audienceRect.top - 2, boothsRect.bottom, venueRect.right - (stageRect.width + stageBufferRect.top - audienceRect.top - 2), venueRect.height - boothsRect.height);
 			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom - 1));
 			unwalkableRect = new Rectangle(0, boothsRect.bottom, mainCrowdRect.right, (stageBufferRect.bottom - boothsRect.bottom));
+			outsideRect = new Rectangle(venueRect.right, 0, OUTSIDE_SQUARES, venueRect.height);
 		}
 		
 		public function clearFilters():void

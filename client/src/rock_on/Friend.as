@@ -45,6 +45,7 @@ package rock_on
 		{
 			rectanglesToAvoid = new ArrayCollection();
 			rectanglesToAvoid.addItem(_venue.unwalkableRect);
+			rectanglesToAvoid.addItem(_venue.outsideRect);
 		}		
 		
 		private function updateLayerableOrder():void

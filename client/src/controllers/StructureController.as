@@ -355,6 +355,50 @@ package controllers
 			return false;
 		}
 		
+		public function getStructureToppers(os:OwnedStructure):ArrayCollection
+		{
+			var toppers:ArrayCollection = new ArrayCollection();
+			for each (var topper:OwnedStructure in this.owned_structures)
+			{
+				if (os.structure.structure_type == "StructureTopper" && topsStructure(topper, os))
+					toppers.addItem(topper);
+			}
+			return toppers;
+		}
+		
+		private function topsStructure(topper:OwnedStructure, os:OwnedStructure):Boolean
+		{
+			var structureSpaces:ArrayCollection = getPointsForStructure(os);
+			var topperSpaces:ArrayCollection = getPointsForStructure(topper);
+			for each (var pt:Point3D in structureSpaces)
+			{
+				for each (var tPt:Point3D in topperSpaces)
+				{
+					if (pt.x == tPt.x && pt.z == tPt.z)
+						return true;
+				}
+			}
+			return false;
+		}
+		
+		public function getPointsForStructure(os:OwnedStructure):ArrayCollection
+		{			
+			var spaces:ArrayCollection = new ArrayCollection();
+			for (var xPt:int = 0; xPt <= os.structure.width; xPt++)
+			{
+				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
+				{
+					var osPt3D:Point3D = pathGrid[os.x - os.structure.width/2 + xPt][os.y][os.z - os.structure.depth/2 + zPt];
+					spaces.addItem(osPt3D);										
+				}
+			}
+			if (!os.structure.width || !os.structure.depth)
+			{
+				throw new Error("No dimensions specified for structure");
+			} 			
+			return spaces;
+		}		
+		
 		public function drawTiles(_world:World):void
 		{
 			for each (var os:OwnedStructure in owned_structures)
