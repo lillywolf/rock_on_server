@@ -37,6 +37,8 @@ package views
 		public var currentStructure:ActiveAsset;
 		public var currentStructurePoints:ArrayCollection;
 		public var structureSurfaces:Array;
+		public var allStructures:ArrayCollection;
+		public var normalMode:Boolean;
 		
 		public function NormalStructureMode(editView:EditView, worldWidth:int, worldDepth:int, tileSize:int)
 		{
@@ -44,6 +46,7 @@ package views
 			_editView = editView;
 			_structureController = _editView.structureController;
 			_venue = _editView.venueManager.venue;
+			allStructures = new ArrayCollection();
 			createStructureWorld(worldWidth, worldDepth, tileSize);
 			currentStructurePoints = new ArrayCollection();
 			createStructureSurfaces();
@@ -65,14 +68,62 @@ package views
 		{
 			addTileLayer(worldWidth, worldDepth, tileSize);
 			structureWorld = new World(worldWidth, worldDepth, tileSize);
-			alterAssetRendering(structureWorld);
 			addChild(structureWorld);
 			showStructures();
+			structureWorld.assetRenderer.swapEnterFrameHandler();
+			normalMode = false;
 		}
 		
-		private function alterAssetRendering(alterWorld:World):void
+		private function updateRenderingMode(asset:ActiveAsset):void
 		{
-			alterWorld.assetRenderer.swapEnterFrameHandler();
+			if ((asset.thinger as OwnedStructure).structure.structure_type == "StructureTopper" && normalMode)
+				redrawForToppers();
+			else if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper" && !normalMode)
+				redrawForNormalStructures();
+		}
+		
+		private function redrawForNormalStructures():void
+		{
+			for each (var asset:ActiveAsset in allStructures)
+			{
+				if (asset.toppers && asset.toppers.length > 0)
+				{
+					var aas:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
+					aas.toppers = asset.toppers;
+					aas.thinger = asset.thinger;
+					structureWorld.removeAsset(asset);
+					aas.setMovieClipsForStructure(aas.toppers);
+					aas.reflected = false;
+					aas.bitmapWithToppers();
+					structureWorld.addAsset(aas, asset.worldCoords);
+				}
+				if ((asset.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
+					structureWorld.removeAsset(asset);
+			}
+			structureWorld.assetRenderer.revertEnterFrameHandler();
+			normalMode = true;
+		}
+
+		private function redrawForToppers():void
+		{
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+			{
+				if (asset.toppers && asset.toppers.length > 0)
+				{
+					var a:ActiveAsset = new ActiveAsset(asset.movieClip);
+					a.toppers = asset.toppers;
+					a.thinger = asset.thinger;
+					structureWorld.removeAsset(asset);
+					structureWorld.addAsset(a, asset.worldCoords);
+				}
+			}	
+			for each (var t:ActiveAsset in allStructures)
+			{
+				if ((t.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
+					structureWorld.addAsset(t, t.worldCoords);	
+			}	
+			structureWorld.assetRenderer.swapEnterFrameHandler();
+			normalMode = false;
 		}
 		
 		public function addTileLayer(worldWidth:int, worldDepth:int, tileSize:int):void
@@ -121,7 +172,8 @@ package views
 			asset.toppers = _structureController.getStructureToppers(os);
 //			asset.setMovieClipsForStructure(_structureController.getStructureToppers(os));
 //			asset.bitmapWithToppers();			
-			_world.addAsset(asset, new Point3D(os.x, os.y, os.z));	
+			_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
+			allStructures.addItem(asset);
 			return asset;
 		}
 		
@@ -129,12 +181,27 @@ package views
 		{
 			if ((asset.thinger as OwnedStructure).structure.structure_type != "Tile")
 			{
-				currentStructure = asset;
+				updateRenderingMode(asset);
+				setCurrentStructure(asset);
 				currentStructure.speed = 1;
 				currentStructure.alpha = 0.5;
 				structureEditing = true;
 				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);				
-			}	
+			}
+		}
+		
+		private function setCurrentStructure(asset:ActiveAsset):void
+		{
+			if (!asset.toppers)
+				currentStructure = asset;
+			else
+			{
+				for each (var a:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+				{
+					if (a.thinger == asset.thinger)
+						currentStructure = a;
+				}
+			}
 		}
 		
 		private function removeTopperFromStructures(topper:OwnedStructure):void

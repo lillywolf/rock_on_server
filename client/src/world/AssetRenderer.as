@@ -215,23 +215,31 @@ package world
 		public function swapEnterFrameHandler():void
 		{
 			this.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-			this.addEventListener(Event.ENTER_FRAME, function onSpecialEnterFrame():void
+			this.addEventListener(Event.ENTER_FRAME, onSpecialEnterFrame);
+		}
+		
+		public function revertEnterFrameHandler():void
+		{
+			this.removeEventListener(Event.ENTER_FRAME, onSpecialEnterFrame);
+			this.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		}
+		
+		private function onSpecialEnterFrame(evt:Event):void
+		{
+			var time:Number = getTimer();
+			var deltaTime:Number = time - lastTime;
+			var lockedDelta:Number = Math.min(200, deltaTime);
+			lastTime = time;				
+			
+			if (frameCount%4 == 1)
 			{
-				var time:Number = getTimer();
-				var deltaTime:Number = time - lastTime;
-				var lockedDelta:Number = Math.min(200, deltaTime);
-				lastTime = time;				
-				
-				if (frameCount%4 == 1)
-				{
-					removeExistingAssets();
-					specialSort(lockedDelta);
-					drawAssets();
-				}
-				else
-					updateCoords(lockedDelta);
-				frameCount++;				
-			});
+				removeExistingAssets();
+				specialSort(lockedDelta);
+				drawAssets();
+			}
+			else
+				updateCoords(lockedDelta);
+			frameCount++;							
 		}
 
 		public function specialSort(lockedDelta:Number):void
