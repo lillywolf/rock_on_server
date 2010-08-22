@@ -361,6 +361,7 @@ package controllers
 			for each (var topper:OwnedStructure in this.owned_structures)
 			{
 				if (topper.structure.structure_type == "StructureTopper" 
+					&& topper.id != os.id
 					&& topsStructure(topper, os))
 					toppers.addItem(topper);
 			}

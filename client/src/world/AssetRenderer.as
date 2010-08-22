@@ -259,7 +259,7 @@ package world
 			{
 				sortedAssets.addItem(ordered.getItemAt(i));
 				var toppers:ArrayCollection = (ordered.getItemAt(i) as ActiveAsset).toppers;
-				if (toppers)
+				if (toppers && toppers.length > 0)
 				{	
 					var topperAssets:ArrayCollection = getAssociatedToppers(toppers);
 					topperAssets.sort = sort;

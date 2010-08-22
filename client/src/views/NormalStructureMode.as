@@ -84,7 +84,7 @@ package views
 		
 		private function redrawForNormalStructures():void
 		{
-			for each (var asset:ActiveAsset in allStructures)
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
 			{
 				if (asset.toppers && asset.toppers.length > 0)
 				{
@@ -94,6 +94,7 @@ package views
 					structureWorld.removeAsset(asset);
 					aas.setMovieClipsForStructure(aas.toppers);
 					aas.reflected = false;
+					aas.movieClip.gotoAndStop(0);
 					aas.bitmapWithToppers();
 					structureWorld.addAsset(aas, asset.worldCoords);
 				}
@@ -110,9 +111,10 @@ package views
 			{
 				if (asset.toppers && asset.toppers.length > 0)
 				{
-					var a:ActiveAsset = new ActiveAsset(asset.movieClip);
+					var a:ActiveAsset = new ActiveAsset(EssentialModelReference.getMovieClipCopy(asset.movieClip));
 					a.toppers = asset.toppers;
 					a.thinger = asset.thinger;
+					updateAllStructures(a);
 					structureWorld.removeAsset(asset);
 					structureWorld.addAsset(a, asset.worldCoords);
 				}
@@ -124,6 +126,20 @@ package views
 			}	
 			structureWorld.assetRenderer.swapEnterFrameHandler();
 			normalMode = false;
+		}
+		
+		private function updateAllStructures(a:ActiveAsset):void
+		{
+			for each (var asset:ActiveAsset in allStructures)
+			{
+				if (asset.thinger == a.thinger)
+				{
+					var index:int = allStructures.getItemIndex(asset);
+					allStructures.removeItemAt(index);
+					allStructures.addItem(a);
+					return;
+				}
+			}
 		}
 		
 		public function addTileLayer(worldWidth:int, worldDepth:int, tileSize:int):void
@@ -253,6 +269,7 @@ package views
 			currentStructure.filters = null;
 			saveStructureCoords(currentStructure);
 			resetEditMode();
+			redrawForToppers();			
 		}
 		
 		public function revertStructure():void
@@ -353,7 +370,7 @@ package views
 				if (parentStructure)
 				{	
 					addTopperToStructure(os, parentStructure);
-					updateDestination(destination, parentStructure.thinger as OwnedStructure);
+//					updateDestination(destination, parentStructure.thinger as OwnedStructure);
 					showValidStructureFilters();
 				}	
 				else
