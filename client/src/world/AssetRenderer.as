@@ -7,6 +7,10 @@ package world
 	import flash.system.System;
 	import flash.utils.getTimer;
 	
+	import flashx.textLayout.tlf_internal;
+	
+	import models.OwnedStructure;
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
@@ -206,6 +210,82 @@ package world
 			var sort:Sort = new Sort();
 			sort.fields = [sortField];	
 			return sort;
+		}
+		
+		public function swapEnterFrameHandler():void
+		{
+			this.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			this.addEventListener(Event.ENTER_FRAME, function onSpecialEnterFrame():void
+			{
+				var time:Number = getTimer();
+				var deltaTime:Number = time - lastTime;
+				var lockedDelta:Number = Math.min(200, deltaTime);
+				lastTime = time;				
+				
+				if (frameCount%4 == 1)
+				{
+					removeExistingAssets();
+					specialSort(lockedDelta);
+					drawAssets();
+				}
+				else
+					updateCoords(lockedDelta);
+				frameCount++;				
+			});
+		}
+
+		public function specialSort(lockedDelta:Number):void
+		{
+			var ordered:ArrayCollection = new ArrayCollection();
+			for each (var a:ActiveAsset in unsortedAssets)
+			{
+				if ((a.thinger as OwnedStructure).structure.structure_type != "StructureTopper" || isUnattachedAsTopper(a.thinger as OwnedStructure))
+					ordered.addItem(a);	
+			}
+			updateCoords(lockedDelta);	
+			var sort:Sort = getYSort();
+			ordered.sort = sort;
+			ordered.refresh();
+			sortedAssets = new ArrayCollection();
+			for (var i:int = 0; i < ordered.length; i++)
+			{
+				sortedAssets.addItem(ordered.getItemAt(i));
+				var toppers:ArrayCollection = (ordered.getItemAt(i) as ActiveAsset).toppers;
+				if (toppers)
+				{	
+					var topperAssets:ArrayCollection = getAssociatedToppers(toppers);
+					topperAssets.sort = sort;
+					topperAssets.refresh();
+					for each (var t:ActiveAsset in topperAssets)
+					{
+						sortedAssets.addItem(t);
+					}
+				}
+			}
+		}
+		
+		private function getAssociatedToppers(toppers:ArrayCollection):ArrayCollection
+		{
+			var assets:ArrayCollection = new ArrayCollection();
+			for each (var a:ActiveAsset in unsortedAssets)
+			{
+				for each (var t:OwnedStructure in toppers)
+				{
+					if (a.thinger && a.thinger.id == t.id)
+						assets.addItem(a);
+				}
+			}
+			return assets;
+		}
+		
+		private function isUnattachedAsTopper(os:OwnedStructure):Boolean
+		{
+			for each (var asset:ActiveAsset in unsortedAssets)
+			{
+				if (asset.toppers.contains(os))
+					return false;
+			}
+			return true;
 		}
 		
 		private function updateUnsortedAssets(evt:CollectionEvent):void

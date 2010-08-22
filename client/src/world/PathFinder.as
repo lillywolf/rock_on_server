@@ -1051,7 +1051,7 @@ package world
 			{
 				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
 				{
-					var osPt3D:Point3D = pathGrid[asset.worldCoords.x - os.structure.width/2 + xPt][0][asset.worldCoords.z - os.structure.depth/2 + zPt];
+					var osPt3D:Point3D = new Point3D(asset.worldCoords.x - os.structure.width/2 + xPt, 0, asset.worldCoords.z - os.structure.depth/2 + zPt);
 					structurePoints.addItem(osPt3D);										
 				}
 			}

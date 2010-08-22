@@ -1,5 +1,7 @@
 package world
 {
+	import controllers.StructureController;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -9,6 +11,7 @@ package world
 	import flash.events.Event;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
@@ -16,6 +19,7 @@ package world
 	import models.Creature;
 	import models.EssentialModelReference;
 	import models.OwnedLayerable;
+	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
@@ -77,6 +81,30 @@ package world
 			}
 		}
 		
+		public function bitmapWithToppers():void
+		{
+			var mc:Sprite = createMovieClipsForBitmap();
+			removeCurrentChildren();
+			
+			if (mc)
+			{
+				var mcBounds:Rectangle = mc.getBounds(_world);
+				var heightDiff:Number = Math.abs(mcBounds.top - this.y);
+				var widthDiff:Number = getWidthDifferential(mcBounds);			
+				scaleMovieClip(mc);
+				bitmapData = new BitmapData(mc.width + X_BITMAP_BUFFER, mc.height, true, 0x000000);
+				var matrix:Matrix = new Matrix(1, 0, 0, 1, widthDiff/2 + X_BITMAP_BUFFER, heightDiff);
+				var rect:Rectangle = new Rectangle(0, 0, mc.width + X_BITMAP_BUFFER, mc.height + Y_BITMAP_BUFFER);
+				scaleMatrix(matrix, mc.width);
+				bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
+				bitmap = new Bitmap(bitmapData);
+				bitmap.x = -mc.width/2 - X_BITMAP_BUFFER;
+				bitmap.y = -heightDiff * _scale;
+				bitmap.opaqueBackground = null;
+				addChild(bitmap);					
+			}
+		}		
+		
 		override public function placeBitmap(bitmap:Bitmap, mc:Sprite, heightDiff:Number, tx:Number = 0):void
 		{
 			bitmap.y = -heightDiff;
@@ -99,7 +127,8 @@ package world
 		{
 			if (!layerableOrder)
 			{
-				_layerableOrder = _creature.layerableOrder;
+				if (_creature)
+					_layerableOrder = _creature.layerableOrder;
 			}
 			else
 			{
@@ -350,7 +379,7 @@ package world
 		
 		public function clearMovieClips():void
 		{
-			if (_displayMovieClips.length > 0)
+			if (_displayMovieClips && _displayMovieClips.length > 0)
 			{
 				_displayMovieClips.removeAll();			
 			}
@@ -420,6 +449,12 @@ package world
 		
 		public function setMovieClips():void
 		{
+			if (_creature)
+				setMovieClipsForCreature();
+		}
+		
+		public function setMovieClipsForCreature():void
+		{
 			_allMovieClips = new ArrayCollection();
 			_displayMovieClips = new ArrayCollection();
 			_displayMovieClips.addEventListener(CollectionEvent.COLLECTION_CHANGE, onDisplayMovieClipsCollectionChange);
@@ -433,6 +468,26 @@ package world
 					mc.scaleY = _scale;
 					_allMovieClips.addItem(mc);
 				}
+			}
+		}
+
+		public function setMovieClipsForStructure(toppers:ArrayCollection):void
+		{
+			_allMovieClips = new ArrayCollection();
+			_displayMovieClips = new ArrayCollection();
+			_displayMovieClips.addEventListener(CollectionEvent.COLLECTION_CHANGE, onDisplayMovieClipsCollectionChange);
+			
+			_allMovieClips.addItem(_movieClip);
+			_displayMovieClips.addItem(_movieClip);
+			for each (var os:OwnedStructure in toppers)
+			{
+				var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+				_allMovieClips.addItem(mc);
+				_displayMovieClips.addItem(mc);
+				var offset:Point3D = new Point3D((this.thinger as OwnedStructure).x - os.x, os.y, (this.thinger as OwnedStructure).z - os.z);
+				var flatOffset:Point = World.worldToActualCoords(offset);
+				mc.x = flatOffset.x;
+				mc.y = flatOffset.y;
 			}
 		}
 		
@@ -474,6 +529,12 @@ package world
 					}
 				}
 			}
+		}
+		
+		public function addToppers(structureController:StructureController):void
+		{
+			var toppers:ArrayCollection = structureController.getStructureToppers(this.thinger as OwnedStructure);
+		
 		}
 		
 		public function set creature(val:Creature):void

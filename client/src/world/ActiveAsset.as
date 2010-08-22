@@ -50,6 +50,7 @@ package world
 		public var unclearableFilters:Array;				
 		public var reflected:Boolean;
 		public var _scale:Number;
+		public var toppers:ArrayCollection;
 		
 		public static const X_BITMAP_BUFFER:int = 40;
 		public static const Y_BITMAP_BUFFER:int = 12;

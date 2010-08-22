@@ -16,6 +16,7 @@ package rock_on
 	import views.UILayer;
 	
 	import world.ActiveAsset;
+	import world.ActiveAssetStack;
 	import world.Point3D;
 	import world.World;
 
@@ -167,7 +168,10 @@ package rock_on
 			for each (var os:OwnedStructure in boothStructures)
 			{
 				var booth:Booth = createBooth(os);
-				var asset:ActiveAsset = createBoothAsset(booth);
+				var asset:ActiveAssetStack = createBoothAsset(booth);
+				asset.toppers = _structureController.getStructureToppers(os);
+				asset.setMovieClipsForStructure(asset.toppers);
+				asset.bitmapWithToppers();
 				var addTo:Point3D = new Point3D(booth.x, booth.y, booth.z);
 				addBoothsToWorld(asset, addTo);
 				boothAssets.addItem(asset);
@@ -204,12 +208,12 @@ package rock_on
 			boothAssets.removeAll();
 			booths.removeAll();
 		}
-		
-		public function createBoothAsset(booth:Booth):ActiveAsset
+
+		public function createBoothAsset(booth:Booth):ActiveAssetStack
 		{
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(booth.structure.mc);
 			mc.cacheAsBitmap = true;
-			var asset:ActiveAsset = new ActiveAsset(mc, StructureController.STRUCTURE_SCALE);	
+			var asset:ActiveAssetStack = new ActiveAssetStack(null, mc, null, StructureController.STRUCTURE_SCALE);	
 			asset.thinger = booth;	
 			return asset;		
 		}	

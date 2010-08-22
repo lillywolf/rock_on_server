@@ -360,7 +360,8 @@ package controllers
 			var toppers:ArrayCollection = new ArrayCollection();
 			for each (var topper:OwnedStructure in this.owned_structures)
 			{
-				if (os.structure.structure_type == "StructureTopper" && topsStructure(topper, os))
+				if (topper.structure.structure_type == "StructureTopper" 
+					&& topsStructure(topper, os))
 					toppers.addItem(topper);
 			}
 			return toppers;
@@ -388,7 +389,7 @@ package controllers
 			{
 				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
 				{
-					var osPt3D:Point3D = pathGrid[os.x - os.structure.width/2 + xPt][os.y][os.z - os.structure.depth/2 + zPt];
+					var osPt3D:Point3D = new Point3D(os.x - os.structure.width/2 + xPt, os.y, os.z - os.structure.depth/2 + zPt);
 					spaces.addItem(osPt3D);										
 				}
 			}

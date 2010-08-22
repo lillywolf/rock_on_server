@@ -7,17 +7,21 @@ package views
 	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
+	import flash.utils.Dictionary;
 	
 	import models.EssentialModelReference;
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.collections.Sort;
+	import mx.collections.SortField;
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
 	
 	import rock_on.Venue;
 	
 	import world.ActiveAsset;
+	import world.ActiveAssetStack;
 	import world.Point3D;
 	import world.World;
 	
@@ -32,6 +36,7 @@ package views
 		public var structureEditing:Boolean;
 		public var currentStructure:ActiveAsset;
 		public var currentStructurePoints:ArrayCollection;
+		public var structureSurfaces:Array;
 		
 		public function NormalStructureMode(editView:EditView, worldWidth:int, worldDepth:int, tileSize:int)
 		{
@@ -41,6 +46,7 @@ package views
 			_venue = _editView.venueManager.venue;
 			createStructureWorld(worldWidth, worldDepth, tileSize);
 			currentStructurePoints = new ArrayCollection();
+			createStructureSurfaces();
 
 			this.addEventListener(Event.ADDED, onAdded);
 		}
@@ -59,9 +65,15 @@ package views
 		{
 			addTileLayer(worldWidth, worldDepth, tileSize);
 			structureWorld = new World(worldWidth, worldDepth, tileSize);
+			alterAssetRendering(structureWorld);
 			addChild(structureWorld);
 			showStructures();
-		}		
+		}
+		
+		private function alterAssetRendering(alterWorld:World):void
+		{
+			alterWorld.assetRenderer.swapEnterFrameHandler();
+		}
 		
 		public function addTileLayer(worldWidth:int, worldDepth:int, tileSize:int):void
 		{
@@ -87,9 +99,18 @@ package views
 			{
 				if (os.in_use && os.structure.structure_type == "Tile")
 				{
-					addStructureAsset(os, tileLayer);
+					addTileAsset(os, tileLayer);
 				}
 			}
+		}
+		
+		public function addTileAsset(os:OwnedStructure, _world:World):ActiveAsset
+		{
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+			var asset:ActiveAsset = new ActiveAsset(mc);
+			asset.thinger = os;		
+			_world.addAsset(asset, new Point3D(os.x, os.y, os.z));	
+			return asset;			
 		}
 		
 		public function addStructureAsset(os:OwnedStructure, _world:World):ActiveAsset
@@ -97,6 +118,9 @@ package views
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
 			var asset:ActiveAsset = new ActiveAsset(mc);
 			asset.thinger = os;
+			asset.toppers = _structureController.getStructureToppers(os);
+//			asset.setMovieClipsForStructure(_structureController.getStructureToppers(os));
+//			asset.bitmapWithToppers();			
 			_world.addAsset(asset, new Point3D(os.x, os.y, os.z));	
 			return asset;
 		}
@@ -110,6 +134,26 @@ package views
 				currentStructure.alpha = 0.5;
 				structureEditing = true;
 				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);				
+			}	
+		}
+		
+		private function removeTopperFromStructures(topper:OwnedStructure):void
+		{
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+			{
+				if (asset.toppers.contains(topper))
+				{
+					var index:int = asset.toppers.getItemIndex(topper);
+					asset.toppers.removeItemAt(index);
+				}	
+			}
+		}
+		
+		private function addTopperToStructure(topper:OwnedStructure, asset:ActiveAsset):void
+		{
+			if (!asset.toppers.contains(topper))
+			{
+				asset.toppers.addItem(topper);
 			}	
 		}
 		
@@ -195,6 +239,7 @@ package views
 			{
 				_structureController.saveNewOwnedStructure(asset.thinger as OwnedStructure, _venue, asset.worldCoords);
 			}
+			updateStructureSurfaces(asset);
 		}	
 		
 		public function onStructureMouseMove(evt:MouseEvent):void
@@ -218,8 +263,110 @@ package views
 			{
 				destination.z = snapToCenterPoint(currentStructure, destination.z);
 			}
-			structureWorld.moveAssetTo(currentStructure, destination);
-			updateStructureFilters();
+			updateFilterLogic(currentStructure, destination);
+			doMoveLogic(destination);
+		}
+		
+		private function doMoveLogic(destination:Point3D):void
+		{
+			structureWorld.moveAssetTo(currentStructure, destination);				
+		}
+		
+		private function updateDestination(destination:Point3D, os:OwnedStructure):void
+		{
+			destination.y = os.structure.height;
+		}
+		
+		private function updateFilterLogic(asset:ActiveAsset, destination:Point3D):void
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if ((asset.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
+			{	
+				var parentStructure:ActiveAsset = checkStructureSurfaces();
+				if (parentStructure)
+				{	
+					addTopperToStructure(os, parentStructure);
+					updateDestination(destination, parentStructure.thinger as OwnedStructure);
+					showValidStructureFilters();
+				}	
+				else
+				{	
+					removeTopperFromStructures(os);	
+					showInvalidStructureFilters();
+				}	
+			}	
+			else
+				updateStructureFilters();				
+		}
+		
+		private function checkStructureSurfaces():ActiveAsset
+		{
+			currentStructurePoints = getCurrentStructurePoints(currentStructure);			
+			for each (var pt3D:Point3D in currentStructurePoints)
+			{
+				if (structureSurfaces[pt3D.x] && structureSurfaces[pt3D.x][pt3D.y] && structureSurfaces[pt3D.x][pt3D.y][pt3D.z])
+					return structureSurfaces[pt3D.x][pt3D.y][pt3D.z];
+			}
+			return null;
+		}
+		
+		private function updateStructureSurfaces(asset:ActiveAsset):void
+		{
+			var pt:Point3D;
+			var old:ArrayCollection = getSavedStructurePoints(asset);
+			for each (pt in old)
+			{
+				removePointFromStructureSurfaces(pt);
+			}
+			var newPts:ArrayCollection = getCurrentStructurePoints(asset);
+			for each (pt in newPts)
+			{
+				addPointToStructureSurfaces(pt, asset);
+			}
+		}
+		
+		private function createStructureSurfaces():void
+		{
+			structureSurfaces = new Array();
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+			{
+				if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper" && (asset.thinger as OwnedStructure).structure.structure_type != "Tile")
+				{
+					var pts:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(asset.thinger as OwnedStructure);
+					for each (var pt:Point3D in pts)
+					{
+						addPointToStructureSurfaces(new Point3D(pt.x, pt.y, pt.z), asset);
+					}
+				}
+			}
+		}
+		
+		private function removePointFromStructureSurfaces(pt:Point3D):void
+		{
+			if (structureSurfaces[pt.x] && structureSurfaces[pt.x][pt.y] && structureSurfaces[pt.x][pt.y][pt.z])
+				structureSurfaces[pt.x][pt.y][pt.z] = 0;
+		}
+		
+		private function addPointToStructureSurfaces(pt:Point3D, asset:ActiveAsset):void
+		{
+			var xPt:Array;
+			var yPt:Array;
+			var zPt:Array;
+			if (structureSurfaces[pt.x] && structureSurfaces[pt.x][pt.y])
+			{
+				structureSurfaces[pt.x][pt.y][pt.z] = asset;
+			}
+			else if (structureSurfaces[pt.x])
+			{
+				structureSurfaces[pt.x][pt.y] = new Array();
+				structureSurfaces[pt.x][pt.y][pt.z] = asset;
+			}
+			else
+			{
+				structureSurfaces[pt.x] = new Array();
+				structureSurfaces[pt.x][pt.y] = new Array();
+				structureSurfaces[pt.x][pt.y][pt.z] = asset;
+			}
 		}
 		
 		private function snapToCenterPoint(asset:ActiveAsset, dimension:Number):Number

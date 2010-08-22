@@ -80,6 +80,7 @@ package rock_on
 		{
 			var c:Creature = _creatureGenerator.createImposterCreature("Passerby");
 			var passerby:Passerby = new Passerby(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.5);			
+			passerby.thinger = c;
 			return passerby;		
 		}
 		
@@ -88,6 +89,7 @@ package rock_on
 //			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "StationListener");
 			var c:Creature = _creatureGenerator.createImposterCreature("New Fan");
 			var sl:StationListener = new StationListener(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.5);	
+			sl.thinger = c;
 			return sl;		
 		}
 		

@@ -424,6 +424,7 @@ package rock_on
 			{
 				var tech:Tech = new Tech(c, null, c.layerableOrder, 0.5);
 				tech.personType = Person.MOVING;
+				tech.thinger = c;
 				tech.speed = 0.11;
 				techManager.add(tech);
 			}
@@ -443,6 +444,7 @@ package rock_on
 			{
 				var hater:Hater = new Hater(this, c, null, c.layerableOrder, 0.5);
 				hater.personType = Person.MOVING;
+				hater.thinger = c;
 				hater.speed = 0.11;
 				haterBoss.add(hater);
 			}			
@@ -461,6 +463,7 @@ package rock_on
 			for each (var c:Creature in peerBoss.peerCreatures)
 			{
 				var peer:Peer = new Peer(this, c, null, c.layerableOrder, 0.5);
+				peer.thinger = c;
 				peer.personType = Person.MOVING;
 				peer.speed = 0.11;
 				peerBoss.add(peer);
@@ -490,6 +493,7 @@ package rock_on
 			{
 				var friend:Friend = new Friend(this, c, null, c.layerableOrder, 0.5);
 				friend.personType = Person.MOVING;
+				friend.thinger = c;
 				friend.speed = 0.11;
 				friendBoss.add(friend);
 			}
@@ -526,6 +530,7 @@ package rock_on
 				cp.personType = Person.MOVING;
 				cp.stageManager = stageManager;
 				cp.speed = 0.11;
+				cp.thinger = c;
 				customerPersonManager.add(cp, true, -1, boothsRect);
 				cp.setMood();							
 			}
