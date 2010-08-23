@@ -96,13 +96,13 @@ package world
 			var heightDiff:Number = Math.abs(mcBounds.top - this.y);
 			var widthDiff:Number = getWidthDifferential(mcBounds);			
 			scaleMovieClip(mc);
-			bitmapData = new BitmapData(mc.width + X_BITMAP_BUFFER, mc.height, true, 0x000000);
-			var matrix:Matrix = new Matrix(1, 0, 0, 1, widthDiff/2 + X_BITMAP_BUFFER, heightDiff);
-			var rect:Rectangle = new Rectangle(0, 0, mc.width + X_BITMAP_BUFFER, mc.height + Y_BITMAP_BUFFER);
+			bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
+			var matrix:Matrix = new Matrix(1, 0, 0, 1, widthDiff/2, heightDiff);
+			var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height + Y_BITMAP_BUFFER);
 			scaleMatrix(matrix, mc.width);
 			bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
 			bitmap = new Bitmap(bitmapData);
-			bitmap.x = -mc.width/2 - X_BITMAP_BUFFER;
+			bitmap.x = -mc.width/2;
 			bitmap.y = -heightDiff * _scale;
 			bitmap.opaqueBackground = null;
 			addChild(bitmap);	
