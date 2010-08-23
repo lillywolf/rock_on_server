@@ -183,13 +183,8 @@ package world
 		{
 			for each (var asset:ActiveAsset in this.assetRenderer.unsortedAssets)
 			{
-				if (asset.thinger)
-				{
-					if (asset.thinger.id == thinger.id)
-					{
-						return asset;
-					}
-				}
+				if (asset.thinger && asset.thinger.id == thinger.id)
+					return asset;
 			}
 			return null;
 		}

@@ -84,6 +84,8 @@ package views
 		
 		private function redrawForNormalStructures():void
 		{
+			var toRemove:ArrayCollection = new ArrayCollection();
+			var toAdd:ArrayCollection = new ArrayCollection();
 			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
 			{
 				if (asset.toppers && asset.toppers.length > 0)
@@ -91,22 +93,26 @@ package views
 					var aas:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
 					aas.toppers = asset.toppers;
 					aas.thinger = asset.thinger;
-					structureWorld.removeAsset(asset);
 					aas.setMovieClipsForStructure(aas.toppers);
 					aas.reflected = false;
 					aas.movieClip.gotoAndStop(0);
 					aas.bitmapWithToppers();
-					structureWorld.addAsset(aas, asset.worldCoords);
+					aas.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
+					toRemove.addItem(asset);
+					toAdd.addItem(aas);
 				}
 				if ((asset.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
-					structureWorld.removeAsset(asset);
+					toRemove.addItem(asset);
 			}
+			swapAssets(toRemove, toAdd);
 			structureWorld.assetRenderer.revertEnterFrameHandler();
 			normalMode = true;
 		}
 
 		private function redrawForToppers():void
 		{
+			var toAdd:ArrayCollection = new ArrayCollection();
+			var toRemove:ArrayCollection = new ArrayCollection();
 			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
 			{
 				if (asset.toppers && asset.toppers.length > 0)
@@ -115,17 +121,32 @@ package views
 					a.toppers = asset.toppers;
 					a.thinger = asset.thinger;
 					updateAllStructures(a);
-					structureWorld.removeAsset(asset);
-					structureWorld.addAsset(a, asset.worldCoords);
+					a.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
+					toRemove.addItem(asset);
+					toAdd.addItem(a);
 				}
 			}	
 			for each (var t:ActiveAsset in allStructures)
 			{
 				if ((t.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
-					structureWorld.addAsset(t, t.worldCoords);	
+					toAdd.addItem(t);	
 			}	
+			swapAssets(toRemove, toAdd);
 			structureWorld.assetRenderer.swapEnterFrameHandler();
 			normalMode = false;
+		}
+		
+		private function swapAssets(toRemove:ArrayCollection, toAdd:ArrayCollection):void
+		{
+			var aa:ActiveAsset;
+			for each (aa in toRemove)
+			{
+				structureWorld.removeAsset(aa);
+			}
+			for each (aa in toAdd)
+			{
+				structureWorld.addAsset(aa, aa.worldCoords);
+			}				
 		}
 		
 		private function updateAllStructures(a:ActiveAsset):void
@@ -319,13 +340,43 @@ package views
 				evt.currentPoint = asset.worldCoords;
 				dispatchEvent(evt);
 			}
-			else
+			else if (!isOwned(asset))
 			{
 				_structureController.saveNewOwnedStructure(asset.thinger as OwnedStructure, _venue, asset.worldCoords);
+			}
+			if (asset.toppers && asset.toppers.length > 0)
+			{
+				saveToppers(asset);
 			}
 			updateStructureSurfaces(asset);
 		}	
 		
+		private function saveToppers(asset:ActiveAsset):void
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			var ptDiff:Point3D = new Point3D(asset.worldCoords.x - os.x, asset.worldCoords.y - os.y, asset.worldCoords.z - os.z);
+			for each (var topper:OwnedStructure in asset.toppers)
+			{
+				var newPt:Point3D = new Point3D(topper.x + ptDiff.x, os.structure.height, topper.z + ptDiff.z);
+				var evt:DynamicEvent = new DynamicEvent("structurePlaced", true, true);
+				var topperAsset:ActiveAsset = getMatchingAssetForOwnedStructure(topper);
+				topperAsset.worldCoords = newPt;
+				evt.asset = topperAsset;
+				evt.currentPoint = newPt;
+				this.dispatchEvent(evt);
+			}
+		}
+		
+		private function getMatchingAssetForOwnedStructure(os:OwnedStructure):ActiveAsset
+		{
+			for each (var asset:ActiveAsset in allStructures)
+			{
+				if (asset.thinger && asset.thinger.id == os.id)
+					return asset;
+			}
+			return null;
+		}
+				
 		public function onStructureMouseMove(evt:MouseEvent):void
 		{
 			var destination:Point3D = World.actualToWorldCoords(new Point(structureWorld.mouseX, structureWorld.mouseY));
@@ -414,12 +465,13 @@ package views
 			structureSurfaces = new Array();
 			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
 			{
-				if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper" && (asset.thinger as OwnedStructure).structure.structure_type != "Tile")
+				var os:OwnedStructure = asset.thinger as OwnedStructure;
+				if (os.structure.structure_type != "StructureTopper" && os.structure.structure_type != "Tile")
 				{
-					var pts:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(asset.thinger as OwnedStructure);
+					var pts:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(os);
 					for each (var pt:Point3D in pts)
 					{
-						addPointToStructureSurfaces(new Point3D(pt.x, pt.y, pt.z), asset);
+						addPointToStructureSurfaces(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset);
 					}
 				}
 			}

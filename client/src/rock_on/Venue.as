@@ -565,6 +565,10 @@ package rock_on
 			{
 				this.stageManager.updateRenderedTiles(os, method);
 			}
+			else if (os.structure.structure_type == "StructureTopper")
+			{
+				var test:int = 0;
+			}
 			else if (os.structure.structure_type == "StageDecoration")
 			{
 				this.stageManager.updateRenderedStageDecorations(os, method);
