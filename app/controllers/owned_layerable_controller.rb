@@ -32,6 +32,19 @@ class OwnedLayerableController < ApplicationController
     render :json => @array.to_json         
   end  
   
+  def find_by_game_id
+    @array = Array.new
+    OwnedLayerable.find_each(:conditions => ["user_id = ?", params[:user_id]]) do |owned_layerable|
+      hash = Hash.new
+      layerable_reference = owned_layerable.layerable_id 
+      hash["belongs_to"] = ["layerable"]
+      hash["belongs_to_id"] = [layerable_reference]
+      hash["instance"] = owned_layerable
+      @array.push hash            
+    end            
+    render :json => @array.to_json         
+  end  
+  
   def make_in_use
     @array = Array.new
     owned_layerable = OwnedLayerable.find(params[:id])

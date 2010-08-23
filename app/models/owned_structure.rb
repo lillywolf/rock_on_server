@@ -54,9 +54,9 @@ class OwnedStructure < ActiveRecord::Base
   end
   
   def save_new_placement(x, y, z)
-    self.x = x.to_i
-    self.y = y.to_i
-    self.z = z.to_i
+    self.x = x.to_f
+    self.y = y.to_f
+    self.z = z.to_f
     self.save
   end    
   

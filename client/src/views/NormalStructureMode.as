@@ -37,6 +37,7 @@ package views
 		public var currentStructure:ActiveAsset;
 		public var currentStructurePoints:ArrayCollection;
 		public var structureSurfaces:Array;
+		public var structureBases:Array;
 		public var allStructures:ArrayCollection;
 		public var normalMode:Boolean;
 		
@@ -50,6 +51,7 @@ package views
 			createStructureWorld(worldWidth, worldDepth, tileSize);
 			currentStructurePoints = new ArrayCollection();
 			createStructureSurfaces();
+			createStructureBases();
 
 			this.addEventListener(Event.ADDED, onAdded);
 		}
@@ -268,19 +270,20 @@ package views
 //			var asset:ActiveAsset = getAccurateClickedStructure(coords);
 			
 			if (!structureEditing && asset)
-			{
 				selectStructure(asset);
-			}
-			else if (structureEditing && asset)
+			else if (structureEditing && (currentStructure.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
 			{
-				if (isStructureInBounds(asset) && !(doesStructureCollide(asset)))
-				{
+				if (isStructureInBounds(currentStructure) && !(doesStructureCollide(currentStructure)))
 					placeStructure();				
-				}
 				else
-				{
 					revertStructure();
-				}
+			}
+			else if (structureEditing && (currentStructure.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
+			{
+				if (checkStructureSurfaces())
+					placeStructure();
+				else
+					revertStructure();
 			}
 		}
 		
@@ -301,12 +304,20 @@ package views
 				structureWorld.moveAssetTo(currentStructure, new Point3D(os.x, os.y, os.z));
 			}
 			else
-			{
 				removeImposterStructure(currentStructure);
-			}
+			if (!normalMode)
+				reassignAndRedrawTopper(currentStructure);
 			resetEditMode();
 		}
 		
+		private function reassignAndRedrawTopper(topper:ActiveAsset):void
+		{
+			var asset:ActiveAsset = checkStructureSurfacesForSavedTopper();
+			if (!asset.toppers.contains(topper))
+				asset.toppers.addItem(topper.thinger);
+			redrawForToppers();
+		}
+				
 		public function removeImposterStructure(asset:ActiveAsset):void
 		{
 			structureWorld.removeAsset(asset);
@@ -329,6 +340,7 @@ package views
 			_editView.removeEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);
 			structureEditing = false;
 			currentStructure = null;
+			updateStructureFilters();
 		}
 		
 		public function saveStructureCoords(asset:ActiveAsset):void
@@ -348,7 +360,7 @@ package views
 			{
 				saveToppers(asset);
 			}
-			updateStructureSurfaces(asset);
+			updateStructureSurfacesAndBases(asset);
 		}	
 		
 		private function saveToppers(asset:ActiveAsset):void
@@ -436,7 +448,7 @@ package views
 		
 		private function checkStructureSurfaces():ActiveAsset
 		{
-			currentStructurePoints = getCurrentStructurePoints(currentStructure);			
+			currentStructurePoints = getCurrentlyOccupiedPoints(currentStructure);			
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
 				if (structureSurfaces[pt3D.x] && structureSurfaces[pt3D.x][pt3D.y] && structureSurfaces[pt3D.x][pt3D.y][pt3D.z])
@@ -445,18 +457,32 @@ package views
 			return null;
 		}
 		
-		private function updateStructureSurfaces(asset:ActiveAsset):void
+		private function checkStructureSurfacesForSavedTopper():ActiveAsset
+		{
+			currentStructurePoints = getSavedStructurePoints(currentStructure);			
+			for each (var pt3D:Point3D in currentStructurePoints)
+			{
+				if (structureSurfaces[pt3D.x] && structureSurfaces[pt3D.x][pt3D.y] && structureSurfaces[pt3D.x][pt3D.y][pt3D.z])
+					return structureSurfaces[pt3D.x][pt3D.y][pt3D.z];
+			}
+			return null;
+		}		
+		
+		private function updateStructureSurfacesAndBases(asset:ActiveAsset):void
 		{
 			var pt:Point3D;
 			var old:ArrayCollection = getSavedStructurePoints(asset);
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			for each (pt in old)
 			{
-				removePointFromStructureSurfaces(pt);
+				removePointFrom3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), structureSurfaces);
+				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureBases);
 			}
-			var newPts:ArrayCollection = getCurrentStructurePoints(asset);
+			var newPts:ArrayCollection = getCurrentlyOccupiedPoints(asset);
 			for each (pt in newPts)
 			{
-				addPointToStructureSurfaces(pt, asset);
+				addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureSurfaces);
+				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
 			}
 		}
 		
@@ -471,37 +497,51 @@ package views
 					var pts:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(os);
 					for each (var pt:Point3D in pts)
 					{
-						addPointToStructureSurfaces(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset);
+						addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureSurfaces);
 					}
 				}
 			}
 		}
 		
-		private function removePointFromStructureSurfaces(pt:Point3D):void
+		private function createStructureBases():void
 		{
-			if (structureSurfaces[pt.x] && structureSurfaces[pt.x][pt.y] && structureSurfaces[pt.x][pt.y][pt.z])
-				structureSurfaces[pt.x][pt.y][pt.z] = 0;
+			structureBases = new Array();
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+			{
+				var os:OwnedStructure = asset.thinger as OwnedStructure;
+				if (os.structure.structure_type != "StructureTopper" && os.structure.structure_type != "Tile")
+				{
+					var pts:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(os);
+					for each (var pt:Point3D in pts)
+					{
+						addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
+					}
+				}
+			}
+		}		
+		
+		private function removePointFrom3DArray(pt:Point3D, removeFrom:Array):void
+		{
+			if (removeFrom[pt.x] && removeFrom[pt.x][pt.y] && removeFrom[pt.x][pt.y][pt.z])
+				removeFrom[pt.x][pt.y][pt.z] = 0;
 		}
 		
-		private function addPointToStructureSurfaces(pt:Point3D, asset:ActiveAsset):void
+		private function addPointTo3DArray(pt:Point3D, asset:ActiveAsset, addTo:Array):void
 		{
-			var xPt:Array;
-			var yPt:Array;
-			var zPt:Array;
-			if (structureSurfaces[pt.x] && structureSurfaces[pt.x][pt.y])
+			if (addTo[pt.x] && addTo[pt.x][pt.y])
 			{
-				structureSurfaces[pt.x][pt.y][pt.z] = asset;
+				addTo[pt.x][pt.y][pt.z] = asset;
 			}
-			else if (structureSurfaces[pt.x])
+			else if (addTo[pt.x])
 			{
-				structureSurfaces[pt.x][pt.y] = new Array();
-				structureSurfaces[pt.x][pt.y][pt.z] = asset;
+				addTo[pt.x][pt.y] = new Array();
+				addTo[pt.x][pt.y][pt.z] = asset;
 			}
 			else
 			{
-				structureSurfaces[pt.x] = new Array();
-				structureSurfaces[pt.x][pt.y] = new Array();
-				structureSurfaces[pt.x][pt.y][pt.z] = asset;
+				addTo[pt.x] = new Array();
+				addTo[pt.x][pt.y] = new Array();
+				addTo[pt.x][pt.y][pt.z] = asset;
 			}
 		}
 		
@@ -528,6 +568,10 @@ package views
 				else
 					showInvalidStructureFilters();
 			}
+			else
+			{
+				clearFilters();
+			}
 		}
 		
 		public function isStructureInBounds(asset:ActiveAsset):Boolean
@@ -550,29 +594,37 @@ package views
 		
 		public function doesStructureCollide(asset:ActiveAsset):Boolean
 		{
-			var structurePoints:ArrayCollection = _venue.myWorld.pathFinder.occupiedByStructures;
-			var savedStructurePoints:ArrayCollection = getSavedStructurePoints(asset);
-			currentStructurePoints = getCurrentStructurePoints(asset);
+			currentStructurePoints = getCurrentlyOccupiedPoints(asset);
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
-				if (structurePoints.contains(_venue.myWorld.pathFinder.mapPointToPathGrid(pt3D)) && 
-					!(savedStructurePoints.contains(_venue.myWorld.pathFinder.mapPointToPathGrid(pt3D))))
+				if (structureBases[pt3D.x] && structureBases[pt3D.x][pt3D.y] && structureBases[pt3D.x][pt3D.y][pt3D.z] &&
+					(structureBases[pt3D.x][pt3D.y][pt3D.z] as ActiveAsset).thinger.id != asset.thinger.id)
 					return true;
 			}			
 			return false;
 		}
-		
+			
 		private function getSavedStructurePoints(asset:ActiveAsset):ArrayCollection
 		{
 			var structurePoints:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(asset.thinger as OwnedStructure);
 			return structurePoints;
 		}
-		
-		private function getCurrentStructurePoints(asset:ActiveAsset):ArrayCollection
-		{
-			var structurePoints:ArrayCollection = _venue.myWorld.pathFinder.getPoint3DForMovingStructure(asset);
+
+		private function getCurrentlyOccupiedPoints(asset:ActiveAsset):ArrayCollection
+		{		
+			var structurePoints:ArrayCollection = new ArrayCollection();
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			
+			for (var xPt:int = 0; xPt <= os.structure.width; xPt++)
+			{
+				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
+				{
+					var osPt3D:Point3D = new Point3D(Math.round(asset.worldCoords.x - os.structure.width/2 + xPt), 0, Math.round(asset.worldCoords.z - os.structure.depth/2 + zPt));
+					structurePoints.addItem(osPt3D);										
+				}
+			}
 			return structurePoints;
-		}
+		}	
 		
 		public function showValidStructureFilters():void
 		{
@@ -590,6 +642,15 @@ package views
 				currentStructure.alpha = 1;
 				var gf:GlowFilter = new GlowFilter(0xFF2655, 1, 2, 2, 20, 20);
 				currentStructure.filters = [gf];			
+			}
+		}
+		
+		public function clearFilters():void
+		{
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+			{
+				asset.alpha = 1;
+				asset.filters = null;
 			}
 		}
 		
