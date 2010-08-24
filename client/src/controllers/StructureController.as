@@ -368,6 +368,19 @@ package controllers
 			return toppers;
 		}
 		
+		public function savePlacement(toSave:OwnedStructure, placement:Point3D):void
+		{
+			for each (var os:OwnedStructure in this.owned_structures)
+			{
+				if (os.id == toSave.id)
+				{	
+					toSave.x = placement.x;
+					toSave.y = placement.y;
+					toSave.z = placement.z;
+				}	
+			}
+		}
+		
 		private function topsStructure(topper:OwnedStructure, os:OwnedStructure):Boolean
 		{
 			var structureSpaces:ArrayCollection = getPointsForStructure(os);

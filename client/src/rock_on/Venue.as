@@ -102,6 +102,7 @@ package rock_on
 		public var haterBoss:HaterBoss;
 		public var friendBoss:FriendBoss;
 		public var peerBoss:PeerBoss;
+		public var decorationBoss:DecorationBoss;
 		public var fullyLoaded:Boolean;		
 
 //		public var _wbi:WorldBitmapInterface;
@@ -270,6 +271,7 @@ package rock_on
 			stageManager.myWorld = _myWorld;
 			customerPersonManager = new CustomerPersonManager(_myWorld, this);
 			boothBoss = new BoothBoss(_structureController, _myWorld, this);
+			decorationBoss = new DecorationBoss(_structureController, _myWorld, this);
 			listeningStationBoss = new ListeningStationBoss(_structureController, _layerableController, stageManager, _myWorld, this, boothBoss, customerPersonManager);
 
 //			add UI layer to boothBoss
@@ -567,7 +569,7 @@ package rock_on
 			}
 			else if (os.structure.structure_type == "StructureTopper")
 			{
-				var test:int = 0;
+				this.decorationBoss.updateRenderedDecorations(os, method);
 			}
 			else if (os.structure.structure_type == "StageDecoration")
 			{

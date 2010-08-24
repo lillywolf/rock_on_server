@@ -280,8 +280,9 @@ package views
 			}
 			else if (structureEditing && (currentStructure.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
 			{
-				if (checkStructureSurfaces())
-					placeStructure();
+				var parentAsset:ActiveAsset = checkStructureSurfaces();
+				if (parentAsset)
+					placeTopper(parentAsset);
 				else
 					revertStructure();
 			}
@@ -292,6 +293,15 @@ package views
 			currentStructure.alpha = 1;
 			currentStructure.filters = null;
 			saveStructureCoords(currentStructure);
+			resetEditMode();
+			redrawForToppers();			
+		}
+		
+		public function placeTopper(parentAsset:ActiveAsset):void
+		{
+			currentStructure.alpha = 1;
+			currentStructure.filters = null;
+			saveStructureCoords(currentStructure, parentAsset);
 			resetEditMode();
 			redrawForToppers();			
 		}
@@ -343,13 +353,19 @@ package views
 			updateStructureFilters();
 		}
 		
-		public function saveStructureCoords(asset:ActiveAsset):void
+		public function saveStructureCoords(asset:ActiveAsset, parentAsset:ActiveAsset=null):void
 		{
 			if (isOwned(asset))
 			{
 				var evt:DynamicEvent = new DynamicEvent("structurePlaced", true, true);
 				evt.asset = asset;
-				evt.currentPoint = asset.worldCoords;
+				if (parentAsset)
+				{
+					var parentOs:OwnedStructure = parentAsset.thinger as OwnedStructure;
+					evt.currentPoint = new Point3D(asset.worldCoords.x + parentOs.structure.height, parentOs.structure.height, asset.worldCoords.z - parentOs.structure.height);
+				}
+				else
+					evt.currentPoint = asset.worldCoords;
 				dispatchEvent(evt);
 			}
 			else if (!isOwned(asset))
@@ -360,7 +376,8 @@ package views
 			{
 				saveToppers(asset);
 			}
-			updateStructureSurfacesAndBases(asset);
+			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
+				updateStructureSurfacesAndBases(asset);
 		}	
 		
 		private function saveToppers(asset:ActiveAsset):void

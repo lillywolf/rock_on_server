@@ -150,6 +150,7 @@ package rock_on
 		{
 			if (method == "save_placement")
 			{
+				_structureController.savePlacement(os, new Point3D(os.x, os.y, os.z));
 				_myWorld.saveStructurePlacement(os);
 				reInitializeBooths(false);
 				_venue.redrawAllMovers();

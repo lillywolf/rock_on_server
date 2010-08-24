@@ -485,7 +485,7 @@ package world
 				var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
 				_allMovieClips.addItem(mc);
 				_displayMovieClips.addItem(mc);
-				var offset:Point3D = new Point3D((this.thinger as OwnedStructure).x - os.x, os.y, (this.thinger as OwnedStructure).z - os.z);
+				var offset:Point3D = new Point3D(os.x - (this.thinger as OwnedStructure).x, os.y, os.z - (this.thinger as OwnedStructure).z);
 				var flatOffset:Point = World.worldToActualCoords(offset);
 				mc.x = flatOffset.x;
 				mc.y = flatOffset.y;
