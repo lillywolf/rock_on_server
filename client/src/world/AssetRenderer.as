@@ -290,7 +290,7 @@ package world
 		{
 			for each (var asset:ActiveAsset in unsortedAssets)
 			{
-				if (asset.toppers.contains(os))
+				if (asset.toppers && asset.toppers.contains(os))
 					return false;
 			}
 			return true;

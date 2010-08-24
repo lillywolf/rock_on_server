@@ -14,6 +14,7 @@ package controllers
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
+	import mx.core.INavigatorContent;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
@@ -358,14 +359,18 @@ package controllers
 		public function getStructureToppers(os:OwnedStructure):ArrayCollection
 		{
 			var toppers:ArrayCollection = new ArrayCollection();
-			for each (var topper:OwnedStructure in this.owned_structures)
+			if (os.structure.structure_type != "StructureTopper")
 			{
-				if (topper.structure.structure_type == "StructureTopper" 
-					&& topper.id != os.id
-					&& topsStructure(topper, os))
-					toppers.addItem(topper);
+				for each (var topper:OwnedStructure in this.owned_structures)
+				{
+					if (topper.structure.structure_type == "StructureTopper" 
+						&& topper.id != os.id
+						&& topsStructure(topper, os))
+						toppers.addItem(topper);
+				}
+				return toppers;	
 			}
-			return toppers;
+			return null;
 		}
 		
 		public function savePlacement(toSave:OwnedStructure, placement:Point3D):void
@@ -385,15 +390,20 @@ package controllers
 		{
 			var structureSpaces:ArrayCollection = getPointsForStructure(os);
 			var topperSpaces:ArrayCollection = getPointsForStructure(topper);
+			var numSpaces:int = topperSpaces.length;
+			var spaceCount:int = 0;
 			for each (var pt:Point3D in structureSpaces)
 			{
 				for each (var tPt:Point3D in topperSpaces)
 				{
 					if (pt.x == tPt.x && pt.z == tPt.z)
-						return true;
+						spaceCount++;
 				}
 			}
-			return false;
+			if (spaceCount == numSpaces)
+				return true;
+			else
+				return false;
 		}
 		
 		public function getPointsForStructure(os:OwnedStructure):ArrayCollection

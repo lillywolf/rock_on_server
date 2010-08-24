@@ -38,6 +38,7 @@ package views
 		public var currentStructurePoints:ArrayCollection;
 		public var structureSurfaces:Array;
 		public var structureBases:Array;
+		public var structureToppers:Array;
 		public var allStructures:ArrayCollection;
 		public var normalMode:Boolean;
 		
@@ -52,6 +53,7 @@ package views
 			currentStructurePoints = new ArrayCollection();
 			createStructureSurfaces();
 			createStructureBases();
+			createStructureToppers();
 
 			this.addEventListener(Event.ADDED, onAdded);
 		}
@@ -247,7 +249,7 @@ package views
 		{
 			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
 			{
-				if (asset.toppers.contains(topper))
+				if (asset.toppers && asset.toppers.contains(topper))
 				{
 					var index:int = asset.toppers.getItemIndex(topper);
 					asset.toppers.removeItemAt(index);
@@ -281,7 +283,7 @@ package views
 			else if (structureEditing && (currentStructure.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
 			{
 				var parentAsset:ActiveAsset = checkStructureSurfaces();
-				if (parentAsset)
+				if (parentAsset && !doesTopperCollide(currentStructure))
 					placeTopper(parentAsset);
 				else
 					revertStructure();
@@ -302,6 +304,7 @@ package views
 			currentStructure.alpha = 1;
 			currentStructure.filters = null;
 			saveStructureCoords(currentStructure, parentAsset);
+			updateStructureToppers(currentStructure);
 			resetEditMode();
 			redrawForToppers();			
 		}
@@ -447,12 +450,17 @@ package views
 			if ((asset.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
 			{	
 				var parentStructure:ActiveAsset = checkStructureSurfaces();
-				if (parentStructure)
+				if (parentStructure && !doesTopperCollide(asset))
 				{	
 					addTopperToStructure(os, parentStructure);
 //					updateDestination(destination, parentStructure.thinger as OwnedStructure);
 					showValidStructureFilters();
 				}	
+				else if (parentStructure)
+				{
+					addTopperToStructure(os, parentStructure);
+					showInvalidStructureFilters();					
+				}
 				else
 				{	
 					removeTopperFromStructures(os);	
@@ -465,22 +473,39 @@ package views
 		
 		private function checkStructureSurfaces():ActiveAsset
 		{
-			currentStructurePoints = getCurrentlyOccupiedPoints(currentStructure);			
+			currentStructurePoints = getCurrentlyOccupiedPoints(currentStructure);	
+			var oldParent:ActiveAsset;
+			var newParent:ActiveAsset;
+			var numSpaces:int = currentStructurePoints.length;
+			var spaceCount:int = 0;
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
 				if (structureSurfaces[pt3D.x] && structureSurfaces[pt3D.x][pt3D.y] && structureSurfaces[pt3D.x][pt3D.y][pt3D.z])
-					return structureSurfaces[pt3D.x][pt3D.y][pt3D.z];
+				{	
+					newParent = structureSurfaces[pt3D.x][pt3D.y][pt3D.z];
+					if (!oldParent || oldParent == newParent)
+					{	
+						spaceCount++;
+						oldParent = newParent;
+					}
+					else
+						return null;
+				}	
 			}
+			if (spaceCount == numSpaces)
+				return newParent;
 			return null;
 		}
 		
 		private function checkStructureSurfacesForSavedTopper():ActiveAsset
 		{
-			currentStructurePoints = getSavedStructurePoints(currentStructure);			
+			currentStructurePoints = getSavedStructurePoints(currentStructure);		
+			var os:OwnedStructure = currentStructure.thinger as OwnedStructure;
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
-				if (structureSurfaces[pt3D.x] && structureSurfaces[pt3D.x][pt3D.y] && structureSurfaces[pt3D.x][pt3D.y][pt3D.z])
-					return structureSurfaces[pt3D.x][pt3D.y][pt3D.z];
+				var adjusted:Point3D = new Point3D(pt3D.x - os.structure.height, pt3D.y, pt3D.x + os.structure.height);
+				if (structureSurfaces[adjusted.x] && structureSurfaces[adjusted.x][adjusted.y] && structureSurfaces[adjusted.x][adjusted.y][adjusted.z])
+					return structureSurfaces[adjusted.x][adjusted.y][adjusted.z];
 			}
 			return null;
 		}		
@@ -500,6 +525,24 @@ package views
 			{
 				addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureSurfaces);
 				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
+			}
+		}
+		
+		private function updateStructureToppers(asset:ActiveAsset):void
+		{
+			var pt:Point3D;
+			var old:ArrayCollection = getSavedStructurePoints(asset);
+			var os:OwnedStructure = asset.thinger as OwnedStructure;			
+			for each (pt in old)
+			{
+//				removePointFrom3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), structureSurfaces);
+				removePointFrom3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), structureToppers);
+			}
+			var newPts:ArrayCollection = getCurrentlyOccupiedPoints(asset);
+			for each (pt in newPts)
+			{
+//				addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureSurfaces);
+				addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureToppers);
 			}
 		}
 		
@@ -532,6 +575,23 @@ package views
 					for each (var pt:Point3D in pts)
 					{
 						addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
+					}
+				}
+			}
+		}		
+
+		private function createStructureToppers():void
+		{
+			structureToppers = new Array();
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+			{
+				var os:OwnedStructure = asset.thinger as OwnedStructure;
+				if (os.structure.structure_type == "StructureTopper")
+				{
+					var pts:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(os);
+					for each (var pt:Point3D in pts)
+					{
+						addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureToppers);
 					}
 				}
 			}
@@ -617,7 +677,19 @@ package views
 				if (structureBases[pt3D.x] && structureBases[pt3D.x][pt3D.y] && structureBases[pt3D.x][pt3D.y][pt3D.z] &&
 					(structureBases[pt3D.x][pt3D.y][pt3D.z] as ActiveAsset).thinger.id != asset.thinger.id)
 					return true;
-			}			
+			}	
+			return false;
+		}
+		
+		private function doesTopperCollide(asset:ActiveAsset):Boolean
+		{
+			currentStructurePoints = getCurrentlyOccupiedPoints(asset);
+			for each (var pt3D:Point3D in currentStructurePoints)
+			{
+				if (structureToppers[pt3D.x] && structureToppers[pt3D.x][pt3D.y] && structureToppers[pt3D.x][pt3D.y][pt3D.z] &&
+					(structureToppers[pt3D.x][pt3D.y][pt3D.z] as ActiveAsset).thinger.id != asset.thinger.id)
+					return true;
+			}	
 			return false;
 		}
 			
