@@ -94,7 +94,7 @@ package clickhandlers
 			}
 		}
 		
-		private function onMouseDown(evt:MouseEvent):void
+		public function onMouseDown(evt:MouseEvent):void
 		{			
 			if (!isDragging)
 				waitForDrag();				
