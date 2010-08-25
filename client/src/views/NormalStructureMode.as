@@ -326,7 +326,7 @@ package views
 		private function reassignAndRedrawTopper(topper:ActiveAsset):void
 		{
 			var asset:ActiveAsset = checkStructureSurfacesForSavedTopper();
-			if (!asset.toppers && asset.toppers.contains(topper))
+			if (!asset.toppers.contains(topper))
 				asset.toppers.addItem(topper.thinger);
 			redrawForToppers();
 		}
@@ -395,7 +395,8 @@ package views
 				var newPt:Point3D = new Point3D(topper.x + ptDiff.x, os.structure.height, topper.z + ptDiff.z);
 				var evt:DynamicEvent = new DynamicEvent("structurePlaced", true, true);
 				var topperAsset:ActiveAsset = getMatchingAssetForOwnedStructure(topper);
-				topperAsset.worldCoords = newPt;
+				topperAsset.worldCoords = new Point3D(newPt.x - topper.structure.height, 0, newPt.z + topper.structure.height);
+				updateStructureToppers(topperAsset);
 				evt.asset = topperAsset;
 				evt.currentPoint = newPt;
 				this.dispatchEvent(evt);
@@ -502,7 +503,7 @@ package views
 		
 		private function checkStructureSurfacesForSavedTopper():ActiveAsset
 		{
-			currentStructurePoints = getSavedStructurePoints(currentStructure);		
+			currentStructurePoints = getSavedStructurePoints(currentStructure, false);		
 			var os:OwnedStructure = currentStructure.thinger as OwnedStructure;
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
@@ -516,7 +517,7 @@ package views
 		private function updateStructureSurfaces(asset:ActiveAsset):void
 		{
 			var pt:Point3D;
-			var old:ArrayCollection = getSavedStructurePoints(asset);
+			var old:ArrayCollection = getSavedStructurePoints(asset, false);
 			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			for each (pt in old)
 			{
@@ -532,7 +533,7 @@ package views
 		private function updateStructureBases(asset:ActiveAsset):void
 		{
 			var pt:Point3D;
-			var old:ArrayCollection = getSavedStructurePoints(asset);
+			var old:ArrayCollection = getSavedStructurePoints(asset, true);
 			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			for each (pt in old)
 			{
@@ -548,11 +549,11 @@ package views
 		private function updateStructureToppers(asset:ActiveAsset):void
 		{
 			var pt:Point3D;
-			var old:ArrayCollection = getSavedStructurePoints(asset);
+			var old:ArrayCollection = getSavedStructurePoints(asset, true);
 			var os:OwnedStructure = asset.thinger as OwnedStructure;			
 			for each (pt in old)
 			{
-				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureToppers);
+				removePointFrom3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), structureToppers);
 			}
 			var newPts:ArrayCollection = getOccupiedInnerPoints(asset);
 			for each (pt in newPts)
@@ -708,9 +709,13 @@ package views
 			return false;
 		}
 			
-		private function getSavedStructurePoints(asset:ActiveAsset):ArrayCollection
+		private function getSavedStructurePoints(asset:ActiveAsset, inner:Boolean):ArrayCollection
 		{
-			var structurePoints:ArrayCollection = _venue.myWorld.pathFinder.getInnerStructurePoints(asset.thinger as OwnedStructure);
+			var structurePoints:ArrayCollection;
+			if (inner)
+				structurePoints = getSavedInnerPoints(asset.thinger as OwnedStructure);
+			else
+				structurePoints = getSavedOuterPoints(asset.thinger as OwnedStructure);
 			return structurePoints;
 		}
 
@@ -744,7 +749,37 @@ package views
 				}
 			}
 			return structurePoints;
-		}	
+		}
+		
+		private function getSavedOuterPoints(os:OwnedStructure):ArrayCollection
+		{		
+			var structurePoints:ArrayCollection = new ArrayCollection();
+			
+			for (var xPt:int = 0; xPt <= os.structure.width; xPt++)
+			{
+				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
+				{
+					var osPt3D:Point3D = new Point3D(Math.round(os.x - os.structure.width/2 + xPt), 0, Math.round(os.z - os.structure.depth/2 + zPt));
+					structurePoints.addItem(osPt3D);										
+				}
+			}
+			return structurePoints;
+		}		
+		
+		private function getSavedInnerPoints(os:OwnedStructure):ArrayCollection
+		{		
+			var structurePoints:ArrayCollection = new ArrayCollection();
+			
+			for (var xPt:int = 1; xPt < os.structure.width; xPt++)
+			{
+				for (var zPt:int = 1; zPt < os.structure.depth; zPt++)
+				{
+					var osPt3D:Point3D = new Point3D(Math.round(os.x - os.structure.width/2 + xPt), 0, Math.round(os.z - os.structure.depth/2 + zPt));
+					structurePoints.addItem(osPt3D);										
+				}
+			}
+			return structurePoints;
+		}		
 		
 		public function showValidStructureFilters():void
 		{
