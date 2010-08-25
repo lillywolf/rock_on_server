@@ -326,7 +326,7 @@ package views
 		private function reassignAndRedrawTopper(topper:ActiveAsset):void
 		{
 			var asset:ActiveAsset = checkStructureSurfacesForSavedTopper();
-			if (!asset.toppers.contains(topper))
+			if (!asset.toppers && asset.toppers.contains(topper))
 				asset.toppers.addItem(topper.thinger);
 			redrawForToppers();
 		}
@@ -380,7 +380,10 @@ package views
 				saveToppers(asset);
 			}
 			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
-				updateStructureSurfacesAndBases(asset);
+			{	
+				updateStructureSurfaces(asset);
+				updateStructureBases(asset);
+			}	
 		}	
 		
 		private function saveToppers(asset:ActiveAsset):void
@@ -473,7 +476,7 @@ package views
 		
 		private function checkStructureSurfaces():ActiveAsset
 		{
-			currentStructurePoints = getCurrentlyOccupiedPoints(currentStructure);	
+			currentStructurePoints = getOccupiedOuterPoints(currentStructure);	
 			var oldParent:ActiveAsset;
 			var newParent:ActiveAsset;
 			var numSpaces:int = currentStructurePoints.length;
@@ -510,7 +513,7 @@ package views
 			return null;
 		}		
 		
-		private function updateStructureSurfacesAndBases(asset:ActiveAsset):void
+		private function updateStructureSurfaces(asset:ActiveAsset):void
 		{
 			var pt:Point3D;
 			var old:ArrayCollection = getSavedStructurePoints(asset);
@@ -518,12 +521,26 @@ package views
 			for each (pt in old)
 			{
 				removePointFrom3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), structureSurfaces);
-				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureBases);
 			}
-			var newPts:ArrayCollection = getCurrentlyOccupiedPoints(asset);
+			var newPts:ArrayCollection = getOccupiedOuterPoints(asset);
 			for each (pt in newPts)
 			{
 				addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureSurfaces);
+			}
+		}
+
+		private function updateStructureBases(asset:ActiveAsset):void
+		{
+			var pt:Point3D;
+			var old:ArrayCollection = getSavedStructurePoints(asset);
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			for each (pt in old)
+			{
+				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureBases);
+			}
+			var newPts:ArrayCollection = getOccupiedInnerPoints(asset);
+			for each (pt in newPts)
+			{
 				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
 			}
 		}
@@ -535,14 +552,12 @@ package views
 			var os:OwnedStructure = asset.thinger as OwnedStructure;			
 			for each (pt in old)
 			{
-//				removePointFrom3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), structureSurfaces);
-				removePointFrom3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), structureToppers);
+				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureToppers);
 			}
-			var newPts:ArrayCollection = getCurrentlyOccupiedPoints(asset);
+			var newPts:ArrayCollection = getOccupiedInnerPoints(asset);
 			for each (pt in newPts)
 			{
-//				addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureSurfaces);
-				addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureToppers);
+				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureToppers);
 			}
 		}
 		
@@ -554,7 +569,7 @@ package views
 				var os:OwnedStructure = asset.thinger as OwnedStructure;
 				if (os.structure.structure_type != "StructureTopper" && os.structure.structure_type != "Tile")
 				{
-					var pts:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(os);
+					var pts:ArrayCollection = getOccupiedOuterPoints(asset);
 					for each (var pt:Point3D in pts)
 					{
 						addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureSurfaces);
@@ -571,7 +586,7 @@ package views
 				var os:OwnedStructure = asset.thinger as OwnedStructure;
 				if (os.structure.structure_type != "StructureTopper" && os.structure.structure_type != "Tile")
 				{
-					var pts:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(os);
+					var pts:ArrayCollection = getOccupiedInnerPoints(asset);
 					for each (var pt:Point3D in pts)
 					{
 						addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
@@ -588,7 +603,7 @@ package views
 				var os:OwnedStructure = asset.thinger as OwnedStructure;
 				if (os.structure.structure_type == "StructureTopper")
 				{
-					var pts:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(os);
+					var pts:ArrayCollection = getOccupiedInnerPoints(asset);
 					for each (var pt:Point3D in pts)
 					{
 						addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureToppers);
@@ -606,7 +621,7 @@ package views
 		private function addPointTo3DArray(pt:Point3D, asset:ActiveAsset, addTo:Array):void
 		{
 			if (addTo[pt.x] && addTo[pt.x][pt.y])
-			{
+			{	
 				addTo[pt.x][pt.y][pt.z] = asset;
 			}
 			else if (addTo[pt.x])
@@ -671,7 +686,7 @@ package views
 		
 		public function doesStructureCollide(asset:ActiveAsset):Boolean
 		{
-			currentStructurePoints = getCurrentlyOccupiedPoints(asset);
+			currentStructurePoints = getOccupiedOuterPoints(asset);
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
 				if (structureBases[pt3D.x] && structureBases[pt3D.x][pt3D.y] && structureBases[pt3D.x][pt3D.y][pt3D.z] &&
@@ -683,7 +698,7 @@ package views
 		
 		private function doesTopperCollide(asset:ActiveAsset):Boolean
 		{
-			currentStructurePoints = getCurrentlyOccupiedPoints(asset);
+			currentStructurePoints = getOccupiedOuterPoints(asset);
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
 				if (structureToppers[pt3D.x] && structureToppers[pt3D.x][pt3D.y] && structureToppers[pt3D.x][pt3D.y][pt3D.z] &&
@@ -695,11 +710,11 @@ package views
 			
 		private function getSavedStructurePoints(asset:ActiveAsset):ArrayCollection
 		{
-			var structurePoints:ArrayCollection = _venue.myWorld.pathFinder.getStructurePoints(asset.thinger as OwnedStructure);
+			var structurePoints:ArrayCollection = _venue.myWorld.pathFinder.getInnerStructurePoints(asset.thinger as OwnedStructure);
 			return structurePoints;
 		}
 
-		private function getCurrentlyOccupiedPoints(asset:ActiveAsset):ArrayCollection
+		private function getOccupiedOuterPoints(asset:ActiveAsset):ArrayCollection
 		{		
 			var structurePoints:ArrayCollection = new ArrayCollection();
 			var os:OwnedStructure = asset.thinger as OwnedStructure;
@@ -707,6 +722,22 @@ package views
 			for (var xPt:int = 0; xPt <= os.structure.width; xPt++)
 			{
 				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
+				{
+					var osPt3D:Point3D = new Point3D(Math.round(asset.worldCoords.x - os.structure.width/2 + xPt), 0, Math.round(asset.worldCoords.z - os.structure.depth/2 + zPt));
+					structurePoints.addItem(osPt3D);										
+				}
+			}
+			return structurePoints;
+		}			
+		
+		private function getOccupiedInnerPoints(asset:ActiveAsset):ArrayCollection
+		{		
+			var structurePoints:ArrayCollection = new ArrayCollection();
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			
+			for (var xPt:int = 1; xPt < os.structure.width; xPt++)
+			{
+				for (var zPt:int = 1; zPt < os.structure.depth; zPt++)
 				{
 					var osPt3D:Point3D = new Point3D(Math.round(asset.worldCoords.x - os.structure.width/2 + xPt), 0, Math.round(asset.worldCoords.z - os.structure.depth/2 + zPt));
 					structurePoints.addItem(osPt3D);										

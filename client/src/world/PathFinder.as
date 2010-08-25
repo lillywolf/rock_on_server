@@ -1003,6 +1003,20 @@ package world
 			return structurePoints;
 		}
 
+		public function getInnerStructurePoints(os:OwnedStructure):ArrayCollection
+		{
+			var structurePoints:ArrayCollection = new ArrayCollection();
+			for (var xPt:int = 1; xPt < os.structure.width; xPt++)
+			{
+				for (var zPt:int = 1; zPt < os.structure.depth; zPt++)
+				{
+					var osPt3D:Point3D = pathGrid[os.x - os.structure.width/2 + xPt][0][os.z - os.structure.depth/2 + zPt];
+					structurePoints.addItem(osPt3D);										
+				}
+			}
+			return structurePoints;
+		}
+
 		public function getEstimatedPoint3DForRectangle(rect:Rectangle, rectHeight:int=0):ArrayCollection
 		{		
 			var rectSpaces:ArrayCollection = new ArrayCollection();
