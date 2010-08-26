@@ -264,6 +264,16 @@ package world
 			return _realDestination;
 		} 
 		
+		public function copyFromActiveAsset(asset:ActiveAsset):void
+		{
+			this.thinger = asset.thinger;
+			this.toppers = asset.toppers;
+			this.rotated = asset.rotated;
+			this.flipped = asset.flipped;
+			this.rotationDegree = asset.rotationDegree;
+			this.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
+		}
+		
 		public function set realCoords(val:Point):void
 		{
 			_realCoords = val;

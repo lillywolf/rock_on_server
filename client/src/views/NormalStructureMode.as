@@ -97,14 +97,9 @@ package views
 				if (asset.toppers && asset.toppers.length > 0)
 				{
 					var aas:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
-					aas.toppers = asset.toppers;
-					aas.thinger = asset.thinger;
-					aas.rotated = asset.rotated;
-					aas.flipped = asset.flipped;
-					aas.rotationDegree = asset.rotationDegree;
+					aas.copyFromActiveAsset(asset);
 					aas.setMovieClipsForStructure(aas.toppers);
 					aas.bitmapWithToppers();
-					aas.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
 					toRemove.addItem(asset);
 					toAdd.addItem(aas);
 				}
@@ -121,14 +116,9 @@ package views
 			var toRemove:ArrayCollection = new ArrayCollection();
 			var toAdd:ArrayCollection = new ArrayCollection();			
 			var aas:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
-			aas.toppers = asset.toppers;
-			aas.thinger = asset.thinger;
-			aas.rotated = asset.rotated;
-			aas.flipped = asset.flipped;
-			aas.rotationDegree = asset.rotationDegree;
+			aas.copyFromActiveAsset(asset);
 			aas.setMovieClipsForStructure(aas.toppers);
 			aas.bitmapWithToppers();
-			aas.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
 			toRemove.addItem(asset);
 			toAdd.addItem(aas);
 			normalMode = true;
@@ -152,15 +142,10 @@ package views
 				{
 					var a:ActiveAsset = new ActiveAsset();
 					a.movieClip = EssentialModelReference.getMovieClipCopy(asset.movieClip);
-					a.toppers = asset.toppers;
-					a.thinger = asset.thinger;
-					a.rotated = asset.rotated;
-					a.flipped = asset.flipped;
+					a.copyFromActiveAsset(asset);
 					a.reflected = asset.flipped;
-					a.rotationDegree = asset.rotationDegree;
 					a.switchToBitmap();
 					updateAllStructures(a);
-					a.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
 					toRemove.addItem(asset);
 					toAdd.addItem(a);
 				}
@@ -272,6 +257,7 @@ package views
 			{
 				setCurrentStructure(asset);
 				structureRotating = true;
+				updateRotatedToppers(asset);							
 				rotateAsset(asset, 1);
 				currentStructure.speed = 1;
 				currentStructure.alpha = 0.5;
@@ -375,7 +361,6 @@ package views
 			saveStructureCoords(currentStructure);
 			resetEditMode();
 			redrawForToppers();	
-			structureRotating = false;
 		}		
 		
 		public function placeTopper(parentAsset:ActiveAsset):void
@@ -431,6 +416,7 @@ package views
 		{
 			_editView.removeEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);
 			structureEditing = false;
+			structureRotating = false;			
 			currentStructure = null;
 			updateStructureFilters();
 		}
@@ -447,7 +433,7 @@ package views
 					evt.currentPoint = new Point3D(asset.worldCoords.x + parentOs.structure.height, parentOs.structure.height, asset.worldCoords.z - parentOs.structure.height);
 				}
 				else
-					evt.currentPoint = asset.worldCoords;
+					evt.currentPoint = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
 				dispatchEvent(evt);
 			}
 			else if (!isOwned(asset))
@@ -474,7 +460,7 @@ package views
 				var newPt:Point3D = new Point3D(topper.x + ptDiff.x, os.structure.height, topper.z + ptDiff.z);
 				var evt:DynamicEvent = new DynamicEvent("structurePlaced", true, true);
 				var topperAsset:ActiveAsset = getMatchingAssetForOwnedStructure(topper);
-				topperAsset.worldCoords = new Point3D(newPt.x - topper.structure.height, 0, newPt.z + topper.structure.height);
+				topperAsset.worldCoords = new Point3D(newPt.x, os.structure.height, newPt.z);
 				updateStructureToppers(topperAsset);
 				evt.asset = topperAsset;
 				evt.currentPoint = newPt;
@@ -534,6 +520,20 @@ package views
 			else if (asset.rotationDegree == 0)
 				flip(asset);
 			currentStructure = redrawStructure(asset);
+		}
+		
+		private function updateRotatedToppers(asset:ActiveAsset):void
+		{
+			for each (var topper:OwnedStructure in asset.toppers)
+			{
+				var topperAsset:ActiveAsset = getMatchingAssetForOwnedStructure(topper);
+				var xCoord:Number = topperAsset.worldCoords.x;
+				var zCoord:Number = topperAsset.worldCoords.z;
+				topperAsset.worldCoords.x = asset.worldCoords.z - zCoord + asset.worldCoords.x;
+				topperAsset.worldCoords.z = xCoord - asset.worldCoords.x + asset.worldCoords.z;
+				topper.x = topperAsset.worldCoords.x;
+				topper.z = topperAsset.worldCoords.z;
+			}
 		}
 				
 		public function onStructureMouseMove(evt:MouseEvent):void
@@ -681,7 +681,7 @@ package views
 			var newPts:ArrayCollection = getOccupiedInnerPoints(asset);
 			for each (pt in newPts)
 			{
-				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureToppers);
+				addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureToppers);
 			}
 		}
 		
