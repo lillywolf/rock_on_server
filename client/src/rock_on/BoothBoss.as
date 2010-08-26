@@ -215,7 +215,7 @@ package rock_on
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(booth.structure.mc);
 			mc.cacheAsBitmap = true;
 			var asset:ActiveAssetStack = new ActiveAssetStack(null, mc, null, StructureController.STRUCTURE_SCALE);	
-			asset.thinger = booth;	
+			asset.copyFromOwnedStructure(booth);
 			return asset;		
 		}	
 		

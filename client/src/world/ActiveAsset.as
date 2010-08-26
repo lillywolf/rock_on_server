@@ -13,6 +13,7 @@ package world
 	import flash.utils.getQualifiedClassName;
 	
 	import models.EssentialModelReference;
+	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
 	
@@ -48,12 +49,10 @@ package world
 		public var bitmap:Bitmap;
 		public var doNotClearFilters:Boolean;
 		public var unclearableFilters:Array;				
-		public var reflected:Boolean;
 		public var _scale:Number;
 		public var toppers:ArrayCollection;
 		public var rotated:Boolean;
 		public var flipped:Boolean;
-		public var rotationDegree:int;
 		
 		public static const X_BITMAP_BUFFER:int = 40;
 		public static const Y_BITMAP_BUFFER:int = 12;
@@ -98,7 +97,7 @@ package world
 			var mcBounds:Rectangle = mc.getBounds(_world);
 			var heightDiff:Number = Math.abs(mcBounds.top - this.y);
 			var widthDiff:Number = getWidthDifferential(mcBounds);			
-			scaleMovieClip(mc);
+//			scaleMovieClip(mc);
 			bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
 			var matrix:Matrix = new Matrix(1, 0, 0, 1, widthDiff/2, heightDiff);
 			var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height + Y_BITMAP_BUFFER);
@@ -132,7 +131,7 @@ package world
 		
 		public function scaleMatrix(matrix:Matrix, tx:Number = 0):void
 		{
-			if (reflected && _scale)
+			if (flipped && _scale)
 			{
 				matrix.scale(-(_scale), _scale);
 				matrix.tx += tx;
@@ -147,7 +146,7 @@ package world
 		{
 			if (_scale)
 			{
-				if (reflected)
+				if (flipped)
 				{
 					mc.scaleX = -(_scale);
 				}
@@ -270,8 +269,25 @@ package world
 			this.toppers = asset.toppers;
 			this.rotated = asset.rotated;
 			this.flipped = asset.flipped;
-			this.rotationDegree = asset.rotationDegree;
 			this.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
+		}
+		
+		public function copyFromOwnedStructure(os:OwnedStructure):void
+		{
+			this.thinger = os;
+			setRotation(os);
+		}
+		
+		public function setRotation(os:OwnedStructure):void
+		{
+			if (os.rotation%2 == 1)
+				this.flipped = true;
+			else
+				this.flipped = false;
+			if (os.rotation == 1 || os.rotation == 2)
+				this.rotated = true;
+			else
+				this.rotated = false;			
 		}
 		
 		public function set realCoords(val:Point):void

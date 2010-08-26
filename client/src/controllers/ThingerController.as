@@ -76,6 +76,12 @@ package controllers
 			var ownedStructure:OwnedStructure = asset.thinger as OwnedStructure;
 			_serverController.sendRequest({id: ownedStructure.id, x: pointToSave.x, y: pointToSave.y, z: pointToSave.z}, 'owned_structure', 'save_placement');
 		}
+
+		public function saveStructurePlacementAndRotation(asset:ActiveAsset, pointToSave:Point3D, rotation:int):void
+		{
+			var ownedStructure:OwnedStructure = asset.thinger as OwnedStructure;
+			_serverController.sendRequest({id: ownedStructure.id, x: pointToSave.x, y: pointToSave.y, z: pointToSave.z, rotation: rotation}, 'owned_structure', 'save_placement_and_rotation');
+		}
 		
 		public function instantiate(params:Object, loadedClass:Class):void
 		{

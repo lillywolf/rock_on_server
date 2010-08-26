@@ -20,8 +20,7 @@ package models
 		public var _created_at:String;
 		public var _updated_at:String;
 		public var _in_use:Boolean;
-		public var _flipped:Boolean;
-		public var _rotated:Boolean;
+		public var _rotation:int;
 		
 		public var _inventory_count:int;
 				
@@ -40,11 +39,10 @@ package models
 			_z = params.z;
 			_created_at = params.created_at;
 			_in_use = params.in_use;
+			_rotation = params.rotation;
 			
 			if (params.structure)
-			{
 				_structure = params.structure;
-			}
 			
 			setOptionalProperties(params);
 		}	
@@ -52,17 +50,11 @@ package models
 		public function setOptionalProperties(params:Object):void
 		{
 			if (params.inventory_count)
-			{
 				_inventory_count = params.inventory_count;
-			}
 			if (params.updated_at)
-			{
 				_updated_at = params.updated_at;
-			}
 			if (params.owned_dwelling_id)
-			{
 				_owned_dwelling_id = params.owned_dwelling_id;
-			}
 		}
 
 		public function set id(val:int):void
@@ -81,6 +73,7 @@ package models
 			var evt:DynamicEvent = new DynamicEvent('parentLoaded', true, true);
 			evt.thinger = val;
 			dispatchEvent(evt);
+			setDimensionsByRotation();
 			
 			if (_structure['mc'] != null)
 			{
@@ -205,34 +198,30 @@ package models
 			return _in_use;
 		}
 		
-		public function set flipped(val:Boolean):void
+		public function set rotation(val:int):void
 		{
-			_flipped = val;
-			if (_flipped)
-			{	
+			_rotation = val;
+			
+			setDimensionsByRotation();
+		}
+		
+		public function setDimensionsByRotation():void
+		{
+			if (_rotation%2 == 1)
+			{
 				_structure.width = _structure.normalDepth;
-				_structure.depth = _structure.normalWidth;
+				_structure.depth = _structure.normalWidth;				
 			}
 			else
 			{
 				_structure.width = _structure.normalWidth;
 				_structure.depth = _structure.normalDepth;
-			}
+			}						
 		}
 		
-		public function get flipped():Boolean
+		public function get rotation():int
 		{
-			return _flipped;
-		}
-		
-		public function set rotated(val:Boolean):void
-		{
-			_rotated = val;
-		}
-		
-		public function get rotated():Boolean
-		{
-			return _rotated;
+			return _rotation;
 		}
 		
 		public function getCornerMatrix():Dictionary

@@ -143,7 +143,6 @@ package views
 					var a:ActiveAsset = new ActiveAsset();
 					a.movieClip = EssentialModelReference.getMovieClipCopy(asset.movieClip);
 					a.copyFromActiveAsset(asset);
-					a.reflected = asset.flipped;
 					a.switchToBitmap();
 					updateAllStructures(a);
 					toRemove.addItem(asset);
@@ -258,11 +257,12 @@ package views
 				setCurrentStructure(asset);
 				structureRotating = true;
 				updateRotatedToppers(asset);							
-				rotateAsset(asset, 1);
+				rotateAsset(asset);
 				currentStructure.speed = 1;
 				currentStructure.alpha = 0.5;
 				structureEditing = true;
-				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);			}
+				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);			
+			}
 		}
 		
 		private function setCurrentStructure(asset:ActiveAsset):void
@@ -358,7 +358,7 @@ package views
 		{
 			currentStructure.alpha = 1;
 			currentStructure.filters = null;
-			saveStructureCoords(currentStructure);
+			saveStructureCoordsAndRotation(currentStructure);
 			resetEditMode();
 			redrawForToppers();	
 		}		
@@ -421,6 +421,24 @@ package views
 			updateStructureFilters();
 		}
 		
+		public function saveStructureCoordsAndRotation(asset:ActiveAsset):void
+		{
+			if (isOwned(asset))
+			{
+				var evt:DynamicEvent = new DynamicEvent("structurePlacedAndRotated", true, true);
+				evt.asset = asset;	
+				evt.rotation = (asset.thinger as OwnedStructure).rotation;
+				evt.currentPoint = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
+				dispatchEvent(evt);				
+				if (asset.toppers && asset.toppers.length > 0)
+				{
+					saveToppers(asset);
+				}				
+				updateStructureSurfaces(asset);
+				updateStructureBases(asset);				
+			}
+		}
+		
 		public function saveStructureCoords(asset:ActiveAsset, parentAsset:ActiveAsset=null):void
 		{
 			if (isOwned(asset))
@@ -478,47 +496,23 @@ package views
 			return null;
 		}
 		
-		private function flip(asset:ActiveAsset):void
-		{
-			var os:OwnedStructure = asset.thinger as OwnedStructure;
-			if (asset.flipped)
-			{
-				asset.flipped = false;
-				os.flipped = false;
-			}
-			else
-			{
-				asset.flipped = true;
-				os.flipped = true;
-			}
-		}
-		
-		private function rotate(asset:ActiveAsset):void
-		{
-			var os:OwnedStructure = asset.thinger as OwnedStructure;
-			if (asset.rotated)
-			{
-				asset.rotated = false;
-				os.rotated = false;
-			}
-			else
-			{
-				asset.rotated = true;
-				os.rotated = true;
-			}
-		}
-		
-		private function rotateAsset(asset:ActiveAsset, degree:int):void
+		private function rotateAsset(asset:ActiveAsset):void
 		{
 			var os:OwnedStructure = asset.thinger as OwnedStructure;	
-			asset.rotationDegree = (asset.rotationDegree + 1)%2;
-			if (asset.rotationDegree == 1)
-			{
-				flip(asset);
-				rotate(asset);
-			}
-			else if (asset.rotationDegree == 0)
-				flip(asset);
+			os.rotation = (os.rotation+1)%4;
+			asset.setRotation(os);
+//			if (asset.flipped)
+//				asset.flipped = false;
+//			else if (asset.rotated)
+//			{
+//				asset.rotated = false;
+//				asset.flipped = true;
+//			}
+//			else
+//			{
+//				asset.rotated = true;
+//				asset.flipped = true;
+//			}
 			currentStructure = redrawStructure(asset);
 		}
 		

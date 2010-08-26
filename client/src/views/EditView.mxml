@@ -143,6 +143,7 @@
 				clearCurrentChildren();
 				normalStructureMode = new NormalStructureMode(this, FlexGlobals.topLevelApplication.worldWidth, FlexGlobals.topLevelApplication.worldHeight, FlexGlobals.topLevelApplication.tileSize);
 				normalStructureMode.addEventListener("structurePlaced", onStructurePlaced);
+				normalStructureMode.addEventListener("structurePlacedAndRotated", onStructurePlacedAndRotated);
 				normalStructureMode.nestLevel = 1;
 				currentMode = normalStructureMode;
 				addChild(normalStructureMode);
@@ -150,7 +151,10 @@
 			
 			private function switchToRotateStructureMode():void
 			{
-				this.normalStructureMode.rotationToolEnabled = true;
+				if (normalStructureMode.rotationToolEnabled)
+					normalStructureMode.rotationToolEnabled = false;
+				else
+					normalStructureMode.rotationToolEnabled = true;
 			}
 			
 			public function addTemporaryCoords(os:OwnedStructure):void
@@ -211,6 +215,11 @@
 			private function onStructurePlaced(evt:DynamicEvent):void
 			{
 				thingerController.saveStructurePlacement(evt.asset, evt.currentPoint);
+			}
+			
+			private function onStructurePlacedAndRotated(evt:DynamicEvent):void
+			{
+				thingerController.saveStructurePlacementAndRotation(evt.asset, evt.currentPoint, evt.rotation);
 			}
 			
 			override public function updateRenderedStructures(os:OwnedStructure, method:String):void

@@ -91,7 +91,7 @@ package world
 				var mcBounds:Rectangle = mc.getBounds(_world);
 				var heightDiff:Number = Math.abs(mcBounds.top - this.y);
 				var widthDiff:Number = getWidthDifferential(mcBounds);			
-				scaleMovieClip(mc);
+//				scaleMovieClip(mc);
 				bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
 				var matrix:Matrix = new Matrix(1, 0, 0, 1, widthDiff/2, heightDiff);
 				var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height + Y_BITMAP_BUFFER);
@@ -130,16 +130,13 @@ package world
 			for each (var mc:MovieClip in _displayMovieClips)
 			{
 				mc.scaleY = 1;
+				mc.scaleX = 1;
 				mc.cacheAsBitmap = true;
 				newClip.addChild(mc);	
 				if (rotated && mc.framesLoaded > 1)
 					mc.gotoAndStop(2);
 				else
 					mc.gotoAndStop(1);
-				if (flipped)
-					mc.scaleX = -1;
-				else
-					mc.scaleX = 1;
 			}
 			return newClip;			
 		}
@@ -177,7 +174,7 @@ package world
 			}
 			if (newScaleX < 0)
 			{
-				reflected = true;
+				flipped = true;
 			}
 		}
 		

@@ -323,7 +323,7 @@ package views
 				exemptStructures.addItem(_editView.stageManager.concertStage);
 				currentAsset.worldCoords.y = _editView.stageManager.concertStage.structure.height;
 				worldDestination.y = _editView.stageManager.concertStage.structure.height;
-				_myWorld.moveAssetTo(currentAsset, worldDestination, false, true, false, exemptStructures);
+				_myWorld.moveAssetTo(currentAsset, worldDestination, false, true, false, false, exemptStructures);
 			}
 			else
 			{

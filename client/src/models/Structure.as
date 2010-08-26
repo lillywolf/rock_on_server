@@ -32,9 +32,7 @@ package models
 			{
 				var displayObject:DisplayObject = new loadedClass();			
 				if (displayObject is MovieClip)
-				{
 					_mc = displayObject as MovieClip;
-				}
 			}
 			setProperties(params);			
 		}
@@ -53,27 +51,21 @@ package models
 		private function setOptionalProperties(params:Object):void
 		{
 			if (params["collection_time"])
-			{
 				_collection_time = params["collection_time"];
-			}
 			if (params["capacity"])
-			{
 				_capacity = params["capacity"];
-			}
+			if (params['height'])
+				_height = params['height'];
 			if (params['width'])
 			{
 				_width = params['width'];
 				normalWidth = _width;
 			}
-			if (params['height'])
-			{
-				_height = params['height'];
-			}
 			if (params['depth'])
 			{
 				_depth = params['depth'];
 				normalDepth = _depth;
-			}	
+			}
 		}
 		
 		public function set id(val:int):void
