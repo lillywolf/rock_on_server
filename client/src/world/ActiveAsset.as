@@ -51,6 +51,9 @@ package world
 		public var reflected:Boolean;
 		public var _scale:Number;
 		public var toppers:ArrayCollection;
+		public var rotated:Boolean;
+		public var flipped:Boolean;
+		public var rotationDegree:int;
 		
 		public static const X_BITMAP_BUFFER:int = 40;
 		public static const Y_BITMAP_BUFFER:int = 12;
@@ -154,7 +157,7 @@ package world
 				}
 				mc.scaleY = _scale;
 			}
-		}		
+		}			
 		
 		public function createMovieClipForBitmap():Sprite
 		{
@@ -163,8 +166,15 @@ package world
 			{
 				newClip = EssentialModelReference.getMovieClipCopyFromSystem(_movieClip);
 			}
-			newClip.scaleX = 1;
 			newClip.scaleY = 1;
+			if (rotated && newClip.framesLoaded > 1)
+				newClip.gotoAndStop(2);
+			else
+				newClip.gotoAndStop(1);
+			if (flipped)
+				newClip.scaleX = -1;
+			else
+				newClip.scaleX = 1;
 			return newClip;
 		}	
 		
@@ -186,10 +196,7 @@ package world
 		
 		public function set movieClip(val:MovieClip):void
 		{
-			if (_world)
-			{
-				_movieClip = val;					
-			}
+			_movieClip = val;					
 		}
 		
 		public function get movieClip():MovieClip

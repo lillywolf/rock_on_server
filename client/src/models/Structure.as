@@ -21,6 +21,9 @@ package models
 		public var _width:Number;
 		public var _height:Number;
 		public var _depth:Number;
+		
+		public var normalWidth:Number;
+		public var normalDepth:Number;		
 				
 		public function Structure(params:Object=null, loadedClass:Class=null, target:IEventDispatcher=null)
 		{
@@ -60,6 +63,7 @@ package models
 			if (params['width'])
 			{
 				_width = params['width'];
+				normalWidth = _width;
 			}
 			if (params['height'])
 			{
@@ -68,6 +72,7 @@ package models
 			if (params['depth'])
 			{
 				_depth = params['depth'];
+				normalDepth = _depth;
 			}	
 		}
 		

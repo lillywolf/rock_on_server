@@ -20,6 +20,8 @@ package models
 		public var _created_at:String;
 		public var _updated_at:String;
 		public var _in_use:Boolean;
+		public var _flipped:Boolean;
+		public var _rotated:Boolean;
 		
 		public var _inventory_count:int;
 				
@@ -201,6 +203,36 @@ package models
 		public function get in_use():Boolean
 		{
 			return _in_use;
+		}
+		
+		public function set flipped(val:Boolean):void
+		{
+			_flipped = val;
+			if (_flipped)
+			{	
+				_structure.width = _structure.normalDepth;
+				_structure.depth = _structure.normalWidth;
+			}
+			else
+			{
+				_structure.width = _structure.normalWidth;
+				_structure.depth = _structure.normalDepth;
+			}
+		}
+		
+		public function get flipped():Boolean
+		{
+			return _flipped;
+		}
+		
+		public function set rotated(val:Boolean):void
+		{
+			_rotated = val;
+		}
+		
+		public function get rotated():Boolean
+		{
+			return _rotated;
 		}
 		
 		public function getCornerMatrix():Dictionary

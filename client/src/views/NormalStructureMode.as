@@ -34,6 +34,7 @@ package views
 		public var structureWorld:World;
 		public var tileLayer:World;
 		public var structureEditing:Boolean;
+		public var structureRotating:Boolean;
 		public var currentStructure:ActiveAsset;
 		public var currentStructurePoints:ArrayCollection;
 		public var structureSurfaces:Array;
@@ -41,6 +42,7 @@ package views
 		public var structureToppers:Array;
 		public var allStructures:ArrayCollection;
 		public var normalMode:Boolean;
+		public var rotationToolEnabled:Boolean;
 		
 		public function NormalStructureMode(editView:EditView, worldWidth:int, worldDepth:int, tileSize:int)
 		{
@@ -97,9 +99,10 @@ package views
 					var aas:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
 					aas.toppers = asset.toppers;
 					aas.thinger = asset.thinger;
+					aas.rotated = asset.rotated;
+					aas.flipped = asset.flipped;
+					aas.rotationDegree = asset.rotationDegree;
 					aas.setMovieClipsForStructure(aas.toppers);
-					aas.reflected = false;
-					aas.movieClip.gotoAndStop(0);
 					aas.bitmapWithToppers();
 					aas.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
 					toRemove.addItem(asset);
@@ -113,6 +116,32 @@ package views
 			normalMode = true;
 		}
 
+		private function redrawStructure(asset:ActiveAsset):ActiveAsset
+		{
+			var toRemove:ArrayCollection = new ArrayCollection();
+			var toAdd:ArrayCollection = new ArrayCollection();			
+			var aas:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
+			aas.toppers = asset.toppers;
+			aas.thinger = asset.thinger;
+			aas.rotated = asset.rotated;
+			aas.flipped = asset.flipped;
+			aas.rotationDegree = asset.rotationDegree;
+			aas.setMovieClipsForStructure(aas.toppers);
+			aas.bitmapWithToppers();
+			aas.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
+			toRemove.addItem(asset);
+			toAdd.addItem(aas);
+			normalMode = true;
+			for each (var a:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+			{
+				if ((a.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
+					toRemove.addItem(a);			
+			}
+			swapAssets(toRemove, toAdd);
+			structureWorld.assetRenderer.revertEnterFrameHandler();
+			return aas;
+		}
+
 		private function redrawForToppers():void
 		{
 			var toAdd:ArrayCollection = new ArrayCollection();
@@ -121,9 +150,15 @@ package views
 			{
 				if (asset.toppers && asset.toppers.length > 0)
 				{
-					var a:ActiveAsset = new ActiveAsset(EssentialModelReference.getMovieClipCopy(asset.movieClip));
+					var a:ActiveAsset = new ActiveAsset();
+					a.movieClip = EssentialModelReference.getMovieClipCopy(asset.movieClip);
 					a.toppers = asset.toppers;
 					a.thinger = asset.thinger;
+					a.rotated = asset.rotated;
+					a.flipped = asset.flipped;
+					a.reflected = asset.flipped;
+					a.rotationDegree = asset.rotationDegree;
+					a.switchToBitmap();
 					updateAllStructures(a);
 					a.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
 					toRemove.addItem(asset);
@@ -231,6 +266,19 @@ package views
 			}
 		}
 		
+		public function selectStructureForRotation(asset:ActiveAsset):void
+		{
+			if ((asset.thinger as OwnedStructure).structure.structure_type != "Tile")
+			{
+				setCurrentStructure(asset);
+				structureRotating = true;
+				rotateAsset(asset, 1);
+				currentStructure.speed = 1;
+				currentStructure.alpha = 0.5;
+				structureEditing = true;
+				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);			}
+		}
+		
 		private function setCurrentStructure(asset:ActiveAsset):void
 		{
 			if (!asset.toppers)
@@ -265,12 +313,8 @@ package views
 			}	
 		}
 		
-		public function handleClick(evt:MouseEvent):void
-		{
-			var coords:Point3D = World.actualToWorldCoords(new Point(structureWorld.mouseX, structureWorld.mouseY));
-			var asset:ActiveAsset = evt.target as ActiveAsset;
-//			var asset:ActiveAsset = getAccurateClickedStructure(coords);
-			
+		private function handleMoveClick(asset:ActiveAsset):void
+		{			
 			if (!structureEditing && asset)
 				selectStructure(asset);
 			else if (structureEditing && (currentStructure.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
@@ -290,6 +334,30 @@ package views
 			}
 		}
 		
+		private function handleRotationClick(asset:ActiveAsset):void
+		{
+			if (!structureRotating && asset)
+				selectStructureForRotation(asset);
+			else if (structureEditing && (currentStructure.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
+			{
+				if (isStructureInBounds(asset) && !doesStructureCollide(currentStructure))
+					placeStructureAfterRotating();
+				else
+					revertStructure();
+			}
+		}
+		
+		public function handleClick(evt:MouseEvent):void
+		{
+			var coords:Point3D = World.actualToWorldCoords(new Point(structureWorld.mouseX, structureWorld.mouseY));
+			var asset:ActiveAsset = evt.target as ActiveAsset;
+			
+			if (rotationToolEnabled)
+				handleRotationClick(asset);
+			else
+				handleMoveClick(asset);
+		}
+		
 		public function placeStructure():void
 		{
 			currentStructure.alpha = 1;
@@ -298,6 +366,17 @@ package views
 			resetEditMode();
 			redrawForToppers();			
 		}
+		
+		
+		public function placeStructureAfterRotating():void
+		{
+			currentStructure.alpha = 1;
+			currentStructure.filters = null;
+			saveStructureCoords(currentStructure);
+			resetEditMode();
+			redrawForToppers();	
+			structureRotating = false;
+		}		
 		
 		public function placeTopper(parentAsset:ActiveAsset):void
 		{
@@ -411,6 +490,50 @@ package views
 					return asset;
 			}
 			return null;
+		}
+		
+		private function flip(asset:ActiveAsset):void
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if (asset.flipped)
+			{
+				asset.flipped = false;
+				os.flipped = false;
+			}
+			else
+			{
+				asset.flipped = true;
+				os.flipped = true;
+			}
+		}
+		
+		private function rotate(asset:ActiveAsset):void
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if (asset.rotated)
+			{
+				asset.rotated = false;
+				os.rotated = false;
+			}
+			else
+			{
+				asset.rotated = true;
+				os.rotated = true;
+			}
+		}
+		
+		private function rotateAsset(asset:ActiveAsset, degree:int):void
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;	
+			asset.rotationDegree = (asset.rotationDegree + 1)%2;
+			if (asset.rotationDegree == 1)
+			{
+				flip(asset);
+				rotate(asset);
+			}
+			else if (asset.rotationDegree == 0)
+				flip(asset);
+			currentStructure = redrawStructure(asset);
 		}
 				
 		public function onStructureMouseMove(evt:MouseEvent):void
@@ -669,19 +792,19 @@ package views
 		
 		public function isStructureInBounds(asset:ActiveAsset):Boolean
 		{
-			var os:OwnedStructure = asset.thinger as OwnedStructure;
-			
+		var os:OwnedStructure = asset.thinger as OwnedStructure;
+
 			if ((asset.worldCoords.x - os.structure.width/2 < _venue.venueRect.left || 
 				asset.worldCoords.x + os.structure.width/2 > _venue.venueRect.right ||
 				asset.worldCoords.z - os.structure.depth/2 < _venue.venueRect.top ||
 				asset.worldCoords.z + os.structure.depth/2 > _venue.venueRect.bottom) || 
-				(asset.worldCoords.x - os.structure.width/2 >= _venue.audienceRect.left &&
-				asset.worldCoords.x + os.structure.width/2 <= _venue.audienceRect.right - _venue.crowdBufferRect.width &&
-				asset.worldCoords.z - os.structure.depth/2 >= _venue.audienceRect.top &&
-				asset.worldCoords.z + os.structure.depth/2 <= _venue.audienceRect.bottom))
+					(asset.worldCoords.x + os.structure.width/2 > _venue.audienceRect.left &&
+					asset.worldCoords.x - os.structure.width/2 < _venue.audienceRect.right - _venue.crowdBufferRect.width &&
+					asset.worldCoords.z + os.structure.depth/2 > _venue.audienceRect.top &&
+					asset.worldCoords.z - os.structure.depth/2 < _venue.audienceRect.bottom))
 			{			
 				return false;
-			}
+			}	
 			return true;
 		}
 		

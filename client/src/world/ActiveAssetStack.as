@@ -83,7 +83,7 @@ package world
 		
 		public function bitmapWithToppers():void
 		{
-			var mc:Sprite = createMovieClipsForBitmap();
+			var mc:Sprite = createStaticMovieClipsForBitmap();
 			removeCurrentChildren();
 			
 			if (mc)
@@ -119,9 +119,29 @@ package world
 				mc.scaleX = 1;
 				mc.scaleY = 1;
 				mc.cacheAsBitmap = true;
-				newClip.addChild(mc);				
+				newClip.addChild(mc);	
 			}
 			return newClip;
+		}
+		
+		public function createStaticMovieClipsForBitmap():Sprite
+		{
+			var newClip:Sprite = new Sprite();
+			for each (var mc:MovieClip in _displayMovieClips)
+			{
+				mc.scaleY = 1;
+				mc.cacheAsBitmap = true;
+				newClip.addChild(mc);	
+				if (rotated && mc.framesLoaded > 1)
+					mc.gotoAndStop(2);
+				else
+					mc.gotoAndStop(1);
+				if (flipped)
+					mc.scaleX = -1;
+				else
+					mc.scaleX = 1;
+			}
+			return newClip;			
 		}
 		
 		public function setLayerableOrder(layerableOrder:Array=null):void
