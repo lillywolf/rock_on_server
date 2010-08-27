@@ -261,16 +261,28 @@ package world
 			addAsset(asset, new Point3D(os.x, os.y, os.z));			
 		}
 		
-		public function saveStructurePlacement(os:OwnedStructure):void
+		public function saveStructurePlacement(os:OwnedStructure, saveRotation:Boolean=false):void
+		{
+			var asset:ActiveAsset = getAssetFromOwnedStructure(os);
+			updateUnwalkables(os);
+			updatePlacement(asset, new Point3D(os.x, os.y, os.z));
+			if (saveRotation)
+				saveStructureRotation(asset, os);
+		}
+		
+		public function saveStructureRotation(asset:ActiveAsset, os:OwnedStructure):void
+		{
+			asset.setRotation(os);
+		}
+		
+		public function getAssetFromOwnedStructure(os:OwnedStructure):ActiveAsset
 		{
 			for each (var asset:ActiveAsset in assetRenderer.unsortedAssets)
 			{
 				if (asset.thinger && asset.thinger.id == os.id)
-				{
-					updateUnwalkables(os);
-					updatePlacement(asset, new Point3D(os.x, os.y, os.z));
-				}
-			}						
+					return asset;
+			}			
+			return null;
 		}
 		
 		public static function createStandardAssetFromStructure(os:OwnedStructure):ActiveAsset

@@ -17,6 +17,8 @@ package world
 	
 	import mx.collections.ArrayCollection;
 	
+	import views.BouncyBitmap;
+	
 	public class ActiveAsset extends Sprite
 	{
 		public var _movieClip:MovieClip;
@@ -93,6 +95,7 @@ package world
 		
 		public function switchToBitmap():void
 		{
+			this.removeCurrentChildren();
 			var mc:Sprite = createMovieClipForBitmap();
 			var mcBounds:Rectangle = mc.getBounds(_world);
 			var heightDiff:Number = Math.abs(mcBounds.top - this.y);
@@ -147,13 +150,9 @@ package world
 			if (_scale)
 			{
 				if (flipped)
-				{
 					mc.scaleX = -(_scale);
-				}
 				else
-				{
 					mc.scaleX = _scale;
-				}
 				mc.scaleY = _scale;
 			}
 		}			
@@ -176,6 +175,21 @@ package world
 				newClip.scaleX = 1;
 			return newClip;
 		}	
+		
+		public function removeCurrentChildren():void
+		{
+			var totalChildren:int = this.numChildren.valueOf();
+			var skips:int = 0;
+			for (var i:int = totalChildren; i > 0; i--)
+			{
+				var currentChildren:int = this.numChildren;
+				var index:int = currentChildren - 1 - skips;
+				if (!(this.getChildAt(index) is BouncyBitmap))
+					this.removeChildAt(index);					
+				else
+					skips++;
+			}
+		}		
 		
 		public function onAdded(evt:Event):void
 		{

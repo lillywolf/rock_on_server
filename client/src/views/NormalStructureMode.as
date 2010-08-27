@@ -228,10 +228,11 @@ package views
 		{
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
 			var asset:ActiveAsset = new ActiveAsset(mc);
-			asset.thinger = os;
+			asset.copyFromOwnedStructure(os);
 			asset.toppers = _structureController.getStructureToppers(os);
 //			asset.setMovieClipsForStructure(_structureController.getStructureToppers(os));
-//			asset.bitmapWithToppers();			
+//			asset.bitmapWithToppers();
+			asset.switchToBitmap();
 			_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
 			allStructures.addItem(asset);
 			return asset;
@@ -254,10 +255,11 @@ package views
 		{
 			if ((asset.thinger as OwnedStructure).structure.structure_type != "Tile")
 			{
-				setCurrentStructure(asset);
+//				setCurrentStructure(asset);
 				structureRotating = true;
-				updateRotatedToppers(asset);							
 				rotateAsset(asset);
+				updateRotatedToppers(asset);							
+				currentStructure = redrawStructure(asset);				
 				currentStructure.speed = 1;
 				currentStructure.alpha = 0.5;
 				structureEditing = true;
@@ -405,9 +407,7 @@ package views
 			for each (var os:OwnedStructure in _structureController.owned_structures)
 			{
 				if ((asset.thinger as OwnedStructure).id && (asset.thinger as OwnedStructure).id == os.id)
-				{
 					return true;
-				}
 			}
 			return false;
 		}
@@ -431,9 +431,7 @@ package views
 				evt.currentPoint = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
 				dispatchEvent(evt);				
 				if (asset.toppers && asset.toppers.length > 0)
-				{
 					saveToppers(asset);
-				}				
 				updateStructureSurfaces(asset);
 				updateStructureBases(asset);				
 			}
@@ -501,19 +499,6 @@ package views
 			var os:OwnedStructure = asset.thinger as OwnedStructure;	
 			os.rotation = (os.rotation+1)%4;
 			asset.setRotation(os);
-//			if (asset.flipped)
-//				asset.flipped = false;
-//			else if (asset.rotated)
-//			{
-//				asset.rotated = false;
-//				asset.flipped = true;
-//			}
-//			else
-//			{
-//				asset.rotated = true;
-//				asset.flipped = true;
-//			}
-			currentStructure = redrawStructure(asset);
 		}
 		
 		private function updateRotatedToppers(asset:ActiveAsset):void
@@ -523,8 +508,16 @@ package views
 				var topperAsset:ActiveAsset = getMatchingAssetForOwnedStructure(topper);
 				var xCoord:Number = topperAsset.worldCoords.x;
 				var zCoord:Number = topperAsset.worldCoords.z;
-				topperAsset.worldCoords.x = asset.worldCoords.z - zCoord + asset.worldCoords.x;
-				topperAsset.worldCoords.z = xCoord - asset.worldCoords.x + asset.worldCoords.z;
+				if ((asset.rotated && !asset.flipped) || (!asset.rotated && !asset.flipped))
+				{
+					topperAsset.worldCoords.x = xCoord;
+					topperAsset.worldCoords.z = 2 * asset.worldCoords.z - zCoord;
+				}	
+				else
+				{
+					topperAsset.worldCoords.x = asset.worldCoords.z - zCoord + asset.worldCoords.x;
+					topperAsset.worldCoords.z = xCoord - asset.worldCoords.x + asset.worldCoords.z;
+				}
 				topper.x = topperAsset.worldCoords.x;
 				topper.z = topperAsset.worldCoords.z;
 			}

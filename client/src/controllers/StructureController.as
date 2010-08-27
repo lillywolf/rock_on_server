@@ -385,6 +385,20 @@ package controllers
 				}	
 			}
 		}
+
+		public function savePlacementAndRotation(toSave:OwnedStructure, placement:Point3D):void
+		{
+			for each (var os:OwnedStructure in this.owned_structures)
+			{
+				if (os.id == toSave.id)
+				{	
+					toSave.x = placement.x;
+					toSave.y = placement.y;
+					toSave.z = placement.z;
+					toSave.rotation = os.rotation;
+				}	
+			}
+		}
 		
 		private function topsStructure(topper:OwnedStructure, os:OwnedStructure):Boolean
 		{

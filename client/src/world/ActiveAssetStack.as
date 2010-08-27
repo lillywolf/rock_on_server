@@ -95,7 +95,7 @@ package world
 				bitmapData = new BitmapData(mc.width, mc.height, true, 0x000000);
 				var matrix:Matrix = new Matrix(1, 0, 0, 1, widthDiff/2, heightDiff);
 				var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height + Y_BITMAP_BUFFER);
-				scaleMatrix(matrix, mc.width);
+//				scaleMatrix(matrix, mc.width);
 				bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
 				bitmap = new Bitmap(bitmapData);
 				bitmap.x = -mc.width/2;
@@ -127,10 +127,14 @@ package world
 		public function createStaticMovieClipsForBitmap():Sprite
 		{
 			var newClip:Sprite = new Sprite();
+			if (flipped)
+				(_displayMovieClips[0] as MovieClip).scaleX = -1;
+			else
+				(_displayMovieClips[0] as MovieClip).scaleX = 1;
 			for each (var mc:MovieClip in _displayMovieClips)
 			{
 				mc.scaleY = 1;
-				mc.scaleX = 1;
+//				mc.scaleX = 1;
 				mc.cacheAsBitmap = true;
 				newClip.addChild(mc);	
 				if (rotated && mc.framesLoaded > 1)
@@ -173,9 +177,7 @@ package world
 				mc.scaleY = newScaleY;
 			}
 			if (newScaleX < 0)
-			{
 				flipped = true;
-			}
 		}
 		
 		public function set layerableOrder(val:Array):void
@@ -422,25 +424,6 @@ package world
 					currentChild = null;
 				}
 			}			
-		}
-		
-		public function removeCurrentChildren():void
-		{
-			var totalChildren:int = this.numChildren.valueOf();
-			var skips:int = 0;
-			for (var i:int = totalChildren; i > 0; i--)
-			{
-				var currentChildren:int = this.numChildren;
-				var index:int = currentChildren - 1 - skips;
-				if (!(this.getChildAt(index) is BouncyBitmap))
-				{
-					this.removeChildAt(index);					
-				}
-				else
-				{
-					skips++;
-				}
-			}
 		}
 		
 		public function initializeMovieClips():void

@@ -154,7 +154,22 @@ package rock_on
 				_myWorld.saveStructurePlacement(os);
 				reInitializeBooths(false);
 				_venue.redrawAllMovers();
-//				_venue.customerPersonManager.redrawStandAloneCustomers();
+			}
+			else if (method == "save_placement_and_rotation")
+			{
+				_structureController.savePlacementAndRotation(os, new Point3D(os.x, os.y, os.z));
+				_myWorld.saveStructurePlacement(os, true);
+				var asset:ActiveAsset = _myWorld.getAssetFromOwnedStructure(os);
+				
+				_myWorld.removeAsset(asset);
+				var newAsset:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
+				newAsset.copyFromActiveAsset(asset);
+				newAsset.setMovieClipsForStructure(newAsset.toppers);
+				(newAsset as ActiveAssetStack).bitmapWithToppers();
+				_myWorld.addAsset(newAsset, newAsset.worldCoords);
+				
+				reInitializeBooths(false);
+				_venue.redrawAllMovers();
 			}
 			else if (method == "create_new")
 			{

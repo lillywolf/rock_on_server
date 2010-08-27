@@ -57,7 +57,6 @@ package rock_on
 		{
 			_myWorld.removeAsset(oldAsset);
 			var temp:ActiveAssetStack = new ActiveAssetStack(null, oldAsset.movieClip);
-			temp.worldCoords = new Point3D(oldAsset.worldCoords.x, oldAsset.worldCoords.y, oldAsset.worldCoords.z);
 			temp.copyFromActiveAsset(oldAsset);
 			temp.setMovieClipsForStructure(temp.toppers);
 			temp.bitmapWithToppers();
