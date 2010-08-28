@@ -255,8 +255,8 @@ package views
 		{
 			if ((asset.thinger as OwnedStructure).structure.structure_type != "Tile")
 			{
-//				setCurrentStructure(asset);
 				structureRotating = true;
+				updateStructureBasesBeforeRotating(asset);					
 				rotateAsset(asset);
 				updateRotatedToppers(asset);							
 				currentStructure = redrawStructure(asset);				
@@ -331,7 +331,7 @@ package views
 				if (isStructureInBounds(asset) && !doesStructureCollide(currentStructure))
 					placeStructureAfterRotating();
 				else
-					revertStructure();
+					revertStructureAfterRotating();
 			}
 		}
 		
@@ -377,16 +377,38 @@ package views
 		
 		public function revertStructure():void
 		{
+			moveStructureBack(currentStructure);
+			resetEditMode();
+		}
+		
+		private function moveStructureBack(asset:ActiveAsset):void
+		{			
 			if (isOwned(currentStructure))
 			{
-				var os:OwnedStructure = currentStructure.thinger as OwnedStructure;
-				structureWorld.moveAssetTo(currentStructure, new Point3D(os.x, os.y, os.z));
+				var os:OwnedStructure = asset.thinger as OwnedStructure;
+				structureWorld.moveAssetTo(asset, new Point3D(os.x, os.y, os.z));
 			}
 			else
-				removeImposterStructure(currentStructure);
+				removeImposterStructure(asset);
 			if (!normalMode)
-				reassignAndRedrawTopper(currentStructure);
+				reassignAndRedrawTopper(asset);
+		}
+		
+		private function revertStructureAfterRotating():void
+		{
+			revertRotation(currentStructure);
+			updateStructureBasesAfterRotating(currentStructure);
+			revertRotatedToppers(currentStructure);
+			currentStructure = redrawStructure(currentStructure);
+			moveStructureBack(currentStructure);
 			resetEditMode();
+		}		
+		
+		private function revertRotation(asset:ActiveAsset):void
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			os.rotation = 3-os.rotation+((os.rotation-2)%2)*(2*os.rotation-4);
+			asset.setRotation(os);			
 		}
 		
 		private function reassignAndRedrawTopper(topper:ActiveAsset):void
@@ -517,6 +539,29 @@ package views
 				{
 					topperAsset.worldCoords.x = asset.worldCoords.z - zCoord + asset.worldCoords.x;
 					topperAsset.worldCoords.z = xCoord - asset.worldCoords.x + asset.worldCoords.z;
+				}
+				topper.x = topperAsset.worldCoords.x;
+				topper.z = topperAsset.worldCoords.z;
+			}
+		}
+
+		private function revertRotatedToppers(asset:ActiveAsset):void
+		{
+			for each (var topper:OwnedStructure in asset.toppers)
+			{
+				var topperAsset:ActiveAsset = getMatchingAssetForOwnedStructure(topper);
+				var os:OwnedStructure = asset.thinger as OwnedStructure;
+				var xCoord:Number = topper.x;
+				var zCoord:Number = topper.z;
+				if ((asset.rotated && asset.flipped) || (!asset.rotated && asset.flipped))
+				{
+					topperAsset.worldCoords.x = xCoord;
+					topperAsset.worldCoords.z = 2 * os.z - zCoord;
+				}	
+				else
+				{
+					topperAsset.worldCoords.x = os.x + zCoord - os.z;
+					topperAsset.worldCoords.z = os.x - xCoord + os.z;
 				}
 				topper.x = topperAsset.worldCoords.x;
 				topper.z = topperAsset.worldCoords.z;
@@ -654,6 +699,26 @@ package views
 			{
 				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
 			}
+		}
+		
+		private function updateStructureBasesBeforeRotating(asset:ActiveAsset):void
+		{
+			var old:ArrayCollection = getSavedStructurePoints(asset, true);
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			for each (var pt:Point3D in old)
+			{
+				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureBases);
+			}			
+		}
+		
+		private function updateStructureBasesAfterRotating(asset:ActiveAsset):void
+		{
+			var newPts:ArrayCollection = getOccupiedInnerPoints(asset);
+			var os:OwnedStructure = asset.thinger as OwnedStructure;			
+			for each (var pt:Point3D in newPts)
+			{
+				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
+			}			
 		}
 		
 		private function updateStructureToppers(asset:ActiveAsset):void
