@@ -987,16 +987,16 @@ package world
 //				}
 //			}
 			
-			for (var xPt:int = 0; xPt <= os.structure.width; xPt++)
+			for (var xPt:int = 0; xPt <= os.width; xPt++)
 			{
-				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
+				for (var zPt:int = 0; zPt <= os.depth; zPt++)
 				{
-					var osPt3D:Point3D = pathGrid[os.x - os.structure.width/2 + xPt][0][os.z - os.structure.depth/2 + zPt];
+					var osPt3D:Point3D = pathGrid[os.x - os.width/2 + xPt][0][os.z - os.depth/2 + zPt];
 					structurePoints.addItem(osPt3D);										
 				}
 			}
 						
-			if (!os.structure.width || !os.structure.depth)
+			if (!os.width || !os.depth)
 			{
 //				throw new Error("No dimensions specified for structure");
 			} 
@@ -1006,11 +1006,11 @@ package world
 		public function getInnerStructurePoints(os:OwnedStructure):ArrayCollection
 		{
 			var structurePoints:ArrayCollection = new ArrayCollection();
-			for (var xPt:int = 1; xPt < os.structure.width; xPt++)
+			for (var xPt:int = 1; xPt < os.width; xPt++)
 			{
-				for (var zPt:int = 1; zPt < os.structure.depth; zPt++)
+				for (var zPt:int = 1; zPt < os.depth; zPt++)
 				{
-					var osPt3D:Point3D = pathGrid[os.x - os.structure.width/2 + xPt][0][os.z - os.structure.depth/2 + zPt];
+					var osPt3D:Point3D = pathGrid[os.x - os.width/2 + xPt][0][os.z - os.depth/2 + zPt];
 					structurePoints.addItem(osPt3D);										
 				}
 			}
@@ -1038,15 +1038,15 @@ package world
 			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			var bottomLeft:Point3D = _world.getWorldBoundsForAsset(asset);
 			
-			for (var xPt:int = bottomLeft.x; xPt < (bottomLeft.x + os.structure.width); xPt++)
+			for (var xPt:int = bottomLeft.x; xPt < (bottomLeft.x + os.width); xPt++)
 			{
-				for (var zPt:int = bottomLeft.z; zPt < (bottomLeft.z + os.structure.depth); zPt++)
+				for (var zPt:int = bottomLeft.z; zPt < (bottomLeft.z + os.depth); zPt++)
 				{
 					var osPt3D:Point3D = pathGrid[xPt][os.y][zPt];
 					structureSpaces.addItem(osPt3D);										
 				}
 			}
-			if (!os.structure.width || !os.structure.depth)
+			if (!os.width || !os.depth)
 			{
 				throw new Error("No dimensions specified for structure");
 			} 
@@ -1061,15 +1061,15 @@ package world
 			var structurePoints:ArrayCollection = new ArrayCollection();
 			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			
-			for (var xPt:int = 0; xPt <= os.structure.width; xPt++)
+			for (var xPt:int = 0; xPt <= os.width; xPt++)
 			{
-				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
+				for (var zPt:int = 0; zPt <= os.depth; zPt++)
 				{
-					var osPt3D:Point3D = new Point3D(asset.worldCoords.x - os.structure.width/2 + xPt, 0, asset.worldCoords.z - os.structure.depth/2 + zPt);
+					var osPt3D:Point3D = new Point3D(asset.worldCoords.x - os.width/2 + xPt, 0, asset.worldCoords.z - os.depth/2 + zPt);
 					structurePoints.addItem(osPt3D);										
 				}
 			}
-			if (!os.structure.width || !os.structure.depth)
+			if (!os.width || !os.depth)
 			{
 				throw new Error("No dimensions specified for structure");
 			} 		

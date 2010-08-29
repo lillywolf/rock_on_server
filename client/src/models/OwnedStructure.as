@@ -21,6 +21,9 @@ package models
 		public var _updated_at:String;
 		public var _in_use:Boolean;
 		public var _rotation:int;
+		public var _width:Number;
+		public var _height:Number;
+		public var _depth:Number;
 		
 		public var _inventory_count:int;
 				
@@ -40,9 +43,12 @@ package models
 			_created_at = params.created_at;
 			_in_use = params.in_use;
 			_rotation = params.rotation;
-			
+						
 			if (params.structure)
+			{	
 				_structure = params.structure;
+				setDimensionsByRotation();
+			}				
 			
 			setOptionalProperties(params);
 		}	
@@ -167,6 +173,36 @@ package models
 		{
 			return _z;
 		}
+
+		public function set width(val:Number):void
+		{
+			_width = val;
+		}
+		
+		public function get width():Number
+		{
+			return _width;
+		}
+
+		public function set depth(val:Number):void
+		{
+			_depth = val;
+		}
+		
+		public function get depth():Number
+		{
+			return _depth;
+		}
+
+		public function set height(val:Number):void
+		{
+			_height = val;
+		}
+		
+		public function get height():Number
+		{
+			return _height;
+		}
 		
 		public function set inventory_count(val:int):void
 		{
@@ -207,15 +243,15 @@ package models
 		
 		public function setDimensionsByRotation():void
 		{
-			if (_rotation%2 == 1)
+			if (_rotation && _rotation%2 == 1)
 			{
-				_structure.width = _structure.normalDepth;
-				_structure.depth = _structure.normalWidth;				
+				_width = _structure.normalDepth;
+				_depth = _structure.normalWidth;				
 			}
 			else
 			{
-				_structure.width = _structure.normalWidth;
-				_structure.depth = _structure.normalDepth;
+				_width = _structure.normalWidth;
+				_depth = _structure.normalDepth;
 			}						
 		}
 		

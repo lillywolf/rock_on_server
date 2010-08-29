@@ -423,15 +423,15 @@ package controllers
 		public function getPointsForStructure(os:OwnedStructure):ArrayCollection
 		{			
 			var spaces:ArrayCollection = new ArrayCollection();
-			for (var xPt:int = 0; xPt <= os.structure.width; xPt++)
+			for (var xPt:int = 0; xPt <= os.width; xPt++)
 			{
-				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
+				for (var zPt:int = 0; zPt <= os.depth; zPt++)
 				{
-					var osPt3D:Point3D = new Point3D(os.x - os.structure.width/2 + xPt, os.y, os.z - os.structure.depth/2 + zPt);
+					var osPt3D:Point3D = new Point3D(os.x - os.width/2 + xPt, os.y, os.z - os.depth/2 + zPt);
 					spaces.addItem(osPt3D);										
 				}
 			}
-			if (!os.structure.width || !os.structure.depth)
+			if (!os.width || !os.depth)
 			{
 				throw new Error("No dimensions specified for structure");
 			} 			

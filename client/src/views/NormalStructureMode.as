@@ -10,7 +10,9 @@ package views
 	import flash.utils.Dictionary;
 	
 	import models.EssentialModelReference;
+	import models.OwnedSong;
 	import models.OwnedStructure;
+	import models.OwnedThinger;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
@@ -111,24 +113,16 @@ package views
 			normalMode = true;
 		}
 
-		private function redrawStructure(asset:ActiveAsset):ActiveAsset
-		{
-			var toRemove:ArrayCollection = new ArrayCollection();
-			var toAdd:ArrayCollection = new ArrayCollection();			
+		private function redrawStructure(os:OwnedStructure):ActiveAsset
+		{	
+			var asset:ActiveAsset = getMatchingAssetFromAssetRenderer(os);
 			var aas:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
 			aas.copyFromActiveAsset(asset);
 			aas.setMovieClipsForStructure(aas.toppers);
 			aas.bitmapWithToppers();
-			toRemove.addItem(asset);
-			toAdd.addItem(aas);
+			structureWorld.removeAsset(asset);
+			structureWorld.addAsset(aas, aas.worldCoords);
 			normalMode = true;
-			for each (var a:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
-			{
-				if ((a.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
-					toRemove.addItem(a);			
-			}
-			swapAssets(toRemove, toAdd);
-			structureWorld.assetRenderer.revertEnterFrameHandler();
 			return aas;
 		}
 
@@ -174,6 +168,8 @@ package views
 		
 		private function updateAllStructures(a:ActiveAsset):void
 		{
+//			Do I need this stupid fucking function?
+			
 			for each (var asset:ActiveAsset in allStructures)
 			{
 				if (asset.thinger == a.thinger)
@@ -230,8 +226,6 @@ package views
 			var asset:ActiveAsset = new ActiveAsset(mc);
 			asset.copyFromOwnedStructure(os);
 			asset.toppers = _structureController.getStructureToppers(os);
-//			asset.setMovieClipsForStructure(_structureController.getStructureToppers(os));
-//			asset.bitmapWithToppers();
 			asset.switchToBitmap();
 			_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
 			allStructures.addItem(asset);
@@ -244,11 +238,65 @@ package views
 			{
 				updateRenderingMode(asset);
 				setCurrentStructure(asset);
-				currentStructure.speed = 1;
-				currentStructure.alpha = 0.5;
 				structureEditing = true;
+				cutStructureFromCollisionArrays(asset);
 				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);				
 			}
+		}
+		
+		private function cutStructureFromCollisionArrays(asset:ActiveAsset):void
+		{
+			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
+			{
+				removeSavedPointsFromBasesArray(asset.thinger as OwnedStructure);
+				removeSavedPointsFromSurfacesArray(asset.thinger as OwnedStructure);
+				for each (var topper:OwnedStructure in asset.toppers)
+				{
+					removeSavedPointsFromStructureToppers(topper);			
+				}
+			}
+			else
+				cutTopperFromCollisionArrays(asset);
+		}
+		
+		private function addStructureToCollisionArrays(asset:ActiveAsset):void
+		{
+			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
+			{			
+				addCurrentPointsToBasesArray(asset);
+				addCurrentPointsToSurfacesArray(asset);
+				for each (var topper:OwnedStructure in asset.toppers)
+				{
+					addCurrentPointsToStructureToppers(getMatchingAssetForOwnedStructure(topper));
+				}
+			}
+			else
+				addTopperToCollisionArrays(asset);
+		}
+
+		private function addSavedStructureToCollisionArrays(asset:ActiveAsset):void
+		{
+			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
+			{			
+				addSavedPointsToBasesArray(asset);
+				addSavedPointsToSurfacesArray(asset);
+				for each (var topper:OwnedStructure in asset.toppers)
+				{
+					addSavedPointsToStructureToppers(getMatchingAssetForOwnedStructure(topper));
+				}
+			}	
+			else
+				addSavedPointsToStructureToppers(asset);
+		}
+		
+		private function cutTopperFromCollisionArrays(topperAsset:ActiveAsset):void
+		{
+			removeSavedPointsFromStructureToppers(topperAsset.thinger as OwnedStructure);
+		}
+		
+		private function addTopperToCollisionArrays(topperAsset:ActiveAsset):void
+		{
+			addCurrentPointsToStructureToppers(topperAsset);
 		}
 		
 		public function selectStructureForRotation(asset:ActiveAsset):void
@@ -256,13 +304,19 @@ package views
 			if ((asset.thinger as OwnedStructure).structure.structure_type != "Tile")
 			{
 				structureRotating = true;
-				updateStructureBasesBeforeRotating(asset);					
+				
+//				Do this before rotation changes owned structure
+				cutStructureFromCollisionArrays(asset);
+
+//				Rotate and redraw
+				updateRotatedToppers(asset);
 				rotateAsset(asset);
-				updateRotatedToppers(asset);							
-				currentStructure = redrawStructure(asset);				
+				redrawForNormalStructures();
+				currentStructure = redrawStructure(asset.thinger as OwnedStructure);	
+				
 				currentStructure.speed = 1;
-				currentStructure.alpha = 0.5;
 				structureEditing = true;
+				updateStructureFilters();				
 				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);			
 			}
 		}
@@ -279,6 +333,8 @@ package views
 						currentStructure = a;
 				}
 			}
+			currentStructure.speed = 1;
+			currentStructure.alpha = 0.5;			
 		}
 		
 		private function removeTopperFromStructures(topper:OwnedStructure):void
@@ -308,7 +364,7 @@ package views
 			else if (structureEditing && (currentStructure.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
 			{
 				if (isStructureInBounds(currentStructure) && !(doesStructureCollide(currentStructure)))
-					placeStructure();				
+					placeNormalStructure();				
 				else
 					revertStructure();
 			}
@@ -346,41 +402,56 @@ package views
 				handleMoveClick(asset);
 		}
 		
-		public function placeStructure():void
+		public function placeNormalStructure():void
 		{
 			currentStructure.alpha = 1;
 			currentStructure.filters = null;
 			saveStructureCoords(currentStructure);
+			addStructureToCollisionArrays(currentStructure);
 			resetEditMode();
 			redrawForToppers();			
 		}
-		
-		
-		public function placeStructureAfterRotating():void
-		{
-			currentStructure.alpha = 1;
-			currentStructure.filters = null;
-			saveStructureCoordsAndRotation(currentStructure);
-			resetEditMode();
-			redrawForToppers();	
-		}		
 		
 		public function placeTopper(parentAsset:ActiveAsset):void
 		{
 			currentStructure.alpha = 1;
 			currentStructure.filters = null;
 			saveStructureCoords(currentStructure, parentAsset);
-			updateStructureToppers(currentStructure);
+			addTopperToCollisionArrays(currentStructure);
 			resetEditMode();
 			redrawForToppers();			
+		}
+		
+		public function placeStructureAfterRotating():void
+		{
+			currentStructure.alpha = 1;
+			currentStructure.filters = null;
+			saveStructureCoordsAndRotation(currentStructure);
+			addStructureToCollisionArrays(currentStructure);			
+			resetEditMode();
+			redrawForToppers();	
 		}
 		
 		public function revertStructure():void
 		{
 			moveStructureBack(currentStructure);
+			addSavedStructureToCollisionArrays(currentStructure);
 			resetEditMode();
 		}
 		
+		private function revertStructureAfterRotating():void
+		{
+			revertRotatedToppers(currentStructure);
+			revertRotation(currentStructure);
+			
+//			Redraws asset as it was pre-rotation
+			currentStructure = redrawStructure(currentStructure.thinger as OwnedStructure);
+			moveStructureBack(currentStructure);
+			
+			addSavedStructureToCollisionArrays(currentStructure);
+			resetEditMode();
+		}		
+
 		private function moveStructureBack(asset:ActiveAsset):void
 		{			
 			if (isOwned(currentStructure))
@@ -394,15 +465,6 @@ package views
 				reassignAndRedrawTopper(asset);
 		}
 		
-		private function revertStructureAfterRotating():void
-		{
-			revertRotation(currentStructure);
-			updateStructureBasesAfterRotating(currentStructure);
-			revertRotatedToppers(currentStructure);
-			currentStructure = redrawStructure(currentStructure);
-			moveStructureBack(currentStructure);
-			resetEditMode();
-		}		
 		
 		private function revertRotation(asset:ActiveAsset):void
 		{
@@ -451,43 +513,42 @@ package views
 				evt.asset = asset;	
 				evt.rotation = (asset.thinger as OwnedStructure).rotation;
 				evt.currentPoint = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
-				dispatchEvent(evt);				
+				dispatchEvent(evt);
+				
 				if (asset.toppers && asset.toppers.length > 0)
-					saveToppers(asset);
-				updateStructureSurfaces(asset);
-				updateStructureBases(asset);				
+					saveToppers(asset);				
 			}
 		}
 		
 		public function saveStructureCoords(asset:ActiveAsset, parentAsset:ActiveAsset=null):void
 		{
 			if (isOwned(asset))
-			{
-				var evt:DynamicEvent = new DynamicEvent("structurePlaced", true, true);
-				evt.asset = asset;
-				if (parentAsset)
-				{
-					var parentOs:OwnedStructure = parentAsset.thinger as OwnedStructure;
-					evt.currentPoint = new Point3D(asset.worldCoords.x + parentOs.structure.height, parentOs.structure.height, asset.worldCoords.z - parentOs.structure.height);
-				}
-				else
-					evt.currentPoint = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
-				dispatchEvent(evt);
-			}
+				saveOwnedStructureCoords(asset, parentAsset);
 			else if (!isOwned(asset))
-			{
 				_structureController.saveNewOwnedStructure(asset.thinger as OwnedStructure, _venue, asset.worldCoords);
-			}
-			if (asset.toppers && asset.toppers.length > 0)
+		}
+		
+		private function saveOwnedStructureCoords(asset:ActiveAsset, parentAsset:ActiveAsset=null):void
+		{
+			var evt:DynamicEvent = new DynamicEvent("structurePlaced", true, true);
+			evt.asset = asset;
+			
+			if (parentAsset)
 			{
-				saveToppers(asset);
+//				Brings topper coords back up to parent structure height
+				var parentOs:OwnedStructure = parentAsset.thinger as OwnedStructure;
+				evt.currentPoint = new Point3D(asset.worldCoords.x + parentOs.structure.height, parentOs.structure.height, asset.worldCoords.z - parentOs.structure.height);
 			}
-			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
-			{	
-				updateStructureSurfaces(asset);
-				updateStructureBases(asset);
-			}	
-		}	
+			else
+			{		
+				evt.currentPoint = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
+//				If asset has toppers then save their coords
+				if (asset.toppers && asset.toppers.length > 0)
+					saveToppers(asset);
+			}
+			
+			dispatchEvent(evt);			
+		}
 		
 		private function saveToppers(asset:ActiveAsset):void
 		{
@@ -495,11 +556,12 @@ package views
 			var ptDiff:Point3D = new Point3D(asset.worldCoords.x - os.x, asset.worldCoords.y - os.y, asset.worldCoords.z - os.z);
 			for each (var topper:OwnedStructure in asset.toppers)
 			{
+//				Update topper coords based on parent structure move
 				var newPt:Point3D = new Point3D(topper.x + ptDiff.x, os.structure.height, topper.z + ptDiff.z);
 				var evt:DynamicEvent = new DynamicEvent("structurePlaced", true, true);
 				var topperAsset:ActiveAsset = getMatchingAssetForOwnedStructure(topper);
 				topperAsset.worldCoords = new Point3D(newPt.x, os.structure.height, newPt.z);
-				updateStructureToppers(topperAsset);
+				
 				evt.asset = topperAsset;
 				evt.currentPoint = newPt;
 				this.dispatchEvent(evt);
@@ -509,6 +571,16 @@ package views
 		private function getMatchingAssetForOwnedStructure(os:OwnedStructure):ActiveAsset
 		{
 			for each (var asset:ActiveAsset in allStructures)
+			{
+				if (asset.thinger && asset.thinger.id == os.id)
+					return asset;
+			}
+			return null;
+		}
+
+		private function getMatchingAssetFromAssetRenderer(os:OwnedStructure):ActiveAsset
+		{
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
 			{
 				if (asset.thinger && asset.thinger.id == os.id)
 					return asset;
@@ -573,22 +645,14 @@ package views
 			var destination:Point3D = World.actualToWorldCoords(new Point(structureWorld.mouseX, structureWorld.mouseY));
 			var os:OwnedStructure = currentStructure.thinger as OwnedStructure;
 			destination.y = Math.round(destination.y);
-			if (os.structure.width%2 == 0)
-			{
+			if (os.width%2 == 0)
 				destination.x = Math.round(destination.x);
-			}
 			else
-			{
 				destination.x = snapToCenterPoint(currentStructure, destination.x);
-			}
-			if (os.structure.depth%2 == 0)
-			{
+			if (os.depth%2 == 0)
 				destination.z = Math.round(destination.z);
-			}
 			else
-			{
 				destination.z = snapToCenterPoint(currentStructure, destination.z);
-			}
 			updateFilterLogic(currentStructure, destination);
 			doMoveLogic(destination);
 		}
@@ -658,8 +722,8 @@ package views
 		
 		private function checkStructureSurfacesForSavedTopper():ActiveAsset
 		{
-			currentStructurePoints = getSavedStructurePoints(currentStructure, false);		
 			var os:OwnedStructure = currentStructure.thinger as OwnedStructure;
+			currentStructurePoints = getSavedStructurePoints(os, false);		
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
 				var adjusted:Point3D = new Point3D(pt3D.x - os.structure.height, pt3D.y, pt3D.x + os.structure.height);
@@ -669,71 +733,86 @@ package views
 			return null;
 		}		
 		
-		private function updateStructureSurfaces(asset:ActiveAsset):void
+		private function removeSavedPointsFromSurfacesArray(os:OwnedStructure):void
 		{
-			var pt:Point3D;
-			var old:ArrayCollection = getSavedStructurePoints(asset, false);
-			var os:OwnedStructure = asset.thinger as OwnedStructure;
-			for each (pt in old)
-			{
-				removePointFrom3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), structureSurfaces);
-			}
-			var newPts:ArrayCollection = getOccupiedOuterPoints(asset);
-			for each (pt in newPts)
-			{
-				addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureSurfaces);
-			}
-		}
-
-		private function updateStructureBases(asset:ActiveAsset):void
-		{
-			var pt:Point3D;
-			var old:ArrayCollection = getSavedStructurePoints(asset, true);
-			var os:OwnedStructure = asset.thinger as OwnedStructure;
-			for each (pt in old)
-			{
-				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureBases);
-			}
-			var newPts:ArrayCollection = getOccupiedInnerPoints(asset);
-			for each (pt in newPts)
-			{
-				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
-			}
-		}
-		
-		private function updateStructureBasesBeforeRotating(asset:ActiveAsset):void
-		{
-			var old:ArrayCollection = getSavedStructurePoints(asset, true);
-			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			var old:ArrayCollection = getSavedStructurePoints(os, false);
 			for each (var pt:Point3D in old)
 			{
-				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureBases);
-			}			
-		}
-		
-		private function updateStructureBasesAfterRotating(asset:ActiveAsset):void
+				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureSurfaces);
+			}
+		}	
+
+		private function addSavedPointsToSurfacesArray(asset:ActiveAsset):void
 		{
-			var newPts:ArrayCollection = getOccupiedInnerPoints(asset);
+			var newPts:ArrayCollection = getSavedStructurePoints(asset.thinger as OwnedStructure, false);
+			var os:OwnedStructure = asset.thinger as OwnedStructure;						
+			for each (var pt:Point3D in newPts)
+			{
+				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureSurfaces);
+			}
+		}	
+			
+		private function addCurrentPointsToSurfacesArray(asset:ActiveAsset):void
+		{		
+			var newPts:ArrayCollection = getOccupiedOuterPoints(asset);
 			var os:OwnedStructure = asset.thinger as OwnedStructure;			
 			for each (var pt:Point3D in newPts)
 			{
+				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureSurfaces);
+			}
+		}
+
+		private function removeSavedPointsFromBasesArray(os:OwnedStructure):void
+		{
+			var old:ArrayCollection = getSavedStructurePoints(os, true);
+			for each (var pt:Point3D in old)
+			{
+				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureBases);
+			}
+		}
+
+		private function addSavedPointsToBasesArray(asset:ActiveAsset):void
+		{
+			var newPts:ArrayCollection = getSavedStructurePoints(asset.thinger as OwnedStructure, true);
+			for each (var pt:Point3D in newPts)
+			{
 				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
+			}
+		}
+		
+		private function addCurrentPointsToBasesArray(asset:ActiveAsset):void
+		{
+			var newPts:ArrayCollection = getOccupiedInnerPoints(asset);
+			for each (var pt:Point3D in newPts)
+			{
+				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
+			}
+		}
+		
+		private function removeSavedPointsFromStructureToppers(os:OwnedStructure):void
+		{
+			var old:ArrayCollection = getSavedStructurePoints(os, true);
+			for each (var pt:Point3D in old)
+			{
+				removePointFrom3DArray(new Point3D(pt.x - pt.y, 0, pt.z + pt.y), structureToppers);
 			}			
 		}
 		
-		private function updateStructureToppers(asset:ActiveAsset):void
+		private function addSavedPointsToStructureToppers(asset:ActiveAsset):void
 		{
-			var pt:Point3D;
-			var old:ArrayCollection = getSavedStructurePoints(asset, true);
-			var os:OwnedStructure = asset.thinger as OwnedStructure;			
-			for each (pt in old)
+			var newPts:ArrayCollection = getSavedStructurePoints(asset.thinger as OwnedStructure, true);
+			for each (var pt:Point3D in newPts)
 			{
-				removePointFrom3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), structureToppers);
+				addPointTo3DArray(new Point3D(pt.x - pt.y, 0, pt.z + pt.y), asset, structureToppers);
 			}
+		}
+		
+		private function addCurrentPointsToStructureToppers(asset:ActiveAsset):void
+		{
 			var newPts:ArrayCollection = getOccupiedInnerPoints(asset);
-			for each (pt in newPts)
+			for each (var pt:Point3D in newPts)
 			{
-				addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureToppers);
+				addPointTo3DArray(new Point3D(pt.x - pt.y, 0, pt.z + pt.y), asset, structureToppers);
 			}
 		}
 		
@@ -782,7 +861,7 @@ package views
 					var pts:ArrayCollection = getOccupiedInnerPoints(asset);
 					for each (var pt:Point3D in pts)
 					{
-						addPointTo3DArray(new Point3D(pt.x - os.structure.height, pt.y, pt.z + os.structure.height), asset, structureToppers);
+						addPointTo3DArray(new Point3D(pt.x - pt.y, 0, pt.z + pt.y), asset, structureToppers);
 					}
 				}
 			}
@@ -846,14 +925,14 @@ package views
 		{
 		var os:OwnedStructure = asset.thinger as OwnedStructure;
 
-			if ((asset.worldCoords.x - os.structure.width/2 < _venue.venueRect.left || 
-				asset.worldCoords.x + os.structure.width/2 > _venue.venueRect.right ||
-				asset.worldCoords.z - os.structure.depth/2 < _venue.venueRect.top ||
-				asset.worldCoords.z + os.structure.depth/2 > _venue.venueRect.bottom) || 
-					(asset.worldCoords.x + os.structure.width/2 > _venue.audienceRect.left &&
-					asset.worldCoords.x - os.structure.width/2 < _venue.audienceRect.right - _venue.crowdBufferRect.width &&
-					asset.worldCoords.z + os.structure.depth/2 > _venue.audienceRect.top &&
-					asset.worldCoords.z - os.structure.depth/2 < _venue.audienceRect.bottom))
+			if ((asset.worldCoords.x - os.width/2 < _venue.venueRect.left || 
+				asset.worldCoords.x + os.width/2 > _venue.venueRect.right ||
+				asset.worldCoords.z - os.depth/2 < _venue.venueRect.top ||
+				asset.worldCoords.z + os.depth/2 > _venue.venueRect.bottom) || 
+					(asset.worldCoords.x + os.width/2 > _venue.audienceRect.left &&
+					asset.worldCoords.x - os.width/2 < _venue.audienceRect.right - _venue.crowdBufferRect.width &&
+					asset.worldCoords.z + os.depth/2 > _venue.audienceRect.top &&
+					asset.worldCoords.z - os.depth/2 < _venue.audienceRect.bottom))
 			{			
 				return false;
 			}	
@@ -884,13 +963,13 @@ package views
 			return false;
 		}
 			
-		private function getSavedStructurePoints(asset:ActiveAsset, inner:Boolean):ArrayCollection
+		private function getSavedStructurePoints(os:OwnedStructure, inner:Boolean):ArrayCollection
 		{
 			var structurePoints:ArrayCollection;
 			if (inner)
-				structurePoints = getSavedInnerPoints(asset.thinger as OwnedStructure);
+				structurePoints = getSavedInnerPoints(os);
 			else
-				structurePoints = getSavedOuterPoints(asset.thinger as OwnedStructure);
+				structurePoints = getSavedOuterPoints(os);
 			return structurePoints;
 		}
 
@@ -899,11 +978,11 @@ package views
 			var structurePoints:ArrayCollection = new ArrayCollection();
 			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			
-			for (var xPt:int = 0; xPt <= os.structure.width; xPt++)
+			for (var xPt:int = 0; xPt <= os.width; xPt++)
 			{
-				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
+				for (var zPt:int = 0; zPt <= os.depth; zPt++)
 				{
-					var osPt3D:Point3D = new Point3D(Math.round(asset.worldCoords.x - os.structure.width/2 + xPt), 0, Math.round(asset.worldCoords.z - os.structure.depth/2 + zPt));
+					var osPt3D:Point3D = new Point3D(Math.round(asset.worldCoords.x - os.width/2 + xPt), asset.worldCoords.y, Math.round(asset.worldCoords.z - os.depth/2 + zPt));
 					structurePoints.addItem(osPt3D);										
 				}
 			}
@@ -915,11 +994,11 @@ package views
 			var structurePoints:ArrayCollection = new ArrayCollection();
 			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			
-			for (var xPt:int = 1; xPt < os.structure.width; xPt++)
+			for (var xPt:int = 1; xPt < os.width; xPt++)
 			{
-				for (var zPt:int = 1; zPt < os.structure.depth; zPt++)
+				for (var zPt:int = 1; zPt < os.depth; zPt++)
 				{
-					var osPt3D:Point3D = new Point3D(Math.round(asset.worldCoords.x - os.structure.width/2 + xPt), 0, Math.round(asset.worldCoords.z - os.structure.depth/2 + zPt));
+					var osPt3D:Point3D = new Point3D(Math.round(asset.worldCoords.x - os.width/2 + xPt), asset.worldCoords.y, Math.round(asset.worldCoords.z - os.depth/2 + zPt));
 					structurePoints.addItem(osPt3D);										
 				}
 			}
@@ -930,11 +1009,11 @@ package views
 		{		
 			var structurePoints:ArrayCollection = new ArrayCollection();
 			
-			for (var xPt:int = 0; xPt <= os.structure.width; xPt++)
+			for (var xPt:int = 0; xPt <= os.width; xPt++)
 			{
-				for (var zPt:int = 0; zPt <= os.structure.depth; zPt++)
+				for (var zPt:int = 0; zPt <= os.depth; zPt++)
 				{
-					var osPt3D:Point3D = new Point3D(Math.round(os.x - os.structure.width/2 + xPt), 0, Math.round(os.z - os.structure.depth/2 + zPt));
+					var osPt3D:Point3D = new Point3D(Math.round(os.x - os.width/2 + xPt), os.y, Math.round(os.z - os.depth/2 + zPt));
 					structurePoints.addItem(osPt3D);										
 				}
 			}
@@ -945,11 +1024,11 @@ package views
 		{		
 			var structurePoints:ArrayCollection = new ArrayCollection();
 			
-			for (var xPt:int = 1; xPt < os.structure.width; xPt++)
+			for (var xPt:int = 1; xPt < os.width; xPt++)
 			{
-				for (var zPt:int = 1; zPt < os.structure.depth; zPt++)
+				for (var zPt:int = 1; zPt < os.depth; zPt++)
 				{
-					var osPt3D:Point3D = new Point3D(Math.round(os.x - os.structure.width/2 + xPt), 0, Math.round(os.z - os.structure.depth/2 + zPt));
+					var osPt3D:Point3D = new Point3D(Math.round(os.x - os.width/2 + xPt), os.y, Math.round(os.z - os.depth/2 + zPt));
 					structurePoints.addItem(osPt3D);										
 				}
 			}

@@ -41,33 +41,36 @@ package rock_on
 		public function updateTopperPlacement(topper:OwnedStructure):void
 		{
 			var asset:ActiveAsset;
+			var toRedraw:ArrayCollection = new ArrayCollection();
 			for each (asset in _myWorld.assetRenderer.unsortedAssets)
 			{
-				if (asset.toppers && asset.toppers.contains(topper))
-					var oldAsset:ActiveAssetStack = asset as ActiveAssetStack;
-				if (asset.thinger is OwnedStructure)
+				if (asset.thinger is OwnedStructure && (asset.thinger as OwnedStructure).structure.height > 0)
+				{
 					asset.toppers = _structureController.getStructureToppers(asset.thinger as OwnedStructure); 
-				if (asset.toppers && asset.toppers.contains(topper))
-					var newAsset:ActiveAssetStack = asset as ActiveAssetStack;
+					trace("id: " + (asset.thinger as OwnedStructure).id);
+					trace("toppers: " + asset.toppers.length.toString());
+					toRedraw.addItem(asset);
+				}	
 			}
-			redrawToppedStructures(oldAsset, newAsset);
+			redrawToppedStructures(toRedraw);
 		}
 		
-		private function doRedraw(oldAsset:ActiveAssetStack):void
+		private function doRedraw(asset:ActiveAsset):void
 		{
-			_myWorld.removeAsset(oldAsset);
-			var temp:ActiveAssetStack = new ActiveAssetStack(null, oldAsset.movieClip);
-			temp.copyFromActiveAsset(oldAsset);
+			_myWorld.removeAsset(asset);
+			var temp:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
+			temp.copyFromActiveAsset(asset);
 			temp.setMovieClipsForStructure(temp.toppers);
 			temp.bitmapWithToppers();
 			_myWorld.addAsset(temp, temp.worldCoords);			
 		}
 		
-		private function redrawToppedStructures(oldAsset:ActiveAssetStack, newAsset:ActiveAssetStack):void
+		private function redrawToppedStructures(toRedraw:ArrayCollection):void
 		{
-			doRedraw(newAsset);
-			if (oldAsset != newAsset)
-				doRedraw(oldAsset);
+			for each (var asset:ActiveAsset in toRedraw)
+			{
+				doRedraw(asset);			
+			}
 		}
 	}
 }
