@@ -33,8 +33,8 @@ package rock_on
 		{
 			if (method == "save_placement")
 			{
-				if (os.structure.structure_type == "StructureTopper")
-					updateTopperPlacement(os);
+//				if (os.structure.structure_type == "StructureTopper")
+//					updateTopperPlacement(os);
 			}
 		}
 		

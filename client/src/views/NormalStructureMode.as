@@ -100,6 +100,7 @@ package views
 				{
 					var aas:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
 					aas.copyFromActiveAsset(asset);
+					aas.toppers = asset.toppers;
 					aas.setMovieClipsForStructure(aas.toppers);
 					aas.bitmapWithToppers();
 					toRemove.addItem(asset);
@@ -113,14 +114,15 @@ package views
 			normalMode = true;
 		}
 
-		private function redrawStructure(os:OwnedStructure):ActiveAsset
+		private function redrawStructure(asset:ActiveAsset):ActiveAsset
 		{	
-			var asset:ActiveAsset = getMatchingAssetFromAssetRenderer(os);
 			var aas:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
 			aas.copyFromActiveAsset(asset);
+			aas.toppers = asset.toppers;
 			aas.setMovieClipsForStructure(aas.toppers);
 			aas.bitmapWithToppers();
-			structureWorld.removeAsset(asset);
+			var a:ActiveAsset = getMatchingAssetFromAssetRenderer(asset.thinger as OwnedStructure);
+			structureWorld.removeAsset(a);
 			structureWorld.addAsset(aas, aas.worldCoords);
 			normalMode = true;
 			return aas;
@@ -137,6 +139,7 @@ package views
 					var a:ActiveAsset = new ActiveAsset();
 					a.movieClip = EssentialModelReference.getMovieClipCopy(asset.movieClip);
 					a.copyFromActiveAsset(asset);
+					a.toppers = asset.toppers;
 					a.switchToBitmap();
 					updateAllStructures(a);
 					toRemove.addItem(asset);
@@ -312,7 +315,7 @@ package views
 				updateRotatedToppers(asset);
 				rotateAsset(asset);
 				redrawForNormalStructures();
-				currentStructure = redrawStructure(asset.thinger as OwnedStructure);	
+				currentStructure = redrawStructure(asset);	
 				
 				currentStructure.speed = 1;
 				structureEditing = true;
@@ -445,7 +448,7 @@ package views
 			revertRotation(currentStructure);
 			
 //			Redraws asset as it was pre-rotation
-			currentStructure = redrawStructure(currentStructure.thinger as OwnedStructure);
+			currentStructure = redrawStructure(currentStructure);
 			moveStructureBack(currentStructure);
 			
 			addSavedStructureToCollisionArrays(currentStructure);
@@ -476,6 +479,8 @@ package views
 		private function reassignAndRedrawTopper(topper:ActiveAsset):void
 		{
 			var asset:ActiveAsset = checkStructureSurfacesForSavedTopper();
+			if (!asset.toppers)
+				asset.toppers = new ArrayCollection();
 			if (!asset.toppers.contains(topper))
 				asset.toppers.addItem(topper.thinger);
 			redrawForToppers();
@@ -516,7 +521,9 @@ package views
 				dispatchEvent(evt);
 				
 				if (asset.toppers && asset.toppers.length > 0)
-					saveToppers(asset);				
+					saveToppers(asset);	
+				
+				_venue.doStructureRedraw(asset);
 			}
 		}
 		
@@ -538,6 +545,10 @@ package views
 //				Brings topper coords back up to parent structure height
 				var parentOs:OwnedStructure = parentAsset.thinger as OwnedStructure;
 				evt.currentPoint = new Point3D(asset.worldCoords.x + parentOs.structure.height, parentOs.structure.height, asset.worldCoords.z - parentOs.structure.height);
+				(asset.thinger as OwnedStructure).x = asset.worldCoords.x + parentOs.structure.height;
+				(asset.thinger as OwnedStructure).y = parentOs.structure.height;
+				(asset.thinger as OwnedStructure).z = asset.worldCoords.z - parentOs.structure.height;
+				doTopperRedraw(asset.thinger as OwnedStructure, parentAsset);				
 			}
 			else
 			{		
@@ -545,6 +556,7 @@ package views
 //				If asset has toppers then save their coords
 				if (asset.toppers && asset.toppers.length > 0)
 					saveToppers(asset);
+				_venue.doStructureRedraw(asset);
 			}
 			
 			dispatchEvent(evt);			
@@ -566,6 +578,23 @@ package views
 				evt.currentPoint = newPt;
 				this.dispatchEvent(evt);
 			}
+		}
+		
+		private function doTopperRedraw(topper:OwnedStructure, parentAsset:ActiveAsset):void
+		{
+			for each (var asset:ActiveAsset in _venue.myWorld.assetRenderer.unsortedAssets)
+			{
+				if (asset.toppers && asset.toppers.contains(topper) && 
+					asset.thinger.id != parentAsset.thinger.id)
+				{
+					var index:int = asset.toppers.getItemIndex(topper);
+					asset.toppers.removeItemAt(index);
+					_venue.doStructureRedraw(asset);					
+				}
+			}
+			if (!parentAsset.toppers.contains(topper))
+				parentAsset.toppers.addItem(topper);
+			_venue.doStructureRedraw(parentAsset);
 		}
 		
 		private function getMatchingAssetForOwnedStructure(os:OwnedStructure):ActiveAsset
@@ -726,7 +755,7 @@ package views
 			currentStructurePoints = getSavedStructurePoints(os, false);		
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
-				var adjusted:Point3D = new Point3D(pt3D.x - os.structure.height, pt3D.y, pt3D.x + os.structure.height);
+				var adjusted:Point3D = new Point3D(pt3D.x - os.structure.height, 0, pt3D.x + os.structure.height);
 				if (structureSurfaces[adjusted.x] && structureSurfaces[adjusted.x][adjusted.y] && structureSurfaces[adjusted.x][adjusted.y][adjusted.z])
 					return structureSurfaces[adjusted.x][adjusted.y][adjusted.z];
 			}
@@ -738,7 +767,7 @@ package views
 			var old:ArrayCollection = getSavedStructurePoints(os, false);
 			for each (var pt:Point3D in old)
 			{
-				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureSurfaces);
+				removePointFrom3DArray(new Point3D(pt.x - os.structure.height, 0, pt.z + os.structure.height), structureSurfaces);
 			}
 		}	
 
@@ -748,7 +777,7 @@ package views
 			var os:OwnedStructure = asset.thinger as OwnedStructure;						
 			for each (var pt:Point3D in newPts)
 			{
-				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureSurfaces);
+				addPointTo3DArray(new Point3D(pt.x - os.structure.height, 0, pt.z + os.structure.height), asset, structureSurfaces);
 			}
 		}	
 			
@@ -758,7 +787,7 @@ package views
 			var os:OwnedStructure = asset.thinger as OwnedStructure;			
 			for each (var pt:Point3D in newPts)
 			{
-				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureSurfaces);
+				addPointTo3DArray(new Point3D(pt.x - os.structure.height, 0, pt.z + os.structure.height), asset, structureSurfaces);
 			}
 		}
 

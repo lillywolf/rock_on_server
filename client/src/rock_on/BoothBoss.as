@@ -161,12 +161,12 @@ package rock_on
 				_myWorld.saveStructurePlacement(os, true);
 				var asset:ActiveAsset = _myWorld.getAssetFromOwnedStructure(os);
 				
-				_myWorld.removeAsset(asset);
-				var newAsset:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
-				newAsset.copyFromActiveAsset(asset);
-				newAsset.setMovieClipsForStructure(newAsset.toppers);
-				(newAsset as ActiveAssetStack).bitmapWithToppers();
-				_myWorld.addAsset(newAsset, newAsset.worldCoords);
+//				_myWorld.removeAsset(asset);
+//				var newAsset:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
+//				newAsset.copyFromActiveAsset(asset);
+//				newAsset.setMovieClipsForStructure(newAsset.toppers);
+//				(newAsset as ActiveAssetStack).bitmapWithToppers();
+//				_myWorld.addAsset(newAsset, newAsset.worldCoords);
 				
 				reInitializeBooths(false);
 				_venue.redrawAllMovers();

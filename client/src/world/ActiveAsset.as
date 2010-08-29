@@ -280,7 +280,11 @@ package world
 		public function copyFromActiveAsset(asset:ActiveAsset):void
 		{
 			this.thinger = asset.thinger;
-			this.toppers = asset.toppers;
+			this.toppers = new ArrayCollection();
+			for each (var t:OwnedStructure in asset.toppers)
+			{
+				this.toppers.addItem(t);			
+			}
 			this.rotated = asset.rotated;
 			this.flipped = asset.flipped;
 			this.speed = asset.speed;

@@ -45,6 +45,7 @@ package rock_on
 	import views.WorldBitmapInterface;
 	
 	import world.ActiveAsset;
+	import world.ActiveAssetStack;
 	import world.BitmapBlotter;
 	import world.MoodEvent;
 	import world.Point3D;
@@ -792,6 +793,17 @@ package rock_on
 				startShowButton = null;
 			}			
 		}
+		
+		public function doStructureRedraw(asset:ActiveAsset):void
+		{
+			var realAsset:ActiveAsset = _myWorld.getAssetFromOwnedStructure(asset.thinger as OwnedStructure);
+			_myWorld.removeAsset(realAsset);
+			var temp:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
+			temp.copyFromActiveAsset(asset);
+			temp.setMovieClipsForStructure(temp.toppers);
+			temp.bitmapWithToppers();
+			_myWorld.addAsset(temp, temp.worldCoords);			
+		}		
 		
 		public function set myWorld(val:World):void
 		{
