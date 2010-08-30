@@ -243,7 +243,9 @@ package views
 				setCurrentStructure(asset);
 				structureEditing = true;
 				cutStructureFromCollisionArrays(asset);
-				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);				
+				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);
+				
+				dispatchSelectEvent(asset);
 			}
 		}
 		
@@ -320,7 +322,9 @@ package views
 				currentStructure.speed = 1;
 				structureEditing = true;
 				updateStructureFilters();				
-				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);			
+				_editView.addEventListener(MouseEvent.MOUSE_MOVE, onStructureMouseMove);	
+				
+				dispatchSelectEvent(currentStructure);
 			}
 		}
 		
@@ -412,7 +416,8 @@ package views
 			saveStructureCoords(currentStructure);
 			addStructureToCollisionArrays(currentStructure);
 			resetEditMode();
-			redrawForToppers();			
+			redrawForToppers();	
+			dispatchPlaceEvent();
 		}
 		
 		public function placeTopper(parentAsset:ActiveAsset):void
@@ -422,7 +427,8 @@ package views
 			saveStructureCoords(currentStructure, parentAsset);
 			addTopperToCollisionArrays(currentStructure);
 			resetEditMode();
-			redrawForToppers();			
+			redrawForToppers();
+			dispatchPlaceEvent();
 		}
 		
 		public function placeStructureAfterRotating():void
@@ -433,6 +439,20 @@ package views
 			addStructureToCollisionArrays(currentStructure);			
 			resetEditMode();
 			redrawForToppers();	
+			dispatchPlaceEvent();
+		}
+		
+		private function dispatchPlaceEvent():void
+		{
+			var evt:DynamicEvent = new DynamicEvent("objectPlaced", true, true);
+			_editView.dispatchEvent(evt);
+		}
+
+		private function dispatchSelectEvent(asset:ActiveAsset):void
+		{
+			var evt:DynamicEvent = new DynamicEvent("objectSelected", true, true);
+			evt.selectedObject = asset;
+			_editView.dispatchEvent(evt);
 		}
 		
 		public function revertStructure():void

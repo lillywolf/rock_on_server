@@ -527,8 +527,8 @@
 			private function switchToEditView():void
 			{
 				var wvch:WorldViewClickHandler = this.worldView.mouseHandler as WorldViewClickHandler;
-				this.worldView.removeEventListener(Event.ENTER_FRAME, wvch.onEnterFrame);
-				this.worldView.removeEventListener(MouseEvent.MOUSE_MOVE, wvch.onMouseDown);
+				wvch.killProcessesAndListeners();
+				
 				FlexGlobals.topLevelApplication.currentState = "editView";
 				if (!editView)
 				{
@@ -548,10 +548,9 @@
 				FlexGlobals.topLevelApplication.stageView.myStage.x = worldView.myWorld.x;
 				FlexGlobals.topLevelApplication.stageView.myStage.y = worldView.myWorld.y;
 
-				var wvch:WorldViewClickHandler = this.worldView.mouseHandler as WorldViewClickHandler;
-				this.worldView.addEventListener(Event.ENTER_FRAME, wvch.onEnterFrame);
-				this.worldView.addEventListener(MouseEvent.MOUSE_MOVE, wvch.onMouseDown);				
 				FlexGlobals.topLevelApplication.currentState = "stageViewer";
+				var wvch:WorldViewClickHandler = this.worldView.mouseHandler as WorldViewClickHandler;
+				wvch.reInitialize();			
 			}
 			
 			public function showStore():void

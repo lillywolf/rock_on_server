@@ -103,16 +103,18 @@ package clickhandlers
 		
 		private function listenForMouseUp():void
 		{
-			_worldView.addEventListener(MouseEvent.MOUSE_UP, function onMouseUp(evt:MouseEvent):void
-			{
-				if (clickWaitTimer && clickWaitTimer.running)
-					if (objectOfInterest)
-						objectClicked(objectOfInterest);
-					else
-						moveMyAvatar(convertPointToWorldPoint(new Point(_worldView.mouseX, _worldView.mouseY)));
-				_worldView.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-				isDragging = false;
-			});
+			_worldView.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+		}
+		
+		private function onMouseUp(evt:MouseEvent):void
+		{
+			if (clickWaitTimer && clickWaitTimer.running)
+				if (objectOfInterest)
+					objectClicked(objectOfInterest);
+				else
+					moveMyAvatar(convertPointToWorldPoint(new Point(_worldView.mouseX, _worldView.mouseY)));
+			_worldView.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			isDragging = false;			
 		}
 		
 		private function objectClicked(obj:Object):void
@@ -176,7 +178,34 @@ package clickhandlers
 			isDragging = true;
 			mouseIncrementX = _worldView.mouseX.valueOf();
 			mouseIncrementY = _worldView.mouseY.valueOf();			
-		}		
+		}
+		
+		public function killProcessesAndListeners():void
+		{
+			if (clickWaitTimer)
+			{
+				clickWaitTimer.stop();
+				clickWaitTimer = null;
+			}
+			isDragging = false;
+			if (_worldView.hasEventListener(MouseEvent.MOUSE_UP))
+				_worldView.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			_worldView.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			_worldView.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			if (hoverTimer)
+			{
+				hoverTimer.stop();
+				hoverTimer.removeEventListener(TimerEvent.TIMER, onHoverTimerComplete);
+				hoverTimer = null;
+			}
+		}
+		
+		public function reInitialize():void
+		{
+			_worldView.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+			_worldView.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			isDragging = false;
+		}
 		
 		private function resetHoverTimer():void
 		{

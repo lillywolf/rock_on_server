@@ -5,15 +5,23 @@ package clickhandlers
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.filters.GlowFilter;
 	import flash.utils.Timer;
 	
+	import models.OwnedSong;
+	import models.OwnedStructure;
+	
 	import mx.controls.Button;
+	import mx.core.UIComponent;
+	import mx.events.DynamicEvent;
 	
 	import rock_on.Venue;
 	
 	import views.EditView;
 	import views.NormalStructureMode;
 	import views.TileMode;
+	
+	import world.ActiveAsset;
 	
 	public class EditViewClickHandler extends EventDispatcher
 	{
@@ -27,6 +35,7 @@ package clickhandlers
 		public var lastMouseX:Number;
 		public var lastMouseY:Number;
 		public var objectOfInterest:Object;
+		public var selectedObject:Object;
 		
 		public static const CLICK_WAIT_TIME:int = 500;			
 		
@@ -38,6 +47,35 @@ package clickhandlers
 			
 			_editView.addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			_editView.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			_editView.addEventListener(MouseEvent.MOUSE_MOVE, showHoverGlow);
+			_editView.addEventListener("objectPlaced", onObjectPlaced);
+			_editView.addEventListener("objectSelected", onObjectSelected);
+		}
+		
+		private function showHoverGlow(evt:MouseEvent):void
+		{
+			var hitObject:Object = evt.target;
+			
+//			Remove filters for previous object
+			if (hitObject != objectOfInterest && objectOfInterest)
+				objectOfInterest.filters = null;
+			
+//			Add filter if valid hit object
+			if (hitObject is ActiveAsset && !selectedObject)
+			{	
+				addHoverFilter(hitObject as ActiveAsset);
+				objectOfInterest = hitObject;
+			}
+		}
+		
+		private function addHoverFilter(asset:ActiveAsset):void
+		{
+			if (!(_editView.currentMode is TileMode) && 
+				(asset.thinger as OwnedStructure).structure.structure_type != "Tile")
+			{
+				var gf:GlowFilter = new GlowFilter(0xFFEE00, 1, 2, 2, 20, 20);
+				asset.filters = [gf];			
+			}
 		}
 		
 		private function onEnterFrame(evt:Event):void
@@ -71,7 +109,9 @@ package clickhandlers
 			_editView.addEventListener(MouseEvent.MOUSE_UP, function onMouseUp(evt:MouseEvent):void
 			{
 				if (clickWaitTimer && clickWaitTimer.running)
+				{	
 					objectClicked(objectOfInterest, evt);
+				}	
 				_editView.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 				isDragging = false;
 			});
@@ -89,6 +129,16 @@ package clickhandlers
 				(_editView.currentMode as TileMode).handleClick(evt);
 			else if (_editView.currentMode && _editView.currentMode is NormalStructureMode)
 				(_editView.currentMode as NormalStructureMode).handleClick(evt);
+		}
+		
+		private function onObjectPlaced(evt:DynamicEvent):void
+		{
+			selectedObject = null;
+		}
+
+		private function onObjectSelected(evt:DynamicEvent):void
+		{
+			selectedObject = evt.selectedObject;
 		}
 		
 		public function waitForDrag():void
