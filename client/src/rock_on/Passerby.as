@@ -176,14 +176,15 @@ package rock_on
 		
 		public function setInitialDestination():Point3D
 		{
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
+			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
 			var destination:Point3D;
 			
 			do
 			{
 				destination = tryDestination();
 			}	
-			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(destination)) || isAnyoneElseThere(destination));		
+			while ((occupiedSpaces[destination.x] && occupiedSpaces[destination.x][destination.y] && occupiedSpaces[destination.x][destination.y][destination.z]) || 
+				isAnyoneElseThere(destination));		
 			
 //			trace("destination selected");
 			return destination;

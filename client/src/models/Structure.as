@@ -22,8 +22,7 @@ package models
 		public var _height:Number;
 		public var _depth:Number;
 		
-		public var normalWidth:Number;
-		public var normalDepth:Number;		
+		public var outerPoints:Boolean;	
 				
 		public function Structure(params:Object=null, loadedClass:Class=null, target:IEventDispatcher=null)
 		{
@@ -45,6 +44,9 @@ package models
 			_name = params['name'];
 			_structure_type = params['structure_type'];
 			
+			if (_structure_type != "ListeningStation" && _structure_type != "Tile")
+				outerPoints = true;
+			
 			setOptionalProperties(params);
 		}
 
@@ -57,15 +59,9 @@ package models
 			if (params['height'])
 				_height = params['height'];
 			if (params['width'])
-			{
 				_width = params['width'];
-				normalWidth = _width;
-			}
 			if (params['depth'])
-			{
 				_depth = params['depth'];
-				normalDepth = _depth;
-			}
 		}
 		
 		public function set id(val:int):void
@@ -101,6 +97,9 @@ package models
 		public function set structure_type(val:String):void
 		{
 			_structure_type = val;
+			
+			if (_structure_type != "ListeningStation" && _structure_type != "Tile")
+				outerPoints = true;
 		}
 		
 		public function get structure_type():String

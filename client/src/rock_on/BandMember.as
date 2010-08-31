@@ -443,14 +443,11 @@ package rock_on
 			trace("set initial dest");
 			destinationLocation = tryDestination();			
 			
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.occupiedByStructures;
+			var occupiedSpaces:Array = _myWorld.pathFinder.occupiedByStructures;
 			if (occupiedSpaces.length >= _world.tilesDeep*_world.tilesWide)
-			{
 				throw new Error("No free spaces for band member!");
-			}
 			
-			// Adjust so that person avoids furniture on stage
-			
+			// Adjust so that person avoids furniture on stage			
 			while (isAnyoneElseThere(destinationLocation))
 			{
 				destinationLocation = tryDestination();

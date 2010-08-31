@@ -1,17 +1,25 @@
 package stores
 {
+	import controllers.StoreController;
+	
+	import flash.display.DisplayObject;
 	import flash.events.MouseEvent;
 	
 	import models.Store;
+	import models.StoreOwnedThinger;
 	
+	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
 	import mx.controls.Button;
 	import mx.core.UIComponent;
+	
+	import views.TiledItemList;
 
 	public class StoreUIComponent extends UIComponent
 	{
-		public var _store:Store;
-		public var canvas:Canvas;
+		public var _storeController:StoreController;
+		public var storeContainer:TiledItemList;
+		
 		public static const STORE_WIDTH:int = 600;
 		public static const STORE_HEIGHT:int = 360;
 		public static const ITEM_PADDING_X:int = 12;
@@ -19,10 +27,72 @@ package stores
 		public static const PADDING_X:int = 20;
 		public static const PADDING_Y:int = 20;
 		
-		public function StoreUIComponent(store:Store)
+		public function StoreUIComponent(storeController:StoreController)
 		{
 			super();
-			_store = store;
+			_storeController = storeController;
+			
+			this.addEventListener(StoreEvent.THINGER_CLICKED, onThingerClicked);
+		}
+		
+		private function onThingerClicked(evt:StoreEvent):void
+		{
+			var sot:StoreOwnedThinger = evt.thinger as StoreOwnedThinger;
+			if (_storeController.checkCredits(sot))
+				_storeController.buyThinger(sot, this);
+		}
+		
+		public function addStyle():void
+		{
+			this.width = STORE_WIDTH;
+			this.height = STORE_HEIGHT;
+			
+			var tileBtn:Button = new Button();
+			tileBtn.addEventListener(MouseEvent.CLICK, onTileBtnClicked);
+			tileBtn.x = 30;
+			styleButton(tileBtn);
+			this.addChild(tileBtn);
+			
+			var boothBtn:Button = new Button();
+			boothBtn.addEventListener(MouseEvent.CLICK, onBoothBtnClicked);
+			boothBtn.x = 80;
+			styleButton(boothBtn);
+			this.addChild(boothBtn);	
+			
+			addCloseButton();			
+		}
+			
+		public function styleButton(btn:Button):void
+		{
+			btn.height = 40;
+			btn.width = 40;
+			btn.y = 20;
+		}	
+		
+		private function onTileBtnClicked(evt:MouseEvent):void
+		{
+			var store:Store = _storeController.getStoreByName("Clothing Store");
+			showStore(store);
+		}
+		
+		private function onBoothBtnClicked(evt:MouseEvent):void
+		{
+			var store:Store = _storeController.getStoreByName("Structure Store");
+			showStore(store);
+		}	
+		
+		private function showStore(store:Store):void
+		{			
+			if (storeContainer)
+				removeChild(storeContainer);
+			var itemContainers:ArrayCollection = new ArrayCollection();
+			for each (var sot:StoreOwnedThinger in store.store_owned_thingers)
+			{
+				var container:StoreOwnedThingerUIComponent = new StoreOwnedThingerUIComponent(sot);
+				itemContainers.addItem(container);
+			}	
+			storeContainer = new TiledItemList(itemContainers, 3, StoreOwnedThingerUIComponent.NUM_COLUMNS);
+			addChild(storeContainer);
 		}
 		
 		public function addDefaultStyle():void
@@ -36,15 +106,15 @@ package stores
 			backCanvas.y = -10;
 			addChild(backCanvas);
 			
-			canvas = new Canvas();
-			canvas.setStyle("backgroundColor", 0x333333);
-			canvas.setStyle("cornerRadius", "14");
-			canvas.setStyle("borderColor", 0x333333);
-			canvas.setStyle("borderStyle", "solid");
-			canvas.width = STORE_WIDTH;
-			canvas.height = STORE_HEIGHT;
+//			canvas = new Canvas();
+//			canvas.setStyle("backgroundColor", 0x333333);
+//			canvas.setStyle("cornerRadius", "14");
+//			canvas.setStyle("borderColor", 0x333333);
+//			canvas.setStyle("borderStyle", "solid");
+//			canvas.width = STORE_WIDTH;
+//			canvas.height = STORE_HEIGHT;
 			addCloseButton();
-			addChild(canvas);
+//			addChild(canvas);
 		}
 		
 		public function addCloseButton():void
@@ -55,7 +125,7 @@ package stores
 			btn.setStyle("right", 10);
 			btn.setStyle("top", 10);
 			btn.addEventListener(MouseEvent.CLICK, onCloseButtonClicked);
-			canvas.addChild(btn);
+			this.addChild(btn);
 		}
 		
 		private function onCloseButtonClicked(evt:MouseEvent):void
@@ -63,14 +133,14 @@ package stores
 			parent.removeChild(this);
 		}
 		
-		public function set store(val:Store):void
+		public function set storeController(val:StoreController):void
 		{
-			_store = val;
+			_storeController = val;
 		}
 		
-		public function get store():Store
+		public function get storeController():StoreController
 		{
-			return _store;
+			return _storeController;
 		}
 		
 	}

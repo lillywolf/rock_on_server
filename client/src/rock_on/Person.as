@@ -321,27 +321,24 @@ package rock_on
 		public function getSurroundingPointsLayer(depthIndex:int, pt3D:Point3D):ArrayCollection
 		{
 			var concentricArray:ArrayCollection = new ArrayCollection();
+			var spaces:Array = _myWorld.pathFinder.getStructureOccupiedSpaces();
 			var neighbor:Point3D;
 			for (var i:int = 0; i < 2; i++)
 			{
 				for (var j:int = 0; j < (depthIndex * 2 + 1); j++)
 				{
-					neighbor = _myWorld.pathFinder.mapPointToPathGrid(new Point3D(pt3D.x - (depthIndex * (i * 2 - 1)), pt3D.y, pt3D.z - (depthIndex - j)));
-					if (neighbor && !(_myWorld.pathFinder.establishStructureOccupiedSpaces() as ArrayCollection).contains(neighbor))
-					{
+					neighbor = new Point3D(pt3D.x - (depthIndex * (i * 2 - 1)), pt3D.y, pt3D.z - (depthIndex - j));
+					if (neighbor && (!spaces[neighbor.x] || !spaces[neighbor.x][neighbor.y] || !spaces[neighbor.x][neighbor.y][neighbor.z]))
 						concentricArray.addItem(neighbor);					
-					}
 				}
 			}
 			for (i = 0; i < 2; i++)
 			{
 				for (j = 0; j < (depthIndex * 2 - 1); j++)
 				{
-					neighbor = _myWorld.pathFinder.mapPointToPathGrid(new Point3D(pt3D.x - (depthIndex - j), pt3D.y, pt3D.z - (depthIndex * (i * 2 - 1))));
-					if (neighbor && !(_myWorld.pathFinder.establishStructureOccupiedSpaces() as ArrayCollection).contains(neighbor))
-					{
+					neighbor = new Point3D(pt3D.x - (depthIndex - j), pt3D.y, pt3D.z - (depthIndex * (i * 2 - 1)));
+					if (neighbor && (!spaces[neighbor.x] || !spaces[neighbor.x][neighbor.y] || !spaces[neighbor.x][neighbor.y][neighbor.z]))
 						concentricArray.addItem(neighbor);					
-					}					
 				}
 			}
 			return concentricArray;
@@ -377,15 +374,13 @@ package rock_on
 			// Don't move into structures
 			
 			var nextPoint:Point3D;
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
 			
 			if (directionality.x > 0)
 			{
 				nextPoint = new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				if (occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
-				{
+				if (occupiedSpaces[nextPoint.x] && occupiedSpaces[nextPoint.x][nextPoint.y] && occupiedSpaces[nextPoint.x][nextPoint.y][nextPoint.z])
 					nextPoint = new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				}
 				_myWorld.moveAssetTo(this, nextPoint);
 			}
 			else if (directionality.x < 0)
@@ -441,18 +436,12 @@ package rock_on
 		private function validatePoint(nextPoint:Point3D):void
 		{
 			if (nextPoint.x > _myWorld.tilesWide || nextPoint.z > _myWorld.tilesDeep)
-			{
 				throw new Error("Outside of world");
-			}
 			if (nextPoint.y != 0)
-			{
 				throw new Error("Height not zero");
-			}
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
-			if (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(nextPoint)))
-			{
+			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(false, true);
+			if (occupiedSpaces[nextPoint.x] && occupiedSpaces[nextPoint.x][nextPoint.y] && occupiedSpaces[nextPoint.x][nextPoint.y][nextPoint.z])
 				throw new Error("Occupied space");
-			}
 		}
 		
 		public function onDirectionChanged(evt:WorldEvent):void

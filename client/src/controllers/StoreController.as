@@ -42,63 +42,46 @@ package controllers
 			essentialModelController.users.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onUserLoaded);
 		}
 
-		public function getStoreUIComponent(store:Store):UIComponent
+		public function getStoreUIComponent():UIComponent
 		{
-			var uic:StoreUIComponent = new StoreUIComponent(store);
-			uic.addDefaultStyle();			
-			uic.store = store;
-			var index:int = 0;
-			for each (var sot:StoreOwnedThinger in store.store_owned_thingers)
-			{
-				var container:StoreOwnedThingerUIComponent = new StoreOwnedThingerUIComponent(sot);
-				addStoreOwnedThingerToStore(uic, container, index);
-				index++;
-			}
-			uic.addEventListener(MouseEvent.CLICK, onStoreClicked);
+			var uic:StoreUIComponent = new StoreUIComponent(this);
+			uic.addStyle();
+//			uic.addEventListener(MouseEvent.CLICK, onStoreClicked);
 			return uic;
-		}
-		
-		private function addStoreOwnedThingerToStore(uic:StoreUIComponent, container:StoreOwnedThingerUIComponent, index:int):void
-		{
-			container.x = index % (StoreOwnedThingerUIComponent.NUM_COLUMNS) * (StoreOwnedThingerUIComponent.CONTAINER_WIDTH + StoreUIComponent.ITEM_PADDING_X) + StoreUIComponent.PADDING_X;
-//			var numColumns:int = Math.round((uic.width - (2 * StoreUIComponent.PADDING_X)) / (StoreOwnedThingerUIComponent.CONTAINER_WIDTH + StoreUIComponent.ITEM_PADDING_X));
-			var numColumns:int = StoreOwnedThingerUIComponent.NUM_COLUMNS;
-			container.y = Math.floor(index / numColumns) * (StoreOwnedThingerUIComponent.CONTAINER_HEIGHT + StoreUIComponent.ITEM_PADDING_Y) + StoreUIComponent.PADDING_Y;
-			uic.canvas.addChild(container);
 		}
 		
 		public function onStoreClicked(evt:MouseEvent):void
 		{
-			var store:Store = (evt.currentTarget as StoreUIComponent).store;
-			var sot:StoreOwnedThinger;
-			if (evt.target is StoreOwnedThingerUIComponent)
-			{
-				sot = (evt.target as StoreOwnedThingerUIComponent).storeOwnedThinger;
-			}
-			else if (evt.target.parent is StoreOwnedThingerUIComponent)
-			{
-				sot = (evt.target.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
-			}
-			else if (evt.target.parent.parent is StoreOwnedThingerUIComponent)
-			{
-				sot = (evt.target.parent.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
-			}
-			else if (evt.target.parent.parent.parent is StoreOwnedThingerUIComponent)
-			{
-				sot = (evt.target.parent.parent.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
-			}
-			else
-			{
-				sot = null;
-			}
+//			var store:Store = (evt.currentTarget as StoreUIComponent).store;
+//			var sot:StoreOwnedThinger;
+//			if (evt.target is StoreOwnedThingerUIComponent)
+//			{
+//				sot = (evt.target as StoreOwnedThingerUIComponent).storeOwnedThinger;
+//			}
+//			else if (evt.target.parent is StoreOwnedThingerUIComponent)
+//			{
+//				sot = (evt.target.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
+//			}
+//			else if (evt.target.parent.parent is StoreOwnedThingerUIComponent)
+//			{
+//				sot = (evt.target.parent.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
+//			}
+//			else if (evt.target.parent.parent.parent is StoreOwnedThingerUIComponent)
+//			{
+//				sot = (evt.target.parent.parent.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
+//			}
+//			else
+//			{
+//				sot = null;
+//			}
 			
-			if (sot)
-			{	
-				if (checkCredits(sot))
-				{
-					buyThinger(sot, evt.currentTarget as StoreUIComponent);
-				}			
-			}
+//			if (sot)
+//			{	
+//				if (checkCredits(sot))
+//				{
+//					buyThinger(sot, evt.currentTarget as StoreUIComponent);
+//				}			
+//			}
 		}
 		
 		public function checkCredits(sot:StoreOwnedThinger):Boolean
@@ -114,24 +97,13 @@ package controllers
 		{
 			(storeUI.parent as Canvas).removeChild(storeUI);
 			
-			var model:String;
-			
+			var model:String;			
 			if (sot.layerable)
-			{
 				model = 'layerable';
-			}
 			else if (sot.structure)
-			{
 				placeOwnedStructure(sot);
-			}
 			else if (sot.usable)
-			{
 				model = 'usable';			
-			}			
-//			params.id = sot[model].id;
-//			params.user_id = _gdi.userController.user.id;
-//			var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.INSTANCE_TO_CREATE, 'owned_'+model, params, 'create_new', true, true);			
-//			_essentialModelController.dispatchEvent(evt);
 		}
 		
 		public function placeOwnedStructure(sot:StoreOwnedThinger):void

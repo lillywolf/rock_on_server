@@ -720,15 +720,11 @@ package rock_on
 		{
 			trace("pick point near structure");
 			var stagePoint:Point3D;
-			var occupiedSpaces:ArrayCollection;
+			var occupiedSpaces:Array;
 			if (worldToUpdate)
-			{
 				occupiedSpaces = worldToUpdate.pathFinder.updateOccupiedSpaces(true, true);
-			}
 			else
-			{
 				occupiedSpaces = _myWorld.pathFinder.updateOccupiedSpaces(true, true);			
-			}
 			
 			if (availableSpaces(occupiedSpaces))
 			{
@@ -742,7 +738,7 @@ package rock_on
 						zDimension = bounds.top + Math.round(Math.random()*bounds.height);
 						stagePoint = new Point3D(xDimension, 0, zDimension);				
 					}
-					while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)) || 
+					while ((occupiedSpaces[stagePoint.x] && occupiedSpaces[stagePoint.x][stagePoint.y] && occupiedSpaces[stagePoint.x][stagePoint.y][stagePoint.z]) || 
 						(xDimension >= avoid.left && xDimension <= avoid.right && zDimension >= avoid.top && zDimension <= avoid.bottom));					
 				}
 				else
@@ -753,7 +749,7 @@ package rock_on
 						zDimension = bounds.top + Math.round(Math.random()*bounds.height);
 						stagePoint = new Point3D(xDimension, 0, zDimension);				
 					}
-					while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(stagePoint)));
+					while (occupiedSpaces[stagePoint.x] && occupiedSpaces[stagePoint.x][stagePoint.y] && occupiedSpaces[stagePoint.x][stagePoint.y][stagePoint.z]);
 				}
 			}
 			else
@@ -764,12 +760,10 @@ package rock_on
 			return stagePoint;
 		}
 		
-		private function availableSpaces(occupiedSpaces:ArrayCollection):Boolean
+		private function availableSpaces(occupiedSpaces:Array):Boolean
 		{
 			if (occupiedSpaces.length > _myWorld.tilesDeep*_myWorld.tilesWide)
-			{
 				return false;
-			}
 			return true;
 		}
 		

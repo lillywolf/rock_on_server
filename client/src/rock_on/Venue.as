@@ -178,7 +178,7 @@ package rock_on
 		public function pickRandomAvailablePointWithinRect(rect:Rectangle, worldSprite:World, heightBase:int, rect2:Rectangle = null, avoidStructures:Boolean = true, avoidPeople:Boolean = true, exemptStructures:ArrayCollection = null):Point3D
 		{
 			var pt3D:Point3D = new Point3D(0, heightBase, 0);				
-			var occupiedSpaces:ArrayCollection = worldSprite.pathFinder.updateOccupiedSpaces(avoidPeople, avoidStructures, exemptStructures);
+			var occupiedSpaces:Array = worldSprite.pathFinder.updateOccupiedSpaces(avoidPeople, avoidStructures, exemptStructures);
 			do
 			{
 				pt3D.x = Math.floor(rect.right - Math.random() * (rect.right - rect.left - 1) - 1);
@@ -192,7 +192,7 @@ package rock_on
 					}
 				}
 			}
-			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(pt3D)));	
+			while (occupiedSpaces[pt3D.x] && occupiedSpaces[pt3D.x][pt3D.y] && occupiedSpaces[pt3D.x][pt3D.y][pt3D.z]);	
 			return pt3D;
 		}
 		

@@ -395,15 +395,13 @@ package views
 				exemptStructures.addItem(_editView.stageManager.concertStage);
 			}			
 			
-			var occupiedSpaces:ArrayCollection = _myWorld.pathFinder.establishStructureOccupiedSpaces(exemptStructures);
+			var occupiedSpaces:Array = _myWorld.pathFinder.getStructureOccupiedSpaces(exemptStructures);
 			var structureSpaces:ArrayCollection = new ArrayCollection();
 //			structureSpaces = _myWorld.pathFinder.getPoint3DForMovingStructure(currentAsset, currentAsset.thinger as OwnedStructure, structureSpaces);
 			for each (var pt3D:Point3D in structureSpaces)
 			{
-				if (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(pt3D)))
-				{
+				if (occupiedSpaces[pt3D.x] && occupiedSpaces[pt3D.x][pt3D.y] && occupiedSpaces[pt3D.x][pt3D.y][pt3D.z])
 					return true;
-				}
 			}
 			return false;
 		}

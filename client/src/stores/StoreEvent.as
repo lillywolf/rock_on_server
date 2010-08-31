@@ -6,6 +6,7 @@ package stores
 	{
 		public static const THINGER_PURCHASED:String = "StoreEvent:ThingerPurchased";
 		public static const THINGER_SOLD:String = "StoreEvent:ThingerSold";
+		public static const THINGER_CLICKED:String = "StoreEvent:ThingerClicked";
 		public var _thinger:Object;
 		
 		public function StoreEvent(type:String, thinger:Object=null, bubbles:Boolean=false, cancelable:Boolean=false)

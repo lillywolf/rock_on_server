@@ -245,13 +245,13 @@ package models
 		{
 			if (_rotation && _rotation%2 == 1)
 			{
-				_width = _structure.normalDepth;
-				_depth = _structure.normalWidth;				
+				_width = _structure.depth;
+				_depth = _structure.width;				
 			}
 			else
 			{
-				_width = _structure.normalWidth;
-				_depth = _structure.normalDepth;
+				_width = _structure.width;
+				_depth = _structure.depth;
 			}						
 		}
 		

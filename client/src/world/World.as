@@ -135,36 +135,30 @@ package world
 			return worldBound;
 		}
 		
-		public function getOccupiedSpaces(avoidStructures:Boolean = true, avoidPeople:Boolean = true, exemptStructures:ArrayCollection = null):ArrayCollection
+		public function getOccupiedSpaces(avoidStructures:Boolean = true, avoidPeople:Boolean = true, exempt:ArrayCollection = null):Array
 		{
-			var structureOccupiedSpaces:ArrayCollection = new ArrayCollection();
-			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
+//			var structureOccupiedSpaces:ArrayCollection = new ArrayCollection();
+//			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
+			var spaces:Array = new Array();
 			if (avoidStructures)
-			{
-				structureOccupiedSpaces = this.pathFinder.establishStructureOccupiedSpaces(exemptStructures);			
-			}
+				spaces.concat(this.pathFinder.getStructureOccupiedSpaces(exempt));			
 			if (avoidPeople)
-			{
-				peopleOccupiedSpaces = this.pathFinder.establishPeopleOccupiedSpaces();
-			}
-			structureOccupiedSpaces.addAll(peopleOccupiedSpaces);
-			return structureOccupiedSpaces;
+				spaces.concat(this.pathFinder.getPeopleOccupiedSpacesForArray(this.assetRenderer.unsortedAssets));
+//			structureOccupiedSpaces.addAll(peopleOccupiedSpaces);
+			return spaces;
 		}
 		
 		public function isPointAvailable(pt3D:Point3D, avoidStructures:Boolean = true, avoidPeople:Boolean = true, exemptStructures:ArrayCollection = null):Boolean
 		{
-			var occupiedSpaces:ArrayCollection = getOccupiedSpaces(avoidStructures, avoidPeople, exemptStructures);
-			pt3D = this.pathFinder.mapPointToPathGrid(pt3D);
-			if (occupiedSpaces.contains(pt3D))
-			{
+			var occupiedSpaces:Array = getOccupiedSpaces(avoidStructures, avoidPeople, exemptStructures);
+			if (occupiedSpaces[pt3D.x] && occupiedSpaces[pt3D.x][pt3D.y] && occupiedSpaces[pt3D.x][pt3D.y][pt3D.z])
 				return false;
-			}
 			return true;
 		}
 		
 		public function pickRandomAvailableWorldPoint(avoidStructures:Boolean=true, avoidPeople:Boolean=true, exemptStructures:ArrayCollection=null):Point3D
 		{
-			var occupiedSpaces:ArrayCollection = getOccupiedSpaces(avoidStructures, avoidPeople, exemptStructures);
+			var occupiedSpaces:Array = getOccupiedSpaces(avoidStructures, avoidPeople, exemptStructures);
 			
 			var pt3D:Point3D;
 			return pt3D;

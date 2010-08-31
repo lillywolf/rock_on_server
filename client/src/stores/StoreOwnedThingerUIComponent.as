@@ -27,6 +27,21 @@ package stores
 			super();
 			_storeOwnedThinger = sot;
 			_mc = sot.getMovieClip();
+			addStyle();
+			addEventListener(MouseEvent.ROLL_OVER, onMouseOver);
+			addEventListener(MouseEvent.ROLL_OUT, onMouseOut);	
+			addEventListener(MouseEvent.CLICK, onClick);
+		}
+		
+		private function onClick(evt:MouseEvent):void
+		{
+			var storeEvt:StoreEvent = new StoreEvent(StoreEvent.THINGER_CLICKED);
+			storeEvt.thinger = _storeOwnedThinger;
+			dispatchEvent(storeEvt);
+		}
+		
+		private function addStyle():void
+		{
 			width = CONTAINER_WIDTH;
 			height = CONTAINER_HEIGHT;
 			
@@ -39,11 +54,8 @@ package stores
 				var uic:UIComponent = LayerableController.formatMovieClipByDimensions(_mc, CONTAINER_WIDTH, CONTAINER_HEIGHT, CONTAINER_PADDING_X, CONTAINER_PADDING_Y);
 				container.addChild(uic);
 				addChild(container);
-			}
-			
+			}			
 			addFrame(new ColorFrameBlue());
-			addEventListener(MouseEvent.ROLL_OVER, onMouseOver);
-			addEventListener(MouseEvent.ROLL_OUT, onMouseOut);			
 		}
 		
 		public function addFrame(frame:*):void

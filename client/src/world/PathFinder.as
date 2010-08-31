@@ -4,6 +4,7 @@ package world
 	
 	import models.OwnedStructure;
 	
+	import mx.charts.AreaChart;
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
@@ -18,8 +19,8 @@ package world
 	public class PathFinder extends ArrayCollection
 	{
 		public var pathGrid:ArrayCollection;
-		public var occupiedByStructures:ArrayCollection;
-		public var occupiedByPeople:ArrayCollection;
+		public var occupiedByStructures:Array;
+		public var occupiedByPeople:Array;
 		public var _world:World;
 				
 		public function PathFinder(world:World, worldHeight:int=0, source:Array=null)
@@ -32,7 +33,6 @@ package world
 		public function add(asset:ActiveAsset, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):ArrayCollection
 		{
 			addItem(asset);
-//			var assetPathFinder:ArrayCollection = calculatePathGrid(asset, asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures, extraStructures);
 			var finalPath:ArrayCollection = calculateNaivePath(asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures, extraStructures);
 			if (fallBack && (finalPath.length == 0 || !equivalent3DPoints(finalPath[finalPath.length-1], asset.worldDestination)))
 				finalPath = calculateAStarPath(asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures, extraStructures);	
@@ -47,18 +47,27 @@ package world
 		
 		private function tackOnAdditionalPath(asset:ActiveAsset, finalPath:ArrayCollection, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exempt:ArrayCollection=null, extra:ArrayCollection=null, heightBase:int=0):void
 		{
-//			var orientation:Object = getStartToEndOrientation(asset.lastWorldPoint, asset.worldDestination);						
-			var destination:Point3D = pickNewDestination(finalPath[finalPath.length-1] as Point3D, avoidStructures, avoidPeople, exempt, extra, heightBase);
-//			var additionalPath:ArrayCollection = calculateNaivePath(finalPath[finalPath.length-1] as Point3D, destination, avoidStructures, avoidPeople, exempt, extra);
+//			Pick a new point that isn't the last node in the finalPath array
+			var destination:Point3D = pickNewDestination(finalPath[finalPath.length-1] as Point3D, avoidStructures, avoidPeople, exempt, extra, heightBase);			
+			while (equivalent3DPoints(destination, finalPath[finalPath.length-1] as Point3D))
+			{
+				destination = pickNewDestination(finalPath[finalPath.length-1] as Point3D, avoidStructures, avoidPeople, exempt, extra, heightBase);			
+			}
 			var additionalPath:ArrayCollection = calculateAStarPath(finalPath[finalPath.length-1] as Point3D, destination, avoidStructures, avoidPeople, exempt, extra);
-			finalPath.addAll(additionalPath);
+			if (additionalPath)
+			{	
+				finalPath.addAll(additionalPath);
+				adjustAssetDestination(asset, additionalPath);
+			}	
+			else
+				throw new Error("write a new escape");
 		}
 		
 		private function pickNewDestination(currentPoint:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exempt:ArrayCollection=null, extra:ArrayCollection=null, heightBase:int=0):Point3D
 		{
-			var unwalkables:ArrayCollection = updateOccupiedSpaces(avoidPeople, avoidStructures, exempt, extra);
+			var unwalkables:Array = updateOccupiedSpaces(avoidPeople, avoidStructures, exempt, extra);
 			var destination:Point3D = new Point3D(Math.round(Math.random()*_world.tilesWide), currentPoint.y, Math.round(Math.random()*_world.tilesDeep));		
-			while (unwalkables.contains(mapPointToPathGrid(destination)))
+			while (unwalkables[destination.x] && unwalkables[destination.x][destination.y] && unwalkables[destination.x][destination.y][destination.z])
 			{
 				destination = new Point3D(Math.round(Math.random()*_world.tilesWide), currentPoint.y, Math.round(Math.random()*_world.tilesDeep));		
 			}
@@ -67,9 +76,9 @@ package world
 
 		private function pickNewDestinationBasedOnOrientation(currentPoint:Point3D, orientation:Object, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exempt:ArrayCollection=null, extra:ArrayCollection=null, heightBase:int=0):Point3D
 		{
-			var unwalkables:ArrayCollection = updateOccupiedSpaces(avoidPeople, avoidStructures, exempt, extra);
+			var unwalkables:Array = updateOccupiedSpaces(avoidPeople, avoidStructures, exempt, extra);
 			var destination:Point3D = getDestinationBasedOnOrientation(orientation, currentPoint); 
-			while (unwalkables.contains(mapPointToPathGrid(destination)))
+			while (unwalkables[destination.x] && unwalkables[destination.x][destination.y] && unwalkables[destination.x][destination.y][destination.z])
 			{
 				destination = getDestinationBasedOnOrientation(orientation, currentPoint);			
 			}
@@ -136,7 +145,7 @@ package world
 		
 		public function populateOccupiedSpaces():void
 		{
-			this.occupiedByStructures = establishStructureOccupiedSpaces();
+			this.occupiedByStructures = getStructureOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets);
 		}
 		
 		private function addPlanesToPathGrid(worldHeight:int=0):void
@@ -180,13 +189,15 @@ package world
 			return unorganizedPoints;			
 		}
 		
-		public function validateDestination(asset:ActiveAsset, destination:Point3D, occupiedSpaces:ArrayCollection):void
+		public function validateDestination(asset:ActiveAsset, destination:Point3D, occupiedSpaces:Array):void
 		{
 			if (!asset.worldDestination)
 			{
 //				throw new Error("No destination specified");
 			}
-			else if (occupiedSpaces.contains(pathGrid[asset.worldDestination.x][asset.worldDestination.y][asset.worldDestination.z]))
+			else if (occupiedSpaces[asset.worldDestination.x] &&
+				occupiedSpaces[asset.worldDestination.x][asset.worldDestination.y] &&
+				occupiedSpaces[asset.worldDestination.x][asset.worldDestination.y][asset.worldDestination.z])
 			{
 				var tempPoint:Point3D = pathGrid[asset.worldDestination.x][asset.worldDestination.y][asset.worldDestination.z];
 				throw new Error("Destination is currently occupied");
@@ -212,47 +223,36 @@ package world
 			neighbors.addItem({parentInfo: parentInfo, node: currentPoint, hScore: hScore, gScore: gScore});			
 		}
 		
-		public function getAStarNeighbors(currentObject:Object, startingPt:Point3D, destination:Point3D, unwalkables:Array, closedList:ArrayCollection):ArrayCollection
+		public function getAStarNeighbors(currentObject:Object, startingPt:Point3D, destination:Point3D, unwalkables:Array, closedList:Array):ArrayCollection
 		{
 			var neighbors:ArrayCollection = new ArrayCollection();
 			var pt:Point3D;
 			pt = getNeighbor("top", currentObject.node);
 			if (pt && pt.x < 14 && pt.z > 12)
 				var blah:int = 0;
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && !closedList.contains(pt))
+			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject);
 			}
 			pt = getNeighbor("bottom", currentObject.node);
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && !closedList.contains(pt))
+			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject);			
 			}
 			pt = getNeighbor("right", currentObject.node);
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && !closedList.contains(pt))
+			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject);		
 			}
 			pt = getNeighbor("left", currentObject.node);
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && !closedList.contains(pt))
+			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject);
 			}
 			return neighbors;
 		}
 		
-//		private function inClosedList(pt3D:Point3D, closedList:ArrayCollection):Boolean
-//		{
-//			for (var i:int = (closedList.length - 1); i >= 0; i--)
-//			{
-//				var obj:Object = closedList[i];
-//				if (mapPointToPathGrid(pt3D) == mapPointToPathGrid(obj.node))
-//					return true;
-//			}
-//			return false;
-//		}
-		
-		public function getNeighboringPoints(assetPathFinder:ArrayCollection, index:int, occupiedSpaces:ArrayCollection, unorganizedPoints:ArrayCollection):Array
+		public function getNeighboringPoints(assetPathFinder:ArrayCollection, index:int, occupiedSpaces:Array, unorganizedPoints:ArrayCollection):Array
 		{	
 			var coordsArray:Array = new Array();
 			var pt:Point3D;
@@ -304,9 +304,7 @@ package world
 			for each (var pt:Point3D in coordsArray)
 			{
 				if (pt == startPoint)
-				{
 					return true;
-				}
 				if (pt.x == startPoint.x && pt.y == startPoint.y && pt.z == startPoint.z)
 				{
 					trace ("Start point found, different instance");
@@ -314,68 +312,6 @@ package world
 				}
 			}
 			return false;
-		}
-		
-		public function createSeatingArrangement(bounds:Rectangle, stageBounds:Rectangle, totalSeats:int):ArrayCollection
-		{
-			trace("create seating arrangement");
-			var seats:ArrayCollection = new ArrayCollection();
-			var totalPoints:int = bounds.height * bounds.width;
-			if (totalSeats < totalPoints)
-			{
-				// Subtract 2 to prevent overlap
-				var dimension:int = stageBounds.top - bounds.top - 2;
-				var seatsPerRow:int = Math.ceil(totalSeats / dimension);
-				for (var i:int = 0; i < dimension; i++)
-				{
-					var rowSeats:ArrayCollection = new ArrayCollection();
-					var orderedRowSeats:ArrayCollection = new ArrayCollection();
-					var dist:int;
-					for (var j:int = 0; j < seatsPerRow; j++)
-					{
-						var seatX:int;
-						var seatY:int;
-						do
-						{
-							if (Math.random() < 0.5)
-							{
-								seatX = stageBounds.right + 1 + i;
-								seatY = bounds.bottom - Math.round(Math.random() * (stageBounds.height + i + 1));
-								dist = seatY;
-							}
-							else
-							{
-								seatY = stageBounds.top - 1 - i;
-								seatX = bounds.left + Math.round(Math.random() * (stageBounds.width + i + 1));
-								dist = seatX;
-							}	
-							var reference:Point3D = this.pathGrid[seatX][0][seatY];
-						}
-						while (rowSeats.contains(reference));
-								
-						rowSeats.addItem(reference);
-						orderedRowSeats.addItem({reference: reference, distance: dist});
-//						seats.addItem(reference);
-					}
-					var sortField:SortField = new SortField("distance");
-					sortField.numeric = true;
-					var sort:Sort = new Sort();
-					sort.fields = [sortField];
-					orderedRowSeats.sort = sort;
-					orderedRowSeats.refresh();
-					for each (var obj:Object in orderedRowSeats)
-					{
-						seats.addItem(obj.reference);
-					}
-//					seats.addItem(rowSeats);
-				}
-			}
-			else
-			{
-				throw new Error("Exceeds max capacity");
-			}
-			trace("seating created");
-			return seats;		
 		}
 		
 		public function getOuterPoints(selectedPoint:Point3D, bounds:Rectangle):int
@@ -488,50 +424,69 @@ package world
 		
 		public function calculateAStarPath(startingPoint:Point3D, destination:Point3D, avoidStructures:Boolean, avoidPeople:Boolean, exempt:ArrayCollection, extra:ArrayCollection):ArrayCollection
 		{
-			var closedList:ArrayCollection = new ArrayCollection();
-			var openList:ArrayCollection = new ArrayCollection();
+			var closedList:Array = new Array();
+			var openList:Array = new Array();
 			var fauxOpenList:ArrayCollection = new ArrayCollection();
 			var unwalkables:Array = getUnwalkables(avoidPeople, avoidStructures, exempt, extra);
 			var lowestFScoreObject:Object;
-			openList.addItem({parentInfo: null, node: startingPoint, hScore: getHScore(startingPoint, destination), gScore: 0}); //add starting point to open list
-			fauxOpenList.addItem(startingPoint);
+			addPointTo3DArray(startingPoint, {parentInfo: null, node: startingPoint, hScore: getHScore(startingPoint, destination), gScore: 0}, openList); //add starting point to open list
+			fauxOpenList.addItem({parentInfo: null, node: startingPoint, hScore: getHScore(startingPoint, destination), gScore: 0});
+			var iteration:int;
 			while(openList.length != 0)  // quit if open list is emptied, ie. no path
 			{
-				lowestFScoreObject = getLowestFScore(openList);	//get the last/lowest FscoreObject from the open list
-				var index:int = openList.getItemIndex(lowestFScoreObject);	
-				openList.removeItemAt(index);
-				fauxOpenList.removeItemAt(index); //remove the last object with the lowest Fscore from open list
-				closedList.addItem(lowestFScoreObject);     //add that lowest FScoreObject to the closed List							
-				if (equivalent3DPoints(closedList[closedList.length - 1].node, destination)) return determinePath(closedList); // exit while loop if we've hit the end
-				var neighbors:ArrayCollection = updateAStarNeighbors(startingPoint, destination, unwalkables, openList, closedList, fauxOpenList);
+				lowestFScoreObject = getLowestFScore(fauxOpenList);	//get the last/lowest FscoreObject from the open list
+				var index:int = fauxOpenList.getItemIndex(lowestFScoreObject);	
+				fauxOpenList.removeItemAt(index);
+				openList[lowestFScoreObject.node.x][lowestFScoreObject.node.y][lowestFScoreObject.node.z] = 0; //remove the last object with the lowest Fscore from open list
+				addPointTo3DArray(lowestFScoreObject.node, lowestFScoreObject, closedList);     //add that lowest FScoreObject to the closed List							
+				if (equivalent3DPoints(new Point3D(lowestFScoreObject.node.x, lowestFScoreObject.node.y, lowestFScoreObject.node.z), destination)) return determinePath(closedList, lowestFScoreObject); // exit while loop if we've hit the end
+				var neighbors:ArrayCollection = updateAStarNeighbors(startingPoint, destination, lowestFScoreObject, unwalkables, openList, closedList, fauxOpenList);
+				fauxOpenList.addAll(neighbors);
+				iteration++;
+				
+				if (iteration > 1000 || neighbors.length == 0)
+					return determinePath(closedList, lowestFScoreObject);
 			}
 			return null;
 		}
 		
-		private function updateAStarNeighbors(startingPt:Point3D, destination:Point3D, unwalkables:Array, openList:ArrayCollection, closedList:ArrayCollection, fauxOpenList:ArrayCollection):ArrayCollection
+		private function addPointTo3DArray(pt:Point3D, obj:Object, addTo:Array):void
 		{
-			var neighbors:ArrayCollection = getAStarNeighbors(closedList[closedList.length-1], startingPt, destination, unwalkables, closedList);
+			if (addTo[pt.x] && addTo[pt.x][pt.y])
+			{	
+				addTo[pt.x][pt.y][pt.z] = obj;
+			}
+			else if (addTo[pt.x])
+			{
+				addTo[pt.x][pt.y] = new Array();
+				addTo[pt.x][pt.y][pt.z] = obj;
+			}
+			else
+			{
+				addTo[pt.x] = new Array();
+				addTo[pt.x][pt.y] = new Array();
+				addTo[pt.x][pt.y][pt.z] = obj;
+			}
+		}			
+		
+		private function updateAStarNeighbors(startingPt:Point3D, destination:Point3D, lastObject:Object, unwalkables:Array, openList:Array, closedList:Array, fauxOpenList:ArrayCollection):ArrayCollection
+		{
+			var neighbors:ArrayCollection = getAStarNeighbors(lastObject, startingPt, destination, unwalkables, closedList);
 			for each (var obj:Object in neighbors)    
 			{
-				if (!inOpenList(obj, fauxOpenList))   //for each neighbor that isn't yet on the open list
+				if (!inOpenList(obj, openList))   //for each neighbor that isn't yet on the open list
 				{	
-					openList.addItem(obj);
-					fauxOpenList.addItem(obj.node);
+					addPointTo3DArray(new Point3D(obj.node.x, obj.node.y, obj.node.z), obj, openList);
+					fauxOpenList.addItem(obj);
 				}
 			}
 			return neighbors;
 		}
 		
-		private function inOpenList(obj:Object, fauxOpenList:ArrayCollection):Boolean
-		{
-			for (var i:int = (fauxOpenList.length - 1); i >= 0; i--)
-			{
-				var pt3D:Point3D = fauxOpenList[i];
-				if (obj.node.x == pt3D.x &&
-					obj.node.y == pt3D.y &&
-					obj.node.z == pt3D.z)
-					return true;
-			}
+		private function inOpenList(obj:Object, openList:Array):Boolean
+		{		
+			if (openList[obj.node.x] && openList[obj.node.x][obj.node.y][obj.node.z])
+				return true;
 			return false;
 		}
 		
@@ -545,16 +500,16 @@ package world
 			return true;
 		}
 		
-		private function getLowestFScore(openList:ArrayCollection):Object
+		private function getLowestFScore(fauxOpenList:ArrayCollection):Object
 		{
 			// This function finds the last node with the lowest F score in the open list
 			// returns an object corresponding to that lowest node
-			var lowest:Object = openList[openList.length-1];
+			var lowest:Object = fauxOpenList[fauxOpenList.length-1];
 			
-			for (var i:int = 0; i < openList.length; i++)
+			for (var i:int = 0; i < fauxOpenList.length; i++)
 			{
-				if (openList[i].hScore + openList[i].gScore <= lowest.hScore + lowest.gScore)
-					lowest = openList[i];
+				if (fauxOpenList[i].hScore + fauxOpenList[i].gScore <= lowest.hScore + lowest.gScore)
+					lowest = fauxOpenList[i];
 			}
 			return lowest;
 		}	
@@ -568,29 +523,29 @@ package world
 			
 			closedList.addItem(startingPoint);
 			var startObject:Object = {parentInfo: null, node: startingPoint, hScore: null, gScore: 0};
-			var nextObject:Object = calculateAStarNeighbors(startObject, startingPoint, destination, unwalkables, openList, closedList, aStarInfo);
-			aStarInfo.addItem(startObject);
-			aStarInfo.addItem(nextObject);
+//			var nextObject:Object = calculateAStarNeighbors(startObject, startingPoint, destination, unwalkables, openList, closedList, aStarInfo);
+//			aStarInfo.addItem(startObject);
+//			aStarInfo.addItem(nextObject);
 			
 			while (!closedList.contains(mapPointToPathGrid(destination)))
 			{	
-				var newObject:Object = calculateAStarNeighbors(nextObject, startingPoint, destination, unwalkables, openList, closedList, aStarInfo);
-				if (newObject)
-				{
-					nextObject = newObject;
-					aStarInfo.addItem(newObject);
-				}
-				else
-				{
-					return aStarInfo;
-				}
-				if (closedList.length > 1000 || openList.length > 10000)
-					throw new Error("Bad news");
+//				var newObject:Object = calculateAStarNeighbors(nextObject, startingPoint, destination, unwalkables, openList, closedList, aStarInfo);
+//				if (newObject)
+//				{
+//					nextObject = newObject;
+//					aStarInfo.addItem(newObject);
+//				}
+//				else
+//				{
+//					return aStarInfo;
+//				}
+//				if (closedList.length > 1000 || openList.length > 10000)
+//					throw new Error("Bad news");
 			}
 			return aStarInfo;
 		}
 		
-		private function calculateAStarNeighbors(pointObject:Object, startingPoint:Point3D, destination:Point3D, unwalkables:Array, openList:ArrayCollection, closedList:ArrayCollection, aStarInfo:ArrayCollection):Object
+		private function calculateAStarNeighbors(pointObject:Object, startingPoint:Point3D, destination:Point3D, unwalkables:Array, openList:Array, closedList:Array, aStarInfo:ArrayCollection):Object
 		{
 			var neighbors:ArrayCollection = getAStarNeighbors(pointObject, startingPoint, destination, unwalkables, closedList);
 //			if (neighbors.length == 0)
@@ -604,7 +559,7 @@ package world
 			return lowestNeighbor;
 		}
 		
-		private function addLowestFScore(neighbors:ArrayCollection, startingPoint:Point3D, pointObject:Object, openList:ArrayCollection, closedList:ArrayCollection, aStarInfo:ArrayCollection):Object
+		private function addLowestFScore(neighbors:ArrayCollection, startingPoint:Point3D, pointObject:Object, openList:Array, closedList:Array, aStarInfo:ArrayCollection):Object
 		{
 			var lowestNeighbor:Object;
 			for each (var neighborObject:Object in neighbors)
@@ -622,10 +577,7 @@ package world
 				openList.removeItemAt(index);
 			}
 			else
-			{
-//				lowestNeighbor = pointObject;
 				return null;
-			}
 			return lowestNeighbor;
 		}
 		
@@ -661,52 +613,6 @@ package world
 			return neighbors;
 		}
 		
-		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutStructureOccupiedSpaces:Boolean=true, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null, extraStructures:ArrayCollection=null):ArrayCollection
-		{
-			var pathGridComplete:Boolean = false;
-			
-			var assetPathFinder:ArrayCollection = initializePath(destination);
-			var unorganizedPoints:ArrayCollection = initializeUnorganizedPoints(destination);
-			
-			var occupiedSpaces:ArrayCollection = updateOccupiedSpaces(careAboutPeopleOccupiedSpaces, careAboutStructureOccupiedSpaces, exemptStructures, extraStructures);
-	
-			validateDestination(asset, destination, occupiedSpaces);		
-			
-			var startPoint:Point3D = mapPointToPathGrid(currentPoint);
-			var startPointReached:Boolean = false;
-			var index:int = 1;
-			
-			// Until I add a point that's the same as my start point, keep adding points to the list
-			
-			if (currentPoint.x == destination.x && currentPoint.y == destination.y && currentPoint.z == destination.z)
-			{
-				
-			}
-			else
-			{
-				do
-				{
-					var coordsArray:Array = getNeighboringPoints(assetPathFinder, index, occupiedSpaces, unorganizedPoints);
-					startPointReached = isStartPointReached(coordsArray, startPoint);
-					if (startPointReached)
-					{
-						coordsArray = new Array();
-						coordsArray.push(startPoint);
-					}
-					assetPathFinder.addItemAt(coordsArray, index);
-					index++;			
-					if (index > 100)
-					{
-						throw new Error("You're fucked");
-						break;
-					}
-				}
-				while (!startPointReached);
-			}			
-			
-			return assetPathFinder;		
-		}	
-		
 		public function establishOwnedStructures():ArrayCollection
 		{
 			var occupiedStructures:ArrayCollection = new ArrayCollection();
@@ -715,50 +621,36 @@ package world
 				if (asset.thinger)
 				{
 					if (asset.thinger is OwnedStructure)
-					{
-						addToOccupiedSpaces(asset.thinger as OwnedStructure);				
-					}
+						getStructurePoints(asset.thinger as OwnedStructure);				
 				}
 			}
 			return occupiedStructures;
 		}
 		
-		public function establishPeopleOccupiedSpaces():ArrayCollection
+		public function getPeopleOccupiedSpacesForArray(sourceArray:ArrayCollection):Array
 		{
-//			trace("get people occupied spaces");
-			var peopleOccupiedSpaces:ArrayCollection = getPeopleOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets);
-			if (_world.bitmapBlotter)
-			{
-				peopleOccupiedSpaces.addAll(getPeopleOccupiedSpacesForBitmap(_world.bitmapBlotter.bitmapReferences));			
-			}
-			return peopleOccupiedSpaces;
-		}
-		
-		public function getPeopleOccupiedSpacesForArray(sourceArray:ArrayCollection):ArrayCollection
-		{
-			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
+			var spaces:Array = new Array();
 			for each (var asset:ActiveAsset in sourceArray)
 			{
 				if (asset is Person)
-				{
-					peopleOccupiedSpaces.addItem(getPoint3DForPerson(asset));
-				}
+				{	
+					var pt:Point3D = getPoint3DForPerson(asset);
+					addPointTo3DArray(pt, asset, spaces);
+				}	
 			}
-			return peopleOccupiedSpaces;
+			return spaces;
 		}
 		
-		public function getPeopleOccupiedSpacesForBitmap(sourceArray:ArrayCollection):ArrayCollection
+		public function addPeopleOccupiedSpaces(addTo:Array, sourceArray:ArrayCollection):void
 		{
-			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
-			for each (var abd:AssetBitmapData in sourceArray)
+			for each (var asset:ActiveAsset in sourceArray)
 			{
-				var asset:ActiveAsset = abd.activeAsset;
 				if (asset is Person)
-				{
-					peopleOccupiedSpaces.addItem(getPoint3DForPerson(asset));
-				}
+				{	
+					var pt:Point3D = getPoint3DForPerson(asset);
+					addPointTo3DArray(pt, asset, addTo);
+				}	
 			}
-			return peopleOccupiedSpaces;
 		}
 
 		private function addPointsTo3DObject(originalArray:ArrayCollection, addTo:Array):void
@@ -796,211 +688,219 @@ package world
 			return allOccupied;
 		}
 		
+		private function copy3DArray(toCopy:Array):Array
+		{
+			var result:Array = new Array();
+			for (var i:int = 0; i < toCopy.length; i++)
+			{
+				if (toCopy[i])
+				{	
+					result[i] = new Array();
+					for (var j:int = 0; j < toCopy[i].length; j++)
+					{
+						if (toCopy[i][j])
+						{
+							result[i][j] = new Array();
+							for (var k:int = 0; k < toCopy[i][j].length; k++)
+							{
+								result[i][j][k] = toCopy[i][j][k];
+							}
+						}
+					}
+				}	
+			}
+			return result;
+		}
+		
 		public function getUnwalkables(avoidPeople:Boolean, avoidStructures:Boolean, exempt:ArrayCollection=null, extra:ArrayCollection=null, heightBase:int=0):Array
 		{
 			var allOccupied:Array = initializeOccupiedSpacesArray(heightBase);
 			if (avoidStructures)
 			{	
-				var structureOccupied:ArrayCollection = this.getStructureOccupiedSpaces(exempt);
-				addPointsTo3DObject(structureOccupied, allOccupied);
-			}
-			if (avoidPeople)
-			{	
-				var peopleOccupied:ArrayCollection = establishPeopleOccupiedSpaces();
-				addPointsTo3DObject(peopleOccupied, allOccupied);
+				allOccupied = copy3DArray(occupiedByStructures);
+				addStructureOccupiedSpaces(allOccupied, exempt);
 			}	
+			if (avoidPeople)
+				addPeopleOccupiedSpaces(allOccupied, _world.assetRenderer.unsortedAssets);
 			if (extra)
-			{
-				var extraOccupied:ArrayCollection = getExtraOccupiedSpaces(extra);
-				addPointsTo3DObject(extraOccupied, allOccupied);			
-			}
+				addExtraOccupiedSpaces(allOccupied, extra);		
 			return allOccupied;
 		}
 		
-		public function updateOccupiedSpaces(getPeopleOccupiedSpaces:Boolean, getStructureOccupiedSpaces:Boolean, exemptStructures:ArrayCollection=null, extraStructures:ArrayCollection=null):ArrayCollection
+		public function updateOccupiedSpaces(getPeople:Boolean, getStructures:Boolean, exempt:ArrayCollection=null, extra:ArrayCollection=null):Array
 		{
-			var allOccupiedSpaces:ArrayCollection = new ArrayCollection();
-			var pt:Point3D;
-			if (getStructureOccupiedSpaces)
+			var spaces:Array = new Array();
+			if (getStructures)	
 			{
-				var structureOccupiedSpaces:ArrayCollection = this.getStructureOccupiedSpaces(exemptStructures);
-				allOccupiedSpaces.addAll(structureOccupiedSpaces);			
-			}
-			if (getPeopleOccupiedSpaces)
-			{
-				var peopleOccupiedSpaces:ArrayCollection = establishPeopleOccupiedSpaces();	
-				allOccupiedSpaces.addAll(peopleOccupiedSpaces);		
-			}
-			if (extraStructures)
-			{
-				var extraOccupiedSpaces:ArrayCollection = getExtraOccupiedSpaces(extraStructures);
-				allOccupiedSpaces.addAll(extraOccupiedSpaces);
-			}
-			validateOccupiedSpaces(allOccupiedSpaces);
-			return allOccupiedSpaces;
+				spaces = copy3DArray(occupiedByStructures);
+				addStructureOccupiedSpaces(spaces, exempt);
+			}	
+			if (getPeople)
+				addPeopleOccupiedSpaces(spaces, _world.assetRenderer.unsortedAssets);
+			if (extra)
+				addExtraOccupiedSpaces(spaces, extra);
+			return spaces;
 		}
 		
 		public function validateOccupiedSpaces(occupiedSpaces:ArrayCollection):void
 		{
 			if (occupiedSpaces.length >= _world.tilesDeep*_world.tilesWide)
-			{
 				throw new Error("No free spaces! That's crazy pills! total spaces: " + _world.tilesDeep.toString() + "::" + _world.tilesWide.toString());
-			}			
 		}
 		
-		public function getStructureOccupiedSpaces(exemptStructures:ArrayCollection=null):ArrayCollection
+		public function getStructureOccupiedSpaces(exemptStructures:ArrayCollection=null):Array
 		{
-			var tempStructurePoints:ArrayCollection = this.occupiedByStructures;
+			var spaces:Array = copy3DArray(occupiedByStructures);
 			for each (var os:OwnedStructure in exemptStructures)
 			{
-				var points:ArrayCollection = this.addToOccupiedSpaces(os);
-				for each (var pt3D:Point3D in points)
+				var pts:ArrayCollection;
+				if (os.structure.outerPoints)
+					pts = getStructurePointsWithBuffer(os);
+				else
+					pts = getStructurePoints(os);
+				for each (var pt:Point3D in pts)
 				{
-					if (this.occupiedByStructures.contains(pt3D))
-					{
-						var index:int = tempStructurePoints.getItemIndex(pt3D);
-						tempStructurePoints.removeItemAt(index);
-					}
-				}	
-			}	
-			return tempStructurePoints;
+					if (this.occupiedByStructures[pt.x] && this.occupiedByStructures[pt.x][pt.y] && this.occupiedByStructures[pt.x][pt.y][pt.z])
+						spaces[pt.x][pt.y][pt.z] = 0;
+				}
+			}
+			return spaces;
 		}
-		
-		public function establishStructureOccupiedSpaces(exemptStructures:ArrayCollection=null):ArrayCollection
+
+		public function addStructureOccupiedSpaces(addTo:Array, exemptStructures:ArrayCollection=null):void
 		{
-			var structureOccupiedSpaces:ArrayCollection = getStructureOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets, exemptStructures);
-			return structureOccupiedSpaces;
+			for each (var os:OwnedStructure in exemptStructures)
+			{
+				var pts:ArrayCollection;
+				if (os.structure.outerPoints)
+					pts = getStructurePointsWithBuffer(os);
+				else
+					pts = getStructurePoints(os);
+				for each (var pt:Point3D in pts)
+				{
+					if (this.occupiedByStructures[pt.x] && this.occupiedByStructures[pt.x][pt.y] && this.occupiedByStructures[pt.x][pt.y][pt.z])
+						addTo[pt.x][pt.y][pt.z] = 0;
+				}
+			}
 		}
 		
 		public function updateStructureOccupiedSpaces(exemptStructures:ArrayCollection=null):void
 		{
-			this.occupiedByStructures = establishStructureOccupiedSpaces(exemptStructures);
+			this.occupiedByStructures = getStructureOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets, exemptStructures);
 		}
 		
-		private function getStructureOccupiedSpacesForBitmap(sourceArray:ArrayCollection, exemptStructures:ArrayCollection):ArrayCollection
+		private function getExtraOccupiedSpaces(rectangles:ArrayCollection):Array
 		{
-			var structureOccupiedSpaces:ArrayCollection = new ArrayCollection();
-			var structureSpaces:ArrayCollection;	
-			
-			for each (var abd:AssetBitmapData in sourceArray)
-			{				
-				// Check if the owned structures in exemptStructures equal asset.thinger; if so, do not add them
-				
-				var asset:ActiveAsset = abd.activeAsset;
-				if (asset.thinger is OwnedStructure)
-				{
-					if (!exemptStructures)
-					{
-						structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);						
-					}
-					else
-					{
-						for each (var os:OwnedStructure in exemptStructures)
-						{
-							if (!(os.id == (asset.thinger as OwnedStructure).id && os.structure == (asset.thinger as OwnedStructure).structure))
-							{
-								structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);							
-							}
-						}
-					}		
-					for each (var pt:Point3D in structureSpaces)
-					{
-						structureOccupiedSpaces.addItem(pt);
-					}
-				}
-			}
-			return structureOccupiedSpaces;			
-		}
-		
-		private function getExtraOccupiedSpaces(rectangles:ArrayCollection):ArrayCollection
-		{
-			var rectSpaces:ArrayCollection = new ArrayCollection();
+			var spaces:Array = new Array();
 			for each (var rect:Rectangle in rectangles)
 			{
-				rectSpaces.addAll(this.getEstimatedPoint3DForRectangle(rect));
+				spaces.concat(getEstimatedPoints3DForRectangle(rect));
 			}
-			return rectSpaces;
+			return spaces;
+		}
+
+		private function addExtraOccupiedSpaces(addTo:Array, rectangles:ArrayCollection):void
+		{
+			for each (var rect:Rectangle in rectangles)
+			{
+				addEstimatedPoints3DForRectangle(addTo, rect);
+			}
 		}
 		
-		private function getStructureOccupiedSpacesForArray(sourceArray:ArrayCollection, exemptStructures:ArrayCollection=null):ArrayCollection
+		private function getStructureOccupiedSpacesForArray(assetSource:ArrayCollection, exemptStructures:ArrayCollection=null):Array
 		{	
-			var structureOccupiedSpaces:ArrayCollection = new ArrayCollection();
-			
-			for each (var asset:ActiveAsset in sourceArray)
+			var spaces:Array = new Array();			
+			for each (var asset:ActiveAsset in assetSource)
 			{				
 				// Check if the owned structures in exemptStructures equal asset.thinger; if so, do not add them
-				var structureSpaces:ArrayCollection = new ArrayCollection();	
-				
 				if (asset.thinger is OwnedStructure)
 				{
 					if (!exemptStructures)
 					{
-						structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);						
+						if ((asset.thinger as OwnedStructure).structure.outerPoints)
+							addStructurePointsWithBuffer(asset, spaces);	
+						else
+							addStructurePoints(asset, spaces);
 					}
 					else
 					{
-						var exempt:Boolean = false;
-						
+						var exempt:Boolean = false;				
 						for each (var os:OwnedStructure in exemptStructures)
 						{
 							if ((os.id == (asset.thinger as OwnedStructure).id) || (os.structure == (asset.thinger as OwnedStructure).structure))
-							{
 								exempt = true;
-							}
 						}
 						if (!exempt)
-						{
-							structureSpaces = addToOccupiedSpaces(asset.thinger as OwnedStructure);														
-						}
+							addStructurePoints(asset, spaces);														
 					}		
-					for each (var pt:Point3D in structureSpaces)
-					{
-						structureOccupiedSpaces.addItem(pt);
-					}
 				}
 			}
-			return structureOccupiedSpaces;
+			return spaces;
 		}
 		
-		private function addToOccupiedSpaces(os:OwnedStructure):ArrayCollection
+		private function addStructurePoints(asset:ActiveAsset, addTo:Array):void
 		{
-			var structurePoints:ArrayCollection = getEstimatedPoint3DForStructure(os);
-			return structurePoints;
-		}
-		
-		public function getEstimatedPoint3DForStructure(os:OwnedStructure):ArrayCollection
-		{
-			// Does not count height			
-			var structurePoints:ArrayCollection = getStructurePoints(os);
-			return structurePoints;
-		}
-		
-		public function getStructurePoints(os:OwnedStructure):ArrayCollection
-		{
-			var structurePoints:ArrayCollection = new ArrayCollection();
-//			for (var xPt:int = Math.floor(os.x - os.structure.width/2); xPt < Math.ceil(os.x + os.structure.width/2); xPt++)
-//			{
-//				for (var zPt:int = Math.floor(os.z - os.structure.depth/2); zPt < Math.ceil(os.z + os.structure.depth/2); zPt++)
-//				{
-//					var osPt3D:Point3D = pathGrid[xPt][os.y][zPt];
-//					structurePoints.addItem(osPt3D);										
-//				}
-//			}
-			
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			for (var xPt:int = 0; xPt <= os.width; xPt++)
 			{
 				for (var zPt:int = 0; zPt <= os.depth; zPt++)
 				{
-					var osPt3D:Point3D = pathGrid[os.x - os.width/2 + xPt][0][os.z - os.depth/2 + zPt];
-					structurePoints.addItem(osPt3D);										
+					var osPt3D:Point3D = new Point3D(Math.round(os.x - os.width/2 + xPt), os.y, Math.round(os.z - os.depth/2 + zPt));
+					if (isInBounds(osPt3D) && (!addTo[osPt3D.x] || !addTo[osPt3D.x][osPt3D.y] || !addTo[osPt3D.x][osPt3D.y][osPt3D.z]))
+						addPointTo3DArray(osPt3D, asset, addTo);										
 				}
-			}
-						
-			if (!os.width || !os.depth)
+			}			
+		}
+
+		private function addStructurePointsWithBuffer(asset:ActiveAsset, addTo:Array):void
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			for (var xPt:int = -1; xPt <= os.width + 1; xPt++)
 			{
-//				throw new Error("No dimensions specified for structure");
-			} 
+				for (var zPt:int = -1; zPt <= os.depth + 1; zPt++)
+				{
+					var osPt3D:Point3D = new Point3D(Math.round(os.x - os.width/2 + xPt), os.y, Math.round(os.z - os.depth/2 + zPt));
+					if (isInBounds(osPt3D) && (!addTo[osPt3D.x] || !addTo[osPt3D.x][osPt3D.y] || !addTo[osPt3D.x][osPt3D.y][osPt3D.z]))
+						addPointTo3DArray(osPt3D, asset, addTo);										
+				}
+			}			
+		}
+		
+		private function isInBounds(pt:Point3D):Boolean
+		{
+			if (pt.x >= 0 && pt.x <= _world.tilesWide && pt.z >= 0 && pt.z <= _world.tilesDeep)
+				return true;
+			return false;
+		}
+		
+		public function getStructurePoints(os:OwnedStructure):ArrayCollection
+		{
+			var structurePoints:ArrayCollection = new ArrayCollection();			
+			for (var xPt:int = 0; xPt <= os.width; xPt++)
+			{
+				for (var zPt:int = 0; zPt <= os.depth; zPt++)
+				{
+					var osPt3D:Point3D = new Point3D(os.x - os.width/2 + xPt, 0, os.z - os.depth/2 + zPt);
+					if (isInBounds(osPt3D))
+						structurePoints.addItem(osPt3D);										
+				}
+			}			
 			return structurePoints;
+		}
+		
+		private function getStructurePointsWithBuffer(os:OwnedStructure):ArrayCollection
+		{
+			var structurePoints:ArrayCollection = new ArrayCollection();			
+			for (var xPt:int = -1; xPt <= os.width + 1; xPt++)
+			{
+				for (var zPt:int = -1; zPt <= os.depth + 1; zPt++)
+				{
+					var osPt3D:Point3D = new Point3D(os.x - os.width/2 + xPt, 0, os.z - os.depth/2 + zPt);
+					if (isInBounds(osPt3D))
+						structurePoints.addItem(osPt3D);										
+				}
+			}			
+			return structurePoints;			
 		}
 
 		public function getInnerStructurePoints(os:OwnedStructure):ArrayCollection
@@ -1017,18 +917,30 @@ package world
 			return structurePoints;
 		}
 
-		public function getEstimatedPoint3DForRectangle(rect:Rectangle, rectHeight:int=0):ArrayCollection
+		public function getEstimatedPoints3DForRectangle(rect:Rectangle, rectHeight:int=0):Array
 		{		
-			var rectSpaces:ArrayCollection = new ArrayCollection();
+			var rectSpaces:Array = new Array();
 			for (var xPt:int = rect.left; xPt <= rect.right; xPt++)
 			{
 				for (var zPt:int = rect.top; zPt <= rect.bottom; zPt++)
 				{
 					var osPt3D:Point3D = pathGrid[xPt][rectHeight][zPt];
-					rectSpaces.addItem(osPt3D);										
+					addPointTo3DArray(osPt3D, rect, rectSpaces);								
 				}
 			}
 			return rectSpaces;
+		}
+
+		public function addEstimatedPoints3DForRectangle(addTo:Array, rect:Rectangle, rectHeight:int=0):void
+		{		
+			for (var xPt:int = rect.left; xPt <= rect.right; xPt++)
+			{
+				for (var zPt:int = rect.top; zPt <= rect.bottom; zPt++)
+				{
+					var osPt3D:Point3D = pathGrid[xPt][rectHeight][zPt];
+					addPointTo3DArray(osPt3D, rect, addTo);								
+				}
+			}
 		}
 
 		public function getPoint3DForStructure(asset:ActiveAsset, structureSpaces:ArrayCollection):ArrayCollection
@@ -1047,9 +959,7 @@ package world
 				}
 			}
 			if (!os.width || !os.depth)
-			{
 				throw new Error("No dimensions specified for structure");
-			} 
 			
 			return structureSpaces;
 		}
@@ -1070,9 +980,7 @@ package world
 				}
 			}
 			if (!os.width || !os.depth)
-			{
 				throw new Error("No dimensions specified for structure");
-			} 		
 			return structurePoints;
 		}
 		
@@ -1094,28 +1002,18 @@ package world
 				
 		public function mapPointToPathGrid(point3D:Point3D):Point3D
 		{
-//			if (point3D.x < 0 || point3D.y < 0 || point3D.z < 0)
-//			{
-//				return null;
-//			}
-//			if (pathGrid[point3D.x][point3D.y][point3D.z])
-//			{
-				return pathGrid[point3D.x][point3D.y][point3D.z];			
-//			}
-//			return null;
+			return pathGrid[point3D.x][point3D.y][point3D.z];			
 		}
 		
-		private function determinePath(possiblePoints:ArrayCollection):ArrayCollection
+		private function determinePath(possiblePoints:Array, lastObject:Object):ArrayCollection
 		{
-			var index:int = possiblePoints.length - 1;
-			var pointData:Object = possiblePoints[index];
 			var tempPath:ArrayCollection = new ArrayCollection();
 			var finalPath:ArrayCollection = new ArrayCollection();
-			tempPath.addItem(pointData.node);
-			while (pointData.parentInfo)
+			tempPath.addItem(lastObject.node);
+			while (lastObject.parentInfo)
 			{
-				tempPath.addItem(pointData.parentInfo.node);
-				pointData = pointData.parentInfo;
+				tempPath.addItem(lastObject.parentInfo.node);
+				lastObject = lastObject.parentInfo;
 			}
 			tempPath.removeItemAt(tempPath.length-1);
 			for (var i:int = tempPath.length-1; i >= 0; i--)
@@ -1123,108 +1021,16 @@ package world
 				finalPath.addItem(tempPath[i]);
 			}
 			if (finalPath.length == 0)
-			{
 				throw new Error("No path");
-			}
 			return finalPath;
 		}
 		
-//		private function determinePath(asset:ActiveAsset, pathGrid:ArrayCollection):ArrayCollection
-//		{
-//			var index:int = pathGrid.length - 1;
-//			var pt:Point3D = pathGrid[index][0];
-//			var tileArray:Array;
-//			var finalPath:ArrayCollection = new ArrayCollection();
-//			var foundValidPoint:Boolean = false;
-//			for (var i:int = (pathGrid.length-2); i>=0; i--)
-//			{
-//				foundValidPoint = false;
-//				tileArray = getSurroundingPoints(pt);
-//				for (var j:int = 0; j<tileArray.length; j++)
-//				{
-//					if (foundValidPoint == false)
-//					{
-//						for (var k:int = 0; k<(pathGrid[i] as Array).length; k++)
-//						{
-//							if ((tileArray[j] as Point3D).x == (pathGrid[i][k] as Point3D).x && (tileArray[j] as Point3D).y == (pathGrid[i][k] as Point3D).y && (tileArray[j] as Point3D).z == (pathGrid[i][k] as Point3D).z)
-//							{
-//								var validPoint:Point3D = tileArray[j];
-//								finalPath.addItem(validPoint);
-//							
-//								pt = validPoint;
-//								foundValidPoint = true;
-//							}
-//						}						
-//					}
-//					else
-//					{
-//						break;
-//					}
-//				}
-//			}
-//			return finalPath;
-//		}
-		
-		private function getNeighbor(direction:String, pt:Point3D):Point3D
-		{
-			var neighbor:Point3D;
-			if (pt.x <= _world.tilesWide && pt.x >= 0 && pt.y >= 0 && pt.z <= _world.tilesDeep && pt.z >= 0)
-			{			
-				if (direction == 'top')
-				{
-					if (pt.z + 1 <= _world.tilesDeep)
-					{
-						neighbor = pathGrid[pt.x][pt.y][pt.z + 1];									
-					}
-				}
-				else if (direction == 'bottom')
-				{
-					if (pt.z - 1 >= 0)
-					{
-						neighbor = pathGrid[pt.x][pt.y][pt.z - 1];					
-					}
-				}
-				else if (direction == 'left')
-				{
-					if (pt.x + 1 <= _world.tilesWide)
-					{					
-						neighbor = pathGrid[pt.x + 1][pt.y][pt.z];
-					}
-				}
-				else if (direction == 'right')
-				{
-					if (pt.x - 1 >= 0)
-					{					
-						neighbor = pathGrid[pt.x - 1][pt.y][pt.z];
-					}
-				}
-			}	
-			return neighbor;
-		}
-		
-		private function checkIfValid(pt:Point3D, occupiedSpaces:ArrayCollection, unorganizedPoints:ArrayCollection):Boolean
-		{
-//			// Checks to see whether the point has been added already
-//			
-//			for each (var coordsArray:Array in assetPathFinder)
-//			{
-//				for each (var pt2:Point3D in coordsArray)
-//				{
-//					if (pt2.x == pt.x && pt2.y == pt.y && pt2.z == pt.z)
-//					{
-//						return false;
-//						trace("Already added this point");
-//					}
-//				}
-//			}			
+		private function checkIfValid(pt:Point3D, occupiedSpaces:Array, unorganizedPoints:ArrayCollection):Boolean
+		{		
 			if (unorganizedPoints.contains(pt))
-			{
 				return false;
-			}
-			if (occupiedSpaces.contains(pt))
-			{
+			if (occupiedSpaces[pt.x] && occupiedSpaces[pt.x][pt.y] && occupiedSpaces[pt.x][pt.y][pt.z])
 				return false;
-			}
 			return true;
 		}
 		
@@ -1243,6 +1049,126 @@ package world
 			return pointsArray;
 		}
 		
+		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutStructureOccupiedSpaces:Boolean=true, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null, extraStructures:ArrayCollection=null):ArrayCollection
+		{
+			var pathGridComplete:Boolean = false;
+			
+			var assetPathFinder:ArrayCollection = initializePath(destination);
+			var unorganizedPoints:ArrayCollection = initializeUnorganizedPoints(destination);
+			
+			var occupiedSpaces:Array = updateOccupiedSpaces(careAboutPeopleOccupiedSpaces, careAboutStructureOccupiedSpaces, exemptStructures, extraStructures);
+			
+			validateDestination(asset, destination, occupiedSpaces);		
+			
+			var startPoint:Point3D = mapPointToPathGrid(currentPoint);
+			var startPointReached:Boolean = false;
+			var index:int = 1;
+			
+			// Until I add a point that's the same as my start point, keep adding points to the list
+			
+			if (currentPoint.x == destination.x && currentPoint.y == destination.y && currentPoint.z == destination.z)
+			{
+				
+			}
+			else
+			{
+				do
+				{
+					var coordsArray:Array = getNeighboringPoints(assetPathFinder, index, occupiedSpaces, unorganizedPoints);
+					startPointReached = isStartPointReached(coordsArray, startPoint);
+					if (startPointReached)
+					{
+						coordsArray = new Array();
+						coordsArray.push(startPoint);
+					}
+					assetPathFinder.addItemAt(coordsArray, index);
+					index++;			
+					if (index > 100)
+					{
+						throw new Error("You're fucked");
+						break;
+					}
+				}
+				while (!startPointReached);
+			}			
+			
+			return assetPathFinder;		
+		}			
+		
+		public function getPeopleOccupiedSpacesForBitmap(sourceArray:ArrayCollection):ArrayCollection
+		{
+			var peopleOccupiedSpaces:ArrayCollection = new ArrayCollection();
+			for each (var abd:AssetBitmapData in sourceArray)
+			{
+				var asset:ActiveAsset = abd.activeAsset;
+				if (asset is Person)
+					peopleOccupiedSpaces.addItem(getPoint3DForPerson(asset));
+			}
+			return peopleOccupiedSpaces;
+		}		
+		
+		public function createSeatingArrangement(bounds:Rectangle, stageBounds:Rectangle, totalSeats:int):ArrayCollection
+		{
+			trace("create seating arrangement");
+			var seats:ArrayCollection = new ArrayCollection();
+			var totalPoints:int = bounds.height * bounds.width;
+			if (totalSeats < totalPoints)
+			{
+				// Subtract 2 to prevent overlap
+				var dimension:int = stageBounds.top - bounds.top - 2;
+				var seatsPerRow:int = Math.ceil(totalSeats / dimension);
+				for (var i:int = 0; i < dimension; i++)
+				{
+					var rowSeats:ArrayCollection = new ArrayCollection();
+					var orderedRowSeats:ArrayCollection = new ArrayCollection();
+					var dist:int;
+					for (var j:int = 0; j < seatsPerRow; j++)
+					{
+						var seatX:int;
+						var seatY:int;
+						do
+						{
+							if (Math.random() < 0.5)
+							{
+								seatX = stageBounds.right + 1 + i;
+								seatY = bounds.bottom - Math.round(Math.random() * (stageBounds.height + i + 1));
+								dist = seatY;
+							}
+							else
+							{
+								seatY = stageBounds.top - 1 - i;
+								seatX = bounds.left + Math.round(Math.random() * (stageBounds.width + i + 1));
+								dist = seatX;
+							}	
+							var reference:Point3D = this.pathGrid[seatX][0][seatY];
+						}
+						while (rowSeats.contains(reference));
+						
+						rowSeats.addItem(reference);
+						orderedRowSeats.addItem({reference: reference, distance: dist});
+//						seats.addItem(reference);
+					}
+					var sortField:SortField = new SortField("distance");
+					sortField.numeric = true;
+					var sort:Sort = new Sort();
+					sort.fields = [sortField];
+					orderedRowSeats.sort = sort;
+					orderedRowSeats.refresh();
+					for each (var obj:Object in orderedRowSeats)
+					{
+						seats.addItem(obj.reference);
+					}
+//					seats.addItem(rowSeats);
+				}
+			}
+			else
+			{
+				throw new Error("Exceeds max capacity");
+			}
+			trace("seating created");
+			return seats;		
+		}		
+		
 		public function set world(val:World):void
 		{
 			_world = val;
@@ -1252,5 +1178,67 @@ package world
 		{
 			return _world;
 		}
+		
+		
+		
+		private function getNeighbor(direction:String, pt:Point3D):Point3D
+		{
+			var neighbor:Point3D;
+			if (pt.x <= _world.tilesWide && pt.x >= 0 && pt.y >= 0 && pt.z <= _world.tilesDeep && pt.z >= 0)
+			{			
+				if (direction == 'top')
+				{
+					if (pt.z + 1 <= _world.tilesDeep)
+						neighbor = pathGrid[pt.x][pt.y][pt.z + 1];									
+				}
+				else if (direction == 'bottom')
+				{
+					if (pt.z - 1 >= 0)
+						neighbor = pathGrid[pt.x][pt.y][pt.z - 1];					
+				}
+				else if (direction == 'left')
+				{
+					if (pt.x + 1 <= _world.tilesWide)
+						neighbor = pathGrid[pt.x + 1][pt.y][pt.z];
+				}
+				else if (direction == 'right')
+				{
+					if (pt.x - 1 >= 0)
+						neighbor = pathGrid[pt.x - 1][pt.y][pt.z];
+				}
+			}	
+			return neighbor;
+		}
+		
+		private function getStructureOccupiedSpacesForBitmap(sourceArray:ArrayCollection, exemptStructures:ArrayCollection):ArrayCollection
+		{
+			var structureOccupiedSpaces:ArrayCollection = new ArrayCollection();
+			var structureSpaces:ArrayCollection;	
+			
+			for each (var abd:AssetBitmapData in sourceArray)
+			{				
+				// Check if the owned structures in exemptStructures equal asset.thinger; if so, do not add them
+				
+				var asset:ActiveAsset = abd.activeAsset;
+				if (asset.thinger is OwnedStructure)
+				{
+					if (!exemptStructures)
+						structureSpaces = getStructurePoints(asset.thinger as OwnedStructure);						
+					else
+					{
+						for each (var os:OwnedStructure in exemptStructures)
+						{
+							if (!(os.id == (asset.thinger as OwnedStructure).id && os.structure == (asset.thinger as OwnedStructure).structure))
+								structureSpaces = getStructurePoints(asset.thinger as OwnedStructure);							
+						}
+					}		
+					for each (var pt:Point3D in structureSpaces)
+					{
+						structureOccupiedSpaces.addItem(pt);
+					}
+				}
+			}
+			return structureOccupiedSpaces;			
+		}		
 	}
 }

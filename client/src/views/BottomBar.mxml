@@ -203,14 +203,6 @@
 				}
 			}
 			
-//			public function showInitialCreature():void
-//			{
-//				var uic:ContainerUIC = getBandMember(friendManager.mainGDI, 0.55);
-//				setDisplayedCreatureDimensions(uic);
-//				displayCreatureInfo((uic.thinger as ActiveAssetStack).creature);
-//				addChild(uic);					
-//			}
-			
 			public function showInitialCreature():void
 			{
 				var initialCreature:ActiveAssetStack = getBandMember(friendManager.mainGDI, 0.55);
@@ -221,39 +213,6 @@
 			{
 				this.creatureInfoComponent.replaceCreature(evt.asset.creature);
 			}
-			
-//			public function setDisplayedCreatureDimensions(uic:ContainerUIC):void
-//			{
-//				uic.x = width/2 - 327;
-//				uic.y = inventoryCanvas.y + 86;
-//				var asset:AssetStack = uic.thinger as AssetStack;
-//				displayedCreatureUIC = uic;
-//			}
-			
-//			public function displayCreatureInfo(creature:Creature):void
-//			{
-//				displayedCreatureInfo = new Canvas();
-//				displayedCreatureInfo.clipContent = false;
-//				creatureNameLabel = getCreatureName(creature.name);
-//				displayedCreatureInfo.x = width/2 - 286;
-//				displayedCreatureInfo.y = inventoryCanvas.y - 38;
-//				displayedCreatureInfo.addChild(creatureNameLabel);
-//				var vbox:VBox = new VBox();
-//				vbox.setStyle("verticalGap", 4);
-//				vbox.y = 40;
-//				var typeLabel:Text = getCreatureType(creature);
-//				var starCanvas:Canvas = getCreatureStars(creature);
-//				vbox.addChild(starCanvas);
-//				typeLabel.y = 40;
-//				vbox.addChild(typeLabel);
-////				starCanvas.y = typeLabel.textHeight + typeLabel.y + 13;
-//				displayedCreatureInfo.addChild(vbox);
-////				var buttonCanvas:Canvas = getCreatureButtons(creature);
-////				displayedCreatureInfo.addChild(buttonCanvas);
-////				var moodImage:Image = getCreatureMood(creature);
-////				displayedCreatureInfo.addChild(moodImage);
-//				addChild(displayedCreatureInfo);				
-//			}
 			
 			public function getCreatureButtons(creature:Creature):Canvas
 			{
@@ -274,85 +233,6 @@
 				return canvas;
 			}
 			
-//			public function getCreatureStars(creature:Creature):Canvas
-//			{
-//				var canvas:Canvas = new Canvas();
-//				var star:Image;
-//				var overlay:Image;
-//				var numStars:int = Math.floor(Math.random() * 5);
-//
-//				for (var i:int = 0; i < (numStars + 1); i++)
-//				{
-//					star = new Image();
-//					overlay = new Image();
-//					switch (numStars)
-//					{
-//						case 0:
-//							star.source = HeartFilledYellowGreen;
-//							overlay.source = HeartEmpty;
-//							break;
-//						case 1:
-//							star.source = HeartFilledYellow;
-//							overlay.source = HeartEmpty;
-//							break;
-//						case 2:
-//							star.source = HeartFilledOrange;
-//							overlay.source = HeartEmpty;
-//							break;
-//						case 3:
-//							star.source = HeartFilledOrangeRed;
-//							overlay.source = HeartEmpty;
-//							break;
-//						case 4:
-//							star.source = HeartFilledRed;
-//							overlay.source = HeartEmpty;
-//							break;
-//					}
-//					overlay.x = i * 22;
-//					overlay.height = 22;
-//					star.x = i * 22;
-//					star.height = 18;
-//					canvas.addChild(star);
-//					canvas.addChild(overlay);
-//				}
-//				if (numStars == 4 && Math.random() > 0.5)
-//				{
-//					star = new Image();
-//					overlay = new Image();
-//					star.source = HeartFilledGreen;
-//					overlay.source = HeartEmpty;
-//					overlay.x = 5 * 22;
-//					overlay.height = 22;
-//					star.x = 5 * 22;
-//					star.height = 18;
-//					canvas.addChild(star);
-//					canvas.addChild(overlay);
-//				}
-//				return canvas;
-//			}
-//			
-//			public function getCreatureType(creature:Creature):Text
-//			{
-//				var canvas:Canvas = new Canvas();
-//				var text:Text = new Text();
-//				text.width = 140;
-//				var textFilter:GlowFilter = createTextFilter();
-//				if (creature.type == "BandMember")
-//				{
-//					text.text = "Band Member";
-//				}
-//				else
-//				{
-//					text.text = creature.type;
-//				}
-//				text.setStyle("color", 0xffffff);
-//				text.setStyle("fontFamily", "Museo-Slab-900");
-//				text.setStyle("fontSize", 14);
-//				text.filters = [textFilter];
-//				text.y = 70;
-//				return text;
-//			}
-			
 			public function getCreatureMood(creature:Creature):Image
 			{
 				var image:Image = new Image();
@@ -361,58 +241,10 @@
 				return image;
 			}
 			
-//			public function getCreatureName(name:String):Label
-//			{
-//				var nameLabel:Label = new Label();
-//				nameLabel.text = name;
-//				nameLabel.filters = [createTextFilter()];
-//				nameLabel.setStyle("color", 0xffffff);
-//				nameLabel.setStyle("fontFamily", "Museo-Slab-900");
-//				nameLabel.setStyle("fontSize", 18);
-//				return nameLabel;
-//			}
-			
 			public function replaceCreatureInfo(creature:Creature):void
 			{
 				creatureInfoComponent.replaceCreature(creature);
 			}
-			
-//			public function replaceCreature(creature:Creature):void
-//			{
-//				if (displayedCreatureUIC)
-//				{
-//					removeChild(displayedCreatureUIC);				
-//				}
-//				if (displayedCreatureInfo)
-//				{
-//					removeChild(displayedCreatureInfo);
-//				}
-//				
-//				if (displayedCreatureUIC)
-//				{
-//					var uic:ContainerUIC = getDisplayedCreature(creature, 0.55);
-//					displayedCreatureUIC = uic;
-//					setDisplayedCreatureDimensions(uic);
-//					displayCreatureInfo(creature);
-//					addChild(uic);
-//				}
-//			}
-			
-//			private function createBackCanvas():void
-//			{
-//				creatureCanvas = new ExpandingCanvas();
-//				creatureCanvas.width = 252;
-//				creatureCanvas.height = 105;
-//				creatureCanvas.y = 510;
-//				creatureCanvas.x = 10;
-//				creatureCanvas.alpha = 0.6;
-//				creatureCanvas.setStyle("backgroundColor", 0xffffff);
-//				creatureCanvas.setStyle("cornerRadius", 12);
-//				creatureCanvas.setStyle("borderStyle", "solid");
-//				creatureCanvas.setStyle("borderColor", 0xffffff);
-//				creatureCanvas.clipContent = false;		
-//				this.addChild(creatureCanvas);
-//			}
 			
 			public function expandCreatureCanvas(creature:Creature):void
 			{
@@ -555,12 +387,11 @@
 			
 			public function showStore():void
 			{
-				var store:Store = storeController.getStoreByName("Structure Store");
-				var uic:UIComponent = storeController.getStoreUIComponent(store);
+				var uic:UIComponent = storeController.getStoreUIComponent();
 				uic.x = WorldView.WINDOW_WIDTH/2 - uic.width/2;
-				uic.y = 100;
+				uic.y = 100;				
 			  	FlexGlobals.topLevelApplication.uiLayer.addChild(uic);
-			}						
+			}	
 			
 			public function friendDataLoaded(evt:DynamicEvent):void
 			{

@@ -294,16 +294,14 @@ package rock_on
 			var destination:Point3D;
 			var exemptStructures:ArrayCollection = new ArrayCollection();
 			exemptStructures.addItem(os);
-			var occupiedSpaces:ArrayCollection = new ArrayCollection();
-			var structureOccupiedSpaces:ArrayCollection = _myWorld.pathFinder.getStructureOccupiedSpaces(exemptStructures);
-			var peopleOccupiedSpaces:ArrayCollection = _myWorld.pathFinder.establishPeopleOccupiedSpaces();
-			occupiedSpaces.addAll(structureOccupiedSpaces);
-			occupiedSpaces.addAll(peopleOccupiedSpaces);
+			var occupiedSpaces:Array = new Array();
+			occupiedSpaces.concat(_myWorld.pathFinder.getStructureOccupiedSpaces(exemptStructures));
+			occupiedSpaces.concat(_myWorld.pathFinder.getPeopleOccupiedSpacesForArray(_myWorld.assetRenderer.unsortedAssets));
 			do
 			{		
 				destination = new Point3D(Math.floor(os.structure.width - (Math.random()*os.structure.width)), os.structure.height, Math.ceil(_myWorld.tilesDeep - Math.random()*(os.structure.depth)));	
 			}
-			while (occupiedSpaces.contains(_myWorld.pathFinder.mapPointToPathGrid(destination)));	
+			while (occupiedSpaces[destination.x] && occupiedSpaces[destination.x][destination.y] && occupiedSpaces[destination.x][destination.y][destination.z]);	
 			trace("point picked");
 			return destination;
 		}
