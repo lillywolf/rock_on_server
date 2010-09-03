@@ -69,6 +69,7 @@
 			import models.OwnedDwelling;
 			import models.OwnedLayerable;
 			import models.OwnedStructure;
+			import models.StoreOwnedThinger;
 			import models.User;
 			
 			import mx.events.CollectionEvent;
@@ -356,6 +357,7 @@
 				if (evt.thinger.structure)
 				{
 					var ios:ImposterOwnedStructure = new ImposterOwnedStructure(evt.thinger);
+					ios.sot = evt.thinger as StoreOwnedThinger;
 					if (editView)
 						editView.newStructureAdded(ios);
 					else

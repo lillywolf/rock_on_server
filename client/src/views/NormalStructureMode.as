@@ -373,10 +373,10 @@ package views
 		
 		private function addTopperToStructure(topper:OwnedStructure, asset:ActiveAsset):void
 		{
+			if (!asset.toppers)
+				asset.toppers = new ArrayCollection();
 			if (!asset.toppers.contains(topper))
-			{
 				asset.toppers.addItem(topper);
-			}	
 		}
 		
 		private function handleMoveClick(asset:ActiveAsset):void

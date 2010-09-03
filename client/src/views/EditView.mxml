@@ -203,21 +203,24 @@
 				var asset:ActiveAsset;
 				if (os.structure.structure_type == "Tile")
 				{
-					switchToTileMode();
+					if (!this.tileMode)
+						switchToTileMode();
 					addTemporaryCoords(os);
 					asset = tileMode.addTileAsset(os);
 					tileMode.selectTile(asset);
 				}
 				else if (os.structure.structure_type == "Booth" || os.structure.structure_type == "ListeningStation" || os.structure.structure_type == "Decoration")
 				{
-					switchToNormalStructureMode();
+					if (!this.normalStructureMode)
+						switchToNormalStructureMode();
 					addTemporaryCoords(os);
 					asset = normalStructureMode.addStructureAssetFromInventory(os, normalStructureMode.structureWorld);
 					normalStructureMode.selectStructure(asset);
 				}
 				else if (os.structure.structure_type == "StructureTopper")
 				{
-					switchToNormalStructureMode();
+					if (!this.normalStructureMode)
+						switchToNormalStructureMode();
 					addTemporaryCoords(os);
 					asset = normalStructureMode.addStructureAssetFromInventory(os, normalStructureMode.structureWorld);
 					normalStructureMode.selectStructure(asset);

@@ -37,7 +37,7 @@ package stores
 		
 		private function onStoreItemClicked(evt:MouseEvent):void
 		{
-			var sot:StoreOwnedThinger = evt.target as StoreOwnedThinger;
+			var sot:StoreOwnedThinger = (evt.currentTarget as StoreOwnedThingerUIComponent).storeOwnedThinger;
 			if (_storeController.checkCredits(sot))
 				_storeController.buyThinger(sot, this);
 		}

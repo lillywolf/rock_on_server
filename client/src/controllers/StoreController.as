@@ -17,6 +17,7 @@ package controllers
 	import mx.core.UIComponent;
 	import mx.events.CollectionEvent;
 	
+	import server.ServerController;
 	import server.ServerDataEvent;
 	
 	import stores.StoreEvent;
@@ -28,6 +29,7 @@ package controllers
 		[Bindable] public var stores:ArrayCollection;
 		[Bindable] public var _user:User;
 		[Bindable] public var _gdi:GameDataInterface;
+		[Bindable] public var _serverController:ServerController;
 		
 		public function StoreController(essentialModelController:EssentialModelController, target:IEventDispatcher=null)
 		{
@@ -47,50 +49,13 @@ package controllers
 		{
 			var uic:StoreUIComponent = new StoreUIComponent(this);
 			uic.addStyle();
-//			uic.addEventListener(MouseEvent.CLICK, onStoreClicked);
 			return uic;
-		}
-		
-		public function onStoreClicked(evt:MouseEvent):void
-		{
-//			var store:Store = (evt.currentTarget as StoreUIComponent).store;
-//			var sot:StoreOwnedThinger;
-//			if (evt.target is StoreOwnedThingerUIComponent)
-//			{
-//				sot = (evt.target as StoreOwnedThingerUIComponent).storeOwnedThinger;
-//			}
-//			else if (evt.target.parent is StoreOwnedThingerUIComponent)
-//			{
-//				sot = (evt.target.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
-//			}
-//			else if (evt.target.parent.parent is StoreOwnedThingerUIComponent)
-//			{
-//				sot = (evt.target.parent.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
-//			}
-//			else if (evt.target.parent.parent.parent is StoreOwnedThingerUIComponent)
-//			{
-//				sot = (evt.target.parent.parent.parent as StoreOwnedThingerUIComponent).storeOwnedThinger;
-//			}
-//			else
-//			{
-//				sot = null;
-//			}
-			
-//			if (sot)
-//			{	
-//				if (checkCredits(sot))
-//				{
-//					buyThinger(sot, evt.currentTarget as StoreUIComponent);
-//				}			
-//			}
 		}
 		
 		public function checkCredits(sot:StoreOwnedThinger):Boolean
 		{
 			if (_user.credits >= sot.price)
-			{
 				return true;
-			}
 			return false;
 		}
 		
@@ -121,7 +86,9 @@ package controllers
 			params.owned_dwelling_id = FlexGlobals.topLevelApplication.worldView.venueManager.venue.id;
 			params.id = sot.structure.id;			
 			params.user_id = _gdi.userController.user.id;
-			var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.INSTANCE_TO_CREATE, "owned_structure", params, 'create_new', true, true);			
+			var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.INSTANCE_TO_CREATE, "owned_structure", params, 'create_new', true, true);	
+			_serverController.sendRequest({id: _user.id, to_remove: sot.price}, "user", "decrement_credits");
+			
 			_essentialModelController.dispatchEvent(evt);			
 		}
 		
@@ -140,6 +107,16 @@ package controllers
 		public function set gdi(val:GameDataInterface):void
 		{
 			_gdi = val;
+		}
+		
+		public function set serverController(val:ServerController):void
+		{
+			_serverController = val;
+		}
+		
+		public function get serverController():ServerController
+		{
+			return _serverController;
 		}
 		
 	}

@@ -10,6 +10,7 @@ package controllers
 	import models.EssentialModelReference;
 	import models.OwnedDwelling;
 	import models.OwnedStructure;
+	import models.StoreOwnedThinger;
 	import models.Structure;
 	
 	import mx.collections.ArrayCollection;
@@ -174,8 +175,9 @@ package controllers
 		public function saveNewOwnedStructure(os:OwnedStructure, od:OwnedDwelling, coords:Point3D):void
 		{
 			_serverController.sendRequest({user_id: od.user_id, owned_dwelling_id: od.id, structure_id: os.structure.id, x: coords.x, y: coords.y, z: coords.z}, "owned_structure", "create_new");			
+			_serverController.sendRequest({id: od.user_id, to_remove: (os as ImposterOwnedStructure).sot.price}, "user", "decrement_credits");
 		}
-		
+
 //		private function onParentMovieClipAssigned(evt:DynamicEvent):void
 //		{
 //			(evt.target as OwnedStructure).removeEventListener('parentMovieClipAssigned', onParentMovieClipAssigned);

@@ -806,14 +806,17 @@ package rock_on
 			{
 				var os:OwnedStructure = evt.item as OwnedStructure;
 				var asset:ActiveAsset = _myWorld.getAssetFromOwnedStructure(os);
-				if (!asset)
+				if (!asset && os.structure.structure_type == "StructureTopper")
 				{
 					asset = _myWorld.getParentAssetFromTopper(os);
-					asset.toppers = _structureController.getStructureToppers(asset.thinger as OwnedStructure);
-					_myWorld.doAssetRedraw(asset);
+					if (asset)
+						asset.toppers = _structureController.getStructureToppers(asset.thinger as OwnedStructure);
+						_myWorld.doAssetRedraw(asset);
 				}
-				else
+				else if (asset)
 					_myWorld.removeAsset(asset);
+				else
+					throw new Error("failed to find asset");
 			}
 		}		
 		

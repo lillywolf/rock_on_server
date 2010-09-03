@@ -386,7 +386,7 @@ package rock_on
 			else if (directionality.x < 0)
 			{
 				nextPoint = new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				if (occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				if (occupiedSpaces[nextPoint.x] && occupiedSpaces[nextPoint.x][nextPoint.y] && occupiedSpaces[nextPoint.x][nextPoint.y][nextPoint.z])
 				{
 					nextPoint = new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
 				}					
@@ -395,7 +395,7 @@ package rock_on
 			else if (directionality.z > 0)
 			{
 				nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z));
-				if (occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				if (occupiedSpaces[nextPoint.x] && occupiedSpaces[nextPoint.x][nextPoint.y] && occupiedSpaces[nextPoint.x][nextPoint.y][nextPoint.z])
 				{
 					nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z));
 				}					
@@ -404,7 +404,7 @@ package rock_on
 			else if (directionality.z < 0)
 			{
 				nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z));
-				if (occupiedSpaces.contains(_myWorld.pathFinder.pathGrid[nextPoint.x][nextPoint.y][nextPoint.z]))
+				if (occupiedSpaces[nextPoint.x] && occupiedSpaces[nextPoint.x][nextPoint.y] && occupiedSpaces[nextPoint.x][nextPoint.y][nextPoint.z])
 				{
 					nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z));
 				}						

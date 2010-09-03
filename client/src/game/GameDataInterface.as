@@ -104,6 +104,7 @@ package game
 			userController.serverController = sc;
 			levelController.serverController = sc;
 			dwellingController.serverController = sc;
+			storeController.serverController = sc;
 			
 			storeController.gdi = this;
 		}
