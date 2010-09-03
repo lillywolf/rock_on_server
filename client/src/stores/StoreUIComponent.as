@@ -32,12 +32,12 @@ package stores
 			super();
 			_storeController = storeController;
 			
-			this.addEventListener(StoreEvent.THINGER_CLICKED, onThingerClicked);
+//			this.addEventListener(StoreEvent.THINGER_CLICKED, onThingerClicked);
 		}
 		
-		private function onThingerClicked(evt:StoreEvent):void
+		private function onStoreItemClicked(evt:MouseEvent):void
 		{
-			var sot:StoreOwnedThinger = evt.thinger as StoreOwnedThinger;
+			var sot:StoreOwnedThinger = evt.target as StoreOwnedThinger;
 			if (_storeController.checkCredits(sot))
 				_storeController.buyThinger(sot, this);
 		}
@@ -89,6 +89,7 @@ package stores
 			for each (var sot:StoreOwnedThinger in store.store_owned_thingers)
 			{
 				var container:StoreOwnedThingerUIComponent = new StoreOwnedThingerUIComponent(sot);
+				container.addEventListener(MouseEvent.CLICK, onStoreItemClicked);
 				itemContainers.addItem(container);
 			}	
 			storeContainer = new TiledItemList(itemContainers, 3, StoreOwnedThingerUIComponent.NUM_COLUMNS);

@@ -5,6 +5,7 @@ package controllers
 	import flash.utils.getQualifiedClassName;
 	
 	import game.ImposterOwnedStructure;
+	import game.InventoryEvent;
 	
 	import models.EssentialModelReference;
 	import models.OwnedDwelling;
@@ -87,11 +88,19 @@ package controllers
 			for each (var os:OwnedStructure in owned_structures)
 			{
 				if (os.structure.structure_type == type)
-				{
 					matchingStructures.addItem(os);
-				}
 			}
 			return matchingStructures;
+		}
+		
+		public function getOwnedStructureById(id:int):OwnedStructure
+		{
+			for each (var os:OwnedStructure in owned_structures)
+			{
+				if (os.id == id)
+					return os;
+			}
+			return null;
 		}
 		
 		private function onStructuresCollectionChange(evt:CollectionEvent):void
@@ -260,6 +269,17 @@ package controllers
 			return null;
 		}
 		
+		public function getInventory():ArrayCollection
+		{
+			var inventory:ArrayCollection = new ArrayCollection();
+			for each (var os:OwnedStructure in owned_structures)
+			{
+				if (!os.in_use)
+					inventory.addItem(os);
+			}
+			return inventory;
+		}
+		
 		public function validateBoothCountZero(id:int):void
 		{
 			_serverController.sendRequest({id: id, client_validate: "true"}, "owned_structure", "update_inventory_count");
@@ -270,23 +290,19 @@ package controllers
 			for each (var os:OwnedStructure in owned_structures)
 			{
 				if (os.id == osCopy.id)
-				{
 					var osReference:OwnedStructure = os;
-				}
 			}
 			if (method == "sell")
+				removeOwnedStructureFromSystem(osReference);	
+			else if (method == "take_out_of_use")
 			{
-				removeOwnedStructureFromSystem(osReference);
+				removeOwnedStructureFromView(osReference);
+				putInInventory(osReference);
 			}
-			
 			if (osReference.structure.structure_type == "Booth")
-			{
 				updateBoothOnServerResponse(osReference, method, venue.boothBoss);
-			}
 			else if (osReference.structure.structure_type == "ListeningStation")
-			{
 				updateListeningStationOnServerResponse(osReference, method, venue.listeningStationBoss);
-			}						
 		}
 		
 		private function assignNewOwnedStructureToImposter(osCopy:OwnedStructure):void
@@ -312,6 +328,13 @@ package controllers
 			var index:int = owned_structures.getItemIndex(os);
 			owned_structures.removeItemAt(index);
 			var evt:StoreEvent = new StoreEvent(StoreEvent.THINGER_SOLD, os, true, true);
+			dispatchEvent(evt);
+		}
+		
+		private function removeOwnedStructureFromView(os:OwnedStructure):void
+		{
+			var evt:InventoryEvent = new InventoryEvent(InventoryEvent.ADDED_TO_INVENTORY, true, true);
+			evt.item = os;
 			dispatchEvent(evt);
 		}
 		
@@ -365,7 +388,8 @@ package controllers
 				{
 					if (topper.structure.structure_type == "StructureTopper" 
 						&& topper.id != os.id
-						&& topsStructure(topper, os))
+						&& topsStructure(topper, os)
+						&& topper.in_use)
 						toppers.addItem(topper);
 				}
 				return toppers;	
@@ -398,6 +422,17 @@ package controllers
 					toSave.rotation = os.rotation;
 				}	
 			}
+		}
+		
+		public function putInInventory(os:OwnedStructure):void
+		{
+			os.in_use = false;
+			FlexGlobals.topLevelApplication.putInInventory(os);
+		}
+		
+		public function takeOutOfUse(os:OwnedStructure):void
+		{
+			_serverController.sendRequest({id: os.id}, "owned_structure", "take_out_of_use");			
 		}
 		
 		private function topsStructure(topper:OwnedStructure, os:OwnedStructure):Boolean

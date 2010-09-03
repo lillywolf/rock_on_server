@@ -24,6 +24,7 @@
 			
 			import game.GameClock;
 			import game.GameMagicManager;
+			import game.InventoryEvent;
 			
 			import helpers.CreatureGenerator;
 			
@@ -118,7 +119,6 @@
 			public var creditsBox:Text;
 			public var myStage:World;
 			public var creaturesAdded:Boolean;
-//			public var wbi:WorldBitmapInterface;
 			
 			[Bindable] public var gameMagicManager:GameMagicManager;			
 			[Bindable] public var layerableController:LayerableController;
@@ -148,21 +148,7 @@
 			{
 				viewReference = this;
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
-				
-//				this.doubleClickEnabled = true;
-//				addEventListener(MouseEvent.DOUBLE_CLICK, onViewDoubleClicked);
-//				addEventListener(MouseEvent.CLICK, onViewClicked);
 			}
-			
-//			private function onViewClicked(evt:MouseEvent):void
-//			{
-//				wbi.onWorldViewClicked(evt);
-//			}
-//			
-//			private function onViewDoubleClicked(evt:MouseEvent):void
-//			{
-//				wbi.onWorldViewDoubleClicked(evt);
-//			}
 			
 			public function initializeWorld():void
 			{
@@ -204,9 +190,7 @@
 					trace("creatures added");
 				}
 				else
-				{
 					creaturesAdded = true;	
-				}				
 			}
 			
 			private function onAssetsDrawn(evt:WorldEvent):void
@@ -219,9 +203,7 @@
 			{
 				var relWidth:Number = myWorld.wg.getRect(myWorld).width;
 				var relHeight:Number = myWorld.wg.getRect(myWorld).height;
-//				bitmapBlotter = new BitmapBlotter(relWidth, relHeight, true, 0x00000000);
 				bitmapBlotter = new BitmapBlotter();
-//				wbi.bitmapBlotter = bitmapBlotter;
 				bitmapBlotter.myWorld = myWorld;
 				bitmapBlotter.incrementX = (width - relWidth)/2;
 				bitmapBlotter.incrementY = (height - relHeight)/2;
@@ -229,7 +211,6 @@
 				bitmapBlotter.relHeight = relHeight;
 				myWorld.bitmapBlotter = bitmapBlotter;
 				backgroundCanvas = new Canvas();
-//				wbi.backgroundCanvas = backgroundCanvas;
 				backgroundCanvas.width = relWidth;
 				backgroundCanvas.height = relHeight;
 				backgroundCanvas.clipContent = false;
@@ -254,18 +235,6 @@
 //				addMouseDownListeners();
 			}
 			
-			public function addMouseDownListeners():void
-			{
-//				backgroundCanvas.addEventListener(MouseEvent.MOUSE_DOWN, function onBitmapMouseDown(evt:MouseEvent):void
-//				{
-//					wbi.handleMouseDown(stageView, viewReference, new Point(evt.localX, evt.localY));					
-//				});
-//				myWorld.addEventListener(MouseEvent.MOUSE_DOWN, function onWorldMouseDown(evt:MouseEvent):void
-//				{
-//					wbi.handleMouseDown(stageView, viewReference);
-//				});					
-			}
-			
 			public function onEnterFrame(evt:Event):void
 			{
 				var time:Number = getTimer();
@@ -274,15 +243,9 @@
 				fps = 1000/deltaTime;
 				myMemory = System.totalMemory;
 				lastTime = time;
-				
-//				if (wbi && FlexGlobals.topLevelApplication.currentState == "stageViewer")
-//				{
-//					wbi.handleEnterFrameEvents(viewReference, stageView);			
-//				}
+
 				if (venueManager)
-				{
 					venueManager.update(lockedDelta);				
-				}
 			}
 			
 			private function onStructurePlaced(evt:DynamicEvent):void

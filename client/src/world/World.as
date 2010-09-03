@@ -278,6 +278,29 @@ package world
 			}			
 			return null;
 		}
+
+		public function getParentAssetFromTopper(os:OwnedStructure):ActiveAsset
+		{
+			for each (var asset:ActiveAsset in this.assetRenderer.unsortedAssets)
+			{
+				if (asset.thinger is OwnedStructure && (asset.thinger as OwnedStructure).structure.height > 0)
+				{
+					if (asset.toppers && asset.toppers.contains(os))
+						return asset;
+				}
+			}
+			return null;
+		}
+		
+		public function doAssetRedraw(asset:ActiveAsset):void
+		{
+			this.removeAsset(asset);
+			var temp:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
+			temp.copyFromActiveAsset(asset);
+			temp.setMovieClipsForStructure(temp.toppers);
+			temp.bitmapWithToppers();
+			this.addAsset(temp, temp.worldCoords);			
+		}		
 		
 		public static function createStandardAssetFromStructure(os:OwnedStructure):ActiveAsset
 		{
@@ -285,7 +308,7 @@ package world
 			var asset:ActiveAsset = new ActiveAsset(mc);
 			asset.thinger = os;
 			return asset;
-		}
+		}	
 		
 		public function validateWorldCoords(asset:ActiveAsset):void
 		{

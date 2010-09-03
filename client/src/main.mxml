@@ -186,9 +186,7 @@
 			public function getBasicFriendInfo():void
 			{
 				if (userLoaded && facebookDataLoaded)
-				{
 					friendManager.getBasicFriendGDIs();							
-				}
 			}
 			public function getFriendData(uid:int):void
 			{
@@ -239,7 +237,6 @@
 			public function attemptToInitializeVenueForFriend(friendGDI:GameDataInterface):void
 			{
 				currentState = "friendStage";
-//				friendView.wbi = new WorldBitmapInterface(friendView, friendStageView, null, null);
 				friendView.myUser = friendGDI.user;
 				friendView.userController = friendGDI.userController;
 				friendView.structureController = friendGDI.structureController;
@@ -321,23 +318,15 @@
 				var instance:Object = evt.params;
 				
 				if (evt.model == "owned_dwelling")
-				{
 					checkForUpdatedVenue(instance as OwnedDwelling, evt.method);				
-				}
 				if (evt.model == "owned_structure")
-				{
 					updateOwnedStructurePostServer(instance as OwnedStructure, evt.method);
-				}
 				if (evt.model == "owned_layerable")
-				{
 					updateOwnedLayerablePostServer(instance as OwnedLayerable, evt.method);
-				}
 				if (evt.model == "user")
 				{
 					if (evt.method == "get_friend_basics")
-					{	
 						friendManager.processBasicFriendData(instance as User, evt.method);
-					}
 					else
 					{
 						gdi.user.updateUserOnServerResponse(instance as User, evt.method);
@@ -348,61 +337,67 @@
 			private function updateOwnedStructurePostServer(os:OwnedStructure, method:String):void
 			{
 				gdi.structureController.updateOwnedStructureOnServerResponse(os, method, worldView.venueManager.venue);
-				worldView.venueManager.venue.updateRenderedStructures(os, method);
-//				worldView.updateRenderedStructures(os, method);
-//				stageView.updateRenderedStructures(os, method, stageView.myStage);
-//				
-//				if (editView)
-//				{
-//					editView.updateRenderedStructures(os, method);					
-//				}				
+				worldView.venueManager.venue.updateRenderedStructures(os, method);			
 			}
 			private function updateOwnedLayerablePostServer(ol:OwnedLayerable, method:String):void
 			{
 				var creature:Creature = gdi.creatureController.getCreatureById(ol.creature_id);
 				if (creature.type == "BandMember")
-				{
 					worldView.venueManager.venue.bandMemberManager.updateRenderedBandMembers(ol, creature, method);
-				}
 				gdi.layerableController.updateOwnedLayerableOnServerResponse(ol, method);
 			}
 			private function checkForUpdatedVenue(instance:OwnedDwelling, method:String):void
 			{
 				if (instance.id == worldView.venueManager.venue.id)
-				{
 					worldView.venueManager.onVenueUpdated(method, instance);
-				}
 			}
 			private function onThingerPurchased(evt:StoreEvent):void
 			{
 				if (evt.thinger.structure)
 				{
 					var ios:ImposterOwnedStructure = new ImposterOwnedStructure(evt.thinger);
-					editView.ios = ios;
-					switchToEditView();
 					if (editView)
-					{
-//						var asset:ActiveAsset = editView.editMode.createPurchaseCopy(os);
-						editView.newStructurePurchased(editView.ios);
-//						editView.ios = null;					
-//						editView.editMode.startMoveWithoutEditOptions(asset);
-					}
+						editView.newStructureAdded(ios);
+					else
+						addStructureToEditView(ios);
 				}
 			}
-			public function switchToEditView():void
+			public function addFromInventory(item:Object):void
+			{
+				if (item is OwnedStructure)
+					addStructureFromInventory(item as OwnedStructure);
+				this.bottomBarView.removeInventoryItemRenderer(item);
+			}
+			public function addStructureFromInventory(os:OwnedStructure):void
+			{
+				if (currentState == "editView")
+					editView.newStructureAdded(os);
+				else
+				{
+					currentState = "editView";
+					editView.addEventListener("editViewCreated", function addInventoryToEditView():void
+					{
+						editView.newStructureAdded(os);
+					});
+				}
+			}
+			public function addStructureToEditView(ios:ImposterOwnedStructure):void
 			{
 				currentState = "editView";
-				editView.addEventListener("editViewCreated", onEditViewCreated);
-			}
-			private function onEditViewCreated(evt:DynamicEvent):void
-			{
-				if (editView.ios)
+				editView.addEventListener("editViewCreated", function addNewStructureToEditView():void
 				{
-//					var asset:ActiveAsset = editView.editMode.createPurchaseCopy(editView.pausedForStateCompletion);
-					editView.newStructurePurchased(editView.ios);
-//					editView.ios = null;					
-//					editView.editMode.startMoveWithoutEditOptions(asset);					
-				}
+					editView.newStructureAdded(ios);
+				});
+			}	
+			public function sellItem(item:Object):void
+			{
+				if (item is OwnedStructure)
+					gdi.structureController.serverController.sendRequest({id: item.id}, "owned_structure", "sell");	
+				this.bottomBarView.removeInventoryItemRenderer(item);
+			}
+			public function putInInventory(item:Object):void
+			{
+				this.bottomBarView.addInventoryItemRenderer(item);
 			}
 			private function addControllerListeners():void
 			{
@@ -418,29 +413,21 @@
 			{
 				if (isLoggedInUser(evt.user))
 //				if (true)
-				{
 					instancesLoadedForGameUser();				
-				}
 				else
-				{
 					instancesLoadedForFriend();
-				}				
 			}
 			private function isLoggedInUser(checkUser:User):Boolean
 			{
 				if (facebookInterface.snid == checkUser.snid)
-				{
 					return true;
-				}
 				return false;
 			}
 			private function onSongsLoaded(evt:EssentialEvent):void
 			{
 				gdi.removeEventListener(EssentialEvent.OWNED_SONGS_LOADED, onSongsLoaded);
 				if (isLoggedInUser(evt.user))
-				{
 					topBarView.onSongsLoaded();	
-				}
 			}	
 			private function onStructuresLoaded(evt:EssentialEvent):void
 			{
@@ -457,9 +444,7 @@
 //					throw new Error("Dwelling not set");
 				}
 				else
-				{
 					friendGDILoaded(evt.gdi);
-				}				
 			}
 			private function onUsablesLoaded(evt:EssentialEvent):void
 			{
@@ -478,9 +463,7 @@
 				gdi.removeEventListener(EssentialEvent.OWNED_LAYERABLES_LOADED, onLayerablesLoaded);
 				layerablesLoaded = true;
 				if (isLoggedInUser(evt.user) && venueLoaded)
-				{
 					attemptToPopulateVenueForUser();
-				}				
 			}
 			private function onDwellingsLoaded(evt:EssentialEvent):void
 			{

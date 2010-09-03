@@ -20,6 +20,7 @@ package rock_on
 	import game.CounterEvent;
 	import game.GameClock;
 	import game.ImposterCreature;
+	import game.InventoryEvent;
 	
 	import helpers.CollectibleDrop;
 	import helpers.CreatureGenerator;
@@ -106,7 +107,6 @@ package rock_on
 		public var decorationBoss:DecorationBoss;
 		public var fullyLoaded:Boolean;		
 
-//		public var _wbi:WorldBitmapInterface;
 		public var _dwellingController:DwellingController;
 		public var _structureController:StructureController;
 		public var _creatureController:CreatureController;
@@ -128,7 +128,6 @@ package rock_on
 			
 			_structureController = structureController;
 			_venueManager = venueManager;
-//			_wbi = wbi;
 			_dwellingController = dwellingController;
 			_creatureController = creatureController;
 			_usableController = usableController;
@@ -138,7 +137,8 @@ package rock_on
 			setEntrance(params);
 			setAdditionalProperties(params);		
 			
-			addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);				
+			addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);	
+			_structureController.addEventListener(InventoryEvent.ADDED_TO_INVENTORY, onAddedToInventory);			
 			addStageManager();	
 		}
 		
@@ -268,7 +268,8 @@ package rock_on
 		{
 			setLayout();
 			updateState();	
-						
+			
+			createInventory();
 			stageManager.myWorld = _myWorld;
 			customerPersonManager = new CustomerPersonManager(_myWorld, this);
 			boothBoss = new BoothBoss(_structureController, _myWorld, this);
@@ -782,6 +783,11 @@ package rock_on
 			removeShowButton();
 		}
 		
+		private function createInventory():void
+		{
+			FlexGlobals.topLevelApplication.bottomBarView.createInventoryList();
+		}
+		
 		public function removeShowButton():void
 		{
 			if (FlexGlobals.topLevelApplication.contains(startShowButton))
@@ -793,6 +799,23 @@ package rock_on
 				startShowButton = null;
 			}			
 		}
+		
+		private function onAddedToInventory(evt:InventoryEvent):void
+		{
+			if (evt.item is OwnedStructure)
+			{
+				var os:OwnedStructure = evt.item as OwnedStructure;
+				var asset:ActiveAsset = _myWorld.getAssetFromOwnedStructure(os);
+				if (!asset)
+				{
+					asset = _myWorld.getParentAssetFromTopper(os);
+					asset.toppers = _structureController.getStructureToppers(asset.thinger as OwnedStructure);
+					_myWorld.doAssetRedraw(asset);
+				}
+				else
+					_myWorld.removeAsset(asset);
+			}
+		}		
 		
 		public function doStructureRedraw(asset:ActiveAsset):void
 		{

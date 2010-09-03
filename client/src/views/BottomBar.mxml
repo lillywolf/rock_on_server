@@ -8,6 +8,7 @@
 			import com.facebook.data.users.FacebookUser;
 			
 			import controllers.FriendController;
+			import controllers.LayerableController;
 			import controllers.LevelController;
 			import controllers.StoreController;
 			import controllers.ThingerController;
@@ -19,11 +20,14 @@
 			
 			import game.GameDataInterface;
 			import game.ImposterCreature;
+			import game.InventoryEvent;
 			
 			import helpers.CreatureEvent;
 			
 			import models.Creature;
+			import models.EssentialModelReference;
 			import models.Level;
+			import models.OwnedStructure;
 			import models.Store;
 			import models.User;
 			
@@ -54,12 +58,9 @@
 			public var myWorld:World;
 			[Bindable] public var myUser:User;
 			
-			public var inventoryCanvas:Canvas;
+			public var inventoryList:TiledItemList;
+			public var friendCanvas:Canvas;
 			public var creatureInfoComponent:CreatureInfoComponent;
-//			public var creatureCanvas:ExpandingCanvas;
-//			public var creatureNameLabel:Label;
-//			public var displayedCreatureInfo:Canvas;
-//			public var displayedCreatureUIC:ContainerUIC;
 			public var inventoryIndex:int = 0;
 			public var tabCanvas:HBox;
 			public var worldView:WorldView;
@@ -147,8 +148,7 @@
 			[Embed(source="../libs/icons/miniheart_orange.png")]
 			public var miniHeartOrange:Class;
 			[Embed(source="../libs/icons/miniheart_green.png")]
-			public var miniHeartGreen:Class;
-			
+			public var miniHeartGreen:Class;			
 			[Embed(source="../libs/icons/miniheart_red.png")]
 			public var miniHeart5:Class;
 			[Embed(source="../libs/icons/miniheart_orangered.png")]
@@ -158,19 +158,7 @@
 			[Embed(source="../libs/icons/miniheart_orangeyellow.png")]
 			public var miniHeart2:Class;
 			[Embed(source="../libs/icons/miniheart_yellowgreen.png")]
-			public var miniHeart1:Class;
-			
-			[Embed(source="../libs/icons/chili_red.png")]
-			public var miniChili5:Class;
-			[Embed(source="../libs/icons/chili_orange.png")]
-			public var miniChili4:Class;
-			[Embed(source="../libs/icons/chili_yellow.png")]
-			public var miniChili3:Class;
-			[Embed(source="../libs/icons/chili_yellowgreen.png")]
-			public var miniChili2:Class;
-			[Embed(source="../libs/icons/chili_green.png")]
-			public var miniChili1:Class;
-			
+			public var miniHeart1:Class;			
 
 			private function onCreationComplete():void
 			{		
@@ -180,11 +168,10 @@
 				addChild(creatureInfoComponent);
 				
 				createTabCanvas();
-				createInventoryCanvas();
+				createFriendCanvas();
 				addTabs();			
 				
 				width = 760;
-//				addEventListener("facebookDataLoaded", onFriendDataLoaded);
 				addEventListener(CreatureEvent.CREATURE_CLICKED, onCreatureClicked);
 				addEventListener(MouseEvent.CLICK, onBottomBarClicked);
 			}		
@@ -213,34 +200,7 @@
 			{
 				this.creatureInfoComponent.replaceCreature(evt.asset.creature);
 			}
-			
-			public function getCreatureButtons(creature:Creature):Canvas
-			{
-				var grayFilter:GlowFilter = createGrayFilter();
-				var canvas:Canvas = new Canvas();
-				var img1:Image = new Image();
-				img1.source = smallPizzaIconClass;
-				img1.filters = [grayFilter];
-				img1.y = 10;
-				canvas.addChild(img1);
-				var img2:Image = new Image();
-				img2.source = smallCoffeeIconClass;
-				img2.x = 35;
-				img2.y = 5;
-				img2.filters = [grayFilter];
-				canvas.addChild(img2);
-				canvas.y = 85;
-				return canvas;
-			}
-			
-			public function getCreatureMood(creature:Creature):Image
-			{
-				var image:Image = new Image();
-				image.source = smileGreenClass;
-				image.y = 70;
-				return image;
-			}
-			
+
 			public function replaceCreatureInfo(creature:Creature):void
 			{
 				creatureInfoComponent.replaceCreature(creature);
@@ -251,14 +211,105 @@
 				creatureInfoComponent.expandComponent(creature);
 			}
 			
-			private function createInventoryCanvas():void
+			private function createFriendCanvas():void
 			{
-				inventoryCanvas = new Canvas();
-				inventoryCanvas.x = 0;
-				inventoryCanvas.y = 520;
-				inventoryCanvas.height = 110;
-				inventoryCanvas.clipContent = false;
-				addChild(inventoryCanvas);
+				friendCanvas = new Canvas();
+				friendCanvas.x = 0;
+				friendCanvas.y = 520;
+				friendCanvas.height = 110;
+				friendCanvas.clipContent = false;
+				addChild(friendCanvas);
+			}
+			
+			public function createInventoryList():void
+			{
+				var inventory:ArrayCollection = getInventory();
+				inventoryList = new TiledItemList(inventory, 2, 7);
+				inventoryList.y = 360;
+				inventoryList.x = 0;
+				inventoryList.height = 210;				
+			}
+			
+			public function showInventory():void
+			{	
+				clearCurrentContent();
+				tabCanvas.y = 310;
+				addChild(tabCanvas);
+				addChild(inventoryList);
+			}
+			
+			public function showFriends():void
+			{
+				clearCurrentContent();
+				addChild(friendCanvas);
+				addChild(creatureInfoComponent);
+				tabCanvas.y = 424;
+				addChild(tabCanvas);
+			}
+			
+			private function getInventory():ArrayCollection
+			{
+				var inventory:ArrayCollection = this.worldView.structureController.getInventory();
+				var containers:ArrayCollection = new ArrayCollection();
+				for each (var os:OwnedStructure in inventory)
+				{
+					var iir:InventoryItemRenderer = createInventoryItemRenderer(os);
+					containers.addItem(iir);
+				}
+				return containers;
+			}
+			
+			private function createInventoryItemRenderer(item:Object):InventoryItemRenderer
+			{
+				var iir:InventoryItemRenderer = new InventoryItemRenderer(0xCBE3F7, 0xCBE3F7, myUser.level, 110);
+				iir.thinger = item;
+				iir.clipContent = true;
+				iir.updateDefaultStyle(0xffffff, 12, 0.6);
+				
+				if (item is OwnedStructure)
+				{
+					var mc:MovieClip = EssentialModelReference.getMovieClipCopy((item as OwnedStructure).structure.mc);
+					mc.gotoAndStop(1);
+					if ((item as OwnedStructure).structure.structure_type == "StructureTopper")
+						iir.uic = LayerableController.formatMovieClipByDimensions(mc, iir.DIMENSION - 40, iir.DIMENSION - 40, 20, 20);
+					else
+						iir.uic = LayerableController.formatMovieClipByDimensions(mc, iir.DIMENSION * 1.5, iir.DIMENSION * 1.5, -25, -25);						
+				}
+				
+				iir.addFrame(new ColorFrameBlue(), iir.DIMENSION - 16);
+				iir.addInventoryButtons();	
+				
+				return iir;
+			}
+			
+			public function removeInventoryItemRenderer(item:Object):void
+			{
+				for (var i:int = 0; i < inventoryList.numChildren; i++)
+				{
+					if (inventoryList.getChildAt(i) is InventoryItemRenderer &&
+						(inventoryList.getChildAt(i) as InventoryItemRenderer).thinger == item)
+					{
+						inventoryList.removeChildObject(i);
+					}
+				}
+			}
+			
+			public function addInventoryItemRenderer(item:Object):void
+			{
+				var iir:InventoryItemRenderer = createInventoryItemRenderer(item);
+				inventoryList.addChildObject(iir);
+			}
+			
+			private function clearCurrentContent():void
+			{
+				if (friendCanvas && this.contains(friendCanvas))
+					removeChild(friendCanvas);
+				if (creatureInfoComponent && this.contains(creatureInfoComponent))
+					removeChild(creatureInfoComponent);
+				if (inventoryList && this.contains(inventoryList))
+					removeChild(inventoryList);
+				if (tabCanvas)
+					removeChild(tabCanvas);
 			}
 			
 			private function createTabCanvas():void
@@ -445,9 +496,10 @@
 					addFriendRendererStyle(null, friendRenderer, 0xffffff);
 					pic = getDefaultPicture(friendRenderer);
 					friendRenderer.uic = pic;
+					friendRenderer.addFrame(new ColorFrameBlue());
 					friendRenderer.x += USER_PIC_DIMENSION;
 					friendRenderer.addName("Invite");
-					inventoryCanvas.addChild(friendRenderer);
+					friendCanvas.addChild(friendRenderer);
 					index++;
 				}				
 				for (j = index; j < displayedUsers; j++)
@@ -463,10 +515,11 @@
 					friendRenderer.thinger = friend;
 					pic = getFriendPicture(friend, friendRenderer);
 					friendRenderer.uic = pic;
+					friendRenderer.addFrame(new ColorFrameBlue());
 					friendRenderer.x += USER_PIC_DIMENSION;
 					friendRenderer.addLevelBox(index);
 					friendRenderer.addName(friend.first_name);
-					inventoryCanvas.addChild(friendRenderer);
+					friendCanvas.addChild(friendRenderer);
 					friendRenderer.addEventListener(MouseEvent.CLICK, onFriendRendererClicked);
 					index++;					
 				}	
@@ -478,11 +531,12 @@
 					addFriendRendererStyle(null, friendRenderer, 0xffffff);
 					pic = getDefaultPicture(friendRenderer);
 					friendRenderer.uic = pic;
+					friendRenderer.addFrame(new ColorFrameBlue());
 					friendRenderer.x += USER_PIC_DIMENSION;
 					friendRenderer.addName("Invite");
-					inventoryCanvas.addChild(friendRenderer);
+					friendCanvas.addChild(friendRenderer);
 				}	
-				inventoryCanvas.setStyle("right", 20);
+				friendCanvas.setStyle("right", 20);
 				showScroller();
 			}
 			
@@ -496,8 +550,8 @@
 				imageLeft.source = arrowScrollerLeft;
 				imageLeft.x = -28;
 				imageLeft.y = 17;
-				inventoryCanvas.addChild(imageRight);
-				inventoryCanvas.addChild(imageLeft);
+				friendCanvas.addChild(imageRight);
+				friendCanvas.addChild(imageLeft);
 			}
 			
 			public function getDefaultPicture(friendRenderer:InventoryItemRenderer):Image
@@ -588,17 +642,6 @@
 				return image;
 			}
 			
-//			public function getDisplayedCreature(creature:Creature, dimension:Number):ContainerUIC
-//			{
-//				var asset:ActiveAssetStack = new ActiveAssetStack(creature, null, creature.layerableOrder, dimension);
-//				asset.doAnimation("walk_toward", false, 39);
-////				asset.scaleMovieClips(dimension, dimension);
-//				var uic:ContainerUIC = new ContainerUIC();
-//				uic.thinger = asset;
-//				uic.addChild(asset);
-//				return uic;				
-//			}
-			
 			public function getBandMember(friendGDI:GameDataInterface, dimension:Number):ActiveAssetStack
 			{
 				if (friendGDI)
@@ -628,7 +671,7 @@
 				pic.source = facebookUser.pic_square;
 				userRenderer.uic = pic;
 				userRenderer.addName("You");
-				inventoryCanvas.addChild(userRenderer);
+				friendCanvas.addChild(userRenderer);
 				
 				userRenderer.thinger = facebookUser;
 				userRenderer.addEventListener(MouseEvent.CLICK, onUserButtonClicked);
@@ -643,11 +686,15 @@
 			
 			private function onUserButtonClicked(evt:MouseEvent):void
 			{
-				if (FlexGlobals.topLevelApplication.currentState == "friendView")
-				{
-					FlexGlobals.topLevelApplication.friendView.tearDown();
-				}
-				FlexGlobals.topLevelApplication.currentState = "stageViewer";
+//				if (FlexGlobals.topLevelApplication.currentState == "friendView")
+//				{
+//					FlexGlobals.topLevelApplication.friendView.tearDown();
+//				}
+//				FlexGlobals.topLevelApplication.currentState = "stageViewer";
+				if (this.contains(this.friendCanvas))
+					showInventory();	
+				else
+					showFriends();
 			}
 			
 			private function onBottomBarClicked(evt:MouseEvent):void

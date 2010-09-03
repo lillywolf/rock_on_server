@@ -90,12 +90,26 @@
 				normalBtn.height = 40;
 				FlexGlobals.topLevelApplication.topBarView.addChild(normalBtn);
 
+				var moveBtn:Button = new Button();
+				moveBtn.addEventListener(MouseEvent.CLICK, onMoveModeButtonClicked);
+				moveBtn.y = 300;
+				moveBtn.width = 40;
+				moveBtn.height = 40;
+				FlexGlobals.topLevelApplication.topBarView.addChild(moveBtn);
+
 				var rotateBtn:Button = new Button();
 				rotateBtn.addEventListener(MouseEvent.CLICK, onRotateStructureModeButtonClicked);
-				rotateBtn.y = 300;
+				rotateBtn.y = 350;
 				rotateBtn.width = 40;
 				rotateBtn.height = 40;
 				FlexGlobals.topLevelApplication.topBarView.addChild(rotateBtn);
+				
+				var inventoryBtn:Button = new Button();
+				inventoryBtn.addEventListener(MouseEvent.CLICK, onInventoryModeButtonClicked);
+				inventoryBtn.y = 400;
+				inventoryBtn.width = 40;
+				inventoryBtn.height = 40;
+				FlexGlobals.topLevelApplication.topBarView.addChild(inventoryBtn);
 			}
 			
 			private function onTileModeButtonClicked(evt:MouseEvent):void
@@ -107,10 +121,20 @@
 			{
 				switchToNormalStructureMode();
 			}
+
+			private function onMoveModeButtonClicked(evt:MouseEvent):void
+			{
+				switchToNormalMoveMode();
+			}
 			
 			private function onRotateStructureModeButtonClicked(evt:MouseEvent):void
 			{
 				switchToRotateStructureMode();
+			}
+			
+			private function onInventoryModeButtonClicked(evt:MouseEvent):void
+			{
+				switchToInventoryMode();
 			}
 			
 			private function clearCurrentChildren():void
@@ -149,12 +173,22 @@
 				addChild(normalStructureMode);
 			}
 			
+			private function switchToNormalMoveMode():void
+			{
+				normalStructureMode.inventoryToolEnabled = false;
+				normalStructureMode.rotationToolEnabled = false;
+			}
+			
 			private function switchToRotateStructureMode():void
 			{
-				if (normalStructureMode.rotationToolEnabled)
-					normalStructureMode.rotationToolEnabled = false;
-				else
-					normalStructureMode.rotationToolEnabled = true;
+				normalStructureMode.inventoryToolEnabled = false;
+				normalStructureMode.rotationToolEnabled = true;
+			}
+			
+			private function switchToInventoryMode():void
+			{
+				normalStructureMode.rotationToolEnabled = false;
+				normalStructureMode.inventoryToolEnabled = true;
 			}
 			
 			public function addTemporaryCoords(os:OwnedStructure):void
@@ -164,22 +198,29 @@
 				os.z = 0;
 			}
 			
-			public function newStructurePurchased(ios:ImposterOwnedStructure):void
+			public function newStructureAdded(os:OwnedStructure):void
 			{
-				if (ios.structure.structure_type == "Tile")
+				var asset:ActiveAsset;
+				if (os.structure.structure_type == "Tile")
 				{
 					switchToTileMode();
-					addTemporaryCoords(ios);
-					var asset:ActiveAsset = tileMode.addTileAsset(ios);
+					addTemporaryCoords(os);
+					asset = tileMode.addTileAsset(os);
 					tileMode.selectTile(asset);
 				}
-				else if (ios.structure.structure_type == "Booth" || ios.structure.structure_type == "ListeningStation")
+				else if (os.structure.structure_type == "Booth" || os.structure.structure_type == "ListeningStation" || os.structure.structure_type == "Decoration")
 				{
-					
+					switchToNormalStructureMode();
+					addTemporaryCoords(os);
+					asset = normalStructureMode.addStructureAssetFromInventory(os, normalStructureMode.structureWorld);
+					normalStructureMode.selectStructure(asset);
 				}
-				else
+				else if (os.structure.structure_type == "StructureTopper")
 				{
-					
+					switchToNormalStructureMode();
+					addTemporaryCoords(os);
+					asset = normalStructureMode.addStructureAssetFromInventory(os, normalStructureMode.structureWorld);
+					normalStructureMode.selectStructure(asset);
 				}
 			}				
 			

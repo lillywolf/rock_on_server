@@ -84,10 +84,40 @@ package views
 			addScrollButtons();
 		}
 		
-		private function addItemToList(obj:DisplayObject, index:int):void
+		public function removeChildObject(index:int):void
+		{
+			var renderer:DisplayObject = this.getChildAt(index);
+			this.removeChildAt(index);
+			var arrayIndex:int = _items.getItemIndex(renderer);
+			_items.removeItemAt(arrayIndex);			
+			
+			for (var i:int = arrayIndex; i < _items.length; i++)
+			{
+				var obj:DisplayObject = _items.getItemAt(i) as DisplayObject;
+				setItemPosition(obj, i);
+			}
+		}
+
+		public function addChildObject(renderer:DisplayObject):void
+		{
+			_items.addItemAt(renderer, 0);
+			this.addChildAt(renderer, 0);
+			for (var i:int = 1; i < _items.length; i++)
+			{
+				var obj:DisplayObject = _items.getItemAt(i) as DisplayObject;
+				setItemPosition(obj, i);
+			}
+		}
+		
+		private function setItemPosition(obj:DisplayObject, index:int):void
 		{
 			obj.x = index%_numColumns * (obj.width + itemPaddingX) + paddingX;
-			obj.y = Math.floor(index/_numColumns) * (obj.height + itemPaddingY) + paddingY;
+			obj.y = Math.floor(index/_numColumns) * (obj.height + itemPaddingY) + paddingY;			
+		}
+		
+		private function addItemToList(obj:DisplayObject, index:int):void
+		{
+			setItemPosition(obj, index);
 			this.addChild(obj);
 		}
 	}

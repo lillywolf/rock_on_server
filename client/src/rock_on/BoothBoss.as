@@ -69,6 +69,7 @@ package rock_on
 		
 		public function updateBoothOnServerResponse(os:OwnedStructure, method:String):void
 		{
+//			var os:OwnedStructure = _structureController.getOwnedStructureById(os.id);
 			var booth:Booth = getBoothById(os.id);
 						
 			if (method == "update_inventory_count")
@@ -107,7 +108,7 @@ package rock_on
 			var booth:Booth = new Booth(this, _venue, os);
 			booth.friendMirror = friendMirror;
 			booth.editMirror = editMirror;
-			booths.addItem(booth);
+			booths.addItem(booth);							
 			return booth;
 		}
 		
@@ -184,14 +185,17 @@ package rock_on
 			for each (var os:OwnedStructure in boothStructures)
 			{
 				var booth:Booth = createBooth(os);
-				var asset:ActiveAssetStack = createBoothAsset(booth);
-				asset.toppers = _structureController.getStructureToppers(os);
-				asset.setMovieClipsForStructure(asset.toppers);
-				asset.bitmapWithToppers();
-				var addTo:Point3D = new Point3D(booth.x, booth.y, booth.z);
-				addBoothsToWorld(asset, addTo);
-				boothAssets.addItem(asset);
-				booth.updateState();
+				if (os.in_use)
+				{
+					var asset:ActiveAssetStack = createBoothAsset(booth);
+					asset.toppers = _structureController.getStructureToppers(os);
+					asset.setMovieClipsForStructure(asset.toppers);
+					asset.bitmapWithToppers();
+					var addTo:Point3D = new Point3D(booth.x, booth.y, booth.z);
+					addBoothsToWorld(asset, addTo);
+					boothAssets.addItem(asset);
+					booth.updateState();
+				}
 			}
 		}
 		
@@ -275,9 +279,8 @@ package rock_on
 		{
 			trace("select booth");
 			var selectedBooth:Booth = null;			
-			var unstockedBooths:int = getUnstockedBooths().length;
 			
-			if (booths.length && !(booths.length == 1 && booth) && booths.length != unstockedBooths)
+			if (stockedBoothExists(booth))
 			{
 				do 
 				{
@@ -287,6 +290,28 @@ package rock_on
 			}
 			trace("booth selected");
 			return selectedBooth;	
+		}
+		
+		private function stockedBoothExists(booth:Booth):Boolean
+		{
+			if (booths.length &&
+				!(booths.length == 1 && booth) &&
+				getBoothsInUse().length != getUnstockedBooths().length)
+			{
+				return true;
+			}
+			return false;
+		}
+		
+		private function getBoothsInUse():ArrayCollection
+		{
+			var inUse:ArrayCollection = new ArrayCollection();
+			for each (var booth:Booth in booths)
+			{
+				if (booth.in_use)
+					inUse.addItem(booth);
+			}
+			return inUse;
 		}
 		
 		public function getAnyExistingBooth(type:String=null):Booth
@@ -305,10 +330,8 @@ package rock_on
 			var unstockedBooths:ArrayCollection = new ArrayCollection();
 			for each (var booth:Booth in booths)
 			{
-				if (booth.state == Booth.UNSTOCKED_STATE)
-				{
+				if (booth.state && booth.state == Booth.UNSTOCKED_STATE)
 					unstockedBooths.addItem(booth);
-				}
 			}	
 			return unstockedBooths;		
 		}

@@ -45,6 +45,7 @@ package views
 		public var allStructures:ArrayCollection;
 		public var normalMode:Boolean;
 		public var rotationToolEnabled:Boolean;
+		public var inventoryToolEnabled:Boolean;
 		
 		public function NormalStructureMode(editView:EditView, worldWidth:int, worldDepth:int, tileSize:int)
 		{
@@ -146,11 +147,14 @@ package views
 					toAdd.addItem(a);
 				}
 			}	
-			for each (var t:ActiveAsset in allStructures)
+			if (normalMode)
 			{
-				if ((t.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
-					toAdd.addItem(t);	
-			}	
+				for each (var t:ActiveAsset in allStructures)
+				{
+					if ((t.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
+						toAdd.addItem(t);	
+				}	
+			}
 			swapAssets(toRemove, toAdd);
 			structureWorld.assetRenderer.swapEnterFrameHandler();
 			normalMode = false;
@@ -229,6 +233,17 @@ package views
 			var asset:ActiveAsset = new ActiveAsset(mc);
 			asset.copyFromOwnedStructure(os);
 			asset.toppers = _structureController.getStructureToppers(os);
+			asset.switchToBitmap();
+			_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
+			allStructures.addItem(asset);
+			return asset;
+		}
+
+		public function addStructureAssetFromInventory(os:OwnedStructure, _world:World):ActiveAsset
+		{
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+			var asset:ActiveAsset = new ActiveAsset(mc);
+			asset.copyFromOwnedStructure(os);
 			asset.switchToBitmap();
 			_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
 			allStructures.addItem(asset);
@@ -377,7 +392,7 @@ package views
 			}
 			else if (structureEditing && (currentStructure.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
 			{
-				var parentAsset:ActiveAsset = checkStructureSurfaces();
+				var parentAsset:ActiveAsset = checkStructureSurfaces(currentStructure);
 				if (parentAsset && !doesTopperCollide(currentStructure))
 					placeTopper(parentAsset);
 				else
@@ -405,6 +420,8 @@ package views
 			
 			if (rotationToolEnabled)
 				handleRotationClick(asset);
+			else if (inventoryToolEnabled)
+				placeInInventory(asset);
 			else
 				handleMoveClick(asset);
 		}
@@ -477,17 +494,23 @@ package views
 
 		private function moveStructureBack(asset:ActiveAsset):void
 		{			
-			if (isOwned(currentStructure))
+			if (isOwned(currentStructure) && (currentStructure.thinger as OwnedStructure).in_use)
 			{
 				var os:OwnedStructure = asset.thinger as OwnedStructure;
 				structureWorld.moveAssetTo(asset, new Point3D(os.x, os.y, os.z));
 			}
+			else if (isOwned(currentStructure) && !(currentStructure.thinger as OwnedStructure).in_use)
+				replaceInInventory(currentStructure.thinger as OwnedStructure);
 			else
 				removeImposterStructure(asset);
 			if (!normalMode)
 				reassignAndRedrawTopper(asset);
 		}
 		
+		private function replaceInInventory(os:OwnedStructure):void
+		{
+			
+		}
 		
 		private function revertRotation(asset:ActiveAsset):void
 		{
@@ -721,7 +744,7 @@ package views
 			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			if ((asset.thinger as OwnedStructure).structure.structure_type == "StructureTopper")
 			{	
-				var parentStructure:ActiveAsset = checkStructureSurfaces();
+				var parentStructure:ActiveAsset = checkStructureSurfaces(currentStructure);
 				if (parentStructure && !doesTopperCollide(asset))
 				{	
 					addTopperToStructure(os, parentStructure);
@@ -743,9 +766,19 @@ package views
 				updateStructureFilters();				
 		}
 		
-		private function checkStructureSurfaces():ActiveAsset
+		private function bringPointsToYZero(points:ArrayCollection):void
 		{
-			currentStructurePoints = getOccupiedOuterPoints(currentStructure);	
+			for each (var pt:Point3D in points)
+			{
+				pt.x = pt.x + pt.y;
+				pt.y = 0;
+				pt.z = pt.x - pt.y;
+			}
+		}
+		
+		private function checkStructureSurfaces(asset:ActiveAsset):ActiveAsset
+		{
+			currentStructurePoints = getOccupiedOuterPoints(asset);	
 			var oldParent:ActiveAsset;
 			var newParent:ActiveAsset;
 			var numSpaces:int = currentStructurePoints.length;
@@ -1130,6 +1163,54 @@ package views
 				}
 			}
 			return null;
-		}		
+		}	
+		
+		private function placeInInventory(asset:ActiveAsset):void
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if (asset.toppers)
+				removeToppersFromEditMode(asset.toppers);
+			if (os.structure.structure_type == "StructureTopper")
+				removeTopperFromParent(os);
+			_structureController.takeOutOfUse(os);
+			removeStructureFromEditMode(asset);
+		}
+		
+		private function removeToppersFromEditMode(toppers:ArrayCollection):void
+		{
+			for each (var t:OwnedStructure in toppers)
+			{
+				var topperAsset:ActiveAsset = getMatchingAssetForOwnedStructure(t);
+				removeStructureFromEditMode(topperAsset);
+				_structureController.takeOutOfUse(t);
+			}		
+		}
+		
+		private function removeTopperFromParent(os:OwnedStructure):void
+		{			
+			var parentAsset:ActiveAsset = getContainingStructure(os);
+			var index:int = parentAsset.toppers.getItemIndex(os);
+			parentAsset.toppers.removeItemAt(index);
+		}
+		
+		private function getContainingStructure(topper:OwnedStructure):ActiveAsset
+		{
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+			{
+				if (asset.toppers && asset.toppers.contains(topper))
+					return asset;
+			}
+			return null;
+		}
+		
+		private function removeStructureFromEditMode(asset:ActiveAsset):void
+		{
+			if (allStructures.contains(asset))
+			{
+				var index:int = allStructures.getItemIndex(asset);
+				this.allStructures.removeItemAt(index);
+			}
+			structureWorld.removeAsset(asset);	
+		}
 	}
 }

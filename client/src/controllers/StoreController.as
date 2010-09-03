@@ -5,6 +5,7 @@ package controllers
 	
 	import game.GameDataInterface;
 	
+	import models.OwnedStructure;
 	import models.Store;
 	import models.StoreOwnedThinger;
 	import models.User;
@@ -108,8 +109,7 @@ package controllers
 		
 		public function placeOwnedStructure(sot:StoreOwnedThinger):void
 		{
-			// Might want to change how this works
-			FlexGlobals.topLevelApplication.switchToEditView();
+//			FlexGlobals.topLevelApplication.addStructureToEditView();
 			var storeEvent:StoreEvent = new StoreEvent(StoreEvent.THINGER_PURCHASED, sot, true, true);
 			dispatchEvent(storeEvent);			
 		}
