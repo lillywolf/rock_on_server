@@ -24,6 +24,7 @@ package rock_on
 		public var stageAsset:ActiveAsset;
 		public var stages:ArrayCollection;
 		public var concertStage:ConcertStage;
+		public var stageDecorations:ArrayCollection;
 		
 		public static const STAGE_DOOR_X:int = 1;
 		
@@ -57,7 +58,7 @@ package rock_on
 		
 		public function addStageDecorations(worldToUpdate:World):void
 		{
-			var stageDecorations:ArrayCollection = _structureController.getStructuresByType("StageDecoration");
+			stageDecorations = _structureController.getStructuresByType("StageDecoration");
 			for each (var os:OwnedStructure in stageDecorations)
 			{
 				var stageDecoration:StageDecoration = new StageDecoration(this.concertStage, os);

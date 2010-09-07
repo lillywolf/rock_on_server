@@ -7,6 +7,7 @@ package views
 	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 	
 	import models.EssentialModelReference;
@@ -802,6 +803,29 @@ package views
 			return null;
 		}
 		
+		private function getExtraBasePointsByStructureType(asset:ActiveAsset):ArrayCollection
+		{
+			var extra:ArrayCollection = new ArrayCollection();
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if (os.structure.structure_type == "Booth")
+				extra.addItem(getStructureFrontByRotation(asset, os));
+			else if (os.structure.structure_type == "ListeningStation")
+				extra.addItem(getStructureFrontByRotation(asset, os));
+			return extra;		
+		}
+		
+		private function getStructureFrontByRotation(asset:ActiveAsset, os:OwnedStructure):Point3D
+		{
+			if (os.rotation == 0)
+				return new Point3D(asset.worldCoords.x + os.width/2 + 1, asset.worldCoords.y, Math.round(asset.worldCoords.z));
+			else if (os.rotation == 1)
+				return new Point3D(Math.round(asset.worldCoords.x), asset.worldCoords.y, asset.worldCoords.z + os.depth/2 + 1);
+			else if (os.rotation == 2)
+				return new Point3D(asset.worldCoords.x - os.width/2 - 1, asset.worldCoords.y, Math.round(asset.worldCoords.z));
+			else
+				return new Point3D(Math.round(asset.worldCoords.x), asset.worldCoords.y, asset.worldCoords.z - os.depth/2 - 1);			
+		}
+		
 		private function checkStructureSurfacesForSavedTopper():ActiveAsset
 		{
 			var os:OwnedStructure = currentStructure.thinger as OwnedStructure;
@@ -847,6 +871,8 @@ package views
 		private function removeSavedPointsFromBasesArray(os:OwnedStructure):void
 		{
 			var old:ArrayCollection = getSavedStructurePoints(os, true);
+			var asset:ActiveAsset = getMatchingAssetForOwnedStructure(os);
+			old.addAll(getExtraBasePointsByStructureType(asset));
 			for each (var pt:Point3D in old)
 			{
 				removePointFrom3DArray(new Point3D(pt.x, pt.y, pt.z), structureBases);
@@ -856,6 +882,7 @@ package views
 		private function addSavedPointsToBasesArray(asset:ActiveAsset):void
 		{
 			var newPts:ArrayCollection = getSavedStructurePoints(asset.thinger as OwnedStructure, true);
+			newPts.addAll(getExtraBasePointsByStructureType(asset));
 			for each (var pt:Point3D in newPts)
 			{
 				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
@@ -865,6 +892,7 @@ package views
 		private function addCurrentPointsToBasesArray(asset:ActiveAsset):void
 		{
 			var newPts:ArrayCollection = getOccupiedInnerPoints(asset);
+			newPts.addAll(getExtraBasePointsByStructureType(asset));
 			for each (var pt:Point3D in newPts)
 			{
 				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
@@ -1005,8 +1033,28 @@ package views
 		
 		public function isStructureInBounds(asset:ActiveAsset):Boolean
 		{
-		var os:OwnedStructure = asset.thinger as OwnedStructure;
-
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if (os.structure.structure_type == "ListeningStation")
+			{
+				if (isSpecialStructureInBounds(asset, _venue.outsideRect))
+					return true;				
+			}
+			else if (os.structure.structure_type == "StageDecoration")
+			{
+				if (isSpecialStructureInBounds(asset, _venue.stageRect))
+					return true;				
+			}
+			else
+			{
+				if (isVenueStructureInBounds(asset))
+					return true;
+			}
+			return false;
+		}
+		
+		public function isVenueStructureInBounds(asset:ActiveAsset):Boolean
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			if ((asset.worldCoords.x - os.width/2 < _venue.venueRect.left || 
 				asset.worldCoords.x + os.width/2 > _venue.venueRect.right ||
 				asset.worldCoords.z - os.depth/2 < _venue.venueRect.top ||
@@ -1018,12 +1066,26 @@ package views
 			{			
 				return false;
 			}	
-			return true;
+			return true;			
+		}
+
+		public function isSpecialStructureInBounds(asset:ActiveAsset, rect:Rectangle):Boolean
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if (asset.worldCoords.x - os.width/2 < rect.left || 
+				asset.worldCoords.x + os.width/2 > rect.right ||
+				asset.worldCoords.z - os.depth/2 < rect.top ||
+				asset.worldCoords.z + os.depth/2 > rect.bottom)
+			{			
+				return false;
+			}	
+			return true;			
 		}
 		
 		public function doesStructureCollide(asset:ActiveAsset):Boolean
 		{
 			currentStructurePoints = getOccupiedOuterPoints(asset);
+			currentStructurePoints.addAll(getExtraBasePointsByStructureType(asset));
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
 				if (structureBases[pt3D.x] && structureBases[pt3D.x][pt3D.y] && structureBases[pt3D.x][pt3D.y][pt3D.z] &&
@@ -1211,6 +1273,10 @@ package views
 				this.allStructures.removeItemAt(index);
 			}
 			structureWorld.removeAsset(asset);	
+			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
+				cutStructureFromCollisionArrays(asset);
+			else
+				cutTopperFromCollisionArrays(asset);
 		}
 	}
 }

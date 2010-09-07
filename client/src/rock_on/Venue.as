@@ -571,23 +571,35 @@ package rock_on
 			}
 			else if (os.structure.structure_type == "StructureTopper")
 			{
-				this.decorationBoss.updateRenderedDecorations(os, method);
+				this.decorationBoss.updateRenderedDecorations(os, method);				
 			}
 			else if (os.structure.structure_type == "StageDecoration")
 			{
-				this.stageManager.updateRenderedStageDecorations(os, method);
+				updateStructureDerivatives(os, stageManager.stageDecorations);
+				this.stageManager.updateRenderedStageDecorations(os, method);				
 			}
 			else if (os.structure.structure_type == "Booth")
 			{
+				updateStructureDerivatives(os, boothBoss.booths);				
 				this.boothBoss.updateRenderedBooths(os, method);
 			}
 			else if (os.structure.structure_type == "ListeningStation")
 			{
+				updateStructureDerivatives(os, listeningStationBoss.listeningStations);				
 				this.listeningStationBoss.updateRenderedStations(os, method);
 			}
 			else
-			{
 				throw new Error("No re-rendering handler for structure type");
+		}
+		
+		public function updateStructureDerivatives(os:OwnedStructure, collection:ArrayCollection):void
+		{
+//			Updates properties of any new instances originally created from the owned structure (e.g. booths, listening stations, etc)
+			
+			for each (var derivative:OwnedStructure in collection)
+			{
+				if (derivative.id == os.id)
+					derivative.updateProperties(os);
 			}
 		}
 		

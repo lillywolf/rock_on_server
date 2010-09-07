@@ -301,6 +301,9 @@ package controllers
 				removeOwnedStructureFromView(osReference);
 				putInInventory(osReference);
 			}
+			else if (method == "create_new")
+				addOwnedStructureToSystem(osReference);
+			
 			if (osReference.structure.structure_type == "Booth")
 				updateBoothOnServerResponse(osReference, method, venue.boothBoss);
 			else if (osReference.structure.structure_type == "ListeningStation")
@@ -331,6 +334,11 @@ package controllers
 			owned_structures.removeItemAt(index);
 			var evt:StoreEvent = new StoreEvent(StoreEvent.THINGER_SOLD, os, true, true);
 			dispatchEvent(evt);
+		}
+		
+		private function addOwnedStructureToSystem(os:OwnedStructure):void
+		{
+			owned_structures.addItem(os);
 		}
 		
 		private function removeOwnedStructureFromView(os:OwnedStructure):void

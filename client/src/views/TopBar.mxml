@@ -26,6 +26,8 @@
 			import mx.core.Application;
 			import mx.core.UIComponent;
 			
+			import user.GameUser;
+			
 			import world.World;
 			public var myWorld:World;
 			[Bindable] public var myUser:User;
@@ -134,6 +136,12 @@
 			public function onSongsLoaded():void
 			{
 				showMusicInfo();
+			}
+			
+			public function updateTopbarInfo(u:User):void
+			{
+				creditsBox.text = u.credits.toString();
+				musicCreditsBox.text = u.music_credits.toString();
 			}
 			
 			public function showMusicInfo():void
@@ -382,10 +390,7 @@
 			
 			public function genericCanvasStyles():Canvas
 			{
-				var canvas:Canvas = new Canvas();
-//				canvas.setStyle("cornerRadius", 8);
-//				canvas.setStyle("borderStyle", "solid");
-//				canvas.setStyle("borderThickness", 1);				
+				var canvas:Canvas = new Canvas();			
 				canvas.clipContent = false; 
 				return canvas;				
 			}
@@ -421,11 +426,7 @@
 			public function createGrayCanvas():Canvas
 			{
 				var grayCanvas:Canvas = new Canvas();
-				grayCanvas.clipContent = false;				
-//				grayCanvas.setStyle("backgroundColor", 0x333333);
-//				grayCanvas.setStyle("cornerRadius", 10);
-//				grayCanvas.setStyle("borderColor", 0x000000);
-//				grayCanvas.setStyle("borderStyle", "solid");	
+				grayCanvas.clipContent = false;					
 				return grayCanvas;			
 			}
 			

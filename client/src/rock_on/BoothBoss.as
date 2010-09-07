@@ -162,13 +162,6 @@ package rock_on
 				_myWorld.saveStructurePlacement(os, true);
 				var asset:ActiveAsset = _myWorld.getAssetFromOwnedStructure(os);
 				
-//				_myWorld.removeAsset(asset);
-//				var newAsset:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
-//				newAsset.copyFromActiveAsset(asset);
-//				newAsset.setMovieClipsForStructure(newAsset.toppers);
-//				(newAsset as ActiveAssetStack).bitmapWithToppers();
-//				_myWorld.addAsset(newAsset, newAsset.worldCoords);
-				
 				reInitializeBooths(false);
 				_venue.redrawAllMovers();
 			}
@@ -202,13 +195,9 @@ package rock_on
 		public function addBoothsToWorld(asset:ActiveAsset, addTo:Point3D):void
 		{
 			if (editMirror)
-			{
 				_myWorld.addStaticAsset(asset, addTo);
-			}
 			else
-			{
 				_myWorld.addStaticAsset(asset, addTo);
-			}
 		}
 		
 		public function removeRenderedBooths():void
@@ -277,7 +266,6 @@ package rock_on
 		
 		public function getRandomBooth(booth:Booth=null):Booth
 		{
-			trace("select booth");
 			var selectedBooth:Booth = null;			
 			
 			if (stockedBoothExists(booth))
@@ -296,9 +284,19 @@ package rock_on
 		{
 			if (booths.length &&
 				!(booths.length == 1 && booth) &&
-				getBoothsInUse().length != getUnstockedBooths().length)
+				hasStockedBooth(getBoothsInUse(), booth))
 			{
 				return true;
+			}
+			return false;
+		}
+		
+		private function hasStockedBooth(inUse:ArrayCollection, discount:Booth=null):Boolean
+		{
+			for each (var b:Booth in inUse)
+			{
+				if (b != discount && b.state == Booth.STOCKED_STATE)
+					return true;
 			}
 			return false;
 		}
@@ -330,7 +328,9 @@ package rock_on
 			var unstockedBooths:ArrayCollection = new ArrayCollection();
 			for each (var booth:Booth in booths)
 			{
-				if (booth.state && booth.state == Booth.UNSTOCKED_STATE)
+				if (!booth.state)
+					unstockedBooths.addItem(booth);
+				else if (booth.state && booth.state == Booth.UNSTOCKED_STATE)
 					unstockedBooths.addItem(booth);
 			}	
 			return unstockedBooths;		

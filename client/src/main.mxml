@@ -227,10 +227,8 @@
 			public function attemptToPopulateVenueForFriend():void
 			{
 				if (friendView.layerablesLoaded && friendView.venueLoaded)
-				{
 					friendView.initializeCreatures();								
 				}
-			}
 			public function friendGDILoaded(friendGDI:GameDataInterface):void
 			{
 				friendManager.friendGDILoaded(friendGDI);
@@ -330,7 +328,8 @@
 						friendManager.processBasicFriendData(instance as User, evt.method);
 					else
 					{
-						gdi.user.updateUserOnServerResponse(instance as User, evt.method);
+//						gdi.user.updateUserOnServerResponse(instance as User, evt.method);
+						topBarView.updateTopbarInfo(gdi.user);
 						gdi.levelController.setLevelOnUser(gdi.user);
 					}
 				}

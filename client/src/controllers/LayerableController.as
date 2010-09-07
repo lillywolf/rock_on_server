@@ -1,5 +1,6 @@
 package controllers
 {
+	import flash.display.Bitmap;
 	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
 	import flash.geom.Rectangle;
@@ -19,6 +20,7 @@ package controllers
 	import server.ServerDataEvent;
 	
 	import views.ContainerUIC;
+	import views.InventoryItemRenderer;
 
 	public class LayerableController extends Controller
 	{
@@ -413,23 +415,24 @@ package controllers
 			var rect:Rectangle;
 			
 			if (mc.width > mc.height)
-			{
 				toScale = dimensionX / mc.width;
-			}
 			else 
-			{
 				toScale = dimensionY / mc.height;
-			}
 			
+			var bitmap:Bitmap = InventoryItemRenderer.bitmapMovieClip(mc, uic, toScale);
+
 			mc.scaleX = toScale;
 			mc.scaleY = toScale;
+//			rect = mc.getBounds(uic);
 			rect = mc.getBounds(uic);
 			
-			mc.y = -(rect.top) + (dimensionY - mc.height)/2; 							
-			mc.x = -(rect.left) + (dimensionX - mc.width)/2;			
+//			bitmap.y = -(rect.top) + (dimensionY - mc.height)/2; 							
+//			bitmap.x = -(rect.left) + (dimensionX - mc.width)/2;			
+			bitmap.y = (dimensionY - mc.height)/2; 							
+			bitmap.x = (dimensionX - mc.width)/2;			
 			uic.x = itemPaddingX;
 			uic.y = itemPaddingY;
-			uic.addChild(mc);
+			uic.addChild(bitmap);
 			return uic;
 		}
 		

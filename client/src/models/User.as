@@ -69,10 +69,10 @@ package models
 			// Ping server and add on response
 		}
 		
-		public function updateUserOnServerResponse(newUserInstance:User, method:String):void
-		{
-			updateProperties(newUserInstance);
-		}	
+//		public function updateUserOnServerResponse(newUserInstance:User, method:String):void
+//		{
+//			updateProperties(newUserInstance);
+//		}	
 		
 		private function onStructureAdded(evt:CollectionEvent):void
 		{
@@ -117,25 +117,15 @@ package models
 			_id = params.id;
 			
 			if (params.xp)
-			{
 				_xp = params.xp;			
-			}
 			if (params.credits)
-			{
 				_credits = params.credits;			
-			}
 			if (params.premium_credits)
-			{
 				_premium_credits = params.premium_credits;			
-			}
 			if (params.level_id)
-			{
 				_level_id = params.level_id;
-			}
 			if (params.snid)
-			{
 				_snid = params.snid;
-			}
 		}
 
 		public function set id(val:int):void

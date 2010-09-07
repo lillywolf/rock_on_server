@@ -23,15 +23,19 @@ package models
 		public function StoreOwnedThinger(params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
-			_id = params.id;		
+			_id = params.id;	
+			if (params.price)
+				_price = params.price;
+			if (params.premium_price)
+				_premium_price = params.premium_price;
+			if (params.store_id)
+				_store_id = params.store_id;
 		}
 		
 		public function setMovieClip():void
 		{
 			if (layerable)
-			{
 				_mc = layerable.mc;
-			}
 		}
 		
 		public function getMovieClip():MovieClip

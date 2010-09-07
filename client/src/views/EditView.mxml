@@ -213,6 +213,8 @@
 				{
 					if (!this.normalStructureMode)
 						switchToNormalStructureMode();
+					normalStructureMode.rotationToolEnabled = false;
+					normalStructureMode.inventoryToolEnabled = false;
 					addTemporaryCoords(os);
 					asset = normalStructureMode.addStructureAssetFromInventory(os, normalStructureMode.structureWorld);
 					normalStructureMode.selectStructure(asset);
@@ -221,6 +223,8 @@
 				{
 					if (!this.normalStructureMode)
 						switchToNormalStructureMode();
+					normalStructureMode.rotationToolEnabled = false;
+					normalStructureMode.inventoryToolEnabled = false;
 					addTemporaryCoords(os);
 					asset = normalStructureMode.addStructureAssetFromInventory(os, normalStructureMode.structureWorld);
 					normalStructureMode.selectStructure(asset);

@@ -19,11 +19,14 @@ package game
 		
 		override public function updateProperties(params:Object):void
 		{	
+			_rotation = 0;			
+			
 			if (params.structure)
 			{
 				_structure = params.structure;
 				_structure_id = params.structure.id;
 				setMovieClipCopy();
+				setDimensionsByRotation();
 			}
 		}
 		

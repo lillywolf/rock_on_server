@@ -47,9 +47,7 @@ package rock_on
 		public function checkForLoadedStructure(params:Object):void
 		{
 			if (params['structure'])
-			{
 				structure = params.structure;
-			}			
 		}
 		
 		public function addToProxiedQueue(cp:CustomerPerson, pathLength:Number):void

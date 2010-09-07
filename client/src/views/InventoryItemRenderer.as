@@ -1,9 +1,14 @@
 package views
 {
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.filters.GlowFilter;
+	import flash.geom.ColorTransform;
+	import flash.geom.Matrix;
+	import flash.geom.Rectangle;
 	
 	import models.Level;
 	import models.OwnedStructure;
@@ -87,9 +92,7 @@ package views
 		{
 			_thingerIndex = val;
 			if (_uic)
-			{
 				setX();
-			}
 		}
 		
 		public function set uic(val:UIComponent):void
@@ -98,9 +101,7 @@ package views
 			addChild(_uic);
 			resizeUIC(_uic);
 			if (_thingerIndex != -1)
-			{
 				setX();
-			}
 		}
 				
 		public function resizeUIC(uic:UIComponent):void
@@ -121,7 +122,6 @@ package views
 				(frame as DisplayObject).width = resize;
 				(frame as DisplayObject).height = resize;			
 			}
-//			tempUIC = fitMovieClipToContainer(frame, tempUIC);
 
 			tempUIC.x = (DIMENSION - frame.width)/2;
 			tempUIC.y = (DIMENSION - frame.height)/2;	
@@ -201,13 +201,9 @@ package views
 		public function setX():void
 		{
 			if (!renderRightToLeft)
-			{
 				x = _thingerIndex * PADDING + _thingerIndex * DIMENSION;						
-			}
 			else
-			{
 				this.setStyle("right", _thingerIndex * PADDING + _thingerIndex * DIMENSION);
-			}
 		}
 		
 		public function getDimension():int
@@ -264,13 +260,9 @@ package views
 			var toScale:Number;
 			var ratio:Number = mc.width / mc.height;
 			if (ratio > 1)
-			{
 				toScale = DIMENSION / mc.width;
-			}
 			else
-			{
 				toScale = DIMENSION / mc.height;
-			}
 			mc.scaleX = toScale;
 			mc.scaleY = toScale;
 			
@@ -280,10 +272,24 @@ package views
 			mc.y = container.height - 10;
 			container.addChild(mc);
 			return container;
-//			uic.x = CONTAINER_PADDING_X;
-//			uic.y = CONTAINER_PADDING_Y;
-//			container.addChild(uic);
 		}		
+		
+		public static function bitmapMovieClip(mc:MovieClip, container:UIComponent, toScale:Number):Bitmap
+		{
+			var mcBounds:Rectangle = mc.getBounds(container);
+			var heightDiff:Number = Math.abs(mcBounds.top);
+//			var widthDiff:Number = getWidthDifferential(mcBounds);			
+			var bitmapData:BitmapData = new BitmapData(mc.width*toScale, mc.height*toScale, true, 0x000000);
+			var matrix:Matrix = new Matrix(1, 0, 0, 1, mc.width/2, heightDiff);
+			var rect:Rectangle = new Rectangle(0, 0, mc.width*toScale, mc.height*toScale);
+			matrix.scale(toScale, toScale);
+			bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
+			var bitmap:Bitmap = new Bitmap(bitmapData);
+			bitmap.x = -mc.width/2;
+			bitmap.y = -heightDiff * toScale;
+			bitmap.opaqueBackground = null;
+			return bitmap;
+		}
 		
 	}
 }
