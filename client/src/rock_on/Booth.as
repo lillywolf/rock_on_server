@@ -138,16 +138,12 @@ package rock_on
 			if (inventory_count > 0)
 			{
 				if (state != STOCKED_STATE)
-				{
 					startStockedState();				
-				}
 			}
 			else
 			{
 				if (state != UNSTOCKED_STATE)
-				{
 					startUnstockedState();				
-				}
 			}
 			
 			updateInventoryCount();

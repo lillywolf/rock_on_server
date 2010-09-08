@@ -56,7 +56,7 @@ package rock_on
 		
 		override public function tryDestination():Point3D
 		{
-			var stationFront:Point3D = _listeningStationBoss.getStationFront(currentStation);
+			var stationFront:Point3D = _listeningStationBoss.getStationFront(_myWorld.getAssetFromOwnedStructure(currentStation));
 			return stationFront;				
 		} 
 		

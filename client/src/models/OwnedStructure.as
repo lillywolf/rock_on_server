@@ -54,7 +54,7 @@ package models
 		}	
 		
 		public function setOptionalProperties(params:Object):void
-		{
+		{			
 			if (params.inventory_count)
 				_inventory_count = params.inventory_count;
 			if (params.updated_at)
@@ -260,13 +260,37 @@ package models
 			return _rotation;
 		}
 		
+		public function getStructureFrontByRotation():Point3D
+		{
+			if (rotation == 0)
+				return new Point3D(this.x + width/2 + 1, this.y, this.z);
+			else if (rotation == 1)
+				return new Point3D(this.x, this.y, this.z + depth/2 + 1);
+			else if (rotation == 2)
+				return new Point3D(this.x - width/2 - 1, this.y, this.z);
+			else
+				return new Point3D(this.x, this.y, this.z - depth/2 - 1);			
+		}		
+		
+		public function addPointsByRotation(pt:Point3D, toAdd:Number):void
+		{
+			if (rotation == 0)
+				pt.x += toAdd;
+			else if (rotation == 1)
+				pt.z += toAdd;
+			else if (rotation == 2)
+				pt.x -= toAdd;
+			else
+				pt.z -= toAdd;
+		}
+		
 		public function getCornerMatrix():Dictionary
 		{
 			var cornerMatrix:Dictionary = new Dictionary();
-			cornerMatrix["topLeft"] = new Point3D(x - structure.width/2, 0, z - structure.depth/2);
-			cornerMatrix["topRight"] = new Point3D(x - structure.width/2, 0, z + structure.depth/2);
-			cornerMatrix["bottomLeft"] = new Point3D(x + structure.width/2, 0, z - structure.depth/2);
-			cornerMatrix["bottomRight"] = new Point3D(x + structure.width/2, 0, z + structure.depth/2);
+			cornerMatrix["topLeft"] = new Point3D(x - width/2, 0, z - depth/2);
+			cornerMatrix["topRight"] = new Point3D(x - width/2, 0, z + depth/2);
+			cornerMatrix["bottomLeft"] = new Point3D(x + width/2, 0, z - depth/2);
+			cornerMatrix["bottomRight"] = new Point3D(x + width/2, 0, z + depth/2);
 			return cornerMatrix;
 		}
 		

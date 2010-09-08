@@ -151,27 +151,21 @@ package rock_on
 		public function isPointInVenueBounds(pt3D:Point3D):Boolean
 		{
 			if (pt3D.x > venueRect.right || pt3D.x < venueRect.left || pt3D.z > venueRect.bottom || pt3D.z < venueRect.top)
-			{
 				return false;
-			}
 			return true;
 		}
 		
 		public function isPointInRect(pt3D:Point3D, rect:Rectangle):Boolean
 		{
 			if (pt3D.x < rect.right && pt3D.x > rect.left && pt3D.z < rect.bottom && pt3D.z > rect.top)
-			{
 				return true;
-			}
 			return false;
 		}
 		
 		public function isPointInStageRect(pt3D:Point3D):Boolean
 		{
 			if (pt3D.x < stageRect.right && pt3D.z > stageRect.top)
-			{
 				return true;
-			}
 			return false;
 		}
 		
@@ -217,16 +211,12 @@ package rock_on
 			for each (sprite in _myWorld.assetRenderer.unsortedAssets)
 			{
 				if (!sprite.doNotClearFilters)
-				{
 					clearSpriteFilters(sprite);
-				}
 			}
 			for each (sprite in stageManager.myStage.assetRenderer.unsortedAssets)
 			{
 				if (!sprite.doNotClearFilters)
-				{
 					clearSpriteFilters(sprite);			
-				}
 			}
 			clearUIFilters();
 		}

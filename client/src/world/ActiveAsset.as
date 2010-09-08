@@ -197,6 +197,19 @@ package world
 			addChild(_movieClip);
 		}
 		
+		public function getStructureFrontByRotation():Point3D
+		{
+			var os:OwnedStructure = this.thinger as OwnedStructure;
+			if (os.rotation == 0)
+				return new Point3D(this.worldCoords.x + os.width/2 + 1, this.worldCoords.y, Math.round(this.worldCoords.z));
+			else if (os.rotation == 1)
+				return new Point3D(Math.round(this.worldCoords.x), this.worldCoords.y, this.worldCoords.z + os.depth/2 + 1);
+			else if (os.rotation == 2)
+				return new Point3D(this.worldCoords.x - os.width/2 - 1, this.worldCoords.y, Math.round(this.worldCoords.z));
+			else
+				return new Point3D(Math.round(this.worldCoords.x), this.worldCoords.y, this.worldCoords.z - os.depth/2 - 1);			
+		}		
+		
 		public function set world(val:World):void
 		{
 			_world = val;

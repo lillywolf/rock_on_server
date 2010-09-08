@@ -379,36 +379,30 @@ package rock_on
 			if (directionality.x > 0)
 			{
 				nextPoint = new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				if (occupiedSpaces[nextPoint.x] && occupiedSpaces[nextPoint.x][nextPoint.y] && occupiedSpaces[nextPoint.x][nextPoint.y][nextPoint.z])
+				if (!_myWorld.pathFinder.isAvailablePoint(nextPoint, this))
 					nextPoint = new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				_myWorld.moveAssetTo(this, nextPoint);
+				movePerson(nextPoint, true);
 			}
 			else if (directionality.x < 0)
 			{
 				nextPoint = new Point3D(Math.floor(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				if (occupiedSpaces[nextPoint.x] && occupiedSpaces[nextPoint.x][nextPoint.y] && occupiedSpaces[nextPoint.x][nextPoint.y][nextPoint.z])
-				{
+				if (!_myWorld.pathFinder.isAvailablePoint(nextPoint, this))
 					nextPoint = new Point3D(Math.ceil(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				}					
-				_myWorld.moveAssetTo(this, nextPoint);
+				movePerson(nextPoint, true);
 			}
 			else if (directionality.z > 0)
 			{
 				nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z));
-				if (occupiedSpaces[nextPoint.x] && occupiedSpaces[nextPoint.x][nextPoint.y] && occupiedSpaces[nextPoint.x][nextPoint.y][nextPoint.z])
-				{
+				if (!_myWorld.pathFinder.isAvailablePoint(nextPoint, this))
 					nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z));
-				}					
-				_myWorld.moveAssetTo(this, nextPoint);
+				movePerson(nextPoint, true);
 			}
 			else if (directionality.z < 0)
 			{
 				nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.floor(worldCoords.z));
-				if (occupiedSpaces[nextPoint.x] && occupiedSpaces[nextPoint.x][nextPoint.y] && occupiedSpaces[nextPoint.x][nextPoint.y][nextPoint.z])
-				{
+				if (!_myWorld.pathFinder.isAvailablePoint(nextPoint, this))
 					nextPoint = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.ceil(worldCoords.z));
-				}						
-				_myWorld.moveAssetTo(this, nextPoint);					
+				movePerson(nextPoint, true);				
 //				_myWorld.assetRenderer.addEventListener(WorldEvent.DESTINATION_REACHED, onAdjustedForPathfinding);								
 //				validatePoint(nextPoint);
 			}
@@ -429,7 +423,7 @@ package rock_on
 		
 		private function doNextActivityAfterAdjusting():void
 		{
-			movePerson(proxiedDestination);
+			movePerson(proxiedDestination, true, true, false, null, 0, null, true);
 			proxiedDestination = null;
 		}	
 		
@@ -453,16 +447,10 @@ package rock_on
 			}
 		}		
 		
-		public function movePerson(destination:Point3D, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):void
+		public function movePerson(destination:Point3D, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null, skipAStar:Boolean=false):void
 		{
 			if (worldCoords.x%1 == 0 && worldCoords.y%1 == 0 && worldCoords.z%1 == 0)
-			{			
-				_myWorld.moveAssetTo(this, destination, true, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);			
-			}
-			else
-			{
-//				throw new Error("Cannot move from non whole number coords");
-			}
+				_myWorld.moveAssetTo(this, destination, true, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures, skipAStar);			
 			
 			if (currentPath)
 			{

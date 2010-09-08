@@ -337,27 +337,26 @@ package rock_on
 		}
 				
 		public function getBoothFront(booth:Booth, index:int=0, routedCustomer:Boolean=false, queuedCustomer:Boolean=false, customerless:Boolean=false):Point3D
-		{
-			// Assumes a particular rotation
-			
+		{			
 			// Do not allow out of bound points, etc.
 			
-			var boothFront:Point3D;
+			var boothFront:Point3D = booth.getStructureFrontByRotation();
 			if (customerless)
-			{
-				boothFront = new Point3D(Math.ceil(booth.structure.width/2 + booth.x + 1), 0, Math.floor(booth.structure.depth/4 + booth.z));
-			}
+				booth.addPointsByRotation(boothFront, 0);
 			else if (queuedCustomer)
-			{
-				boothFront = new Point3D(Math.ceil(booth.structure.width/2 + booth.x + index + 1), 0, Math.floor(booth.structure.depth/4 + booth.z));				
-			}
+				booth.addPointsByRotation(boothFront, index);			
 			else if (routedCustomer)
-			{
-				boothFront = new Point3D(Math.ceil(booth.structure.width/2 + booth.x + (booth.actualQueue + index + 1)), 0, Math.floor(booth.structure.depth/4 + booth.z));																	
-			}
+				booth.addPointsByRotation(boothFront, booth.actualQueue + index);															
 			else
+				booth.addPointsByRotation(boothFront, booth.currentQueue);	
+			
+			if ((_myWorld.pathFinder.occupiedByStructures[boothFront.x] &&
+				_myWorld.pathFinder.occupiedByStructures[boothFront.x][boothFront.y] &&
+				_myWorld.pathFinder.occupiedByStructures[boothFront.x][boothFront.y][boothFront.z] &&
+				(_myWorld.pathFinder.occupiedByStructures[boothFront.x][boothFront.y][boothFront.z] as ActiveAsset).thinger.id != booth.id) ||
+				!_myWorld.pathFinder.isInBounds(boothFront))
 			{
-				boothFront = new Point3D(Math.ceil(booth.structure.width/2 + booth.x + (booth.currentQueue + 1)), 0, Math.floor(booth.structure.depth/4 + booth.z));													
+				return null;
 			}
 			return boothFront;
 		}

@@ -30,11 +30,11 @@ package world
 			createPathGrid(worldHeight);
 		}
 		
-		public function add(asset:ActiveAsset, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):ArrayCollection
+		public function add(asset:ActiveAsset, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null, skipAStar:Boolean=false):ArrayCollection
 		{
 			addItem(asset);
 			var finalPath:ArrayCollection = calculateNaivePath(asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures, extraStructures);
-			if (fallBack && (finalPath.length == 0 || !equivalent3DPoints(finalPath[finalPath.length-1], asset.worldDestination)))
+			if (fallBack && (finalPath.length == 0 || !equivalent3DPoints(finalPath[finalPath.length-1], asset.worldDestination)) && !skipAStar)
 				finalPath = calculateAStarPath(asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures, extraStructures);	
 			else if (!fallBack && finalPath.length == 0)
 				pathfindingFailed(asset);
@@ -42,6 +42,8 @@ package world
 				tackOnAdditionalPath(asset, finalPath, avoidStructures, avoidPeople, exemptStructures, extraStructures, heightBase);
 			else if (!fallBack && !equivalent3DPoints(finalPath[finalPath.length-1], asset.worldDestination))
 				adjustAssetDestination(asset, finalPath);
+			else if (fallBack && skipAStar)
+				finalPath = calculatePathGrid(asset, asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures, extraStructures);
 			return finalPath;
 		}
 		
@@ -134,6 +136,38 @@ package world
 			{
 				var index:Number = getItemIndex(asset);
 				removeItemAt(index);
+			}
+			if (asset.thinger is OwnedStructure && this.occupiedByStructures)
+				removeStructureUnwalkables(asset);
+		}
+		
+		public function removeStructureUnwalkables(asset:ActiveAsset, maxHeight:int=0):void
+		{
+			for (var i:int = 0; i <= _world.tilesWide; i++)
+			{
+				if (this.occupiedByStructures[i])
+				{
+					for (var j:int = 0; j <= maxHeight; j++)
+					{
+						if (this.occupiedByStructures[i][j])
+						{
+							for (var k:int = 0; k <= _world.tilesDeep; k++)
+							{
+								if (this.occupiedByStructures[i][j][k] && this.occupiedByStructures[i][j][k] == asset)
+									this.occupiedByStructures[i][j][k] = 0;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		public function addStructureUnwalkables(asset:ActiveAsset):void
+		{
+			var unwalkables:ArrayCollection = this.getStructurePointsWithBuffer(asset.thinger as OwnedStructure);
+			for each (var pt:Point3D in unwalkables)
+			{
+				addPointTo3DArray(pt, asset, this.occupiedByStructures);
 			}
 		}
 		
@@ -252,7 +286,7 @@ package world
 			return neighbors;
 		}
 		
-		public function getNeighboringPoints(assetPathFinder:ArrayCollection, index:int, occupiedSpaces:Array, unorganizedPoints:ArrayCollection):Array
+		public function getNeighboringPoints(asset:ActiveAsset, assetPathFinder:ArrayCollection, index:int, occupiedSpaces:Array, unorganizedPoints:ArrayCollection):Array
 		{	
 			var coordsArray:Array = new Array();
 			var pt:Point3D;
@@ -261,25 +295,25 @@ package world
 			{
 				var reference:Point3D = assetPathFinder[index-1][i];
 				pt = getNeighbor('top', reference);
-				if (pt != null && checkIfValid(pt, occupiedSpaces, unorganizedPoints))
+				if (pt != null && checkIfValid(asset, pt, occupiedSpaces, unorganizedPoints))
 				{
 					coordsArray.push(pt);
 					unorganizedPoints.addItem(pt);					
 				}	
 				pt = getNeighbor('bottom', reference);
-				if (pt != null && checkIfValid(pt, occupiedSpaces, unorganizedPoints))
+				if (pt != null && checkIfValid(asset, pt, occupiedSpaces, unorganizedPoints))
 				{
 					coordsArray.push(pt);
 					unorganizedPoints.addItem(pt);					
 				}	
 				pt = getNeighbor('left', reference);
-				if (pt != null && checkIfValid(pt, occupiedSpaces, unorganizedPoints))
+				if (pt != null && checkIfValid(asset, pt, occupiedSpaces, unorganizedPoints))
 				{
 					coordsArray.push(pt);
 					unorganizedPoints.addItem(pt);					
 				}
 				pt = getNeighbor('right', reference);
-				if (pt != null && checkIfValid(pt, occupiedSpaces, unorganizedPoints))
+				if (pt != null && checkIfValid(asset, pt, occupiedSpaces, unorganizedPoints))
 				{
 					coordsArray.push(pt);
 					unorganizedPoints.addItem(pt);					
@@ -444,7 +478,12 @@ package world
 				fauxOpenList.addAll(neighbors);
 				iteration++;
 				
-				if (iteration > 1000 || neighbors.length == 0)
+				if (neighbors.length == 0)
+				{
+					removePointFrom3DArray(lowestFScoreObject.node as Point3D, closedList);
+					addPointTo3DArray(lowestFScoreObject.node, lowestFScoreObject, unwalkables);
+				}
+				if (iteration > 1000)
 					return determinePath(closedList, lowestFScoreObject);
 			}
 			return null;
@@ -468,6 +507,12 @@ package world
 				addTo[pt.x][pt.y][pt.z] = obj;
 			}
 		}			
+		
+		private function removePointFrom3DArray(pt:Point3D, removeFrom:Array):void
+		{
+			if (removeFrom[pt.x] && removeFrom[pt.x][pt.y] && removeFrom[pt.x][pt.y][pt.z])
+				removeFrom[pt.x][pt.y][pt.z] = 0;
+		}
 		
 		private function updateAStarNeighbors(startingPt:Point3D, destination:Point3D, lastObject:Object, unwalkables:Array, openList:Array, closedList:Array, fauxOpenList:ArrayCollection):ArrayCollection
 		{
@@ -866,7 +911,7 @@ package world
 			}			
 		}
 		
-		private function isInBounds(pt:Point3D):Boolean
+		public function isInBounds(pt:Point3D):Boolean
 		{
 			if (pt.x >= 0 && pt.x <= _world.tilesWide && pt.z >= 0 && pt.z <= _world.tilesDeep)
 				return true;
@@ -1025,11 +1070,21 @@ package world
 			return finalPath;
 		}
 		
-		private function checkIfValid(pt:Point3D, occupiedSpaces:Array, unorganizedPoints:ArrayCollection):Boolean
+		private function checkIfValid(asset:ActiveAsset, pt:Point3D, occupiedSpaces:Array, unorganizedPoints:ArrayCollection):Boolean
 		{		
 			if (unorganizedPoints.contains(pt))
 				return false;
-			if (occupiedSpaces[pt.x] && occupiedSpaces[pt.x][pt.y] && occupiedSpaces[pt.x][pt.y][pt.z])
+			if (occupiedSpaces[pt.x] && occupiedSpaces[pt.x][pt.y] && occupiedSpaces[pt.x][pt.y][pt.z] && occupiedSpaces[pt.x][pt.y][pt.z] != asset)
+				return false;
+			return true;
+		}
+		
+		public function isAvailablePoint(pt:Point3D, asset:ActiveAsset):Boolean
+		{
+			if (this.occupiedByStructures[pt.x] && this.occupiedByStructures[pt.x][pt.y] && this.occupiedByStructures[pt.x][pt.y][pt.z] && 
+				this.occupiedByStructures[pt.x][pt.y][pt.z] != asset)
+				return false;
+			if (!isInBounds(pt))
 				return false;
 			return true;
 		}
@@ -1049,37 +1104,34 @@ package world
 			return pointsArray;
 		}
 		
-		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, careAboutStructureOccupiedSpaces:Boolean=true, careAboutPeopleOccupiedSpaces:Boolean=false, exemptStructures:ArrayCollection=null, extraStructures:ArrayCollection=null):ArrayCollection
+		public function calculatePathGrid(asset:ActiveAsset, currentPoint:Point3D, destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exempt:ArrayCollection=null, extra:ArrayCollection=null):ArrayCollection
 		{
 			var pathGridComplete:Boolean = false;
 			
 			var assetPathFinder:ArrayCollection = initializePath(destination);
 			var unorganizedPoints:ArrayCollection = initializeUnorganizedPoints(destination);
 			
-			var occupiedSpaces:Array = updateOccupiedSpaces(careAboutPeopleOccupiedSpaces, careAboutStructureOccupiedSpaces, exemptStructures, extraStructures);
+			var occupiedSpaces:Array = updateOccupiedSpaces(avoidPeople, avoidStructures, exempt, extra);
 			
-			validateDestination(asset, destination, occupiedSpaces);		
+//			validateDestination(asset, destination, occupiedSpaces);		
 			
-			var startPoint:Point3D = mapPointToPathGrid(currentPoint);
+//			var startPoint:Point3D = mapPointToPathGrid(currentPoint);
+			var start:Point3D = new Point3D(currentPoint.x, currentPoint.y, currentPoint.z);
 			var startPointReached:Boolean = false;
 			var index:int = 1;
 			
 			// Until I add a point that's the same as my start point, keep adding points to the list
 			
-			if (currentPoint.x == destination.x && currentPoint.y == destination.y && currentPoint.z == destination.z)
-			{
-				
-			}
-			else
+			if (!(currentPoint.x == destination.x && currentPoint.y == destination.y && currentPoint.z == destination.z))
 			{
 				do
 				{
-					var coordsArray:Array = getNeighboringPoints(assetPathFinder, index, occupiedSpaces, unorganizedPoints);
-					startPointReached = isStartPointReached(coordsArray, startPoint);
+					var coordsArray:Array = getNeighboringPoints(asset, assetPathFinder, index, occupiedSpaces, unorganizedPoints);
+					startPointReached = isStartPointReached(coordsArray, start);
 					if (startPointReached)
 					{
 						coordsArray = new Array();
-						coordsArray.push(startPoint);
+						coordsArray.push(start);
 					}
 					assetPathFinder.addItemAt(coordsArray, index);
 					index++;			
@@ -1092,7 +1144,7 @@ package world
 				while (!startPointReached);
 			}			
 			
-			return assetPathFinder;		
+			return getBasicAlgorithmPath(asset, assetPathFinder);		
 		}			
 		
 		public function getPeopleOccupiedSpacesForBitmap(sourceArray:ArrayCollection):ArrayCollection
@@ -1184,7 +1236,7 @@ package world
 		private function getNeighbor(direction:String, pt:Point3D):Point3D
 		{
 			var neighbor:Point3D;
-			if (pt.x <= _world.tilesWide && pt.x >= 0 && pt.y >= 0 && pt.z <= _world.tilesDeep && pt.z >= 0)
+			if (isInBounds(pt))
 			{			
 				if (direction == 'top')
 				{
@@ -1209,6 +1261,42 @@ package world
 			}	
 			return neighbor;
 		}
+		
+		private function getBasicAlgorithmPath(asset:ActiveAsset, grid:ArrayCollection):ArrayCollection
+		{
+			var index:int = grid.length - 1;
+			var pt:Point3D = grid[index][0];
+			var tileArray:Array;
+			var finalPath:ArrayCollection = new ArrayCollection();
+			var foundValidPoint:Boolean = false;
+			for (var i:int = (grid.length-2); i>=0; i--)
+			{
+				foundValidPoint = false;
+				tileArray = getSurroundingPoints(pt);
+				for (var j:int = 0; j<tileArray.length; j++)
+				{
+					if (foundValidPoint == false)
+					{
+						for (var k:int = 0; k<(grid[i] as Array).length; k++)
+						{
+							if ((tileArray[j] as Point3D).x == (grid[i][k] as Point3D).x && (tileArray[j] as Point3D).y == (grid[i][k] as Point3D).y && (tileArray[j] as Point3D).z == (grid[i][k] as Point3D).z)
+							{
+								var validPoint:Point3D = tileArray[j];
+								finalPath.addItem(validPoint);
+								
+								pt = validPoint;
+								foundValidPoint = true;
+							}
+						}						
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+			return finalPath;
+		}		
 		
 		private function getStructureOccupiedSpacesForBitmap(sourceArray:ArrayCollection, exemptStructures:ArrayCollection):ArrayCollection
 		{

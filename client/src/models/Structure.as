@@ -44,8 +44,8 @@ package models
 			_name = params['name'];
 			_structure_type = params['structure_type'];
 			
-			if (_structure_type != "ListeningStation" && _structure_type != "Tile")
-				outerPoints = true;
+//			if (_structure_type != "ListeningStation" && _structure_type != "Tile")
+//				outerPoints = true;
 			
 			setOptionalProperties(params);
 		}

@@ -222,20 +222,16 @@ package rock_on
 			return asset;		
 		}
 		
-		public function getStationFront(station:ListeningStation):Point3D
-		{	
-			trace("get station front");
-			
-			// This assumes a particular rotation
+		public function getStationFront(stationAsset:ActiveAsset):Point3D
+		{				
 			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(true, true);		
-			var stationFront:Point3D;
-			do
-			{
-				stationFront = new Point3D(Math.ceil(station.x + station.structure.width/2) + Math.ceil(Math.random()*station.radius.x), 0, Math.ceil(station.z - station.structure.depth/2) + Math.ceil(Math.random()*station.radius.z));										
-			}			
-			while (occupiedSpaces[stationFront.x] && occupiedSpaces[stationFront.x][stationFront.y] && occupiedSpaces[stationFront.x][stationFront.y][stationFront.z]);
-			trace("station front found");
-			return stationFront;
+			return stationAsset.getStructureFrontByRotation();
+//			do
+//			{
+//				stationFront = new Point3D(Math.ceil(station.x + station.structure.width/2) + Math.ceil(Math.random()*station.radius.x), 0, Math.ceil(station.z - station.structure.depth/2) + Math.ceil(Math.random()*station.radius.z));										
+//			}			
+//			while (occupiedSpaces[stationFront.x] && occupiedSpaces[stationFront.x][stationFront.y] && occupiedSpaces[stationFront.x][stationFront.y][stationFront.z]);
+//			trace("station front found");			
 		}
 		
 		public function isAnyStationAvailable():Boolean

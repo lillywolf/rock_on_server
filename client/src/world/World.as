@@ -167,9 +167,7 @@ package world
 		public function doesWorldContain(asset:ActiveAsset):Boolean
 		{
 			if (assetRenderer.unsortedAssets.contains(asset))
-			{
 				return true;
-			}
 			return false;
 		}
 		
@@ -200,10 +198,6 @@ package world
 				pathFinder.remove(activeAsset);
 				assetRenderer.unsortedAssets.removeItemAt(index);
 			}
-//			else if (bitmapBlotter.getMatchingBitmap(activeAsset) != null)
-//			{
-//				bitmapBlotter.removeRenderedBitmap(activeAsset);
-//			}
 		}
 		
 		public static function worldToActualCoords(worldCoords:Point3D):Point
@@ -258,8 +252,8 @@ package world
 		public function saveStructurePlacement(os:OwnedStructure, saveRotation:Boolean=false):void
 		{
 			var asset:ActiveAsset = getAssetFromOwnedStructure(os);
-			updateUnwalkables(os);
 			updatePlacement(asset, new Point3D(os.x, os.y, os.z));
+			updateUnwalkables(os);
 			if (saveRotation)
 				saveStructureRotation(asset, os);
 		}
@@ -318,7 +312,7 @@ package world
 			}
 		}
 		
-		public function moveAssetTo(activeAsset:ActiveAsset, destination:Point3D, fourDirectional:Boolean = false, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null):void
+		public function moveAssetTo(activeAsset:ActiveAsset, destination:Point3D, fourDirectional:Boolean = false, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null, skipAStar:Boolean=false):void
 		{	
 			validateDestination(destination);
 			validateWorldCoords(activeAsset);
@@ -327,29 +321,19 @@ package world
 			
 			if (fourDirectional)
 			{
-//				activeAsset.fourDirectional = true;
 				var arrived:Boolean = checkIfAtDestination(activeAsset);
 				
-				if (arrived)
-				{
-					
-				}
-				else
-				{
-					moveFourDirectional(activeAsset, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);
-				}
+				if (!arrived)
+					moveFourDirectional(activeAsset, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures, skipAStar);
 			}
-			else
-			{
-				
-			}
+
 			activeAsset.realDestination = worldToActualCoords(activeAsset.worldDestination);
 			activeAsset.isMoving = true;			
 		}
 		
-		private function moveFourDirectional(asset:ActiveAsset, fallBack:Boolean, avoidStructures:Boolean, avoidPeople:Boolean, exemptStructures:ArrayCollection, heightBase:int=0, extraStructures:ArrayCollection=null):void
+		private function moveFourDirectional(asset:ActiveAsset, fallBack:Boolean, avoidStructures:Boolean, avoidPeople:Boolean, exemptStructures:ArrayCollection, heightBase:int=0, extraStructures:ArrayCollection=null, skipAStar:Boolean=false):void
 		{
-			var tilePath:ArrayCollection = pathFinder.add(asset, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures);		
+			var tilePath:ArrayCollection = pathFinder.add(asset, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures, skipAStar);		
 			if (tilePath && tilePath.length != 0)
 			{	
 				asset.currentPath = tilePath;

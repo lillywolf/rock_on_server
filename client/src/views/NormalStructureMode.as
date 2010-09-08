@@ -269,7 +269,7 @@ package views
 		{
 			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
 			{
-				removeSavedPointsFromBasesArray(asset.thinger as OwnedStructure);
+				removeSavedPointsFromBasesArray(asset);
 				removeSavedPointsFromSurfacesArray(asset.thinger as OwnedStructure);
 				for each (var topper:OwnedStructure in asset.toppers)
 				{
@@ -817,13 +817,13 @@ package views
 		private function getStructureFrontByRotation(asset:ActiveAsset, os:OwnedStructure):Point3D
 		{
 			if (os.rotation == 0)
-				return new Point3D(asset.worldCoords.x + os.width/2 + 1, asset.worldCoords.y, Math.round(asset.worldCoords.z));
+				return new Point3D(Math.ceil(asset.worldCoords.x + os.width/2 + 1), asset.worldCoords.y, Math.round(asset.worldCoords.z));
 			else if (os.rotation == 1)
-				return new Point3D(Math.round(asset.worldCoords.x), asset.worldCoords.y, asset.worldCoords.z + os.depth/2 + 1);
+				return new Point3D(Math.round(asset.worldCoords.x), asset.worldCoords.y, Math.ceil(asset.worldCoords.z + os.depth/2 + 1));
 			else if (os.rotation == 2)
-				return new Point3D(asset.worldCoords.x - os.width/2 - 1, asset.worldCoords.y, Math.round(asset.worldCoords.z));
+				return new Point3D(Math.floor(asset.worldCoords.x - os.width/2 - 1), asset.worldCoords.y, Math.round(asset.worldCoords.z));
 			else
-				return new Point3D(Math.round(asset.worldCoords.x), asset.worldCoords.y, asset.worldCoords.z - os.depth/2 - 1);			
+				return new Point3D(Math.round(asset.worldCoords.x), asset.worldCoords.y, Math.floor(asset.worldCoords.z - os.depth/2 - 1));			
 		}
 		
 		private function checkStructureSurfacesForSavedTopper():ActiveAsset
@@ -868,10 +868,10 @@ package views
 			}
 		}
 
-		private function removeSavedPointsFromBasesArray(os:OwnedStructure):void
+		private function removeSavedPointsFromBasesArray(asset:ActiveAsset):void
 		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			var old:ArrayCollection = getSavedStructurePoints(os, true);
-			var asset:ActiveAsset = getMatchingAssetForOwnedStructure(os);
 			old.addAll(getExtraBasePointsByStructureType(asset));
 			for each (var pt:Point3D in old)
 			{
@@ -952,6 +952,7 @@ package views
 				if (os.structure.structure_type != "StructureTopper" && os.structure.structure_type != "Tile")
 				{
 					var pts:ArrayCollection = getOccupiedInnerPoints(asset);
+					pts.addAll(getExtraBasePointsByStructureType(asset));
 					for each (var pt:Point3D in pts)
 					{
 						addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);

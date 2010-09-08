@@ -332,10 +332,12 @@ package rock_on
 		
 		public function startRoamState():void
 		{
-			trace("start roam state");
 			state = ROAM_STATE;
 			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
-			movePerson(destination);
+			if (this.state == CustomerPerson.ENTHRALLED_STATE)
+				movePerson(destination);
+			else
+				movePerson(destination, true, true, false, null, 0, null, true);
 			trace("customer person roamed");
 		}
 		
@@ -455,13 +457,7 @@ package rock_on
 				enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
 				numEnthralledTimers--;
 				if (state == ENTHRALLED_STATE)
-				{
 					advanceState(ROUTE_STATE);			
-				}
-				else
-				{
-//					throw new Error("State is not enthralled state");
-				}
 			}
 		}
 		
@@ -489,9 +485,7 @@ package rock_on
 		public function checkIfFrontOfQueue():void
 		{
 			if (!currentBooth)
-			{
 				throw new Error("Should have a current booth");
-			}
 			if (queuedTimer)
 			{
 //				throw new Error("Queued timer already exists");
@@ -500,14 +494,10 @@ package rock_on
 			{
 				startQueuedTimer();
 				if (proxiedForItemPickup)
-				{
 					doItemPickup();
-				}
 			}
 			else if (currentBoothPosition == 0)
-			{
 				throw new Error("Booth position is 0");
-			}
 		}
 		
 		public function doItemPickup():void
@@ -561,13 +551,14 @@ package rock_on
 		{
 			// This assumes a particular orientation
 			
-			var destination:Point3D = new Point3D(Math.floor(worldCoords.x - 1), Math.floor(worldCoords.y), Math.floor(worldCoords.z));
+//			var destination:Point3D = new Point3D(Math.floor(worldCoords.x - 1), Math.floor(worldCoords.y), Math.floor(worldCoords.z));
+			var destination:Point3D = new Point3D(Math.floor(worldCoords.x), Math.floor(worldCoords.y), Math.floor(worldCoords.z));
+			this.currentBooth.addPointsByRotation(destination, -1);
 			movePerson(destination);
 		}
 		
 		private function exitQueue(evt:TimerEvent):void
 		{
-			trace("exit queue called");
 			if (state == QUEUED_STATE)
 			{
 				decrementQueue();
@@ -576,9 +567,7 @@ package rock_on
 				
 				queuedTimer.stop();
 				queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);
-				queuedTimer = null;
-				trace("Queued Timers: " + numQueuedTimers.toString());		
-				trace("Enthralled Timers: " + numEnthralledTimers.toString());				
+				queuedTimer = null;			
 				
 //				advanceState(HEADTOSTAGE_STATE);
 				advanceState(ROAM_STATE);
@@ -671,9 +660,7 @@ package rock_on
 			var booth:Booth = getBoothForRouteState();
 			
 			if (booth == null)
-			{
 				advanceState(ROAM_STATE);
-			}
 			else
 			{
 				currentBooth = booth;
@@ -773,17 +760,18 @@ package rock_on
 			if (state == ROUTE_STATE)
 			{
 				boothFront = _boothBoss.getBoothFront(currentBooth, index, true);
-				updateDestination(boothFront);
+				if (boothFront)
+					updateDestination(boothFront);
+				else
+					advanceState(ROAM_STATE);
 			}
 			else if (state == QUEUED_STATE)
 			{
 				boothFront = _boothBoss.getBoothFront(currentBooth, index, false, true);
-				movePerson(boothFront);
+				movePerson(boothFront, true, true, false, null, 0, null, true);
 			}
 			else
-			{
 				throw new Error("Should not be updating booth front when not in route state");
-			}
 		}
 		
 		public function doWantsMusicMood():void
@@ -793,11 +781,17 @@ package rock_on
 		
 		public function getPathToBoothLength(routedCustomer:Boolean=false, queuedCustomer:Boolean=false):int
 		{
-			var boothFront:Point3D = _boothBoss.getBoothFront(currentBooth, 0, routedCustomer, queuedCustomer);				
-			var currentPoint:Point3D = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-			var path:ArrayCollection = _myWorld.pathFinder.calculatePathGrid(this, currentPoint, boothFront, false);
-
-			return path.length;
+//			Returns 0 on failure...not sure that's ok
+			
+			var boothFront:Point3D = _boothBoss.getBoothFront(currentBooth, 0, routedCustomer, queuedCustomer);
+			if (boothFront)
+			{
+				var currentPoint:Point3D = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
+				var path:ArrayCollection = _myWorld.pathFinder.calculatePathGrid(this, currentPoint, boothFront, false);
+				return path.length;
+			}
+			else
+				return 0;
 		}
 		
 		public function isCustomerAtQueue():void
@@ -805,31 +799,21 @@ package rock_on
 			if (proxiedDestination)
 			{
 				if (worldCoords.x != proxiedDestination.x || worldCoords.y != proxiedDestination.y || worldCoords.z != proxiedDestination.z)
-				{
-					movePerson(proxiedDestination);
-				}
+					movePerson(proxiedDestination, true, true, false, null, 0, null, true);
 				else
 				{
 					if (state == ROUTE_STATE)
-					{
 						advanceState(QUEUED_STATE);					
-					}
 					else
-					{
 						throw new Error("Must be in route state");
-					}
 				}
 			}
 			else
 			{
 				if (state == ROUTE_STATE)
-				{
 					advanceState(QUEUED_STATE);				
-				}
 				else
-				{
 					throw new Error("Must be in route state");
-				}
 			}
 		}
 		

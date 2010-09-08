@@ -194,7 +194,10 @@ package rock_on
 				if (cp.currentBooth == booth && cp.state == CustomerPerson.ROUTE_STATE)
 				{
 					var pathLength:int = cp.getPathToBoothLength(true, false);
-					proxiedCustomers.addItem({cp: cp, pathLength: pathLength});
+					if (pathLength)
+						proxiedCustomers.addItem({cp: cp, pathLength: pathLength});
+					else
+						cp.advanceState(CustomerPerson.ROAM_STATE);
 				}
 			}			
 			proxiedCustomers = sortProxiedCustomers(proxiedCustomers);
@@ -230,9 +233,7 @@ package rock_on
 			{
 				var cp:CustomerPerson = evt.activeAsset as CustomerPerson;
 				if (cp.state == CustomerPerson.ROUTE_STATE)
-				{
 					cp.isCustomerAtQueue();
-				}
 				else if (cp.state == CustomerPerson.QUEUED_STATE)
 				{
 					cp.checkIfFrontOfQueue();	
