@@ -156,10 +156,10 @@ package rock_on
 			var cornerMatrix:Dictionary = os.getCornerMatrix();
 			var relationship:Array = getHorizontalAndVerticalRelationship(cornerMatrix);						
 			_frameNumber = evaluateHorizontalAndVerticalRelationship(relationship, frameNumber, os, strictFacing);						
-			var reflection:Boolean = getReflection(relationship);	
+			flipped = getReflection(relationship);	
 			var standAnimation:String = getStandAnimation(_frameNumber);
 			stand(standAnimation, _frameNumber, relationship);
-			return {frameNumber: _frameNumber, animation: standAnimation, reflection: reflection};			
+			return {frameNumber: _frameNumber, animation: standAnimation, reflection: flipped};			
 		}
 		
 		public function getDirectionalRelationshipsArray():Array
@@ -205,15 +205,11 @@ package rock_on
 			var reflection:Boolean = false;
 			
 			if (relationship["horizontalRelationship"] == "center" && relationship["verticalRelationship"] == "top")
-			{
 				reflection = true;
-			}
 			else if (relationship["horizontalRelationship"] != "center" && relationship["verticalRelationship"] == "top")
 			{
 				if (Math.random() < 0.5)
-				{
 					reflection = true;
-				}
 			}
 			return reflection;
 		}
@@ -223,30 +219,18 @@ package rock_on
 			var relationship:Array = [];
 			
 			if (worldCoords.x < (cornerMatrix["topLeft"] as Point3D).x)
-			{
 				relationship["verticalRelationship"] = "bottom";
-			}
 			else if (worldCoords.x > (cornerMatrix["bottomLeft"] as Point3D).x)
-			{
 				relationship["verticalRelationship"] = "top";
-			}
 			else
-			{
 				relationship["verticalRelationship"] = "center";
-			}
 			
 			if (worldCoords.z < (cornerMatrix["topLeft"] as Point3D).z)
-			{
 				relationship["horizontalRelationship"] = "left";
-			}		
 			else if (worldCoords.z > (cornerMatrix["topRight"] as Point3D).z)
-			{
 				relationship["horizontalRelationship"] = "right";
-			}	
 			else
-			{
 				relationship["horizontalRelationship"] = "center";
-			}			
 			return relationship;
 		}
 		
@@ -348,9 +332,7 @@ package rock_on
 		{
 			doAnimation(animation, false, frameNumber);
 			if (relationship)
-			{
 				adjustScaleToSpatialRelationship(relationship);						
-			}
 			switchToBitmap();
 		}
 		
@@ -407,9 +389,7 @@ package rock_on
 //				validatePoint(nextPoint);
 			}
 			else 
-			{
 				doNextActivityAfterAdjusting();				
-			}							
 		}
 		
 		private function onAdjustedForPathfinding(evt:WorldEvent):void
@@ -423,7 +403,8 @@ package rock_on
 		
 		private function doNextActivityAfterAdjusting():void
 		{
-			movePerson(proxiedDestination, true, true, false, null, 0, null, true);
+//			movePerson(proxiedDestination, true, true, false, null, 0, null, true);
+			movePerson(proxiedDestination, true);
 			proxiedDestination = null;
 		}	
 		
@@ -469,26 +450,18 @@ package rock_on
 				if (Math.abs(xDiff) > Math.abs(yDiff))
 				{
 					if (xDiff > 0)
-					{
 						doAnimation("walk_toward", true);
-					}
 					else
-					{
 						doAnimation("walk_away", true);
-					}
 					changeScale(-(_scale), _scale);			
 				}
 					
 				else if (Math.abs(xDiff) < Math.abs(yDiff))
 				{
 					if (yDiff > 0)
-					{
 						doAnimation("walk_away", true);
-					}
 					else
-					{		
 						doAnimation("walk_toward", true);	
-					}
 					changeScale(_scale, _scale);
 				}
 				else

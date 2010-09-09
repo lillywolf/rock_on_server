@@ -128,28 +128,20 @@ package rock_on
 				{
 					var timeSinceLastMeal:Number = new Date().getTime() - GameClock.convertStringTimeToUnixTime(_creature.last_nurture);				
 					if (timeSinceLastMeal > CustomerPerson.HUNGER_DELAY)
-					{
 						mood = MoodBoss.assignMoodByString(CustomerPerson.HUNGRY);
-					}
 				}
 				else
-				{
 					mood = MoodBoss.assignMoodByCreatureAndPersonType(_creature.type, personType, FlexGlobals.topLevelApplication.gdi.user.level.rank);
-				}
 				
 				if (mood)
-				{
 					startMood(mood);				
-				}
 			}
 		}	
 		
 		private function onMouseClicked(evt:MouseEvent):void
 		{
 			if (mood && !proxiedForItemPickup)
-			{
 				handleMood(mood);
-			}
 		}
 				
 		public function handleMood(mood:Object):void
@@ -163,9 +155,7 @@ package rock_on
 				transitionToItemPickup(mood);
 			}
 			else if (mood.animation)
-			{
 				doMultipleAnimations(itemPickupAnimations);
-			}
 		}
 		
 		public function transitionToItemPickup(mood:Object):void
@@ -180,13 +170,9 @@ package rock_on
 				pickupBooth = currentBooth;
 			}
 			else if (state == CustomerPerson.ROUTE_STATE)
-			{
 				pickupBooth = currentBooth;
-			}
 			else
-			{
 				advanceState(CustomerPerson.ROUTE_STATE);
-			}
 		}
 		
 		public function updateMood(deltaTime:Number):void
@@ -383,7 +369,7 @@ package rock_on
 		{
 			state = HEADTODOOR_STATE;
 			var door:Point3D = _venue.mainEntrance;
-			movePerson(door);
+			movePerson(door, true);
 		}
 		
 		public function startGoneState():void
@@ -442,7 +428,7 @@ package rock_on
 			state = BITMAPPED_ENTHRALLED_STATE;
 			
 			var frameNumber:int = 1;
-			var obj:Object = standFacingObject(_stageManager.concertStage, frameNumber);
+			var obj:Object = standFacingObject(this._venue.stageManager.concertStage, frameNumber);
 			_world.removeAssetFromWorld(this);
 			_world.bitmapBlotter.addRenderedBitmap(this, obj.animation, obj.frameNumber, obj.reflection);
 		}
@@ -476,10 +462,8 @@ package rock_on
 			trace("start queued state");
 			state = QUEUED_STATE;
 			standFacingObject(currentBooth);
-			currentBooth.actualQueue++;
-			
+			currentBooth.actualQueue++;			
 			checkIfFrontOfQueue();
-			trace("start queued state complete");
 		}
 		
 		public function checkIfFrontOfQueue():void
@@ -515,43 +499,29 @@ package rock_on
 		
 		public function startQueuedTimer():void
 		{
-			trace("start queued timer");
 			if (state != QUEUED_STATE)
-			{
-				trace("Queued Timers: " + numQueuedTimers.toString());		
-				trace("Enthralled Timers: " + numEnthralledTimers.toString());						
 				throw new Error("State is not queued state");
-			}
 			
 			queuedTimer = new Timer(CustomerPerson.QUEUED_TIME);
 			queuedTimer.addEventListener(TimerEvent.TIMER, exitQueue);
 			queuedTimer.start();	
-			numQueuedTimers++;
-			trace("Queued Timers: " + numQueuedTimers.toString());		
-			trace("Enthralled Timers: " + numEnthralledTimers.toString());		
+			numQueuedTimers++;	
 		}
 
 		public function refreshQueuedTimer():void
 		{
 			if (state != QUEUED_STATE)
-			{						
 				throw new Error("State is not queued state");
-			}
 			
 			queuedTimer.stop();
 			queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);
 			queuedTimer = new Timer(CustomerPerson.QUEUED_TIME);
 			queuedTimer.addEventListener(TimerEvent.TIMER, exitQueue);
-			queuedTimer.start();	
-			trace("Queued Timers: " + numQueuedTimers.toString());		
-			trace("Enthralled Timers: " + numEnthralledTimers.toString());		
+			queuedTimer.start();		
 		}
 		
 		public function moveUpInQueue():void
-		{
-			// This assumes a particular orientation
-			
-//			var destination:Point3D = new Point3D(Math.floor(worldCoords.x - 1), Math.floor(worldCoords.y), Math.floor(worldCoords.z));
+		{		
 			var destination:Point3D = new Point3D(Math.floor(worldCoords.x), Math.floor(worldCoords.y), Math.floor(worldCoords.z));
 			this.currentBooth.addPointsByRotation(destination, -1);
 			movePerson(destination);
@@ -768,7 +738,8 @@ package rock_on
 			else if (state == QUEUED_STATE)
 			{
 				boothFront = _boothBoss.getBoothFront(currentBooth, index, false, true);
-				movePerson(boothFront, true, true, false, null, 0, null, true);
+//				movePerson(boothFront, true, true, false, null, 0, null, true);
+				movePerson(boothFront, true);
 			}
 			else
 				throw new Error("Should not be updating booth front when not in route state");
@@ -799,7 +770,8 @@ package rock_on
 			if (proxiedDestination)
 			{
 				if (worldCoords.x != proxiedDestination.x || worldCoords.y != proxiedDestination.y || worldCoords.z != proxiedDestination.z)
-					movePerson(proxiedDestination, true, true, false, null, 0, null, true);
+//					movePerson(proxiedDestination, true, true, false, null, 0, null, true);
+					movePerson(proxiedDestination, true);
 				else
 				{
 					if (state == ROUTE_STATE)

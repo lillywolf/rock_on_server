@@ -41,7 +41,7 @@ package rock_on
 				cp.speed = 0.11;
 				addEventListeners(cp);
 				addItem(cp);
-				_myWorld.addStaticAsset(cp, startPoint);
+				_myWorld.addAsset(cp, startPoint);
 				cp.timedConversion(fanIndex);
 			}
 		}
@@ -240,26 +240,17 @@ package rock_on
 					cp.standFacingObject(cp.currentBooth);
 				}
 				else if (cp.state == CustomerPerson.HEADTOSTAGE_STATE)
-				{
-//					cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
 					cp.advanceState(CustomerPerson.BITMAPPED_ENTHRALLED_STATE);
-				}
 				else if (cp.state == CustomerPerson.ENTHRALLED_STATE)
 				{
 					
 				}
 				else if (cp.state == CustomerPerson.HEADTODOOR_STATE)
-				{
 					cp.advanceState(CustomerPerson.HEADTOSTAGE_STATE);
-				}
 				else if (cp.state == CustomerPerson.ROAM_STATE)
-				{
 					cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
-				}
 				else
-				{
 					throw new Error("This doesn't really make sense");
-				}
 			}
 		}
 		

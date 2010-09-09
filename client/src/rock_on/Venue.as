@@ -745,7 +745,7 @@ package rock_on
 		
 		private function setEntrance(params:Object=null):void
 		{
-			mainEntrance = new Point3D(14, 0, 10);
+			mainEntrance = new Point3D(14, 0, 20);
 		}
 		
 		public function updateFanCount(fansToAdd:int, venue:Venue, station:ListeningStation):void
@@ -820,6 +820,12 @@ package rock_on
 				else
 					throw new Error("failed to find asset");
 			}
+		}		
+		
+		public function convertStationListenerToCustomer(sl:StationListener, fanIndex:int):void
+		{
+			var cp:CustomerPerson = new CustomerPerson(boothBoss, sl.creature, null, sl.layerableOrder, VenueManager.PERSON_SCALE);
+			customerPersonManager.addConvertedFan(cp, sl.worldCoords, fanIndex);
 		}		
 		
 		public function doStructureRedraw(asset:ActiveAsset):void

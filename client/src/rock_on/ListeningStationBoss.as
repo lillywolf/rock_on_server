@@ -93,42 +93,12 @@ package rock_on
 		
 		public function addFanButton(station:ListeningStation):void
 		{
-			var btn:SpecialButton = new SpecialButton();
-			btn.station = station;
-			btn.addEventListener(MouseEvent.CLICK, onFanButtonClicked);
-			var actualCoords:flash.geom.Point = World.worldToActualCoords(new Point3D(station.x, station.y, station.z));
-			btn.x = actualCoords.x + _myWorld.x;
-			btn.y = actualCoords.y + _myWorld.y;
-			if (!friendMirror && !editMirror)
-			{
-//				_uiLayer.addChild(btn);
-			}			
-		}
-		
-		private function onFanButtonClicked(evt:MouseEvent):void
-		{
-			var button:SpecialButton = evt.currentTarget as SpecialButton;
-			letInNewFans(button.station);
-		}
-		
-		private function letInNewFans(station:ListeningStation):void
-		{
-			station.advanceState(ListeningStation.FAN_COLLECTION_STATE);
-			
-			var fanCount:int = 0;
-			for each (var sl:StationListener in station.currentListeners)
-			{
-				convertStationListenerToCustomer(sl, fanCount);
-				fanCount++;
-			}
-			_venue.updateFanCount(fanCount, _venue, station);
-			_venue.checkForMinimumFancount();
-		}
-		
-		private function convertStationListenerToCustomer(sl:StationListener, fanIndex:int):void
-		{
-			var cp:CustomerPerson = new CustomerPerson(_boothBoss, sl.creature, null, sl.layerableOrder, VenueManager.PERSON_SCALE);
-			_customerPersonManager.addConvertedFan(cp, sl.worldCoords, fanIndex);
+//			var btn:SpecialButton = new SpecialButton();
+//			btn.station = station;
+//			btn.addEventListener(MouseEvent.CLICK, onFanButtonClicked);
+//			var actualCoords:flash.geom.Point = World.worldToActualCoords(new Point3D(station.x, station.y, station.z));
+//			btn.x = actualCoords.x + _myWorld.x;
+//			btn.y = actualCoords.y + _myWorld.y;
 		}
 		
 		public function showPassersby():void
@@ -150,13 +120,11 @@ package rock_on
 			{
 				var listeningStation:ListeningStation = createListeningStation(os);
 				var asset:ActiveAsset = createListeningStationAsset(listeningStation);
-//				asset.movieClip.scaleX = 0.4;
-//				asset.movieClip.scaleY = 0.4;
 				listeningStation.activeAsset = asset;
-//				listeningStation.setInMotion();
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				addListeningStationToWorld(asset, addTo);
 				listeningStationAssets.addItem(asset);
+				listeningStation.setInMotion();
 			}
 		}
 		
@@ -168,9 +136,7 @@ package rock_on
 				reInitializeListeningStations();			
 			}
 			else if (method == "create_new")
-			{
 				_myWorld.createNewStructure(os);
-			}
 		}
 		
 		public function addStaticStationListeners():void
@@ -183,14 +149,7 @@ package rock_on
 		
 		public function addListeningStationToWorld(asset:ActiveAsset, addTo:Point3D):void
 		{
-			if (editMirror)
-			{
-				_myWorld.addStaticAsset(asset, addTo);
-			}
-			else
-			{
-				_myWorld.addStaticAsset(asset, addTo);				
-			}
+			_myWorld.addStaticAsset(asset, addTo);				
 		}
 		
 		public function removeListeningStations():void
@@ -225,13 +184,7 @@ package rock_on
 		public function getStationFront(stationAsset:ActiveAsset):Point3D
 		{				
 			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(true, true);		
-			return stationAsset.getStructureFrontByRotation();
-//			do
-//			{
-//				stationFront = new Point3D(Math.ceil(station.x + station.structure.width/2) + Math.ceil(Math.random()*station.radius.x), 0, Math.ceil(station.z - station.structure.depth/2) + Math.ceil(Math.random()*station.radius.z));										
-//			}			
-//			while (occupiedSpaces[stationFront.x] && occupiedSpaces[stationFront.x][stationFront.y] && occupiedSpaces[stationFront.x][stationFront.y][stationFront.z]);
-//			trace("station front found");			
+			return stationAsset.getStructureFrontByRotation();		
 		}
 		
 		public function isAnyStationAvailable():Boolean
@@ -240,9 +193,7 @@ package rock_on
 			for each (var ls:ListeningStation in listeningStations)
 			{
 				if (ls.currentListeners.length != ls.structure.capacity)
-				{
 					freeStation = true;
-				}
 			}	
 			return freeStation;		
 		}
@@ -283,9 +234,7 @@ package rock_on
 			var station:ListeningStation = getStationById(os.id);
 						
 			if (method == "validate_usage_complete")
-			{
 				removeStationWhenFinished(station);					
-			}
 			if (method == "save_placement")
 			{
 				station.updateProperties(os);
@@ -307,10 +256,8 @@ package rock_on
 		
 		private function moveStationUIComponents(station:ListeningStation):void
 		{
-			if (station.state == ListeningStation.FAN_BUTTON_STATE && station.collectionButton)
-			{
+			if (station.state == ListeningStation.READY_TO_COLLECT_STATE && station.collectionButton)
 				moveStationCollectionButton(station.collectionButton, station);
-			}
 		}
 		
 		private function moveStationCollectionButton(btn:SpecialButton, station:ListeningStation):void

@@ -2,6 +2,7 @@ package rock_on
 {
 	import flash.display.MovieClip;
 	import flash.events.IEventDispatcher;
+	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
@@ -22,7 +23,7 @@ package rock_on
 	public class ListeningStation extends Booth
 	{
 		public static const START_STATE:int = 0;
-		public static const FAN_BUTTON_STATE:int = 1;
+		public static const READY_TO_COLLECT_STATE:int = 1;
 		public static const FAN_COLLECTION_STATE:int = 2;
 		public static const FAN_ENTRY_STATE:int = 3;
 		
@@ -53,10 +54,7 @@ package rock_on
 			
 		public function setInMotion():void
 		{
-			if (!editMirror)
-			{
-				initializeTimeAndState();			
-			}
+			initializeTimeAndState();			
 		}	
 				
 		public function setProperties():void
@@ -87,9 +85,9 @@ package rock_on
 			updateSecondsRemaining();	
 			initializeListenerCount();
 			
-			if (secondsRemaining <= 0 && state != FAN_BUTTON_STATE)
+			if (secondsRemaining <= 0 && state != READY_TO_COLLECT_STATE)
 			{
-				advanceState(FAN_BUTTON_STATE);
+				advanceState(READY_TO_COLLECT_STATE);
 			}	
 			else
 			{
@@ -140,7 +138,7 @@ package rock_on
 		
 		private function onStationTimerComplete(evt:TimerEvent):void
 		{
-			advanceState(FAN_BUTTON_STATE);
+			advanceState(READY_TO_COLLECT_STATE);
 			removeCounter();
 		}
 		
@@ -163,8 +161,8 @@ package rock_on
 				case START_STATE:
 					endStartState();
 					break;
-				case FAN_BUTTON_STATE:
-					endFanButtonState();				
+				case READY_TO_COLLECT_STATE:
+					endReadyToCollectState();				
 					break;	
 				case FAN_COLLECTION_STATE:
 					endFanCollectionState();
@@ -176,8 +174,8 @@ package rock_on
 			}
 			switch (destinationState)
 			{
-				case FAN_BUTTON_STATE:
-					startFanButtonState();
+				case READY_TO_COLLECT_STATE:
+					startReadyToCollectState();
 					break;
 				case FAN_COLLECTION_STATE:
 					startFanCollectionState();
@@ -209,23 +207,44 @@ package rock_on
 			_listeningStationBoss.remove(this);
 		}
 		
-		private function startFanButtonState():void
+		private function startReadyToCollectState():void
 		{
-			state = FAN_BUTTON_STATE;
-			_listeningStationBoss.addListeners(this);
+			state = READY_TO_COLLECT_STATE;
+//			_listeningStationBoss.addListeners(this);
 			
 			if (!friendMirror)
-			{
-				_listeningStationBoss.onFanButtonState(this);			
-			}
+//				_listeningStationBoss.onFanButtonState(this);	
+				initializeCollectListeners();
 		}	
+		
+		private function initializeCollectListeners():void
+		{
+			this.activeAsset.addEventListener(MouseEvent.CLICK, onCollectionClick);
+		}
+		
+		private function onCollectionClick(evt:MouseEvent):void
+		{
+			this.activeAsset.removeEventListener(MouseEvent.CLICK, onCollectionClick);
+			letInNewFans();
+		}
+		
+		private function letInNewFans():void
+		{
+			advanceState(ListeningStation.FAN_COLLECTION_STATE);	
+			var fanCount:int = 0;		
+			for each (var sl:StationListener in currentListeners)
+			{
+				_venue.convertStationListenerToCustomer(sl, fanCount);
+				fanCount++;
+			}
+			_venue.updateFanCount(fanCount, _venue, this);
+			_venue.checkForMinimumFancount();
+		}		
 		
 		public function isSlotAvailable():Boolean
 		{
 			if (structure.capacity > currentListeners.length)
-			{
 				return true;
-			}
 			return false;
 		}
 		
@@ -241,13 +260,9 @@ package rock_on
 				return true;
 			}
 			else if (permanentSlotsAvailable - listenerCount == 1 && secondsUntilCollectionPeriodComplete < COLLECTION_BUFFER_TIME)
-			{
 				return true;
-			}
 			else if (permanentSlotsAvailable - listenerCount > 1)
-			{
 				return true;
-			}
 			return false;
 		}	
 			
@@ -272,7 +287,7 @@ package rock_on
 			
 		}
 		
-		private function endFanButtonState():void
+		private function endReadyToCollectState():void
 		{
 		
 		}
@@ -290,9 +305,7 @@ package rock_on
 		{
 			var isFree:Boolean = true;
 			if (structure.capacity == currentListeners.length)
-			{
 				isFree = false;
-			}
 			return isFree;
 		}	
 		

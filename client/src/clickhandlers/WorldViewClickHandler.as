@@ -432,8 +432,10 @@ package clickhandlers
 		{
 			for each (var abd:AssetBitmapData in _worldView.bitmapBlotter.bitmapReferences)
 			{
-				abd.bitmap.filters = null;
-				abd.moodClip.filters = null;
+				if (abd.bitmap)
+					abd.bitmap.filters = null;
+				if (abd.moodClip)
+					abd.moodClip.filters = null;
 			}	
 		}
 		
