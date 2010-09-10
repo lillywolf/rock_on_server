@@ -73,13 +73,9 @@ package views
 		public function update(deltaTime:Number):void
 		{
 			if (venue)
-			{
 				venue.update(deltaTime);			
-			}
 			if (bandBoss)
-			{
 				bandBoss.update(deltaTime);
-			}
 		}
 		
 		public function onVenueUpdated(method:String, newInstance:OwnedDwelling):void

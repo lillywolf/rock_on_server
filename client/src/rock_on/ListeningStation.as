@@ -190,7 +190,8 @@ package rock_on
 		private function startFanEntryState():void
 		{
 			state = FAN_ENTRY_STATE;
-			playListeningStationDestruction();
+//			playListeningStationDestruction();
+			letInNewFans();
 		}
 		
 		private function endFanEntryState():void
@@ -200,10 +201,7 @@ package rock_on
 		
 		private function playListeningStationDestruction():void
 		{
-			// Play animation on movie clip
-			
-			// Remove from server and client
-			
+			// Play animation on movie clip and remove from server and client			
 			_listeningStationBoss.remove(this);
 		}
 		
@@ -213,7 +211,6 @@ package rock_on
 //			_listeningStationBoss.addListeners(this);
 			
 			if (!friendMirror)
-//				_listeningStationBoss.onFanButtonState(this);	
 				initializeCollectListeners();
 		}	
 		
@@ -225,21 +222,29 @@ package rock_on
 		private function onCollectionClick(evt:MouseEvent):void
 		{
 			this.activeAsset.removeEventListener(MouseEvent.CLICK, onCollectionClick);
-			letInNewFans();
+			advanceState(ListeningStation.FAN_ENTRY_STATE);	
 		}
 		
 		private function letInNewFans():void
 		{
-			advanceState(ListeningStation.FAN_COLLECTION_STATE);	
 			var fanCount:int = 0;		
 			for each (var sl:StationListener in currentListeners)
 			{
 				_venue.convertStationListenerToCustomer(sl, fanCount);
+				removeStationListener(sl);
 				fanCount++;
 			}
 			_venue.updateFanCount(fanCount, _venue, this);
 			_venue.checkForMinimumFancount();
 		}		
+		
+		private function removeStationListener(sl:StationListener):void
+		{
+			_venue.myWorld.removeAsset(sl);
+			var index:int = this.currentListeners.getItemIndex(sl);
+			this.currentListeners.removeItemAt(index);
+			this.currentListenerCount--;
+		}
 		
 		public function isSlotAvailable():Boolean
 		{

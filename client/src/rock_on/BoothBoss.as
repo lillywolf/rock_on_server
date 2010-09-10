@@ -41,7 +41,7 @@ package rock_on
 			_venue = venue;
 		}
 				
-		public function setInMotion():void
+		public function initialize():void
 		{
 			booths = new ArrayCollection();
 			showBooths();

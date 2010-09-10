@@ -170,20 +170,20 @@
 			public function showBooths():void
 			{
 				boothBoss.friendMirror = true;
-				boothBoss.setInMotion();
+				boothBoss.initialize();
 			}
 			
 			public function addStage():void
 			{	
 				stageManager = new StageManager(structureController, myWorld);
-				stageManager.setInMotion();
+				stageManager.initialize();
 				concertStage = stageManager.concertStage;		
 			}
 			
 			private function showListeningStations():void
 			{
 				listeningStationBoss.friendMirror = true;
-				listeningStationBoss.setInMotion();	
+				listeningStationBoss.initialize();	
 				
 				listeningStationBoss.boothBoss = boothBoss;
 				listeningStationBoss.stageManager = stageManager;				

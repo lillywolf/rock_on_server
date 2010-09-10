@@ -35,7 +35,7 @@ package rock_on
 			stages = new ArrayCollection();
 		}
 		
-		public function setInMotion():void
+		public function initialize():void
 		{
 			createStage();
 		}
@@ -50,21 +50,38 @@ package rock_on
 			var stageStructures:ArrayCollection = _structureController.getStructuresByType("ConcertStage");
 			concertStage = new ConcertStage(stageStructures[0]);
 			
-			stageAsset = new ActiveAsset();
+			stageAsset = new ActiveAsset(EssentialModelReference.getMovieClipCopy(concertStage.structure.mc));
 			stageAsset.thinger = stageStructures[0];
 			var addTo:Point3D = new Point3D(concertStage.x, concertStage.y, concertStage.z);
 			concertStage.worldCoords = addTo;
-		}
+		}	
+		
+		public function drawTiles(_world:World):void
+		{
+			for each (var os:OwnedStructure in _structureController.owned_structures)
+			{
+				if (os.structure.structure_type == "Tile")
+				{
+					var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);					
+					var asset:ActiveAsset = new ActiveAsset(mc);
+					asset.thinger = os;
+					_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
+				}
+			}
+		}		
 		
 		public function addStageDecorations(worldToUpdate:World):void
 		{
 			stageDecorations = _structureController.getStructuresByType("StageDecoration");
 			for each (var os:OwnedStructure in stageDecorations)
 			{
-				var stageDecoration:StageDecoration = new StageDecoration(this.concertStage, os);
-				var asset:ActiveAsset = createStageDecorationAsset(stageDecoration);
-				var addTo:Point3D = new Point3D(stageDecoration.x, stageDecoration.y, stageDecoration.z);
-				addStageDecorationToWorld(asset, addTo, worldToUpdate);
+				if (os.in_use)
+				{
+					var stageDecoration:StageDecoration = new StageDecoration(this.concertStage, os);
+					var asset:ActiveAsset = createStageDecorationAsset(stageDecoration);
+					var addTo:Point3D = new Point3D(stageDecoration.x, stageDecoration.y, stageDecoration.z);
+					addStageDecorationToWorld(asset, addTo, worldToUpdate);
+				}
 			}
 		}
 		
@@ -86,7 +103,9 @@ package rock_on
 		{
 			if (method == "save_placement")
 			{
+				_structureController.savePlacement(os, new Point3D(os.x, os.y, os.z));				
 				_myStage.saveStructurePlacement(os);
+//				Redraw band members
 			}
 			else if (method == "create_new")
 			{
@@ -108,16 +127,9 @@ package rock_on
 		
 		public function addStageToWorld(asset:ActiveAsset, addTo:Point3D, myStage:World):void
 		{
-			_myStage = myStage;
-			
-			if (editMirror)
-			{
-				_myStage.addAsset(asset, addTo);
-			}
-			else
-			{
-				_myStage.addAsset(asset, addTo);
-			}
+			_myStage = myStage;	
+			_myStage.addAsset(asset, addTo);
+			_myStage.addToPrioritizedRenderList(asset);
 		}
 		
 		public function set myStage(val:World):void

@@ -452,6 +452,14 @@ package world
 //			dispatchEvent(evt);			
 		}
 		
+		public function addToPrioritizedRenderList(asset:ActiveAsset, index:int=-1):void
+		{
+			if (index == -1)
+				this.assetRenderer.renderFirst.addItem(asset);
+			else
+				this.assetRenderer.renderFirst.addItemAt(asset, index);
+		}
+		
 		private function onDirectionChanged(evt:WorldEvent):void
 		{
 			var asset:ActiveAsset = evt.activeAsset;

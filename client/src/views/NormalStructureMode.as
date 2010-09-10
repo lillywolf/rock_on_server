@@ -202,9 +202,7 @@ package views
 			for each (var os:OwnedStructure in _structureController.owned_structures)
 			{
 				if (os.in_use && os.structure.structure_type != "Tile")
-				{
 					addStructureAsset(os, structureWorld);
-				}
 			}
 		}
 		
@@ -237,6 +235,8 @@ package views
 			asset.switchToBitmap();
 			_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
 			allStructures.addItem(asset);
+			if (os.structure.structure_type == "ConcertStage")
+				_world.addToPrioritizedRenderList(asset);
 			return asset;
 		}
 
@@ -715,8 +715,15 @@ package views
 				
 		public function onStructureMouseMove(evt:MouseEvent):void
 		{
-			var destination:Point3D = World.actualToWorldCoords(new Point(structureWorld.mouseX, structureWorld.mouseY));
 			var os:OwnedStructure = currentStructure.thinger as OwnedStructure;
+			
+//			Get destination of structure; If it's a stage decoration, give it a height base
+			var destination:Point3D;
+			if (os.structure.structure_type == "StageDecoration")
+				destination = World.actualToWorldCoords(new Point(structureWorld.mouseX, structureWorld.mouseY), os.y);
+			else
+				destination = World.actualToWorldCoords(new Point(structureWorld.mouseX, structureWorld.mouseY));
+			
 			destination.y = Math.round(destination.y);
 			if (os.width%2 == 0)
 				destination.x = Math.round(destination.x);
@@ -949,7 +956,7 @@ package views
 			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
 			{
 				var os:OwnedStructure = asset.thinger as OwnedStructure;
-				if (os.structure.structure_type != "StructureTopper" && os.structure.structure_type != "Tile")
+				if (os.structure.structure_type != "StructureTopper" && os.structure.structure_type != "Tile" && os.structure.structure_type != "ConcertStage")
 				{
 					var pts:ArrayCollection = getOccupiedInnerPoints(asset);
 					pts.addAll(getExtraBasePointsByStructureType(asset));
@@ -1073,10 +1080,10 @@ package views
 		public function isSpecialStructureInBounds(asset:ActiveAsset, rect:Rectangle):Boolean
 		{
 			var os:OwnedStructure = asset.thinger as OwnedStructure;
-			if (asset.worldCoords.x - os.width/2 < rect.left || 
-				asset.worldCoords.x + os.width/2 > rect.right ||
-				asset.worldCoords.z - os.depth/2 < rect.top ||
-				asset.worldCoords.z + os.depth/2 > rect.bottom)
+			if (asset.worldCoords.x + asset.worldCoords.y - os.width/2 < rect.left || 
+				asset.worldCoords.x + asset.worldCoords.y + os.width/2 > rect.right ||
+				asset.worldCoords.z - asset.worldCoords.y - os.depth/2 < rect.top ||
+				asset.worldCoords.z - asset.worldCoords.y + os.depth/2 > rect.bottom)
 			{			
 				return false;
 			}	

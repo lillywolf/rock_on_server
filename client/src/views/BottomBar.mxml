@@ -225,7 +225,7 @@
 			{
 				var inventory:ArrayCollection = getInventory();
 				inventoryList = new TiledItemList(inventory, 2, 7);
-				inventoryList.y = 360;
+				inventoryList.y = 250;
 				inventoryList.x = 0;
 				inventoryList.height = 210;				
 			}

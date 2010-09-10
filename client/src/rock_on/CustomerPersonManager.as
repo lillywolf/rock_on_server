@@ -4,6 +4,8 @@ package rock_on
 	import flash.filters.GlowFilter;
 	import flash.geom.Rectangle;
 	
+	import models.Creature;
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
 	import mx.collections.SortField;
@@ -32,13 +34,11 @@ package rock_on
 			_myWorld.addEventListener(WorldEvent.FINAL_DESTINATION_REACHED, onFinalDestinationReached);			
 		}
 		
-		public function addConvertedFan(cp:CustomerPerson, startPoint:Point3D, fanIndex:int):void
+		public function addConvertedCustomer(c:Creature, startPoint:Point3D, fanIndex:int):void
 		{
 			if (_myWorld)
 			{
-				cp.myWorld = _myWorld;
-				cp.venue = _venue;
-				cp.speed = 0.11;
+				var cp:CustomerPerson = createConvertedCustomer(c);
 				addEventListeners(cp);
 				addItem(cp);
 				_myWorld.addAsset(cp, startPoint);
@@ -50,23 +50,16 @@ package rock_on
 		{
 			if(_myWorld)
 			{			
-				cp.myWorld = _myWorld;
 				if (isMoving)
-				{
 					addToWorldAsMoving(cp, bounds, avoid, worldToUpdate);
-				}
 				else
-				{
 					addToWorld(cp, seatNumber);				
-				}
 				
 				addEventListeners(cp);
 				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
 			}
 			else
-			{
 				throw new Error("you have to fill your pool before you dive");
-			}
 		}
 		
 		public function addAfterInitializing(cp:CustomerPerson):void
@@ -85,22 +78,16 @@ package rock_on
 		
 		private function addToWorldAsMoving(cp:CustomerPerson, bounds:Rectangle, avoid:Rectangle=null, worldToUpdate:World=null):void
 		{
-			cp.venue = _venue;
 			var destination:Point3D = cp.pickPointNearStructure(bounds, avoid, worldToUpdate);
 			if (worldToUpdate)
-			{
 				worldToUpdate.addAsset(cp, destination);
-			}
 			else
-			{
 				_myWorld.addAsset(cp, destination);			
-			}
 			this.addItem(cp);			
 		}
 				
 		private function addToWorld(cp:CustomerPerson, seatNumber:int = -1):void
 		{
-			cp.venue = _venue;
 			cp.isBitmapped = true;
 			var destination:Point3D;
 			if (seatNumber != -1)
@@ -109,26 +96,19 @@ package rock_on
 				_venue.numAssignedSeats++;
 			}
 			else
-			{
 				destination = cp.pickPointNearStructure(_venue.mainCrowdRect);			
-			}
 			cp.worldCoords = destination;
 			var standAnimation:Object = cp.standFacingObject(_concertStage, 0, true);
 			_myWorld.addStaticBitmap(cp, destination, standAnimation.animation, standAnimation.frameNumber, standAnimation.reflection);
-//			_myWorld.addAsset(cp, destination);
 			this.addItem(cp);
 		}	
 		
 		private function addEventListeners(cp:CustomerPerson):void
 		{
 			if (!cp.hasEventListener("customerRouted"))
-			{
 				cp.addEventListener("customerRouted", onCustomerRouted);			
-			}
 			if (!cp.hasEventListener("queueDecremented"))
-			{
 				cp.addEventListener("queueDecremented", decrementQueue);						
-			}
 		}
 		
 		private function decrementQueue(evt:DynamicEvent):void
@@ -148,13 +128,9 @@ package rock_on
 		private function updateBoothPosition(customer:CustomerPerson, index:int):void
 		{
 			if (customer.state == CustomerPerson.ROUTE_STATE)
-			{
 				customer.setQueuedPosition(customer.currentBooth.actualQueue + index);			
-			}
 			else if (customer.state == CustomerPerson.QUEUED_STATE)
-			{
 				customer.setQueuedPosition(index);
-			}
 		}
 		
 		private function validateBoothPositions(booth:Booth):void
@@ -202,6 +178,58 @@ package rock_on
 			}			
 			proxiedCustomers = sortProxiedCustomers(proxiedCustomers);
 			updateProxiedCustomers(proxiedCustomers);
+		}
+		
+		public function setEssentialVariables(cp:CustomerPerson):void
+		{
+			cp.stageManager = _venue.stageManager;
+			cp.venue = _venue;
+			cp.myWorld = _myWorld;
+		}
+		
+		public function createSuperCustomer(c:Creature, addToWorld:World):void
+		{
+			var cp:CustomerPerson = new CustomerPerson(_venue.boothBoss, c, null, c.layerableOrder, 0.5);
+			cp.personType = Person.SUPER;
+			cp.speed = 0.11;
+			cp.isSuperFan = true;
+			setEssentialVariables(cp);
+			add(cp, true, -1, _venue.stageBufferRect, _venue.stageRect, addToWorld);
+			cp.setMood();
+			cp.advanceState(CustomerPerson.HEAD_BOB_STATE);	
+		}
+		
+		public function createStaticCustomer(c:Creature, seatNumber:int=-1):void
+		{
+			var cp:CustomerPerson = new CustomerPerson(_venue.boothBoss, c, null, c.layerableOrder, 0.5);
+			cp.personType = Person.STATIC;
+			cp.speed = 0.11;
+			setEssentialVariables(cp);
+			add(cp, false, seatNumber);
+			cp.setMood();
+		}
+		
+		public function createMovingCustomer(c:Creature):CustomerPerson
+		{
+			var cp:CustomerPerson = new CustomerPerson(_venue.boothBoss, c, null, c.layerableOrder, 0.5);
+			cp.personType = Person.MOVING;
+			cp.speed = 0.11;
+			cp.thinger = c;
+			setEssentialVariables(cp);
+			add(cp, true, -1, _venue.boothsRect);
+			cp.setMood();
+			return cp;
+		}
+
+		public function createConvertedCustomer(c:Creature):CustomerPerson
+		{
+			var cp:CustomerPerson = new CustomerPerson(_venue.boothBoss, c, null, c.layerableOrder, 0.5);
+			cp.personType = Person.MOVING;
+			cp.speed = 0.11;
+			cp.thinger = c;
+			setEssentialVariables(cp);
+			cp.setMood();
+			return cp;
 		}
 		
 		private function sortProxiedCustomers(proxiedCustomers:ArrayCollection):ArrayCollection
@@ -259,9 +287,7 @@ package rock_on
 			for each (var person:CustomerPerson in this)
 			{
 				if (person.update(deltaTime))
-				{		
 					remove(person);							
-				}
 				else 
 				{
 				}
@@ -287,9 +313,7 @@ package rock_on
 				removeItemAt(personIndex);
 			}
 			else 
-			{
 				throw new Error("how the hell did this happen?");
-			}
 		}
 		
 		public function redrawAllCustomers():void
@@ -348,9 +372,7 @@ package rock_on
 			for each (var cp:CustomerPerson in this)
 			{
 				if (cp.currentBooth == booth)
-				{
 					cp.advanceState(CustomerPerson.ROAM_STATE);
-				}
 			}
 		}
 						

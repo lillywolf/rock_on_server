@@ -56,7 +56,7 @@ package rock_on
 			listeningStations = new ArrayCollection();
 		}
 		
-		public function setInMotion():void
+		public function initialize():void
 		{
 			passerbyManager = new PasserbyManager(this, _myWorld, creatureGenerator, _venue);
 			showListeningStations();
@@ -81,9 +81,7 @@ package rock_on
 		public function addListeners(station:ListeningStation):void
 		{
 			if (station.currentListeners.length < station.listenerCount)
-			{
 				passerbyManager.spawnForStation(station);
-			}			
 		}
 		
 		public function onFanButtonState(station:ListeningStation):void

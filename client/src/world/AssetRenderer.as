@@ -21,6 +21,7 @@ package world
 	{
 		public var sortedAssets:ArrayCollection;
 		public var unsortedAssets:ArrayCollection;
+		public var renderFirst:ArrayCollection;
 		public var initialDraw:Boolean;
 		private static const DEFAULT_SPEED:Number = .02;
 
@@ -35,6 +36,7 @@ package world
 			super();
 			sortedAssets = new ArrayCollection();
 			unsortedAssets = new ArrayCollection();
+			renderFirst = new ArrayCollection();
 			unsortedAssets.addEventListener(CollectionEvent.COLLECTION_CHANGE, updateUnsortedAssets);
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
@@ -196,10 +198,17 @@ package world
 			tempArray.sort = sort;
 			tempArray.refresh();
 			sortedAssets = new ArrayCollection();
-			for (var i:int = 0; i<tempArray.length; i++)
+			for (var i:int = 0; i<renderFirst.length; i++)
 			{
-				var asset:ActiveAsset = tempArray.getItemAt(i) as ActiveAsset;
-				sortedAssets.addItemAt(asset, i);
+				var leadAsset:ActiveAsset = renderFirst.getItemAt(i) as ActiveAsset;
+				var tempIndex:int = tempArray.getItemIndex(leadAsset);
+				tempArray.removeItemAt(tempIndex);
+				sortedAssets.addItem(leadAsset);
+			}
+			for (var j:int = 0; j<tempArray.length; j++)
+			{
+				var asset:ActiveAsset = tempArray.getItemAt(j) as ActiveAsset;
+				sortedAssets.addItem(asset);
 			}
 		}
 		
@@ -255,10 +264,17 @@ package world
 			ordered.sort = sort;
 			ordered.refresh();
 			sortedAssets = new ArrayCollection();
-			for (var i:int = 0; i < ordered.length; i++)
+			for (var i:int = 0; i<renderFirst.length; i++)
 			{
-				sortedAssets.addItem(ordered.getItemAt(i));
-				var toppers:ArrayCollection = (ordered.getItemAt(i) as ActiveAsset).toppers;
+				var leadAsset:ActiveAsset = renderFirst.getItemAt(i) as ActiveAsset;
+				var tempIndex:int = ordered.getItemIndex(leadAsset);
+				ordered.removeItemAt(tempIndex);
+				sortedAssets.addItem(leadAsset);
+			}			
+			for (var j:int = 0; j < ordered.length; j++)
+			{
+				sortedAssets.addItem(ordered.getItemAt(j));
+				var toppers:ArrayCollection = (ordered.getItemAt(j) as ActiveAsset).toppers;
 				if (toppers && toppers.length > 0)
 				{	
 					var topperAssets:ArrayCollection = getAssociatedToppers(toppers);

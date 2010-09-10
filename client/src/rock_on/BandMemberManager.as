@@ -376,9 +376,7 @@ package rock_on
 			for each (var person:BandMember in this)
 			{
 				if (person.update(deltaTime))
-				{		
 					remove(person);							
-				}
 				else 
 				{
 				}

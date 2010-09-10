@@ -45,18 +45,20 @@ package world
 //			var xCoord:int = Math.sqrt( (_gridWidth * _gridWidth) / 2);
 
 			mc.graphics.clear();
-			mc.graphics.lineStyle(1,0xB0DEFF);
+			mc.graphics.lineStyle(1, 0xB0DEFF, 0);
 			
 			var xCoord:Number = Math.sqrt( (_gridWidth * _gridWidth) / 2 );
 			var yCoord:Number = xCoord * GRID_ANGLE;
 			
 //			mc.graphics.beginFill(0x92C5E8, 1);
 			
+//			Draws the outline of the space
+			
 			mc.graphics.lineTo(xCoord, yCoord);
 			mc.graphics.lineTo(xCoord*2, 0);
 			mc.graphics.lineTo(xCoord, -yCoord);
 			mc.graphics.lineTo(0, 0);
-			mc.graphics.endFill();			
+//			mc.graphics.endFill();			
 		}
 
 		public function drawGridBlocks():void

@@ -386,7 +386,8 @@ package clickhandlers
 			{
 				var gf:GlowFilter = new GlowFilter(0x00F2FF, 1, 2, 2, 20, 20);
 				abd.bitmap.filters = [gf];
-				abd.moodClip.filters = [gf];
+				if (abd.moodClip)
+					abd.moodClip.filters = [gf];
 			}
 		}
 		

@@ -88,7 +88,7 @@
 				mouseBoss.stageMouseHandler = mouseHandler;
 				mouseHandler.mouseBoss = mouseBoss;
 				myStage = new World(stageWidth, stageHeight, tileSize, concertStage.structure.height);
-				structureController.drawTiles(myStage);
+				venueManager.venue.stageManager.drawTiles(myStage);
 				venueManager.venue.stageManager.myStage = myStage;
 				addChild(myStage);
 				

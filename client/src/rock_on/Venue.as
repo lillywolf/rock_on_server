@@ -145,7 +145,7 @@ package rock_on
 		public function addStageManager():void
 		{
 			stageManager = new StageManager(_structureController);
-			stageManager.createStage();
+			stageManager.initialize();
 		}
 		
 		public function isPointInVenueBounds(pt3D:Point3D):Boolean
@@ -231,9 +231,7 @@ package rock_on
 			for (var i:int = 0; i < _myWorld.numChildren; i++)
 			{
 				if (_myWorld.getChildAt(i) is CollectibleDrop)
-				{
 					(_myWorld.getChildAt(i) as Sprite).filters = null;
-				}
 			}
 		}	
 			
@@ -245,30 +243,25 @@ package rock_on
 		public function update(deltaTime:Number):void
 		{
 			if (customerPersonManager)
-			{
 				customerPersonManager.update(deltaTime);			
-			}
 			if (listeningStationBoss)
-			{
 				listeningStationBoss.passerbyManager.update(deltaTime);							
-			}
 		}
 		
 		public function addStaticStuffToVenue():void
 		{
 			setLayout();
-			updateState();	
-			
+			updateState();				
 			createInventory();
+			
 			stageManager.myWorld = _myWorld;
 			customerPersonManager = new CustomerPersonManager(_myWorld, this);
 			boothBoss = new BoothBoss(_structureController, _myWorld, this);
 			decorationBoss = new DecorationBoss(_structureController, _myWorld, this);
 			listeningStationBoss = new ListeningStationBoss(_structureController, _layerableController, stageManager, _myWorld, this, boothBoss, customerPersonManager);
 
-//			add UI layer to boothBoss
-			boothBoss.setInMotion();
-			listeningStationBoss.setInMotion();
+			boothBoss.initialize();
+			listeningStationBoss.initialize();
 			
 			_myWorld.setOccupiedSpaces();
 			this.stageManager.myStage.setOccupiedSpaces();
@@ -287,18 +280,13 @@ package rock_on
 			_creatureController.makeSureOwnedLayerablesAreAssignedToCreatures();
 			
 			addStaticCustomersToVenue(fans);
-			trace("static customers added");
 			addSuperCustomersToVenue(stageManager.myStage);
-			trace("super customers added");
 			addMovingCustomersToVenue();
-			trace("moving customers added");
 			groupieBoss.setInMotion();
-			trace("groupies started");
 			addTechsToVenue();
 			addHatersToVenue();
 			addSpecialPeopleToVenue();
 			showBandMembersRaceCondition();	
-			trace("band members checked");
 		}	
 		
 		public function getFans():ArrayCollection
@@ -325,17 +313,13 @@ package rock_on
 				trace("band members loaded");
 			}
 			else
-			{
 				fullyLoaded = true;
-			}
 		}		
 		
 		public function setAdditionalProperties(params:Object):void
 		{
 			if (params['dwelling'])
-			{
 				dwelling = params.dwelling;
-			}				
 		}
 		
 		private function getNumberOfBitmaps():void
@@ -364,9 +348,7 @@ package rock_on
 		public function addStaticCustomersToVenue(fans:ArrayCollection):void
 		{
 			if (!customerPersonManager.concertStage)
-			{
 				customerPersonManager.concertStage = stageManager.concertStage;
-			}
 			trace("number of static customers:" + numStaticCustomers.toString());
 			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
@@ -374,33 +356,18 @@ package rock_on
 				c.name = (fans[i] as Creature).name;
 				c.owned_layerables = (fans[i] as Creature).owned_layerables;
 				c.has_moods = true;
-				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
-				cp.personType = Person.STATIC;
-//				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
-				cp.speed = 0.11;
-				cp.stageManager = stageManager;
-				customerPersonManager.add(cp, false, i);
-				cp.setMood();
+				customerPersonManager.createStaticCustomer(c, i);
 			}
 		}
 		
 		public function addSuperCustomersToVenue(worldToUpdate:World):void
 		{
 			if (!customerPersonManager.concertStage)
-			{
 				customerPersonManager.concertStage = stageManager.concertStage;
-			}
 			for (var i:int = 0; i < numSuperCustomers; i++)
 			{
 				var imposter:ImposterCreature = creatureGenerator.createImposterCreature("Fan");
-				var cp:CustomerPerson = new CustomerPerson(boothBoss, imposter, null, imposter.layerableOrder, 0.5);
-				cp.personType = Person.SUPER;
-				cp.stageManager = stageManager;
-//				var cp:CustomerPerson = creatureGenerator.createCustomer("Concert Goer", "walk_toward", stageManager.concertStage, boothBoss);
-				cp.speed = 0.11;
-				cp.isSuperFan = true;
-				customerPersonManager.add(cp, true, -1, stageBufferRect, stageRect, worldToUpdate);
-				cp.advanceState(CustomerPerson.HEAD_BOB_STATE);
+				customerPersonManager.createSuperCustomer(imposter, worldToUpdate);
 			}					
 		}
 		
@@ -467,9 +434,7 @@ package rock_on
 		private function onFriendAvatarsLoaded(evt:ServerDataEvent):void
 		{
 			if (!friendAvatarsAdded)
-			{
 				addFriendsToVenue();			
-			}
 		}
 		
 		public function addFriendsToVenue():void
@@ -503,9 +468,7 @@ package rock_on
 		public function addMovingCustomersToVenue():void
 		{
 			if (!customerPersonManager.concertStage)
-			{
 				customerPersonManager.concertStage = stageManager.concertStage;
-			}
 			customerPersonManager.customerCreatures = new ArrayCollection();
 			for (var i:int = 0; i < numMovingCustomers; i++)
 			{
@@ -520,13 +483,7 @@ package rock_on
 		{
 			for each (var c:Creature in customerPersonManager.customerCreatures)
 			{	
-				var cp:CustomerPerson = new CustomerPerson(boothBoss, c, null, c.layerableOrder, 0.5);
-				cp.personType = Person.MOVING;
-				cp.stageManager = stageManager;
-				cp.speed = 0.11;
-				cp.thinger = c;
-				customerPersonManager.add(cp, true, -1, boothsRect);
-				cp.setMood();							
+				customerPersonManager.createMovingCustomer(c);					
 			}
 		}
 		
@@ -556,13 +513,9 @@ package rock_on
 		public function updateRenderedStructures(os:OwnedStructure, method:String):void
 		{
 			if (os.structure.structure_type == "Tile")
-			{
 				this.stageManager.updateRenderedTiles(os, method);
-			}
 			else if (os.structure.structure_type == "StructureTopper")
-			{
 				this.decorationBoss.updateRenderedDecorations(os, method);				
-			}
 			else if (os.structure.structure_type == "StageDecoration")
 			{
 				updateStructureDerivatives(os, stageManager.stageDecorations);
@@ -727,9 +680,7 @@ package rock_on
 		public function checkForVenueTurnover():void
 		{
 			if (state == ENCORE_STATE || state == ENCORE_WAIT_STATE)
-			{
 				_venueManager.dwellingController.serverController.sendRequest({id: id, level: _venueManager.levelController.level}, "owned_dwelling", "change_venue");
-			}
 		}
 		
 		public function startEmptyState():void
@@ -793,13 +744,9 @@ package rock_on
 		public function removeShowButton():void
 		{
 			if (FlexGlobals.topLevelApplication.contains(startShowButton))
-			{
 				FlexGlobals.topLevelApplication.removeChild(startShowButton);
-			}
 			if (startShowButton)
-			{
 				startShowButton = null;
-			}			
 		}
 		
 		private function onAddedToInventory(evt:InventoryEvent):void
@@ -824,8 +771,7 @@ package rock_on
 		
 		public function convertStationListenerToCustomer(sl:StationListener, fanIndex:int):void
 		{
-			var cp:CustomerPerson = new CustomerPerson(boothBoss, sl.creature, null, sl.layerableOrder, VenueManager.PERSON_SCALE);
-			customerPersonManager.addConvertedFan(cp, sl.worldCoords, fanIndex);
+			customerPersonManager.addConvertedCustomer(sl.creature, sl.worldCoords, fanIndex);
 		}		
 		
 		public function doStructureRedraw(asset:ActiveAsset):void
@@ -849,9 +795,7 @@ package rock_on
 			for each (var s:Structure in _structureController.structures)
 			{
 				if (s.id == this.dwelling.floor_structure_id)
-				{
 					return s;
-				}
 			}
 			return null;
 		}

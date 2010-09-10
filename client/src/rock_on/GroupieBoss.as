@@ -57,13 +57,14 @@ package rock_on
 				{
 					var lo:Array = _creatureController.getLayerableOrderByCreatureType("Groupie");
 					c.layerableOrder = lo;
-					var cp:CustomerPerson = new CustomerPerson(_boothBoss, c, null, lo, 0.5);
-					var star:BouncyBitmap = new BouncyBitmap(new FlatStarBlue(), 0.6);
+					var cp:CustomerPerson = _customerPersonManager.createMovingCustomer(c);
+//					var cp:CustomerPerson = new CustomerPerson(_boothBoss, c, null, lo, 0.5);
+//					var star:BouncyBitmap = new BouncyBitmap(new FlatStarBlue(), 0.6);
 //					cp.addChild(star);
-					cp.speed = 0.11;
-					cp.doInitialAnimation("walk_toward");
-					cp.stageManager = _venue.stageManager;
-					_customerPersonManager.add(cp, true, -1, _venue.boothsRect);
+//					cp.speed = 0.11;
+//					cp.doInitialAnimation("walk_toward");
+//					cp.stageManager = _venue.stageManager;
+//					_customerPersonManager.add(cp, true, -1, _venue.boothsRect);
 					groupies.addItem(cp);
 				}
 			}

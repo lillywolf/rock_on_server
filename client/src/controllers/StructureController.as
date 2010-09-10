@@ -483,20 +483,6 @@ package controllers
 			return spaces;
 		}		
 		
-		public function drawTiles(_world:World):void
-		{
-			for each (var os:OwnedStructure in owned_structures)
-			{
-				if (os.structure.structure_type == "Tile")
-				{
-					var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);					
-					var asset:ActiveAsset = new ActiveAsset(mc);
-					asset.thinger = os;
-					_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
-				}
-			}
-		}
-		
 		private function updateListeningStationOnServerResponse(os:OwnedStructure, method:String, listeningStationBoss:ListeningStationBoss):void
 		{
 			listeningStationBoss.updateStationOnServerResponse(os, method);
