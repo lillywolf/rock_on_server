@@ -144,7 +144,7 @@ package rock_on
 		
 		public function addStageManager():void
 		{
-			stageManager = new StageManager(_structureController);
+			stageManager = new StageManager(_structureController, this);
 			stageManager.initialize();
 		}
 		
@@ -264,7 +264,6 @@ package rock_on
 			listeningStationBoss.initialize();
 			
 			_myWorld.setOccupiedSpaces();
-			this.stageManager.myStage.setOccupiedSpaces();
 		}	
 		
 		public function addMovingStuffToVenue():void
@@ -501,6 +500,12 @@ package rock_on
 			initializeFriends();
 			initializeTechs();
 		}		
+		
+		public function redrawAllBandMembers():void
+		{
+			bandMemberManager.removeBandMembers();
+			bandMemberManager.initializeBandMembers();
+		}
 		
 		public function removeCustomersFromVenue():void
 		{
@@ -776,13 +781,26 @@ package rock_on
 		
 		public function doStructureRedraw(asset:ActiveAsset):void
 		{
-			var realAsset:ActiveAsset = _myWorld.getAssetFromOwnedStructure(asset.thinger as OwnedStructure);
-			_myWorld.removeAsset(realAsset);
+//			Determines parent world for structure to redraw
+			var parentWorld:World;
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if (os.structure.structure_type == "StageDecoration" || os.structure.structure_type == "Tile" || os.structure.structure_type == "ConcertStage")
+				parentWorld = this.stageManager.myStage;
+			else
+				parentWorld = _myWorld;
+			redrawStructureInParentWorld(asset, parentWorld);
+		}
+		
+		public function redrawStructureInParentWorld(asset:ActiveAsset, parentWorld:World):void
+		{	
+//			Redraws structure in main view parent world
+			var realAsset:ActiveAsset = parentWorld.getAssetFromOwnedStructure(asset.thinger as OwnedStructure);		
+			parentWorld.removeAsset(realAsset);
 			var temp:ActiveAssetStack = new ActiveAssetStack(null, asset.movieClip);
 			temp.copyFromActiveAsset(asset);
 			temp.setMovieClipsForStructure(temp.toppers);
 			temp.bitmapWithToppers();
-			_myWorld.addAsset(temp, temp.worldCoords);			
+			parentWorld.addAsset(temp, temp.worldCoords);			
 		}		
 		
 		public function set myWorld(val:World):void

@@ -319,7 +319,7 @@
 				if (evt.model == "owned_dwelling")
 					checkForUpdatedVenue(instance as OwnedDwelling, evt.method);				
 				if (evt.model == "owned_structure")
-					updateOwnedStructurePostServer(instance as OwnedStructure, evt.method);
+					updateOwnedStructurePostServer(instance, evt.method);
 				if (evt.model == "owned_layerable")
 					updateOwnedLayerablePostServer(instance as OwnedLayerable, evt.method);
 				if (evt.model == "user")
@@ -334,9 +334,9 @@
 					}
 				}
 			}
-			private function updateOwnedStructurePostServer(os:OwnedStructure, method:String):void
+			private function updateOwnedStructurePostServer(structureObj:Object, method:String):void
 			{
-				gdi.structureController.updateOwnedStructureOnServerResponse(os, method, worldView.venueManager.venue);
+				var os:OwnedStructure = gdi.structureController.updateOwnedStructureOnServerResponse(structureObj, method, worldView.venueManager.venue);
 				worldView.venueManager.venue.updateRenderedStructures(os, method);			
 			}
 			private function updateOwnedLayerablePostServer(ol:OwnedLayerable, method:String):void

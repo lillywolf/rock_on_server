@@ -20,19 +20,23 @@ package rock_on
 		public var _structureController:StructureController;
 		public var _myWorld:World;
 		public var _myStage:World;
+		public var _venue:Venue;
 		public var editMirror:Boolean;
 		public var stageAsset:ActiveAsset;
 		public var stages:ArrayCollection;
 		public var concertStage:ConcertStage;
 		public var stageDecorations:ArrayCollection;
+		public var stageDecorationAssets:ArrayCollection;
 		
 		public static const STAGE_DOOR_X:int = 1;
 		
-		public function StageManager(structureController:StructureController, target:IEventDispatcher=null)
+		public function StageManager(structureController:StructureController, venue:Venue, target:IEventDispatcher=null)
 		{
 			super(target);
 			_structureController = structureController;
+			_venue = venue;
 			stages = new ArrayCollection();
+			stageDecorationAssets = new ArrayCollection();
 		}
 		
 		public function initialize():void
@@ -79,6 +83,7 @@ package rock_on
 				{
 					var stageDecoration:StageDecoration = new StageDecoration(this.concertStage, os);
 					var asset:ActiveAsset = createStageDecorationAsset(stageDecoration);
+					stageDecorationAssets.addItem(asset);
 					var addTo:Point3D = new Point3D(stageDecoration.x, stageDecoration.y, stageDecoration.z);
 					addStageDecorationToWorld(asset, addTo, worldToUpdate);
 				}
@@ -105,7 +110,7 @@ package rock_on
 			{
 				_structureController.savePlacement(os, new Point3D(os.x, os.y, os.z));				
 				_myStage.saveStructurePlacement(os);
-//				Redraw band members
+				_venue.redrawAllBandMembers();
 			}
 			else if (method == "create_new")
 			{

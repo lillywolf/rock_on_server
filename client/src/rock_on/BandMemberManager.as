@@ -36,12 +36,14 @@ package rock_on
 		private var _myWorld:World;		
 		private var _concertStage:ConcertStage;
 		public var _venue:Venue;
+		public var creatures:ArrayCollection;
 		public var spawnLocation:Point3D;
 		public var myAvatar:BandMember;
 		
 		public function BandMemberManager(venue:Venue, myWorld:World, source:Array=null)
 		{
 			super(source);
+			creatures = new ArrayCollection();
 			_venue = venue;
 			_myWorld = myWorld;
 			_myWorld.addEventListener(WorldEvent.DIRECTION_CHANGED, onDirectionChanged);				
@@ -53,42 +55,31 @@ package rock_on
 		
 		public function showBandMembers():void
 		{
-//			var bandMembers:ArrayCollection = _venue.creatureController.getConstructedCreaturesByType("BandMember");
-//			
-//			for each (var assetStack:AssetStack in bandMembers)
-//			{
-//				var bandMember:BandMember = new BandMember(assetStack.movieClips, assetStack.layerableOrder, assetStack.creature, 0.4);
-//				bandMember. = _venue.stageManager.concertStage;
-//				bandMember.addExemptStructures();
-//				bandMember.speed = 0.06;
-//				add(bandMember);
-//				
-//				var newState:int = mapVenueStateToBandMemberState();
-//				bandMember.advanceState(newState);
-//			}
 			trace("band members in creatures: " + _venue.creatureController.creatures.length.toString());
 			for each (var c:Creature in _venue.creatureController.creatures)
 			{
 				if (c.type == "BandMember" || c.type == "Me")
 				{
-					var bm:BandMember = new BandMember(c, null, c.layerableOrder, 0.5);
-					bm.stageManager = _venue.stageManager;
-					bm.venue = _venue;
-					bm.addExemptStructures();
-					bm.speed = 0.11;
-					add(bm);
-					
-					if (c.type == "Me")
-					{
-						this.myAvatar = bm;
-					}
-					
-					trace("band member created");
-					
-					bm.advanceState(mapVenueStateToBandMemberState(bm));
+					creatures.addItem(c);
+					createBandMember(c);					
 				}
 			}
 		}		
+		
+		public function createBandMember(c:Creature):void
+		{
+			var bm:BandMember = new BandMember(c, null, c.layerableOrder, 0.5);
+			bm.stageManager = _venue.stageManager;
+			bm.venue = _venue;
+			bm.addExemptStructures();
+			bm.speed = 0.11;
+			add(bm);
+			
+			if (c.type == "Me")
+				this.myAvatar = bm;
+			
+			bm.advanceState(mapVenueStateToBandMemberState(bm));			
+		}
 		
 		public function add(bm:BandMember):void
 		{
@@ -227,7 +218,8 @@ package rock_on
 				}
 				else
 				{
-					bm.standFacingCrowd();
+//					bm.standFacingCrowd();
+					bm.walkComplete();
 				}
 			}
 		}
@@ -275,9 +267,7 @@ package rock_on
 			for each (var bm:BandMember in this)
 			{
 				if (bm.creature.id == id)
-				{
 					return bm;
-				}
 			}
 			return null;
 		}
@@ -290,19 +280,16 @@ package rock_on
 		
 		public function pickPointWithinStructure(os:OwnedStructure):Point3D
 		{
-			trace("pick point in structure");
 			var destination:Point3D;
-			var exemptStructures:ArrayCollection = new ArrayCollection();
-			exemptStructures.addItem(os);
-			var occupiedSpaces:Array = new Array();
-			occupiedSpaces.concat(_myWorld.pathFinder.getStructureOccupiedSpaces(exemptStructures));
-			occupiedSpaces.concat(_myWorld.pathFinder.getPeopleOccupiedSpacesForArray(_myWorld.assetRenderer.unsortedAssets));
+			var exempt:ArrayCollection = new ArrayCollection();
+			exempt.addItem(os);
+			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(true, true, exempt);
 			do
 			{		
-				destination = new Point3D(Math.floor(os.structure.width - (Math.random()*os.structure.width)), os.structure.height, Math.ceil(_myWorld.tilesDeep - Math.random()*(os.structure.depth)));	
+//				Get space inside stage that isn't an edge point
+				destination = new Point3D(Math.floor(os.width - (Math.random()*(os.width))), os.structure.height, Math.ceil(_myWorld.tilesDeep - Math.random()*(os.depth)));	
 			}
 			while (occupiedSpaces[destination.x] && occupiedSpaces[destination.x][destination.y] && occupiedSpaces[destination.x][destination.y][destination.z]);	
-			trace("point picked");
 			return destination;
 		}
 		
@@ -383,19 +370,37 @@ package rock_on
 			}
 		}
 		
-		public function remove(person:BandMember):void
+		public function remove(bm:BandMember):void
 		{
 			if(_myWorld)
 			{
-				_myWorld.removeAsset(person);
-				var personIndex:Number = getItemIndex(person);
+				_myWorld.removeAsset(bm);
+				var personIndex:Number = getItemIndex(bm);
 				removeItemAt(personIndex);
 			}
 			else 
 			{
 				throw new Error("how the hell did this happen?");
 			}
+		}	
+		
+		public function initializeBandMembers():void
+		{
+			for each (var c:Creature in this.creatures)
+			{	
+				createBandMember(c);					
+			}
 		}		
+		
+		public function removeBandMembers():void
+		{
+			var bmLength:int = length;
+			for (var i:int = (bmLength - 1); i >= 0; i--)				
+			{
+				var bm:BandMember = this[i] as BandMember;
+				remove(bm);
+			}			
+		}
 		
 		private function onDirectionChanged(evt:WorldEvent):void
 		{
@@ -403,10 +408,7 @@ package rock_on
 			for each (var asset:ActiveAsset in this)
 			{
 				if (evt.activeAsset == asset)
-				{
-					(asset as BandMember).setDirection(asset.worldDestination);
-				}
-			}
+					(asset as BandMember).setDirectionAnimation((asset as BandMember).getNextPointAlongPath());				}
 		}	
 		
 		private function onVenueDirectionChanged(evt:WorldEvent):void
@@ -414,9 +416,7 @@ package rock_on
 			for each (var asset:ActiveAsset in this)
 			{
 				if (evt.activeAsset == asset)
-				{
-					(asset as BandMember).setDirection(asset.worldDestination);
-				}
+					(asset as BandMember).setDirectionAnimation((asset as BandMember).getNextPointAlongPath());
 			}
 		}	
 						

@@ -228,26 +228,20 @@ package game
 			for each (var obj:Object in objectsLoaded)
 			{
 				if (obj.has_many)
-				{
 					requestChildrenFromServer(obj, requestType);
-				}
 				if (obj.has_one)
-				{
 					requestChildrenFromServer(obj, requestType);					
-				}
+//				For new things added via client, like items bought from store
 				if (obj.created_from_client)
 				{
 					loadObject(obj, requestType);
-				}
-				
+					dispatchServerUpdateEvent(obj.instance[obj.model], obj.model, obj.method);
+				}	
+//				For items that exist on the server but were updated
 				if (obj.already_loaded)
-				{
 					updateProperties(obj);
-				}
-				else
-				{
+				else if (!obj.created_from_client)
 					loadObject(obj, requestType);				
-				}
 			}
 			checkIfLoadingComplete();
 			// Dispatch load event?
@@ -279,9 +273,7 @@ package game
 				}
 			}	
 			else
-			{
 				throw new Error("No model specified for server response");
-			}
 			
 			// Handles user class case
 			
@@ -292,9 +284,7 @@ package game
 					for each (instance in essentialModelController[obj.model])
 					{
 						if (instance.id == obj.instance[obj.model].id)
-						{
 							instance.updateProperties(obj.instance[obj.model]);
-						}
 					}
 				}
 			}
@@ -338,7 +328,7 @@ package game
 		public function loadObject(obj:Object, requestType:String):void
 		{
 			var toLoad:UnprocessedModel = new UnprocessedModel(requestType, obj, obj.instance[requestType]);
-			essentialModelController.loadNewInstance(toLoad);				
+			essentialModelController.loadNewInstance(toLoad);
 		}
 		
 		public function requestChildrenFromServer(parentObject:Object, requestType:String):void

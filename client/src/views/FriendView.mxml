@@ -175,7 +175,7 @@
 			
 			public function addStage():void
 			{	
-				stageManager = new StageManager(structureController, myWorld);
+				stageManager = new StageManager(structureController, venueManager.venue, myWorld);
 				stageManager.initialize();
 				concertStage = stageManager.concertStage;		
 			}

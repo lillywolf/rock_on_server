@@ -33,10 +33,12 @@ package world
 		public function add(asset:ActiveAsset, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null, skipAStar:Boolean=false):ArrayCollection
 		{
 			addItem(asset);
-			var finalPath:ArrayCollection = calculateNaivePath(asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures, extraStructures);
-			if (fallBack && (finalPath.length == 0 || !equivalent3DPoints(finalPath[finalPath.length-1], asset.worldDestination)) && !skipAStar)
+			var finalPath:ArrayCollection;
+			if (!fallBack)
+				finalPath = calculateNaivePath(asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures, extraStructures);
+			if (fallBack && ((finalPath && finalPath.length == 0) || !equivalent3DPoints(asset.worldCoords, asset.worldDestination)) && !skipAStar)
 				finalPath = calculateAStarPath(asset.lastWorldPoint, asset.worldDestination, avoidStructures, avoidPeople, exemptStructures, extraStructures);	
-			else if (!fallBack && finalPath.length == 0)
+			else if (!fallBack && (finalPath && finalPath.length == 0))
 				pathfindingFailed(asset);
 			else if (!fallBack && isStandingOnPerson(asset, finalPath[finalPath.length-1]))
 				tackOnAdditionalPath(asset, finalPath, avoidStructures, avoidPeople, exemptStructures, extraStructures, heightBase);
@@ -279,24 +281,22 @@ package world
 			var neighbors:ArrayCollection = new ArrayCollection();
 			var pt:Point3D;
 			pt = getNeighbor("top", currentObject.node);
-			if (pt && pt.x < 14 && pt.z > 12)
-				var blah:int = 0;
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y][pt.z]))
+			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject, openList);
 			}
 			pt = getNeighbor("bottom", currentObject.node);
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y][pt.z]))
+			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject, openList);			
 			}
 			pt = getNeighbor("right", currentObject.node);
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y][pt.z]))
+			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject, openList);		
 			}
 			pt = getNeighbor("left", currentObject.node);
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y][pt.z]))
+			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject, openList);
 			}
@@ -417,7 +417,7 @@ package world
 			if (orientation.xSign > 0 && (destination.x - currentPoint.x > 0))
 			{	
 				neighbor = getNeighbor("left", currentPoint);
-				if (!unwalkables[neighbor.x] || !unwalkables[neighbor.x][neighbor.y][neighbor.z])
+				if (neighbor && (!unwalkables[neighbor.x] || !unwalkables[neighbor.x][neighbor.y] || !unwalkables[neighbor.x][neighbor.y][neighbor.z]))
 					return neighbor.x;
 				else
 					return currentPoint.x;
@@ -425,7 +425,7 @@ package world
 			else if (orientation.xSign < 0 && (destination.x - currentPoint.x < 0))
 			{	
 				neighbor = getNeighbor("right", currentPoint);
-				if (!unwalkables[neighbor.x] || !unwalkables[neighbor.x][neighbor.y][neighbor.z])
+				if (neighbor && (!unwalkables[neighbor.x] || !unwalkables[neighbor.x][neighbor.y] || !unwalkables[neighbor.x][neighbor.y][neighbor.z]))
 					return neighbor.x;
 				else
 					return currentPoint.x;
@@ -439,7 +439,7 @@ package world
 			if (orientation.zSign > 0 && (destination.z - currentPoint.z > 0))
 			{	
 				neighbor = getNeighbor("top", currentPoint);
-				if (!unwalkables[neighbor.x] || !unwalkables[neighbor.x][neighbor.y][neighbor.z])
+				if (neighbor && (!unwalkables[neighbor.x] || !unwalkables[neighbor.x][neighbor.y] || !unwalkables[neighbor.x][neighbor.y][neighbor.z]))
 					return neighbor.z;
 				else
 					return currentPoint.z;
@@ -447,7 +447,7 @@ package world
 			else if (orientation.zSign < 0 && (destination.z - currentPoint.z < 0))
 			{	
 				neighbor = getNeighbor("bottom", currentPoint);
-				if (!unwalkables[neighbor.x] || !unwalkables[neighbor.x][neighbor.y][neighbor.z])
+				if (neighbor && (!unwalkables[neighbor.x] || !unwalkables[neighbor.x][neighbor.y] || !unwalkables[neighbor.x][neighbor.y][neighbor.z]))
 					return neighbor.z;
 				else
 					return currentPoint.z;
@@ -486,20 +486,18 @@ package world
 			while(openList.length != 0)  // quit if open list is emptied, ie. no path
 			{
 				lowestFScoreObject = getLowestFScore(fauxOpenList);	//get the last/lowest FscoreObject from the open list
-				var index:int = fauxOpenList.getItemIndex(lowestFScoreObject);	
-				fauxOpenList.removeItemAt(index);
-				openList[lowestFScoreObject.node.x][lowestFScoreObject.node.y][lowestFScoreObject.node.z] = 0; //remove the last object with the lowest Fscore from open list
-				addPointTo3DArray(lowestFScoreObject.node, lowestFScoreObject, closedList);     //add that lowest FScoreObject to the closed List							
-				if (equivalent3DPoints(new Point3D(lowestFScoreObject.node.x, lowestFScoreObject.node.y, lowestFScoreObject.node.z), destination)) return determinePath(closedList, lowestFScoreObject); // exit while loop if we've hit the end
-				var neighbors:ArrayCollection = updateAStarNeighbors(startingPoint, destination, lowestFScoreObject, unwalkables, openList, closedList, fauxOpenList);
-//				fauxOpenList.addAll(neighbors);
-				iteration++;
-				
-//				if (neighbors.length == 0)
-//				{
-//					removePointFrom3DArray(lowestFScoreObject.node as Point3D, closedList);
-//					addPointTo3DArray(lowestFScoreObject.node, lowestFScoreObject, unwalkables);
-//				}
+				if (lowestFScoreObject)
+				{
+					var index:int = fauxOpenList.getItemIndex(lowestFScoreObject);	
+					fauxOpenList.removeItemAt(index);
+					openList[lowestFScoreObject.node.x][lowestFScoreObject.node.y][lowestFScoreObject.node.z] = 0; //remove the last object with the lowest Fscore from open list
+					addPointTo3DArray(lowestFScoreObject.node, lowestFScoreObject, closedList);     //add that lowest FScoreObject to the closed List							
+					if (equivalent3DPoints(new Point3D(lowestFScoreObject.node.x, lowestFScoreObject.node.y, lowestFScoreObject.node.z), destination)) return determinePath(closedList, lowestFScoreObject); // exit while loop if we've hit the end
+					var neighbors:ArrayCollection = updateAStarNeighbors(startingPoint, destination, lowestFScoreObject, unwalkables, openList, closedList, fauxOpenList);
+					iteration++;
+				}
+				else
+					return null;
 				if (iteration > 1000)
 					return determinePath(closedList, lowestFScoreObject);
 			}
@@ -566,7 +564,10 @@ package world
 		{
 			// This function finds the last node with the lowest F score in the open list
 			// returns an object corresponding to that lowest node
-			var lowest:Object = fauxOpenList[fauxOpenList.length-1];
+			if (fauxOpenList.length > 0)
+				var lowest:Object = fauxOpenList[fauxOpenList.length-1];
+			else
+				return null;
 			
 			for (var i:int = 0; i < fauxOpenList.length; i++)
 			{

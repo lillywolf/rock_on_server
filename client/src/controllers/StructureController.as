@@ -287,11 +287,11 @@ package controllers
 			_serverController.sendRequest({id: id, client_validate: "true"}, "owned_structure", "update_inventory_count");
 		}
 		
-		public function updateOwnedStructureOnServerResponse(osCopy:OwnedStructure, method:String, venue:Venue):void
+		public function updateOwnedStructureOnServerResponse(structureObj:Object, method:String, venue:Venue):OwnedStructure
 		{
 			for each (var os:OwnedStructure in owned_structures)
 			{
-				if (os.id == osCopy.id)
+				if (os.id == structureObj.id)
 					var osReference:OwnedStructure = os;
 			}
 			if (method == "sell")
@@ -308,6 +308,8 @@ package controllers
 				updateBoothOnServerResponse(osReference, method, venue.boothBoss);
 			else if (osReference.structure.structure_type == "ListeningStation")
 				updateListeningStationOnServerResponse(osReference, method, venue.listeningStationBoss);
+			
+			return osReference;
 		}
 		
 		private function assignNewOwnedStructureToImposter(osCopy:OwnedStructure):void

@@ -61,12 +61,16 @@ package rock_on
 		private static const BOB_SING_CONSTANT:int = 2000;
 		private static const BOB_SING_WAIT_MULTIPLIER:int = 20000;
 		private static const BOB_SING_WAIT_CONSTANT:int = 2000;
+		private static const WALK_WAIT_CONSTANT:int = 1000;
+		private static const WALK_WAIT_MULTIPLIER:int = 30000;
 		
 		public var _venue:Venue;
 		public var inWorld:Boolean;
 		public var itemDropRecipient:Object;
 		public var destinationLocation:Point3D;
 		public var exitLocation:Point3D;
+		public var towardAnimation:String;
+		public var awayAnimation:String;
 		public var exemptStructures:ArrayCollection;
 		public var state:int;
 		public var stopTime:Timer;
@@ -77,20 +81,21 @@ package rock_on
 		public var singWaitTime:Timer;
 		public var bobSingTime:Timer;
 		public var bobSingWaitTime:Timer;
+		public var walkWaitTime:Timer;
 		
 		private var bandAnimations:Object = {
 			walk_toward: 						{"body": "walk_toward", "eyes": "walk_toward", "shoes": "walk_toward", "bottom": "walk_toward", "bottom custom": "walk_toward", "top": "walk_toward", "top custom": "walk_toward", "hair front": "walk_toward", "hair band": "walk_toward", "instrument": "walk_toward"},
-			walk_toward_and_sing: 				{},
-			walk_away: 							{},
+			walk_away: 							{"instrument": "walk_away", "body": "walk_away", "eyes": "walk_away", "shoes": "walk_away", "bottom": "walk_away", "bottom custom": "walk_away", "top": "walk_away", "top custom": "walk_away", "hair front": "walk_away", "hair band": "walk_away"},
 			bob_head: 							{"body": "head_bob", "eyes": "head_bob", "mouth": "head_bob", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "head_bob", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward"},
 			bob_head_and_sing: 					{"body": "head_bob", "eyes": "head_bob", "mouth": "sing_head_bob", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward"},
-			bob_head_and_walk_toward:			{},
-			bob_head_and_walk_away:				{},
+			bob_head_and_walk_toward:			{"body": "walk_toward_body", "head": "head_bob", "eyes": "head_bob", "mouth": "head_bob", "shoes": "walk_toward", "bottom": "walk_toward", "bottom custom": "walk_toward", "top": "walk_toward", "top custom": "walk_toward", "hair front": "head_bob", "hair band": "head_bob", "instrument": "walk_toward"},
+			bob_head_and_walk_away:				{"body": "walk_away_body", "shoes": "walk_away", "bottom": "walk_away", "bottom custom": "walk_away", "top": "walk_away", "top custom": "walk_away", "head": "head_bob_away", "hair front": "head_bob_away", "hair band": "head_bob_away", "instrument": "walk_away"},
 			bob_head_and_strum_guitar:			{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "stand_still_toward", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "head_bob", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
 			bob_head_and_strum_guitar_and_sing:	{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "sing", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "head_bob", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
 			strum_guitar:						{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "stand_still_toward", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "stand_still_toward", "hair front": "stand_still_toward", "hair band": "stand_still_toward", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
 			strum_guitar_and_sing:				{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "sing", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "stand_still_toward", "hair front": "stand_still_toward", "hair band": "stand_still_toward", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
-			sing:								{"body": "stand_still_toward", "eyes": "stand_still_toward", "mouth": "sing", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "stand_still_toward", "hair band": "stand_still_toward", "instrument": "stand_still_toward"}
+			sing:								{"body": "stand_still_toward", "eyes": "stand_still_toward", "mouth": "sing", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "stand_still_toward", "hair band": "stand_still_toward", "instrument": "stand_still_toward"},
+			sing_and_walk_toward: 				{"body": "walk_toward", "eyes": "walk_toward", "shoes": "walk_toward", "mouth": "sing_walk_toward", "bottom": "walk_toward", "bottom custom": "walk_toward", "top": "walk_toward", "top custom": "walk_toward", "hair front": "walk_toward", "hair band": "walk_toward", "instrument": "walk_toward"}
 		}
 		
 		public function BandMember(creature:Creature, movieClip:MovieClip=null, layerableOrder:Array=null, scale:Number=1)
@@ -104,13 +109,16 @@ package rock_on
 		{
 			layerableOrder = new Array();
 			layerableOrder['walk_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];
-			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "bottom custom", "top custom", "hair front", "hair band", "instrument"];
+			layerableOrder['walk_away'] = ["instrument", "body", "shoes", "bottom", "top", "bottom custom", "top custom", "hair front", "hair band"];
 			layerableOrder['stand_still_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band", "instrument"];			
 			layerableOrder['sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];			
+			layerableOrder['sing_and_walk_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];			
 			layerableOrder['bob_head_and_sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument"];			
 			layerableOrder['bob_head'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument"];			
 			layerableOrder['bob_head_and_strum_guitar'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "instrument", "left arm", "right arm", "head", "mouth", "hair front", "hair band"];			
+			layerableOrder['bob_head_and_walk_toward'] = ["body", "head", "shoes", "bottom", "bottom custom", "top", "top custom", "instrument", "mouth", "hair front", "hair band"];			
+			layerableOrder['bob_head_and_walk_away'] = ["instrument", "body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "hair front", "hair band"];			
 			layerableOrder['strum_guitar'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument", "left arm", "right arm"];			
 			layerableOrder['strum_guitar_and_sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument", "left arm", "right arm"];			
 		}		
@@ -136,16 +144,50 @@ package rock_on
 //			stopTime.start();
 		}
 		
+		private function resetWalkWaitTimer():void
+		{
+			if (walkWaitTime)
+			{
+				walkWaitTime.stop();
+				walkWaitTime.reset();
+			}
+			else
+				walkWaitTime = new Timer(BandMember.WALK_WAIT_CONSTANT + Math.random()*BandMember.WALK_WAIT_MULTIPLIER);
+			walkWaitTime.addEventListener(TimerEvent.TIMER, onWalkWaitComplete);
+			walkWaitTime.start();
+		}
+		
+		private function onWalkWaitComplete(evt:TimerEvent):void
+		{
+			walkWaitTime.stop();
+			walkWaitTime.removeEventListener(TimerEvent.TIMER, onWalkWaitComplete);
+			var destination:Point3D = setInitialDestination();
+			var exempt:ArrayCollection = new ArrayCollection();
+			exempt.addItem(_stageManager.concertStage);
+			this.movePersonWithCustomAnimation(destination, true, true, false, exempt);
+		}
+		
+		public function walkComplete():void
+		{
+			advanceState(this.state);
+		}
+		
 		public function startSingState():void
 		{
 			state = SING_STATE;
 			standAndSing();
+			towardAnimation = "sing_and_walk_toward";
+			awayAnimation = "walk_away";
+			resetWalkWaitTimer();
 		}
 		
 		public function startBobState():void
 		{
 			state = BOB_STATE;
 			startBob();
+			towardAnimation = "bob_head_and_walk_toward";
+			awayAnimation = "bob_head_and_walk_away";	
+			resetWalkWaitTimer();
 		}
 		
 		public function startStrumState():void
@@ -156,8 +198,11 @@ package rock_on
 		
 		public function startBobAndStrumState():void
 		{
-			state = STRUM_STATE;
+			state = BOB_AND_STRUM_STATE;
 			startBobAndStrum();
+			towardAnimation = "bob_head_and_walk_toward";
+			awayAnimation = "bob_head_and_walk_away";	
+			resetWalkWaitTimer();			
 		}
 		
 		public function endSingState():void
@@ -207,7 +252,7 @@ package rock_on
 		public function startSingBobState():void
 		{
 			state = SING_BOB_STATE;
-			startBobSingTimer();
+			startBobSingTimer();		
 		}
 		
 		public function doSingBob():void
@@ -380,13 +425,9 @@ package rock_on
 			{
 				_myWorld.assetRenderer.removeEventListener(WorldEvent.DESTINATION_REACHED, onAdjustedForPathfinding);
 				if (state == ROAM_STATE)
-				{			
 					findNextPath();	
-				}		
 				else if (state == STOP_STATE)
-				{
 					standFacingCrowd();
-				}		
 			}
 		}
 		
@@ -440,15 +481,17 @@ package rock_on
 		
 		public function setInitialDestination():Point3D
 		{
-			trace("set initial dest");
 			destinationLocation = tryDestination();			
 			
-			var occupiedSpaces:Array = _myWorld.pathFinder.occupiedByStructures;
-			if (occupiedSpaces.length >= _world.tilesDeep*_world.tilesWide)
-				throw new Error("No free spaces for band member!");
+			var exempt:ArrayCollection = new ArrayCollection();
+			exempt.addItem(_stageManager.concertStage);
+			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(false, true, exempt);
+//			if (occupiedSpaces.length >= _world.tilesDeep*_world.tilesWide)
+//				throw new Error("No free spaces for band member!");
 			
 			// Adjust so that person avoids furniture on stage			
-			while (isAnyoneElseThere(destinationLocation))
+			while (isAnyoneElseThere(destinationLocation) ||
+			(occupiedSpaces[destinationLocation.x] && occupiedSpaces[destinationLocation.x][destinationLocation.y] && occupiedSpaces[destinationLocation.x][destinationLocation.y][destinationLocation.z]))
 			{
 				destinationLocation = tryDestination();
 			}	
@@ -480,9 +523,9 @@ package rock_on
 		
 		public function tryDestination():Point3D
 		{
-			destinationLocation = new Point3D(_stageManager.concertStage.worldCoords.x + Math.floor((_stageManager.concertStage.structure.width - 1) - (Math.random()*(_stageManager.concertStage.structure.width - 1))), 
-				0, 
-				_stageManager.concertStage.worldCoords.z + Math.floor((_stageManager.concertStage.structure.depth - 1) - Math.random()*(_stageManager.concertStage.structure.depth - 1)));	
+			destinationLocation = new Point3D(_stageManager.concertStage.worldCoords.x + _stageManager.concertStage.structure.width/2 - Math.ceil(Math.random()*(_stageManager.concertStage.structure.width)), 
+				_stageManager.concertStage.structure.height, 
+				_stageManager.concertStage.worldCoords.z + _stageManager.concertStage.structure.depth/2 - Math.floor(Math.random()*(_stageManager.concertStage.structure.depth)));	
 			return destinationLocation;	
 		}
 				
@@ -819,6 +862,48 @@ package rock_on
 				movePerson(exitLocation);			
 			}
 			state = EXIT_OFFSTAGE_STATE;
+		}
+		
+		public function setDirectionAnimation(destination:Point3D):void
+		{
+			if (destination)
+			{
+				var xDiff:int = destination.x - Math.round(worldCoords.x);
+				var yDiff:int = destination.z - Math.round(worldCoords.z);
+				
+				if (Math.abs(xDiff) > Math.abs(yDiff))
+				{
+					if (xDiff > 0)
+						doComplexAnimation(towardAnimation, this.bandAnimations[towardAnimation]);
+					else
+						doComplexAnimation(awayAnimation, this.bandAnimations[awayAnimation]);
+					changeScale(-(_scale), _scale);			
+				}
+					
+				else if (Math.abs(xDiff) < Math.abs(yDiff))
+				{
+					if (yDiff > 0)
+						doComplexAnimation(awayAnimation, this.bandAnimations[awayAnimation]);	
+					else
+						doComplexAnimation(towardAnimation, this.bandAnimations[towardAnimation]);
+					changeScale(_scale, _scale);
+				}
+				currentDirection = destination;				
+			}
+		}		
+		
+		public function movePersonWithCustomAnimation(destination:Point3D, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null, skipAStar:Boolean=false):void
+		{
+			this.speed = .06;
+			
+			if (worldCoords.x%1 == 0 && worldCoords.y%1 == 0 && worldCoords.z%1 == 0)
+				_myWorld.moveAssetTo(this, destination, true, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures, skipAStar);			
+			
+			if (currentPath)
+			{
+				var nextPoint:Point3D = getNextPointAlongPath();
+				setDirectionAnimation(nextPoint);
+			}			
 		}
 		
 		public function endExitOffstageState():void

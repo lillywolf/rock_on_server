@@ -195,17 +195,13 @@ package world
 			_animation = animation;
 			
 			if (frameNumber != -1)
-			{
 				_frameNumber = frameNumber;			
-			}
 			
 			clearMovieClips();
 			clearBitmap();
 			
 			if (!_layerableOrder[animation])
-			{
 				throw new Error("No order for this animation");
-			}
 			
 			for each (var str:String in _layerableOrder[animation])
 			{
@@ -249,16 +245,12 @@ package world
 			clearBitmap();
 			
 			if (!_layerableOrder[complexAnimation])
-			{
 				throw new Error("No order for this animation");
-			}			
 			
 			for each (var str:String in _layerableOrder[complexAnimation])
 			{
 				if (!layeredAnimations[str])
-				{
 					throw new Error("no animation exists for this layer");
-				}
 				else
 				{
 					var layerAnimation:String = layeredAnimations[str];
