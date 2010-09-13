@@ -85,11 +85,13 @@ package rock_on
 		
 		private var bandAnimations:Object = {
 			walk_toward: 						{"body": "walk_toward", "eyes": "walk_toward", "shoes": "walk_toward", "bottom": "walk_toward", "bottom custom": "walk_toward", "top": "walk_toward", "top custom": "walk_toward", "hair front": "walk_toward", "hair band": "walk_toward", "instrument": "walk_toward"},
-			walk_away: 							{"instrument": "walk_away", "body": "walk_away", "eyes": "walk_away", "shoes": "walk_away", "bottom": "walk_away", "bottom custom": "walk_away", "top": "walk_away", "top custom": "walk_away", "hair front": "walk_away", "hair band": "walk_away"},
+			walk_away: 							{"instrument": "walk_away", "mouth": "stand_still_away", "body": "walk_away", "eyes": "walk_away", "shoes": "walk_away", "bottom": "walk_away", "bottom custom": "walk_away", "top": "walk_away", "top custom": "walk_away", "hair front": "walk_away", "hair band": "walk_away"},
 			bob_head: 							{"body": "head_bob", "eyes": "head_bob", "mouth": "head_bob", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "head_bob", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward"},
 			bob_head_and_sing: 					{"body": "head_bob", "eyes": "head_bob", "mouth": "sing_head_bob", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward"},
-			bob_head_and_walk_toward:			{"body": "walk_toward_body", "head": "head_bob", "eyes": "head_bob", "mouth": "head_bob", "shoes": "walk_toward", "bottom": "walk_toward", "bottom custom": "walk_toward", "top": "walk_toward", "top custom": "walk_toward", "hair front": "head_bob", "hair band": "head_bob", "instrument": "walk_toward"},
-			bob_head_and_walk_away:				{"body": "walk_away_body", "shoes": "walk_away", "bottom": "walk_away", "bottom custom": "walk_away", "top": "walk_away", "top custom": "walk_away", "head": "head_bob_away", "hair front": "head_bob_away", "hair band": "head_bob_away", "instrument": "walk_away"},
+			bob_head_and_walk_toward:			{"body": "walk_toward_body", "head": "head_bob_walk_toward", "eyes": "head_bob", "mouth": "head_bob", "shoes": "walk_toward", "bottom": "walk_toward", "bottom custom": "walk_toward", "top": "walk_toward", "top custom": "walk_toward", "hair front": "head_bob_walk_toward", "hair band": "head_bob_walk_toward", "instrument": "walk_toward"},
+//			bob_head_and_walk_toward:			{"body": "walk_toward_body", "head": "head_bob_walk_toward", "shoes": "walk_toward", "bottom": "walk_toward", "bottom custom": "walk_toward", "top": "walk_toward", "top custom": "walk_toward"},
+//			bob_head_and_walk_away:				{"body": "walk_away_body", "shoes": "walk_away", "bottom": "walk_away", "bottom custom": "walk_away", "top": "walk_away", "top custom": "walk_away", "head": "head_bob_walk_away", "hair front": "head_bob_away", "hair band": "head_bob_away", "instrument": "walk_away"},
+			bob_head_and_walk_away:				{"body": "walk_away_body", "shoes": "walk_away", "bottom": "walk_away", "bottom custom": "walk_away", "top": "walk_away", "top custom": "walk_away", "head": "head_bob_walk_away"},
 			bob_head_and_strum_guitar:			{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "stand_still_toward", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "head_bob", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
 			bob_head_and_strum_guitar_and_sing:	{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "sing", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "head_bob", "hair front": "head_bob", "hair band": "head_bob", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
 			strum_guitar:						{"body": "strum_guitar", "eyes": "stand_still_toward", "mouth": "stand_still_toward", "shoes": "stand_still_toward", "bottom": "stand_still_toward", "bottom custom": "stand_still_toward", "top": "stand_still_toward", "top custom": "stand_still_toward", "head": "stand_still_toward", "hair front": "stand_still_toward", "hair band": "stand_still_toward", "instrument": "stand_still_toward", "left arm": "strum_guitar", "right arm": "strum_guitar"},
@@ -109,7 +111,7 @@ package rock_on
 		{
 			layerableOrder = new Array();
 			layerableOrder['walk_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];
-			layerableOrder['walk_away'] = ["instrument", "body", "shoes", "bottom", "top", "bottom custom", "top custom", "hair front", "hair band"];
+			layerableOrder['walk_away'] = ["instrument", "mouth", "body", "shoes", "bottom", "top", "bottom custom", "top custom", "hair front", "hair band"];
 			layerableOrder['stand_still_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band", "instrument"];			
 			layerableOrder['sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];			
@@ -117,8 +119,10 @@ package rock_on
 			layerableOrder['bob_head_and_sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument"];			
 			layerableOrder['bob_head'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument"];			
 			layerableOrder['bob_head_and_strum_guitar'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "instrument", "left arm", "right arm", "head", "mouth", "hair front", "hair band"];			
-			layerableOrder['bob_head_and_walk_toward'] = ["body", "head", "shoes", "bottom", "bottom custom", "top", "top custom", "instrument", "mouth", "hair front", "hair band"];			
-			layerableOrder['bob_head_and_walk_away'] = ["instrument", "body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "hair front", "hair band"];			
+			layerableOrder['bob_head_and_walk_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "instrument", "mouth", "hair front", "hair band"];			
+//			layerableOrder['bob_head_and_walk_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head"];			
+//			layerableOrder['bob_head_and_walk_away'] = ["instrument", "body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "hair front", "hair band"];			
+			layerableOrder['bob_head_and_walk_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head"];			
 			layerableOrder['strum_guitar'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument", "left arm", "right arm"];			
 			layerableOrder['strum_guitar_and_sing'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "head", "mouth", "hair front", "hair band", "instrument", "left arm", "right arm"];			
 		}		
