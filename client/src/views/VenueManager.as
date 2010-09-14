@@ -122,14 +122,17 @@ package views
 		{
 			_bitmapBlotter = bitmapBlotter;
 			venue.bitmapBlotter = bitmapBlotter;
-			initializeBandBoss();			
 		}
 		
 		public function initializeBandBoss():void
 		{			
 			bandBoss = new BandBoss(this, _creatureController);	
 			venue.bandBoss = bandBoss;
-			bandBoss.addBands(venue.stageManager.myStage);
+		}
+		
+		public function getBands():void
+		{
+			bandBoss.addBands(venue.stageManager.myStage);						
 		}
 		
 		public function set bitmapBlotter(val:BitmapBlotter):void

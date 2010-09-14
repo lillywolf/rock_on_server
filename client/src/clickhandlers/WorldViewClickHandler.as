@@ -161,7 +161,7 @@ package clickhandlers
 		{
 			var worldRect:Rectangle = _worldView.myWorld.getBounds(_worldView); 
 			var wgRect:Rectangle = _worldView.myWorld.wg.getBounds(_worldView.myWorld);
-			var newPoint:Point = new Point(pt.x - worldRect.left, pt.y + wgRect.y - (_worldView.height - worldRect.height)/2);
+			var newPoint:Point = new Point(pt.x - worldRect.left, pt.y + wgRect.y - (_worldView.height - wgRect.height)/2);
 			return newPoint;			
 		}		
 		

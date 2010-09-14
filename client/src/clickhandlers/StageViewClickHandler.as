@@ -16,6 +16,7 @@ package clickhandlers
 	
 	import models.OwnedStructure;
 	
+	import rock_on.ConcertStage;
 	import rock_on.Person;
 	import rock_on.Venue;
 	
@@ -123,7 +124,7 @@ package clickhandlers
 		{
 			var worldRect:Rectangle = _worldView.myWorld.getBounds(_worldView); 
 			var wgRect:Rectangle = _worldView.myWorld.wg.getBounds(_worldView.myWorld);
-			var newPoint:Point = new Point(pt.x - worldRect.left, pt.y + wgRect.y - (_worldView.height - worldRect.height)/2);
+			var newPoint:Point = new Point(pt.x - worldRect.left, pt.y + wgRect.y - (_worldView.height - wgRect.height)/2);
 			return newPoint;		
 		}		
 		
@@ -194,7 +195,8 @@ package clickhandlers
 			var newObjectOfInterest:Object;
 			if (_mouseBoss && !_mouseBoss.checkIfWorldViewHovering())
 				newObjectOfInterest = handleObjectUnderHover();
-			if (newObjectOfInterest != objectOfInterest)
+//			Do not count concert stage as an object of interest
+			if (newObjectOfInterest != objectOfInterest && !(newObjectOfInterest as ActiveAsset).thinger is ConcertStage)
 			{	
 				resetHoverTimer();
 				objectOfInterest = newObjectOfInterest;	

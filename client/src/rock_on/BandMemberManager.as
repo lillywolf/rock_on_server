@@ -102,41 +102,25 @@ package rock_on
 			if (_venue.state == Venue.EMPTY_STATE)
 			{
 				if (bm.creature.type == "Me")
-				{
 					return BandMember.SING_STATE;
-				}
 				else
-				{
 					return BandMember.WAIT_STATE;				
-				}
 			}
 			else if (_venue.state == Venue.ENCORE_STATE)
-			{
 				return BandMember.STAGE_ENTER_STATE;
-			}
 			else if (_venue.state == Venue.ENCORE_WAIT_STATE)
-			{
 				return BandMember.WAIT_STATE;
-			}
 			else if (_venue.state == Venue.SHOW_STATE)
-			{
 				return BandMember.STAGE_ENTER_STATE;
-			}
 			else if (_venue.state == Venue.SHOW_WAIT_STATE)
 			{
 				if (bm.creature.type == "Me")
-				{
 					return BandMember.SING_STATE;
-				}
 				else
-				{
 					return BandMember.BOB_AND_STRUM_STATE;				
-				}			
 			}
 			else
-			{
 				throw new Error("Not a legitimate state");
-			}
 		}			
 		
 		public function clearFilters():void
@@ -162,13 +146,13 @@ package rock_on
 		{
 			if (this.myAvatar)
 			{
-				(myAvatar as BandMember).destinationLocation = destination;
+				(myAvatar as BandMember).destinationLocation = new Point3D(destination.x, destination.y, destination.z);
 				
 				if (toWorld)
 				{
 					if (!(myAvatar as BandMember).inWorld)
 					{
-						(myAvatar as BandMember).exitLocation = _concertStage.stageEntryPoint;
+						(myAvatar as BandMember).setExitLocation(true);
 						(myAvatar as BandMember).advanceState(BandMember.EXIT_STAGE_STATE);
 					}
 					else
@@ -183,6 +167,8 @@ package rock_on
 						(myAvatar as BandMember).exitLocation = _venue.mainEntrance;
 						(myAvatar as BandMember).advanceState(BandMember.EXIT_OFFSTAGE_STATE);
 					}
+					else
+						(myAvatar as BandMember).advanceState(BandMember.DIRECTED_STAGE_MOVE_STATE);
 				}
 			}
 		}
@@ -193,28 +179,22 @@ package rock_on
 			{	
 				var bm:BandMember = evt.activeAsset as BandMember;
 				if (bm.state == ROAM_STATE && Math.random() < 0.5)
-				{
 					bm.findNextPath();
-				}
 				else if (bm.state == ROAM_STATE)
-				{
 					bm.advanceState(STOP_STATE);
-				}
 				else if (bm.state == BandMember.EXIT_STAGE_STATE)
-				{
 					bm.advanceState(BandMember.DIRECTED_MOVE_STATE);
-				}
+				else if (bm.state == BandMember.EXIT_OFFSTAGE_STATE)
+					bm.advanceState(BandMember.STAGE_ENTER_STATE);
 				else if (bm.state == BandMember.DIRECTED_MOVE_STATE)
-				{
 					bm.checkIfProxiedMove(BandMember.DIRECTED_STOP_STATE);
-				}
+				else if (bm.state == BandMember.DIRECTED_STAGE_MOVE_STATE)
+					bm.advanceState(mapVenueStateToBandMemberState(bm));
 				else if (bm.state == BandMember.STAGE_ENTER_STATE)
 				{
 					bm.advanceState(BandMember.STOP_STATE);
 					if (bm.itemDropRecipient)
-					{
 						bm.tossItem(bm.itemDropRecipient.recipient as Person, bm.itemDropRecipient.view as WorldView);						
-					}
 				}
 				else
 				{
@@ -230,17 +210,11 @@ package rock_on
 			{
 				var bm:BandMember = evt.activeAsset as BandMember;				
 				if (bm.state == BandMember.DIRECTED_MOVE_STATE)
-				{
 					bm.checkIfProxiedMove(BandMember.DIRECTED_STOP_STATE);
-				}
 				else if (bm.state == BandMember.EXIT_OFFSTAGE_STATE)
-				{
 					bm.checkIfProxiedMove(BandMember.STAGE_ENTER_STATE);
-				}
 				else
-				{
 					bm.standFacingCrowd();
-				}
 			}
 		}
 		

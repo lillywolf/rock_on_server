@@ -28,7 +28,7 @@ package rock_on
 		public var stageDecorations:ArrayCollection;
 		public var stageDecorationAssets:ArrayCollection;
 		
-		public static const STAGE_DOOR_X:int = 1;
+		public static var STAGE_DOOR_X:int;
 		
 		public function StageManager(structureController:StructureController, venue:Venue, target:IEventDispatcher=null)
 		{
@@ -58,6 +58,8 @@ package rock_on
 			stageAsset.thinger = stageStructures[0];
 			var addTo:Point3D = new Point3D(concertStage.x, concertStage.y, concertStage.z);
 			concertStage.worldCoords = addTo;
+			
+			STAGE_DOOR_X = concertStage.depth - 1;
 		}	
 		
 		public function drawTiles(_world:World):void

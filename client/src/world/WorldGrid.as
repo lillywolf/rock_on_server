@@ -50,7 +50,7 @@ package world
 			var xCoord:Number = Math.sqrt( (_gridWidth * _gridWidth) / 2 );
 			var yCoord:Number = xCoord * GRID_ANGLE;
 			
-//			mc.graphics.beginFill(0x92C5E8, 1);
+			mc.graphics.beginFill(0x92C5E8, 0);
 			
 //			Draws the outline of the space
 			
@@ -58,7 +58,7 @@ package world
 			mc.graphics.lineTo(xCoord*2, 0);
 			mc.graphics.lineTo(xCoord, -yCoord);
 			mc.graphics.lineTo(0, 0);
-//			mc.graphics.endFill();			
+			mc.graphics.endFill();			
 		}
 
 		public function drawGridBlocks():void

@@ -45,6 +45,7 @@ package rock_on
 		public static const BOB_STATE:int = 12;
 		public static const STRUM_STATE:int = 13;
 		public static const BOB_AND_STRUM_STATE:int = 14;
+		public static const DIRECTED_STAGE_MOVE_STATE:int = 15;
 		
 		private static const ROAM_TIME:int = Math.random()*5000 + 500;
 		private static const STOP_TIME:int = 10000;
@@ -110,7 +111,7 @@ package rock_on
 		private function updateLayerableOrder():void
 		{
 			layerableOrder = new Array();
-			layerableOrder['walk_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];
+			layerableOrder['walk_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band", "instrument"];
 			layerableOrder['walk_away'] = ["instrument", "mouth", "body", "shoes", "bottom", "top", "bottom custom", "top custom", "hair front", "hair band"];
 			layerableOrder['stand_still_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "mouth", "hair front", "hair band", "instrument"];
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band", "instrument"];			
@@ -161,6 +162,15 @@ package rock_on
 			walkWaitTime.start();
 		}
 		
+		private function stopWalkWaitTimer():void
+		{
+			if (walkWaitTime)
+			{
+				walkWaitTime.stop();
+				walkWaitTime.reset();
+			}
+		}
+		
 		private function onWalkWaitComplete(evt:TimerEvent):void
 		{
 			walkWaitTime.stop();
@@ -168,6 +178,7 @@ package rock_on
 			var destination:Point3D = setInitialDestination();
 			var exempt:ArrayCollection = new ArrayCollection();
 			exempt.addItem(_stageManager.concertStage);
+			this.speed = 0.06;
 			this.movePersonWithCustomAnimation(destination, true, true, false, exempt);
 		}
 		
@@ -211,6 +222,7 @@ package rock_on
 		
 		public function endSingState():void
 		{
+			stopWalkWaitTimer();
 			if (singTime)
 			{
 				this.singTime.stop();			
@@ -229,6 +241,7 @@ package rock_on
 			this.bobSingWaitTime.stop();
 			this.bobSingTime = null;
 			this.bobSingWaitTime = null;
+			stopWalkWaitTimer();
 		}
 		
 		public function endBobState():void
@@ -241,16 +254,17 @@ package rock_on
 			{
 				this.removeEventListener("loopComplete", onBobLoopComplete);
 			}
+			stopWalkWaitTimer();
 		}
 		
 		private function endStrumState():void
 		{
-			
+			stopWalkWaitTimer();
 		}
 
 		private function endBobAndStrumState():void
 		{
-			
+			stopWalkWaitTimer();
 		}
 		
 		public function startSingBobState():void
@@ -458,7 +472,7 @@ package rock_on
 		
 		public function standAndSing():void
 		{
-			doAnimation("sing", true, 39);
+			doComplexAnimation("sing", this.bandAnimations["sing"]);
 		}
 		
 		public function startWaitState():void
@@ -510,15 +524,11 @@ package rock_on
 				if (asset != this && asset.worldCoords)
 				{
 					if (asset.worldCoords.x == destinationLocation.x && asset.worldCoords.y == destinationLocation.y && asset.worldCoords.z == destinationLocation.z)
-					{
 						return true;
-					}
 					if (asset.worldDestination)
 					{
 						if (asset.worldDestination.x == destinationLocation.x && asset.worldDestination.y == destinationLocation.y && asset.worldDestination.z == destinationLocation.z)
-						{
 							return true;
-						}
 					}
 				}
 			}
@@ -574,6 +584,8 @@ package rock_on
 					break;
 				case BOB_AND_STRUM_STATE:
 					break;
+				case DIRECTED_STAGE_MOVE_STATE:
+					break;
 				case GONE_STATE:
 					doGoneState(deltaTime);	
 					return true;
@@ -609,6 +621,9 @@ package rock_on
 					break;
 				case DIRECTED_STOP_STATE:
 					endDirectedStopState();
+					break;
+				case DIRECTED_STAGE_MOVE_STATE:
+					endDirectedStageMoveState();
 					break;
 				case EXIT_OFFSTAGE_STATE:
 					endExitOffstageState();
@@ -660,6 +675,9 @@ package rock_on
 					break;
 				case DIRECTED_STOP_STATE:
 					startDirectedStopState();
+					break;
+				case DIRECTED_STAGE_MOVE_STATE:
+					startDirectedStageMoveState();
 					break;
 				case EXIT_OFFSTAGE_STATE:
 					startExitOffstageState();
@@ -764,13 +782,7 @@ package rock_on
 			state = STAGE_ENTER_STATE;
 			addToOnstageView();	
 			if (validateDestinationLocation())
-			{
-				movePerson(destinationLocation);			
-			}
-				
-//			enterTime = new Timer(ENTER_TIME);
-//			enterTime.addEventListener(TimerEvent.TIMER, roam);
-//			enterTime.start();
+				movePerson(destinationLocation, true);			
 		}
 		
 		public function startLeavingState():void
@@ -787,7 +799,9 @@ package rock_on
 		public function startExitStageState():void
 		{
 			state = EXIT_STAGE_STATE;
-			movePerson(exitLocation);
+			this.speed = 0.12;
+			towardAnimation = "walk_toward";
+			movePersonWithCustomAnimation(exitLocation, true);
 		}
 		
 		public function endExitStageState():void
@@ -796,14 +810,28 @@ package rock_on
 			removeFromView();
 		}
 		
+		public function setExitLocation(forStage:Boolean=false):void
+		{
+			if (forStage)
+				exitLocation = _stageManager.concertStage.stageEntryPoint;
+		}
+		
 		public function startDirectedMoveState():void
 		{		
 			addToOffstageView();			
 			if (!adjustInCaseAlreadyMoving(destinationLocation))
-			{
-				movePerson(destinationLocation);				
-			}
+				movePerson(destinationLocation, true);				
 			state = DIRECTED_MOVE_STATE;
+		}
+		
+		public function startDirectedStageMoveState():void
+		{
+			state = DIRECTED_STAGE_MOVE_STATE;
+			this.speed = 0.12;
+			towardAnimation = "walk_toward";
+			awayAnimation = "walk_away";
+			if (!adjustInCaseAlreadyMoving(destinationLocation))
+				movePerson(destinationLocation, true);
 		}
 		
 		public function checkIfProxiedMove(newState:int):void
@@ -824,6 +852,11 @@ package rock_on
 		}	
 		
 		public function endDirectedMoveState():void
+		{
+			
+		}
+		
+		public function endDirectedStageMoveState():void
 		{
 			
 		}
@@ -851,7 +884,8 @@ package rock_on
 		
 		public function adjustInCaseAlreadyMoving(currentDestination:Point3D):Boolean
 		{		
-			if (state == DIRECTED_MOVE_STATE || state == EXIT_OFFSTAGE_STATE)
+//			if (state == DIRECTED_MOVE_STATE || state == EXIT_OFFSTAGE_STATE)
+			if (this.isMoving)
 			{
 				updateDestination(currentDestination);	
 				return true;
@@ -862,9 +896,7 @@ package rock_on
 		public function startExitOffstageState():void
 		{
 			if (!adjustInCaseAlreadyMoving(exitLocation))
-			{
-				movePerson(exitLocation);			
-			}
+				movePerson(exitLocation, true);			
 			state = EXIT_OFFSTAGE_STATE;
 		}
 		
@@ -897,9 +929,7 @@ package rock_on
 		}		
 		
 		public function movePersonWithCustomAnimation(destination:Point3D, fallBack:Boolean=false, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, heightBase:int=0, extraStructures:ArrayCollection=null, skipAStar:Boolean=false):void
-		{
-			this.speed = .06;
-			
+		{			
 			if (worldCoords.x%1 == 0 && worldCoords.y%1 == 0 && worldCoords.z%1 == 0)
 				_myWorld.moveAssetTo(this, destination, true, fallBack, avoidStructures, avoidPeople, exemptStructures, heightBase, extraStructures, skipAStar);			
 			
