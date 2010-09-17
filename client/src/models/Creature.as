@@ -23,6 +23,7 @@ package models
 		public var location:Point3D;
 		public var _layerableOrder:Array;
 		public var _last_nurture:String;
+		public var _reference_id:int;
 		public var has_moods:Boolean;
 		
 		public function Creature(params:Object, target:IEventDispatcher=null)
@@ -40,29 +41,19 @@ package models
 			_user_id = params.user_id;
 			
 			if (params.creature_type)
-			{
 				_type = params.creature_type;
-			}		
 			if (params.additional_info)
-			{
-				_additional_info = params.additional_info;				
-			}	
+				_additional_info = params.additional_info;		
+			if (params.reference_id)
+				_reference_id = params.reference_id;
 			if (params.x != null)
-			{
 				location = new Point3D(params.x, 0, 0);
-			}
 			if (params.y != null)
-			{
 				location.y = params.y;
-			}
 			if (params.z != null)
-			{
 				location.z = params.z;
-			}
 			if (params.name)
-			{
 				_name = params.name;
-			}
 			if (params.last_nurture)
 			{
 				_last_nurture = params.last_nurture;
@@ -73,63 +64,16 @@ package models
 		public function initializeLayerableOrder():void
 		{
 			layerableOrder = new Array();
-//			layerableOrder['walk_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
-//			layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
-//			layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
-//			layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
-			layerableOrder['walk_toward'] = ["body", "hair back", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
+			layerableOrder['walk_toward'] = ["body", "hair back", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
 			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
-			layerableOrder['stand_still_toward'] = ["body", "hair back", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
+			layerableOrder['stand_still_toward'] = ["body", "hair back", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
-			layerableOrder['sing'] = ["body", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "instrument"];
-			layerableOrder['head_bob_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
+			layerableOrder['sing'] = ["body", "mouth", "shoes", "bottom", "top", "hair front"];
+			layerableOrder['head_bob_away'] = ["body", "shoes", "bottom", "top", "hair front"];
 		}
 		
 		public function getConstructedCreature(layerablerOrder:Array, animation:String, size:Number):ActiveAssetStack
 		{
-//			var movieClipStack:MovieClip = new MovieClip();
-//			var constructedCreature:AssetStack = new AssetStack();
-//			for each (var str:String in layerableOrder[animation])
-//			{
-//				for each (var ol:OwnedLayerable in owned_layerables)
-//				{
-//					if (ol.layerable.layer_name == str && ol.in_use)
-//					{
-//						var mc:MovieClip = new MovieClip();
-//						mc = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
-//						mc.scaleX = sizeX;
-//						mc.scaleY = sizeY;
-//						mc.name = ol.layerable.layer_name;
-//						constructedCreature.layerableOrder = layerableOrder;
-//						constructedCreature.movieClipStack.addChild(mc);
-//					}
-//				}
-//			}
-			
-//			var movieClips:ArrayCollection = new ArrayCollection();
-//			for each (var str:String in layerableOrder[animation])
-//			{
-//				for each (var ol:OwnedLayerable in owned_layerables)
-//				{
-//					if (ol.layerable.layer_name == str && ol.in_use)
-//					{
-//						var mc:MovieClip = new MovieClip();
-//						mc = EssentialModelReference.getMovieClipCopy(ol.layerable.mc);
-//						mc.scaleX = sizeX;
-//						mc.scaleY = sizeY;
-//						mc.name = ol.layerable.layer_name;
-//						movieClips.addItem(mc);
-////						constructedCreature.movieClip = mc;
-//					}
-//				}
-//			}
-			
-//			constructedCreature.movieClipStack.buttonMode = true;
-//			constructedCreature.creature = this;
-//			constructedCreature.layerableOrder = layerableOrder;
-//			constructedCreature.movieClips = movieClips;
-//			return constructedCreature;
-			
 			var asset:ActiveAssetStack = new ActiveAssetStack(this, null, this.layerableOrder, size);
 			return asset;
 		}	
@@ -202,6 +146,16 @@ package models
 		public function get user_id():int
 		{
 			return _user_id;
+		}
+
+		public function set reference_id(val:int):void
+		{
+			_reference_id = val;
+		}
+		
+		public function get reference_id():int
+		{
+			return _reference_id;
 		}
 		
 		public function set layerableOrder(val:Array):void

@@ -41,7 +41,9 @@ package rock_on
 	
 	import spark.primitives.Rect;
 	
+	import views.AssetBitmapData;
 	import views.BandBoss;
+	import views.BouncyBitmap;
 	import views.VenueManager;
 	import views.WorldBitmapInterface;
 	
@@ -117,8 +119,8 @@ package rock_on
 		
 		public var numSuperCustomers:int;
 		public var numStaticCustomers:int;
-		public var numMovingCustomers:int;		
-		
+		public var numMovingCustomers:int;
+				
 		public function Venue(venueManager:VenueManager, dwellingController:DwellingController, creatureController:CreatureController, layerableController:LayerableController, structureController:StructureController, usableController:UsableController, bandBoss:BandBoss, params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
@@ -199,8 +201,10 @@ package rock_on
 			audienceRect = new Rectangle(0, boothsRect.bottom, venueRect.width, venueRect.height - boothsRect.height - 1);
 			
 			assignedSeats = _myWorld.pathFinder.createSeatingArrangement(audienceRect, stageBufferRect, this.dwelling.capacity);
+			
 			crowdBufferRect = new Rectangle(stageRect.width + stageBufferRect.top - audienceRect.top - 2, boothsRect.bottom, venueRect.right - (stageRect.width + stageBufferRect.top - audienceRect.top - 2), venueRect.height - boothsRect.height);
-			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom - 1));
+//			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom - 1));
+			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, venueRect.bottom - boothsRect.bottom);
 			unwalkableRect = new Rectangle(0, boothsRect.bottom, mainCrowdRect.right, (stageBufferRect.bottom - boothsRect.bottom));
 			outsideRect = new Rectangle(venueRect.right, 0, OUTSIDE_SQUARES, venueRect.height);
 		}
@@ -264,13 +268,17 @@ package rock_on
 			listeningStationBoss.initialize();
 			
 			_myWorld.setOccupiedSpaces();
+			
+			var extra:ArrayCollection = new ArrayCollection();
+			extra.addItem(this.stageBufferRect);
+			_myWorld.addOccupiedRectangles(extra);
 		}	
 		
 		public function addMovingStuffToVenue():void
 		{
+			creatureGenerator = new CreatureGenerator(_layerableController);
 			var fans:ArrayCollection = getFans();
 			updateAudienceNumbers();
-			creatureGenerator = new CreatureGenerator(_layerableController);
 			groupieBoss = new GroupieBoss(customerPersonManager, boothBoss, stageManager.concertStage, _creatureController, _myWorld, this);
 
 			listeningStationBoss.addStaticStationListeners();
@@ -279,19 +287,25 @@ package rock_on
 			_creatureController.makeSureOwnedLayerablesAreAssignedToCreatures();
 			
 			addStaticCustomersToVenue(fans);
-			addSuperCustomersToVenue(stageManager.myStage);
-			addMovingCustomersToVenue();
+//			addSuperCustomersToVenue(stageManager.myStage);
+			addMovingCustomersToVenue(fans);
 			groupieBoss.setInMotion();
 			addTechsToVenue();
 			addHatersToVenue();
 			addSpecialPeopleToVenue();
 			showBandMembersRaceCondition();	
+			
+			customerPersonManager.startQueueTimersForCustomers();
 		}	
 		
 		public function getFans():ArrayCollection
 		{
 			var fans:ArrayCollection = _creatureController.getFans();
-			this.fancount = fans.length;			
+			this.fancount = fans.length;
+			for each (var c:Creature in fans)
+			{
+				creatureGenerator.gameOwnedCreaturesInUse.addItem(c);
+			}
 			return fans;
 		}
 		
@@ -299,9 +313,9 @@ package rock_on
 		{
 			numStaticCustomers = Math.floor(fancount * VenueManager.STATIC_CUSTOMER_FRACTION);
 			numSuperCustomers = Math.ceil(fancount * VenueManager.SUPER_CUSTOMER_FRACTION);
-			numMovingCustomers = fancount - numStaticCustomers - numSuperCustomers;	
-			
-			getNumberOfBitmaps();			
+			numMovingCustomers = fancount - numStaticCustomers;	
+					
+//			getNumberOfBitmaps();			
 		}
 		
 		public function showBandMembersRaceCondition():void
@@ -351,11 +365,13 @@ package rock_on
 			trace("number of static customers:" + numStaticCustomers.toString());
 			for (var i:int = 0; i < numStaticCustomers; i++)
 			{
-				var c:Creature = creatureGenerator.createImposterCreature("Fan");
-				c.name = (fans[i] as Creature).name;
-				c.owned_layerables = (fans[i] as Creature).owned_layerables;
+				var c:Creature = fans[i] as Creature;
+				if (c.owned_layerables.length == 0)
+					creatureGenerator.addLayersToCreatureByType(c.type, "walk_toward", c);				
 				c.has_moods = true;
-				customerPersonManager.createStaticCustomer(c, i);
+				var cp:CustomerPerson = customerPersonManager.createStaticCustomer(c, i);
+				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
+				cp.setMood();
 			}
 		}
 		
@@ -464,14 +480,17 @@ package rock_on
 			}			
 		}
 				
-		public function addMovingCustomersToVenue():void
+		public function addMovingCustomersToVenue(fans:ArrayCollection):void
 		{
 			if (!customerPersonManager.concertStage)
 				customerPersonManager.concertStage = stageManager.concertStage;
 			customerPersonManager.customerCreatures = new ArrayCollection();
 			for (var i:int = 0; i < numMovingCustomers; i++)
 			{
-				var c:ImposterCreature = creatureGenerator.createImposterCreature("Fan");
+//				var c:ImposterCreature = creatureGenerator.createImposterCreature("Fan");
+				var c:Creature = fans[numStaticCustomers + i] as Creature;
+				if (c.owned_layerables.length == 0)
+					creatureGenerator.addLayersToCreatureByType(c.type, "walk_toward", c);						
 				c.has_moods = true;
 				customerPersonManager.customerCreatures.addItem(c);
 			}			
@@ -482,7 +501,9 @@ package rock_on
 		{
 			for each (var c:Creature in customerPersonManager.customerCreatures)
 			{	
-				customerPersonManager.createMovingCustomer(c);					
+				var cp:CustomerPerson = customerPersonManager.createMovingCustomer(c);	
+				cp.advanceState(CustomerPerson.TEMPORARY_ENTHRALLED_STATE);
+				cp.setMood();
 			}
 		}
 		
@@ -491,7 +512,7 @@ package rock_on
 			peerBoss.removePeers();
 			haterBoss.removeHaters();
 			friendBoss.removeFriends();
-			customerPersonManager.removeCustomers();
+			customerPersonManager.removeMovingCustomers();
 			techManager.removeTechs();
 			
 			initializeCustomers();
@@ -704,9 +725,13 @@ package rock_on
 			mainEntrance = new Point3D(14, 0, 20);
 		}
 		
-		public function updateFanCount(fansToAdd:int, venue:Venue, station:ListeningStation):void
+		public function updateFanCount(newFans:ArrayCollection, venue:Venue, station:ListeningStation):void
 		{
-			_venueManager.dwellingController.serverController.sendRequest({id: venue.id, to_add: fansToAdd, owned_structure_id: station.id}, "owned_dwelling", "update_fancount");
+			_venueManager.dwellingController.serverController.sendRequest({id: venue.id, owned_structure_id: station.id}, "owned_dwelling", "update_fancount");
+			for each (var c:Creature in newFans)
+			{
+				creatureController.serverController.sendRequest({user_id: this.user_id, creature_type: "Fan", reference_id: c.id}, "creature", "add_new");			
+			}
 		}
 		
 		public function startEncoreWaitState():void
@@ -802,6 +827,66 @@ package rock_on
 			temp.bitmapWithToppers();
 			parentWorld.addAsset(temp, temp.worldCoords);			
 		}		
+		
+		public function startPostSongExit():void
+		{
+//			convertStaticToMoving();
+			customerPersonManager.initializeStaggeredExit(3);
+			customerPersonManager.startStaggeredExit();
+			numStaticCustomers -= 3;
+		}
+		
+		public function replaceExitedCustomers():void
+		{
+			customerPersonManager.initializeExitReplacements(this.numStaticCustomers, 3);
+			customerPersonManager.replaceExitedCustomers();
+		}
+		
+		public function reRenderBitmap():void
+		{
+			_bitmapBlotter.renderInitialBitmap();
+		}
+		
+		public function updateBitmapProperties(asset:ActiveAsset):void
+		{
+			var abd:AssetBitmapData = _bitmapBlotter.getMatchFromBitmapReferences(asset);
+			abd.realCoordX = asset.realCoordX;
+			abd.realCoordY = asset.realCoordY;
+			abd.reflected = asset.flipped;
+		}
+		
+		public function getOpenSpot(rect:Rectangle, extra:ArrayCollection=null):Point3D
+		{
+			var pt:Point3D = new Point3D(rect.left + Math.round(Math.random()*rect.width), 0, rect.top + Math.round(Math.random()*rect.height));
+			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(true, true, null, extra);	
+			while (occupiedSpaces[pt.x] && occupiedSpaces[pt.x][pt.y] && occupiedSpaces[pt.x][pt.y][pt.z])
+			{
+				pt = new Point3D(rect.left + Math.round(Math.random()*rect.width), 0, rect.top + Math.round(Math.random()*rect.height));
+			}
+			return pt;
+		}
+		
+		public function getOpenSeat(rect:Rectangle, extra:ArrayCollection=null):Point3D
+		{
+			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(true, true, null, extra);
+			for each (var pt:Point3D in assignedSeats)
+			{
+				if (!(occupiedSpaces[pt.x] && occupiedSpaces[pt.x][pt.y] && occupiedSpaces[pt.x][pt.y][pt.z]))
+					return pt;
+			}
+			return getOpenSpot(rect, extra);
+		}
+		
+		public function removeAssetFromBitmap(asset:ActiveAsset):void
+		{
+			_bitmapBlotter.removeBitmapFromReferences(asset);
+		}
+		
+		public function removeMoodClipFromBitmappedAsset(asset:ActiveAsset):BouncyBitmap
+		{
+			var clip:BouncyBitmap = _bitmapBlotter.removeMoodClipFromBitmap(asset);
+			return clip;
+		}
 		
 		public function set myWorld(val:World):void
 		{

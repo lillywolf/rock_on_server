@@ -57,6 +57,11 @@ package world
 			this.pathFinder.populateOccupiedSpaces();
 		}
 		
+		public function addOccupiedRectangles(extra:ArrayCollection):void
+		{
+			this.pathFinder.addExtraOccupiedSpaces(pathFinder.occupiedByStructures, extra);
+		}
+		
 		public function drawInitialGrid():void
 		{
 			wg = new WorldGrid(_worldWidth, _worldDepth, _blockSize, _tile, _floorStyle);
@@ -303,6 +308,18 @@ package world
 			asset.thinger = os;
 			return asset;
 		}	
+		
+		public function addStandardStructureToWorld(os:OwnedStructure):ActiveAsset
+		{
+			var asset:ActiveAsset = createStandardAssetFromStructure(os);
+			asset.thinger = os;
+			if (os.in_use)
+			{
+				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
+				addStaticAsset(asset, addTo);
+			}
+			return asset;
+		}
 		
 		public function validateWorldCoords(asset:ActiveAsset):void
 		{

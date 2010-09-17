@@ -196,7 +196,7 @@ package clickhandlers
 			if (_mouseBoss && !_mouseBoss.checkIfWorldViewHovering())
 				newObjectOfInterest = handleObjectUnderHover();
 //			Do not count concert stage as an object of interest
-			if (newObjectOfInterest != objectOfInterest && !(newObjectOfInterest as ActiveAsset).thinger is ConcertStage)
+			if (newObjectOfInterest != objectOfInterest && (!(newObjectOfInterest is ActiveAsset) || !(newObjectOfInterest as ActiveAsset).thinger is ConcertStage))
 			{	
 				resetHoverTimer();
 				objectOfInterest = newObjectOfInterest;	

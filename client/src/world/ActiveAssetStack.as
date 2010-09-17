@@ -275,30 +275,15 @@ package world
 			for (var i:int = 0; i < mc.currentLabels.length; i++)
 			{
 				if (mc.currentLabels[i].name == animation)
-				{
 					hasLabel = true;
-				}
 			}
 			
 			if (move && hasLabel)				
-			{
-//				if (loops != 0)
-//				{
-//					animateLoopedMc(mc, animation, loops);
-//				}
-//				else
-//				{
-					mc.gotoAndPlay(animation);				
-//				}
-			}
+				mc.gotoAndPlay(animation);				
 			else if (move && !hasLabel)
-			{
 				mc.gotoAndStop("stand_still_toward");
-			}
 			else
-			{
 				mc.gotoAndStop(animation);
-			}
 		}
 		
 		public function animateLoopedMc(mc:MovieClip, animation:String, loops:int):void

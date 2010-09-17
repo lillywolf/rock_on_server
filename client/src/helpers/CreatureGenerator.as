@@ -29,23 +29,27 @@ package helpers
 		public var layerableOrder:Array;
 		public var _layerableController:LayerableController;
 		public var sortedLayerables:Dictionary;
+		public var gameOwnedCreaturesInUse:ArrayCollection;
 		public static const GENERIC_X:Number = 1;
 		public static const GENERIC_Y:Number = 1;
 		
 		public function CreatureGenerator(layerableController:LayerableController, target:IEventDispatcher=null)
 		{
 			super(target);
+			gameOwnedCreaturesInUse = new ArrayCollection();
 			_layerableController = layerableController;
 			initializeLayerableOrder();
+		}
+		
+		public function removeFromGameCreaturesInUse(c:Creature):void
+		{
+			var index:int = gameOwnedCreaturesInUse.getItemIndex(c);
+			gameOwnedCreaturesInUse.removeItemAt(index);
 		}
 		
 		private function initializeLayerableOrder():void
 		{
 			layerableOrder = new Array();
-//			layerableOrder['walk_toward'] = ["shoes", "bottom", "top", "hair front"];
-//			layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
-//			layerableOrder['stand_still_toward'] = ["body", "eyes", "shoes", "bottom", "top", "hair front"];
-//			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "top", "hair front"];
 			layerableOrder['walk_toward'] = ["body", "shoes", "bottom", "top", "hair front"];
 			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "top", "hair front"];
 			layerableOrder['stand_still_toward'] = ["body", "shoes", "bottom", "top", "hair front"];
@@ -59,9 +63,7 @@ package helpers
 				for each (var layerable:Layerable in _layerableController.layerables)
 				{
 					if (layerable.layer_name == str)
-					{
 						(sortedLayerables[str] as Array).push(layerable);
-					}
 				}	
 			}		
 		}
@@ -69,9 +71,7 @@ package helpers
 		public function createImposterCreature(creatureType:String=null, animation:String=null):ImposterCreature
 		{
 			if (!animation)
-			{
 				animation = "walk_toward";
-			}
 			
 			var params:Object = {creature_type: creatureType};
 			var imposter:ImposterCreature = new ImposterCreature({});
@@ -80,7 +80,7 @@ package helpers
 			return imposter;
 		}
 		
-		public function addLayerToCreature(layerName:String, creature:ImposterCreature):void
+		public function addLayerToCreature(layerName:String, creature:Creature):void
 		{
 			var index:int = Math.floor(Math.random()*(sortedLayerables[layerName] as Array).length);
 			var layerable:Layerable = sortedLayerables[layerName][index] as Layerable;
@@ -97,25 +97,19 @@ package helpers
 //				addMovieClipToCreature(mc);	
 			}
 			else
-			{
 				throw new Error("Layerable " + ol.layerable.id + " has no mc"); 
-			}			
 		}
 		
 		public function addMovieClipToCreature(mc:MovieClip, asset:AssetStack):void
 		{
 			mc.scaleX = GENERIC_X;
 			mc.scaleY = GENERIC_Y;
-//			asset.movieClipStack.addChild(mc);		
 			asset.movieClips.addItem(mc);
 		}
 		
 		public function createCustomer(type:String, animation:String, concertStage:ConcertStage, boothBoss:BoothBoss):CustomerPerson
 		{
 			var imposter:ImposterCreature = createImposterCreature(type);
-//			var asset:ActiveAssetStack = addLayersToCreatureByType(type, animation, imposter);
-//			asset.buttonMode = true;	
-//			asset.creature = imposter;
 			var cp:CustomerPerson = new CustomerPerson(boothBoss, imposter, null, layerableOrder, 0.5);
 			cp.buttonMode = true;
 			return cp;		
@@ -125,25 +119,21 @@ package helpers
 		{
 			var imposter:ImposterCreature = createImposterCreature(creatureType);
 			var asset:ActiveAssetStack = new ActiveAssetStack(imposter);
-//			var asset:AssetStack = addLayersToCreatureByType(type, animation, imposter);
-//			var asset:AssetStack = generateCreatureByType(type, animation, imposter);
 			asset.buttonMode = true;	
 			return asset;
 		}
 				
-		public function addLayersToCreatureByType(type:String, animation:String, imposter:ImposterCreature):ImposterCreature
+		public function addLayersToCreatureByType(type:String, animation:String, c:Creature):Creature
 		{
-			if (type == "Concert Goer" || type == "Passerby" || type == "StationListener" || type == "Fan" || type == "New Fan")
-			{	
-				for each (var str:String in imposter.layerableOrder[animation])
+//			if (type == "Concert Goer" || type == "Passerby" || type == "StationListener" || type == "Fan" || type == "New Fan")
+//			{	
+				for each (var str:String in c.layerableOrder[animation])
 				{	
 					if (sortedLayerables[str])
-					{
-						addLayerToCreature(str, imposter);					
-					}
+						addLayerToCreature(str, c);					
 				}
-			}				
-			return imposter;		
+//			}				
+			return c;		
 		}
 		
 		public function generateCreatureByType(type:String, animation:String, imposter:ImposterCreature):AssetStack

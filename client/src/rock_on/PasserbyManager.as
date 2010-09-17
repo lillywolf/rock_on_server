@@ -70,24 +70,27 @@ package rock_on
 			{
 				var passerby:Passerby = this[i] as Passerby;
 				if (!(passerby is StationListener))
-				{
 					remove(passerby);				
-				}
 			}
 		}		
 		
 		private function generatePasserby():Passerby
 		{
-			var c:Creature = _creatureGenerator.createImposterCreature("Passerby");
+			var c:Creature = _venue.creatureController.getRandomGameOwnedCreature(_venue.creatureGenerator.gameOwnedCreaturesInUse);
+			if (c.owned_layerables.length == 0)
+				_venue.creatureGenerator.addLayersToCreatureByType(c.type, "walk_toward", c);
+			_venue.creatureGenerator.gameOwnedCreaturesInUse.addItem(c);
 			var passerby:Passerby = new Passerby(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.5);			
 			passerby.thinger = c;
 			return passerby;		
 		}
 		
 		private function generateStationListener():StationListener
-		{
-//			var asset:AssetStack = _creatureGenerator.createCreatureAsset("Passerby", "walk_toward", "StationListener");
-			var c:Creature = _creatureGenerator.createImposterCreature("New Fan");
+		{	
+			var c:Creature = _venue.creatureController.getRandomGameOwnedCreature(_venue.creatureGenerator.gameOwnedCreaturesInUse);
+			if (c.owned_layerables.length == 0)
+				_venue.creatureGenerator.addLayersToCreatureByType(c.type, "walk_toward", c);
+			_venue.creatureGenerator.gameOwnedCreaturesInUse.addItem(c);
 			var sl:StationListener = new StationListener(_listeningStationBoss, this, _myWorld, _venue, c, null, c.layerableOrder, 0.5);	
 			sl.thinger = c;
 			return sl;		
@@ -119,7 +122,8 @@ package rock_on
 		{			
 			// Criteria for making someone go to stations
 			
-			if (Math.random()*_listeningStationBoss.listeningStations.length > (1 - STATIONLISTENER_CONVERSION_PROBABILITY) && _listeningStationBoss.isAnyStationAvailable())
+			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
+			if (Math.random()*_listeningStationBoss.listeningStations.length > (1 - STATIONLISTENER_CONVERSION_PROBABILITY) && _listeningStationBoss.isAnyStationAvailable(occupiedSpaces))
 			{
 				var sl:StationListener = generateStationListener();
 				sl.speed = 0.11;
@@ -160,13 +164,9 @@ package rock_on
 		public function determineNextStep(person:Passerby):void
 		{
 			if (person is StationListener)
-			{
 				person.startRouteState();
-			}
 			else
-			{
 				person.startRouteState();	
-			}			
 		}
 		
 		public function spawnForStation(station:ListeningStation):void
@@ -193,8 +193,15 @@ package rock_on
 			listener.currentStation = station;
 			listener.speed = 0.07;		
 			addStationListener(listener);
-			listener.isStatic = true;
-			listener.startEnthralledState();									
+
+//			If station listener finds a valid point, add it; otherwise kill it
+			if (listener.worldCoords)
+			{
+				listener.isStatic = true;
+				listener.startEnthralledState();									
+			}
+			else
+				listener = null;
 		}
 		
 		public function addStationListener(listener:StationListener):void
@@ -202,8 +209,11 @@ package rock_on
 			if(_myWorld)
 			{			
 				spawnLocation = listener.setInitialDestination();
-				_myWorld.addAsset(listener, spawnLocation);
-				addItem(listener);
+				if (spawnLocation)
+				{
+					_myWorld.addAsset(listener, spawnLocation);
+					addItem(listener);
+				}
 			}
 			else
 			{
@@ -253,9 +263,7 @@ package rock_on
 			for each (var person:Passerby in this)
 			{
 				if (person.update(deltaTime))
-				{		
 					remove(person);							
-				}
 				else 
 				{
 				}
@@ -267,8 +275,7 @@ package rock_on
 			if(_myWorld)
 			{
 				_myWorld.removeAsset(person);
-//				var movingSkinIndex:Number = _myWorld.assetRenderer.sortedAssets.getItemIndex(person);
-//				_myWorld.assetRenderer.sortedAssets.removeItemAt(movingSkinIndex);
+				_venue.creatureGenerator.removeFromGameCreaturesInUse(person.creature);
 				var personIndex:Number = getItemIndex(person);
 				removeItemAt(personIndex);
 				removePasserby(person);

@@ -146,7 +146,7 @@ package rock_on
 					startUnstockedState();				
 			}
 			
-			updateInventoryCount();
+//			updateInventoryCount();
 		}
 		
 		public function updateInventoryCount():void

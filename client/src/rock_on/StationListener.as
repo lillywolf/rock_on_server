@@ -50,9 +50,24 @@ package rock_on
 				currentStation = station;
 				currentStation.currentQueue++;
 				var destination:Point3D = setInitialDestination();
-				movePerson(destination, true);
+				if (destination)
+					movePerson(destination, true);	
+				else
+					throw new Error("no valid station destination");
 			}			
 		}
+		
+		override public function setInitialDestination():Point3D
+		{
+			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
+			var destination:Point3D = tryDestination();
+			if ((occupiedSpaces[destination.x] && occupiedSpaces[destination.x][destination.y] && occupiedSpaces[destination.x][destination.y][destination.z]) || 
+				isAnyoneElseThere(destination))
+			{
+				return null;
+			}
+			return destination;
+		}			
 		
 		override public function tryDestination():Point3D
 		{

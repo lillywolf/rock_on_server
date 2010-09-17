@@ -32,7 +32,7 @@ package views
 	public class VenueManager extends EventDispatcher
 	{
 		public static const PERSON_SCALE:Number = 0.5;	
-		public static const STATIC_CUSTOMER_FRACTION:Number = 0.8;
+		public static const STATIC_CUSTOMER_FRACTION:Number = 0.9;
 		public static const SUPER_CUSTOMER_FRACTION:Number = 0.1;
 		
 		public var venue:Venue;

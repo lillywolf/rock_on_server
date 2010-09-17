@@ -134,7 +134,8 @@ package clickhandlers
 		
 		private function doMovingPersonMoodActivities(person:Person):void
 		{
-			
+//			if (person.mood)
+				
 		}
 		
 		private function doStaticPersonMoodActivities(person:Person):void
@@ -147,6 +148,15 @@ package clickhandlers
 		{
 			var evt:UIEvent = new UIEvent(UIEvent.COLLECTIBLE_DROP_FROM_STAGE);
 			evt.asset = asset;
+			this.dispatchEvent(evt);
+		}
+		
+		public function doMoodCollectibleDrop(person:Person, parentWorld:World=null):void
+		{
+			var evt:UIEvent = new UIEvent(UIEvent.COLLECTIBLE_DROP_BY_MOOD);
+			evt.asset = person;
+			if (parentWorld)
+				evt.parentWorld = parentWorld;
 			this.dispatchEvent(evt);
 		}
 		

@@ -107,7 +107,8 @@ package rock_on
 			state = ROUTE_STATE;
 			
 			var destination:Point3D = setInitialDestination();
-			movePerson(destination, true);		
+			if (destination)
+				movePerson(destination, true);		
 			
 //			testTimer = new Timer(testTime);
 //			testTimer.start();
@@ -177,16 +178,12 @@ package rock_on
 		public function setInitialDestination():Point3D
 		{
 			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
-			var destination:Point3D;
-			
-			do
+			var destination:Point3D = tryDestination();
+			while ((occupiedSpaces[destination.x] && occupiedSpaces[destination.x][destination.y] && occupiedSpaces[destination.x][destination.y][destination.z]) || 
+				isAnyoneElseThere(destination))
 			{
 				destination = tryDestination();
-			}	
-			while ((occupiedSpaces[destination.x] && occupiedSpaces[destination.x][destination.y] && occupiedSpaces[destination.x][destination.y][destination.z]) || 
-				isAnyoneElseThere(destination));		
-			
-//			trace("destination selected");
+			}
 			return destination;
 		}		
 
@@ -217,11 +214,12 @@ package rock_on
 			var destinationLocation:Point3D;
 			if (worldCoords.z == 0)
 			{
-				destinationLocation = new Point3D(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right)), 0, _myWorld.tilesDeep);			
+				destinationLocation = new Point3D(Math.round(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right))), 
+					0, _myWorld.tilesDeep);			
 			}
 			else
 			{
-				destinationLocation = new Point3D(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right)), 0, 0)
+				destinationLocation = new Point3D(Math.round(_myWorld.tilesWide - Math.round(Math.random() * (_myWorld.tilesWide - _venue.venueRect.right))), 0, 0)
 			}
 			return destinationLocation;	
 		}			

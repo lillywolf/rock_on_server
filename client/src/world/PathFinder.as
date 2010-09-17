@@ -113,7 +113,7 @@ package world
 			{
 				if (a != asset && equivalent3DPoints(a.worldCoords, pt3D))
 					return true;
-				if (a != asset && equivalent3DPoints(a.worldDestination, pt3D))
+				if (a != asset && a.currentPath && equivalent3DPoints(a.currentPath[a.currentPath.length-1] as Point3D, pt3D))
 					return true;
 			}
 			return false;
@@ -399,7 +399,9 @@ package world
 				if (newPoint.x == currentPoint.x)					
 					newPoint.z = getZNeighbor(currentPoint, destination, orientation, unwalkables);
 				
-				if (newPoint.x == currentPoint.x && newPoint.z == currentPoint.z)
+				if (currentPoint.x == destination.x && currentPoint.z == destination.z)
+					return path;
+				else if (newPoint.x == currentPoint.x && newPoint.z == currentPoint.z)
 					return path;
 				else
 					path.addItem(new Point3D(newPoint.x, newPoint.y, newPoint.z));
@@ -862,7 +864,7 @@ package world
 			return spaces;
 		}
 
-		private function addExtraOccupiedSpaces(addTo:Array, rectangles:ArrayCollection):void
+		public function addExtraOccupiedSpaces(addTo:Array, rectangles:ArrayCollection):void
 		{
 			for each (var rect:Rectangle in rectangles)
 			{
@@ -1050,9 +1052,9 @@ package world
 		private function getPoint3DForPerson(asset:ActiveAsset):Point3D
 		{
 			var osPt3D:Point3D;
-			if (asset.worldDestination)
+			if (asset.isMoving && asset.currentPath)
 			{
-				osPt3D = pathGrid[asset.worldDestination.x][asset.worldDestination.y][asset.worldDestination.z];
+				osPt3D = pathGrid[(asset.currentPath[asset.currentPath.length-1] as Point3D).x][(asset.currentPath[asset.currentPath.length-1] as Point3D).y][(asset.currentPath[asset.currentPath.length-1] as Point3D).z];
 				return osPt3D;
 			}
 			else if (asset.worldCoords)

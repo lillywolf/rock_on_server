@@ -90,25 +90,29 @@ package rock_on
 		{
 			var cursor:MovieClip = generateMoodOverheadHover(mood);
 			moodClip = new BouncyBitmap(cursor, 0.75);
-			moodClip.y = -(height + moodClip.height - 8);
-			moodClip.x = -moodClip.width/4;
-			handleMoodForStaticPeople(mood, moodClip);
+			addVisibleMoodClip(moodClip);
+//			handleMoodForStaticPeople(mood, moodClip);
 			trace("mood started");
 		}		
 		
 		public function handleMoodForStaticPeople(mood:Object, moodClip:BouncyBitmap):void
 		{
 			if (this.personType == Person.STATIC)
-			{
 				_myWorld.bitmapBlotter.addMoodToAssetBitmapData(this, mood, moodClip);
-			}
 			else
-			{
-				addChild(moodClip);
-				var t:Timer = new Timer(Math.random() * 1000);
-				t.addEventListener(TimerEvent.TIMER, onBounceWaitComplete);
-				t.start();
-			}
+				addVisibleMoodClip(moodClip);
+		}
+		
+		public function addVisibleMoodClip(moodClip:BouncyBitmap):void
+		{
+			moodClip.y = -(height + moodClip.height - 8);
+			moodClip.x = -moodClip.width/4;			
+			addChild(moodClip);
+			
+//			Times the bounce
+//			var t:Timer = new Timer(Math.random() * 1000);
+//			t.addEventListener(TimerEvent.TIMER, onBounceWaitComplete);
+//			t.start();			
 		}
 		
 		private function onBounceWaitComplete(evt:TimerEvent):void
@@ -187,16 +191,18 @@ package rock_on
 		public function getStandAnimation(frameNumber:int):String
 		{
 			if (frameNumber == 37)
-			{
 				return "stand_still_away";
-			}
 			else if (frameNumber == 39)
-			{
 				return "stand_still_toward";
-			}
 			else
-			{
 				return null;
+		}
+		
+		public function flipMovieClips():void
+		{
+			for each (var mc:MovieClip in _displayMovieClips)
+			{
+				mc.scaleX = -(mc.scaleX);
 			}
 		}
 		
@@ -239,25 +245,15 @@ package rock_on
 			var rand:Number = Math.random();
 			
 			if (relationship["verticalRelationship"] == "bottom")
-			{
 				frameNumber = 39;
-			}
 			else if (relationship["horizontalRelationship"] == "left")
-			{
 				frameNumber = 37;
-			}
 			else if (relationship["verticalRelationship"] == "top")
-			{
 				frameNumber = 37;
-			}
 			else if (relationship["horizontalRelationship"] == "right")
-			{
 				frameNumber = 39;
-			}
 			else
-			{
 				throw new Error("You're in the middle of a structure");
-			}
 			return frameNumber;
 		}	
 		

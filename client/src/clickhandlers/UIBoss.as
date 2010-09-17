@@ -1,25 +1,33 @@
 package clickhandlers
 {
+	import flash.display.Bitmap;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
+	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.utils.Timer;
 	import flash.utils.getDefinitionByName;
 	
 	import game.MoodBoss;
 	
 	import helpers.CollectibleDrop;
 	
+	import mx.controls.Button;
 	import mx.controls.Image;
 	import mx.events.FlexEvent;
+	
+	import org.osmf.events.TimeEvent;
 	
 	import rock_on.Person;
 	import rock_on.Venue;
 	import rock_on.VenueEvent;
 	
+	import views.AssetBitmapData;
 	import views.BottomBar;
 	import views.CustomizableProgressBar;
 	import views.StageView;
@@ -27,6 +35,7 @@ package clickhandlers
 	
 	import world.ActiveAsset;
 	import world.MoodEvent;
+	import world.World;
 	import world.WorldEvent;
 	
 	public class UIBoss extends EventDispatcher
@@ -54,6 +63,32 @@ package clickhandlers
 			_bottomBar = bottomBar;
 			_worldView.addEventListener(VenueEvent.VENUE_INITIALIZED, onVenueInitialized);
 			_stageView.addEventListener(VenueEvent.STAGE_INITIALIZED, onStageInitialized);
+			
+			addDumbButton();
+		}
+		
+		public function addDumbButton():void
+		{
+			var btn:Button = new Button();
+			btn.height = 50;
+			btn.width = 50;
+			btn.y = 150;
+			btn.addEventListener(MouseEvent.CLICK, onDumbButtonClicked);
+			_worldView.addChild(btn);
+		}
+		
+		private function onDumbButtonClicked(evt:MouseEvent):void
+		{
+			_venue.startPostSongExit();
+			var tempTimer:Timer = new Timer(300);
+			tempTimer.start();
+			tempTimer.addEventListener(TimerEvent.TIMER, function onTempTimer():void
+			{
+				clearBitmap();
+				tempTimer.stop();
+				tempTimer.removeEventListener(TimerEvent.TIMER, onTempTimer);
+				tempTimer = null;
+			});
 		}
 		
 		private function onVenueInitialized(evt:VenueEvent):void
@@ -109,6 +144,33 @@ package clickhandlers
 			});				
 		}
 		
+		public static function doCollectibleDropByMood(person:Person, parentWorld:World):void
+		{
+			person.removeMoodClip();
+			for each (var reward:Object in person.mood.rewards)
+			{
+				if (reward.mc)
+				{
+					var klass:Class = getDefinitionByName(reward.mc) as Class;
+					var mc:MovieClip = new klass() as MovieClip;
+					createCollectible(mc, person, parentWorld);
+				}
+			}
+			if ((person.mood.possible_rewards as Array).length > 0)
+				createCollectible(MoodBoss.getRandomItemByMood(person.mood), person, parentWorld);
+		}
+		
+		public static function createCollectible(mc:MovieClip, asset:Person, parentWorld:World):void
+		{
+			var radius:Point = new Point(100, 50);
+			var collectibleDrop:CollectibleDrop = new CollectibleDrop(asset, mc, radius, parentWorld, parentWorld.parent as WorldView, 0, 400, .001, null, new Point(asset.x, asset.y - 70));
+			collectibleDrop.addEventListener("removeCollectible", function onRemoveCollectible():void
+			{
+				parentWorld.removeChild(collectibleDrop);
+			});
+			parentWorld.addChild(collectibleDrop);				
+		}
+				
 		private function onReplaceBottomBar(evt:UIEvent):void
 		{
 			if (evt.asset && evt.asset is Person)
@@ -160,6 +222,21 @@ package clickhandlers
 			asset.filters = [gf];		
 			customizableBar.filters = [gf];
 		}	
+		
+		private function pullCreatureFromBitmap(asset:ActiveAsset, toWorld:World):void
+		{
+			var abd:AssetBitmapData = _worldView.bitmapBlotter.getMatchFromBitmapReferences(asset);
+			_worldView.bitmapBlotter.removeRenderedBitmap(asset);
+			var index:int = _worldView.bitmapBlotter.bitmapReferences.getItemIndex(abd);
+			_worldView.bitmapBlotter.bitmapReferences.removeItemAt(index);
+			_worldView.bitmapBlotter.clearBitmaps();
+			_worldView.bitmapBlotter.renderInitialBitmap();
+		}
+		
+		private function clearBitmap():void
+		{
+			_worldView.bitmapBlotter.clearBitmaps();
+		}
 		
 		private function onQuestInfoRequested(evt:MoodEvent):void
 		{

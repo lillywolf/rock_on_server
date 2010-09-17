@@ -373,9 +373,7 @@ package game
 			{
 				songController.ownedSongsLoaded = true;
 				if (!songController.songsLoaded)
-				{
 					throw new Error("attempting to load owned songs before songs");
-				}
 				var newEvent:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_SONGS_LOADED);
 				newEvent.user = this.user;
 				newEvent.gdi = this;
@@ -386,9 +384,7 @@ package game
 		public function onStructuresLoaded(evt:EssentialEvent):void
 		{
 			if (!structureController.structuresLoaded)
-			{
 				structureController.structuresLoaded = true;
-			}
 		}
 		
 		public function onOwnedStructuresLoaded(evt:EssentialEvent):void
@@ -397,9 +393,7 @@ package game
 			{
 				structureController.ownedStructuresLoaded = true;
 				if (!structureController.structuresLoaded)
-				{
 					throw new Error("trying to load owned structures before structures");
-				}
 				var newEvent:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_STRUCTURES_LOADED);
 				newEvent.user = this.user;
 				newEvent.gdi = this;
@@ -422,9 +416,7 @@ package game
 		public function onLayerablesLoaded(evt:EssentialEvent):void
 		{
 			if (!layerableController.layerablesLoaded)
-			{
 				layerableController.layerablesLoaded = true;
-			}
 		}
 		
 		public function onOwnedLayerablesLoaded(evt:EssentialEvent):void
@@ -433,9 +425,7 @@ package game
 			{
 				layerableController.ownedLayerablesLoaded = true;
 				if (!layerableController.layerablesLoaded)
-				{
 					throw new Error("owned layerables loaded before layerables?");
-				}
 				var newEvent:EssentialEvent = new EssentialEvent(EssentialEvent.OWNED_LAYERABLES_LOADED);
 				newEvent.user = this.user;
 				newEvent.gdi = this;

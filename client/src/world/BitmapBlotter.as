@@ -58,8 +58,8 @@ package world
 			if (bitmapReferences.length == expectedAssetCount)
 			{
 				bitmapReferences.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onNewBitmapReference);
-				renderInitialBitmap();
-				renderAssociatedMovieClips();
+//				renderInitialBitmap();
+//				renderAssociatedMovieClips();
 			}
 		}
 		
@@ -67,9 +67,7 @@ package world
 		{
 			var abd:AssetBitmapData = this.getMatchFromBitmapReferences(asset);
 			if (abd)
-			{
 				this.updateAssetBitmapDataLocation(abd, asset);
-			}
 			else
 			{
 				abd = createNewAssetBitmapData(asset, animation, frameNumber, reflect);
@@ -119,14 +117,6 @@ package world
 			return abd;
 		}
 		
-		//		public function updateAssetBitmapData(abd:AssetBitmapData, asset:ActiveAsset, animation:String=null, frameNumber:int=0):void
-		//		{
-		//			var newMc:MovieClip = getNewMovieClip(asset, animation, frameNumber);
-		//			abd.mc = newMc;			
-		//			abd.realCoordX = asset.realCoords.x;
-		//			abd.realCoordY = asset.realCoords.y;
-		//		}
-		
 		public function getMatchingBitmapDataForStructure(os:OwnedStructure):AssetBitmapData
 		{
 			for each (var abd:AssetBitmapData in this.bitmapReferences)
@@ -134,9 +124,7 @@ package world
 				if (abd.activeAsset.thinger is OwnedStructure)
 				{
 					if (abd.activeAsset.thinger.id == os.id)
-					{
 						return abd;
-					}
 				}
 			}
 			return null;
@@ -184,9 +172,7 @@ package world
 			for each (var abd:AssetBitmapData in bitmapReferences)
 			{
 				if (abd.activeAsset == asset)
-				{
 					return abd;
-				}
 			}
 			return null;
 		}
@@ -196,9 +182,7 @@ package world
 			for each (var abd:AssetBitmapData in bitmapReferences)
 			{
 				if (abd.activeAsset == asset)
-				{
 					return abd.bitmap;
-				}
 			}	
 			return null;			
 		}
@@ -211,9 +195,7 @@ package world
 				if (abd.bitmap)
 				{
 					if (_backgroundCanvas.rawChildren.contains(abd.bitmap))
-					{
-						_backgroundCanvas.rawChildren.removeChild(abd.bitmap);	
-					}
+						_backgroundCanvas.removeChild(abd.bitmap.parent);	
 				}
 			}			
 		}
@@ -231,112 +213,20 @@ package world
 			}
 		}
 		
+		public function removeBitmapFromReferences(asset:ActiveAsset):void
+		{
+			var abd:AssetBitmapData = getMatchFromBitmapReferences(asset);
+			var index:int = bitmapReferences.getItemIndex(abd);
+			bitmapReferences.removeItemAt(index);				
+		}
+		
 		public function evaluateBitmap(asset:ActiveAsset):void
 		{
 			
 		}
 		
-		//		public function reRenderBitmap(asset:ActiveAsset, animation:String=null, frameNumber:int=0):void
-		//		{
-		//			var abd:AssetBitmapData = getMatchFromBitmapReferences(asset);
-		//			if (abd == null)
-		//			{
-		//				abd = createNewAssetBitmapData(asset, animation, frameNumber);
-		//			}
-		//			else
-		//			{
-		//				updateAssetBitmapData(abd, asset, animation, frameNumber);
-		//			}
-		//			
-		//			if (getMatchFromBitmapReferences(asset) == null)
-		//			{
-		//				bitmapReferences.addItem(abd);
-		//				sortBitmaps();
-		//				undrawPreviousBitmaps();
-		//				renderBitmaps();
-		//			}
-		//			else
-		//			{
-		//				throw new Error("Trying to re-render an already rendered asset");
-		//			}
-		//		}
-		
-//		public function reIntroduceBitmap(abd:AssetBitmapData, animation:String=null, frameNumber:int=0):void
-//		{
-//			// Create new bitmap
-//			abd.mc = getNewMovieClip(abd.activeAsset, animation, frameNumber);
-//			abd.realCoordX = abd.activeAsset.realCoords.x;
-//			abd.realCoordY = abd.activeAsset.realCoords.y;			
-//			abd.newBitmap = getNewBitmap(abd);
-//			// Get overlaps
-//			var overlaps:ArrayCollection = getOverlappingBitmaps(abd);
-//			sortOverlaps(overlaps);
-//			reRenderOverlaps(overlaps);
-//		}
-		
-//		public function reRenderOverlaps(overlaps:ArrayCollection):void
-//		{
-//			var abd:AssetBitmapData;
-//			for each (abd in overlaps)
-//			{
-//				if (_backgroundCanvas.rawChildren.contains(abd.bitmap))
-//				{
-//					_backgroundCanvas.rawChildren.removeChild(abd.bitmap);
-//				}
-//			}
-//			for each (abd in overlaps)
-//			{
-//				if (abd.newBitmap)
-//				{
-//					abd.bitmap = abd.newBitmap;
-//				}
-//				_backgroundCanvas.rawChildren.addChild(abd.bitmap);
-//			}
-			
-//		}
-		
-//		public function sortOverlaps(overlaps:ArrayCollection):void
-//		{
-//			var sortField:SortField = new SortField("realCoordY");
-//			sortField.numeric = true;
-//			var sort:Sort = new Sort();
-//			sort.fields = [sortField];
-//			overlaps.sort = sort;
-//			overlaps.refresh();				
-//		}
-		
-//		public function getOverlappingBitmaps(stander:AssetBitmapData):ArrayCollection
-//		{
-//			var overlaps:ArrayCollection = new ArrayCollection();
-//			for each (var abd:AssetBitmapData in bitmapReferences)
-//			{
-//				if ((abd.realCoordY - abd.transformedHeight) < (stander.realCoordY - stander.transformedHeight) && 
-//					abd.realCoordY > (stander.realCoordY - stander.transformedHeight) && 
-//					((abd.realCoordX > stander.realCoordX && abd.realCoordX < stander.realCoordX + stander.transformedWidth*2) ||
-//						abd.realCoordX + abd.transformedWidth*2 > stander.realCoordX && abd.realCoordX + abd.transformedWidth*2 < stander.realCoordX + stander.transformedWidth*2))
-//				{
-//					overlaps.addItem(abd);
-//				}			
-//			}
-//			return overlaps;
-//		}
-//		
-//		public function doesBitmapOverlapWithAsset(abd:AssetBitmapData, bitmap:Bitmap):Boolean
-//		{
-//			var bp:Bitmap = abd.bitmap;
-//			if (bitmap.bitmapData.rect.bottom < bp.bitmapData.rect.bottom && 
-//				bitmap.bitmapData.rect.top > bp.bitmapData.rect.bottom && 
-//				((bitmap.bitmapData.rect.right > bp.bitmapData.rect.left && bitmap.bitmapData.rect.right < bp.bitmapData.rect.right) ||
-//					bitmap.bitmapData.rect.left > bp.bitmapData.rect.left && bitmap.bitmapData.rect.left < bp.bitmapData.rect.right))
-//			{
-//				return true;
-//			}
-//			return false;
-//		}
-		
 		public function renderInitialBitmap():void
 		{
-			trace("render initial bitmap");
 			sortBitmaps();
 			renderBitmaps();
 			trace("initial bitmap rendered");
@@ -367,34 +257,30 @@ package world
 		{
 			updateBitmapLocations();
 			sortBitmaps();
-			//			undrawPreviousBitmaps();
 			renderUpdatedBitmaps();
 		}
 		
 		public function renderUpdatedBitmaps():void
 		{
-			trace("render updated bitmap");
 			for each (var abd:AssetBitmapData in bitmapReferences)
 			{
 				if (abd)
-				{
 					_backgroundCanvas.rawChildren.addChild(abd.bitmap);
-				}
 			}	
-			trace("updated bitmap rendered");
 		}
 		
 		public function updateBitmapLocations():void
 		{
-			trace("update bitmap locations");
 			for each (var abd:AssetBitmapData in bitmapReferences)
 			{
 				if (abd)
-				{
 					moveRenderedBitmap(abd);
-				}
 			}
-			trace("bitmap locations updated");
+		}
+		
+		public function clearBitmaps():void
+		{
+			_backgroundCanvas.removeAllChildren();
 		}
 		
 		public function renderBitmaps():void
@@ -406,17 +292,12 @@ package world
 				if (abd)
 				{
 					if (abd.activeAsset is Person)
-					{
 						bp = getBitmapForPerson(abd);
-					}
 					else
-					{
 						bp = getBitmapForStructure(abd);
-					}
 					var uic:UIComponent = new UIComponent();
 					uic.addChild(bp);
 					_backgroundCanvas.addChild(uic);
-					//					_backgroundCanvas.rawChildren.addChild(bp);	
 					bp = null;
 					i++;
 				}
@@ -505,19 +386,15 @@ package world
 		
 		public function getBitmapForPerson(abd:AssetBitmapData):Bitmap
 		{
-			var bmd:BitmapData = new BitmapData(abd.mc.width, abd.mc.height, true, 0x00000000);
 			abd.mc.scaleX = 0.5;
 			abd.mc.scaleY = 0.5;
+			var bmd:BitmapData = new BitmapData(abd.mc.width + WIDTH_BUFFER, abd.mc.height + FOOT_CONSTANT, true, 0x00000000);
 			var rect:Rectangle = new Rectangle(0, 0, abd.mc.width + WIDTH_BUFFER, abd.mc.height + FOOT_CONSTANT);
 			var matrix:Matrix = new Matrix();
 			if (abd.reflected)
-			{
 				matrix.scale(-0.5, 0.5);
-			}
 			else
-			{
 				matrix.scale(0.5, 0.5);			
-			}
 			matrix.tx = abd.mc.width/2 + WIDTH_BUFFER/2;
 			matrix.ty = abd.mc.height;
 			abd.transformedHeight = matrix.ty;
@@ -534,14 +411,7 @@ package world
 		
 		public function undrawPreviousBitmaps():void
 		{
-			//			var totalChildren:int = _backgroundCanvas.rawChildren.numChildren.valueOf();
-			//			for (var i:int = 0; i < totalChildren; i++)
-			//			{
-			//				if (_backgroundCanvas.rawChildren)
-			//				{
-			//					_backgroundCanvas.rawChildren.removeChildAt(0);				
-			//				}
-			//			}
+	
 		}
 		
 		public function addMoodToAssetBitmapData(asset:ActiveAssetStack, mood:Object, moodClip:BouncyBitmap = null):void
@@ -549,6 +419,14 @@ package world
 			var abd:AssetBitmapData = getMatchFromBitmapReferences(asset);
 			abd.mood = mood;
 			abd.moodClip = moodClip;
+		}
+		
+		public function removeMoodClipFromBitmap(asset:ActiveAsset):BouncyBitmap
+		{
+			var abd:AssetBitmapData = getMatchFromBitmapReferences(asset);
+			if (_myWorld.contains(abd.moodClip))
+				_myWorld.removeChild(abd.moodClip);
+			return abd.moodClip;
 		}
 		
 		private function onMouseMove(evt:MouseEvent):void

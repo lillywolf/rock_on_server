@@ -2,6 +2,8 @@ package rock_on
 {
 	import adobe.utils.CustomActions;
 	
+	import clickhandlers.UIBoss;
+	
 	import controllers.UsableController;
 	
 	import flash.display.MovieClip;
@@ -51,17 +53,22 @@ package rock_on
 		public static const BITMAPPED_ENTHRALLED_STATE:int = 8;
 		public static const ITEM_PICKUP_STATE:int = 9;
 		public static const HEAD_BOB_STATE:int = 10;
+		public static const EXIT_STATE:int = 11;
+		public static const DIRECTED_STATE:int = 12;
+		public static const TEMPORARY_ENTHRALLED_STATE:int = 13;
 
 		public static const HUNGER_DELAY:int = 360000;
 		public static const HUNGRY:String = "Hungry";
 		public static const THIRSTY:String = "Thirsty";
 		public static const MAX_DROPS_END_MOOD:int = 3;
 		
-		public static const ENTHRALLED_TIME:int = 10000 + 40000 * Math.random();
+		public static const TEMPORARY_ENTHRALLED_TIME:int = 20000 + 40000 * Math.random();
 		public static const QUEUED_TIME:int = 4000;
 		public static const FAN_CONVERSION_DELAY:int = 2000;
 		public static const MUSIC_DELAY:int = 2000000 + 1000000 * Math.random();
+		public static var ENTHRALLED_TIME:int;
 				
+		public var temporaryEnthralledTimer:Timer;
 		public var enthralledTimer:Timer;
 		public var queuedTimer:Timer;
 		
@@ -72,8 +79,8 @@ package rock_on
 		public var currentBooth:Booth;
 		public var currentBoothPosition:int;
 		public var activityTimer:Timer;
-		public var isBitmapped:Boolean;
 		public var isSuperFan:Boolean;
+		public var seatNumber:int;
 		public var _boothBoss:BoothBoss;
 		public var _venue:Venue;
 		
@@ -92,16 +99,40 @@ package rock_on
 			_boothBoss = boothBoss;
 			startInitializedState();
 			addEventListener(MouseEvent.CLICK, onMouseClicked);
-			addEventListener(WorldEvent.PATHFINDING_FAILED, onPathfindingFailed);
+			addEventListener(WorldEvent.PATHFINDING_FAILED, onPathfindingFailed);			
+		}
+		
+		public function initializeForQueueing():void
+		{
+			var tempTimer:Timer = new Timer(ENTHRALLED_TIME * Math.random());
+			tempTimer.addEventListener(TimerEvent.TIMER, initializeEnthralledTimer);
+			tempTimer.start();
+		}
+		
+		private function initializeEnthralledTimer(evt:TimerEvent):void
+		{
+//			Routes person for the first time, then sets enthralled timer for the first time
+			var tempTimer:Timer = evt.currentTarget as Timer;	
+			tempTimer.stop();
+			tempTimer.removeEventListener(TimerEvent.TIMER, initializeEnthralledTimer);
+			tempTimer = null;
+			if (Math.random() < 0.5)
+				advanceState(ROUTE_STATE);
+			resetEnthralledTimer();
 		}
 		
 		private function onPathfindingFailed(evt:WorldEvent):void
 		{
-			advanceState(CustomerPerson.ENTHRALLED_STATE);
+			advanceState(CustomerPerson.TEMPORARY_ENTHRALLED_STATE);
 		}
 		
 		public function reInitialize():void
 		{
+			if (temporaryEnthralledTimer)
+			{
+				temporaryEnthralledTimer.stop();
+				temporaryEnthralledTimer = null;
+			}
 			if (enthralledTimer)
 			{
 				enthralledTimer.stop();
@@ -139,8 +170,8 @@ package rock_on
 		}	
 		
 		private function onMouseClicked(evt:MouseEvent):void
-		{
-			if (mood && !proxiedForItemPickup)
+		{			
+			if (mood && !proxiedForItemPickup && personType == Person.MOVING)
 				handleMood(mood);
 		}
 				
@@ -198,6 +229,8 @@ package rock_on
 				case ENTHRALLED_STATE:
 					doEnthralledState(deltaTime);
 					break;	
+				case TEMPORARY_ENTHRALLED_STATE:
+					break;
 				case BITMAPPED_ENTHRALLED_STATE:
 					doBitmappedEnthralledState(deltaTime);
 					break;
@@ -214,6 +247,10 @@ package rock_on
 					doHeadToDoorState(deltaTime);	
 					break;
 				case HEAD_BOB_STATE:
+					break;
+				case DIRECTED_STATE:
+					break;
+				case EXIT_STATE:
 					break;
 				case GONE_STATE:
 					doGoneState(deltaTime);
@@ -236,6 +273,9 @@ package rock_on
 				case ENTHRALLED_STATE:
 					endEnthralledState();				
 					break;	
+				case TEMPORARY_ENTHRALLED_STATE:
+					endTemporaryEnthralledState();
+					break;
 				case BITMAPPED_ENTHRALLED_STATE:
 					endBitmappedEnthralledState();
 					break;
@@ -254,6 +294,12 @@ package rock_on
 				case HEAD_BOB_STATE:
 					endHeadBobState();
 					break;
+				case DIRECTED_STATE:
+					endDirectedState();
+					break;
+				case EXIT_STATE:
+					endExitState();
+					break;
 				case GONE_STATE:
 					break;					
 				default: throw new Error('no state to advance from!');
@@ -265,6 +311,9 @@ package rock_on
 					break;
 				case ENTHRALLED_STATE:
 					startEnthralledState();
+					break;
+				case TEMPORARY_ENTHRALLED_STATE:
+					startTemporaryEnthralledState();
 					break;
 				case BITMAPPED_ENTHRALLED_STATE:
 					startBitmappedEnthralledState();
@@ -283,6 +332,12 @@ package rock_on
 					break;	
 				case HEAD_BOB_STATE:
 					startHeadBobState();
+					break;
+				case DIRECTED_STATE:
+					startDirectedState();
+					break;
+				case EXIT_STATE:
+					startExitState();
 					break;
 				case GONE_STATE:
 					startGoneState();
@@ -319,11 +374,13 @@ package rock_on
 		public function startRoamState():void
 		{
 			state = ROAM_STATE;
+			personType = Person.MOVING;
 			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
-			if (this.state == CustomerPerson.ENTHRALLED_STATE)
+			if (this.state == CustomerPerson.TEMPORARY_ENTHRALLED_STATE)
 				movePerson(destination);
 			else
-				movePerson(destination, true, true, false, null, 0, null, true);
+//				movePerson(destination, true, true, false, null, 0, null, true);
+				movePerson(destination);
 			trace("customer person roamed");
 		}
 		
@@ -358,6 +415,18 @@ package rock_on
 		{
 			state = HEAD_BOB_STATE;
 			doComplexAnimation("head_bob_away", this.customerAnimations["head_bob_away"]);
+			var relationship:Array = getHorizontalAndVerticalRelationship(_stageManager.concertStage.getCornerMatrix());						
+			if (getReflection(relationship))
+				flipMovieClips();
+		}
+		
+		public function startDirectedState():void
+		{
+			state = DIRECTED_STATE;
+			this.speed = 0.12;
+			var extra:ArrayCollection = new ArrayCollection();
+			extra.addItem(_venue.stageBufferRect);
+			movePerson(this.worldDestination, true, true, false, null, 0, extra);
 		}
 		
 		public function endHeadBobState():void
@@ -372,9 +441,16 @@ package rock_on
 			movePerson(door, true);
 		}
 		
+		public function startExitState():void
+		{
+			state = EXIT_STATE;
+			this.speed = 0.13;
+			movePerson(new Point3D(_venue.mainEntrance.x, _venue.mainEntrance.y, _venue.mainEntrance.z), true);
+		}
+		
 		public function startGoneState():void
 		{
-			
+//			_venue.removeAssetFromBitmap(this);
 		}
 		
 		public function doGoneState(deltaTime:Number):void
@@ -390,6 +466,16 @@ package rock_on
 		public function endHeadToDoorState():void
 		{
 			
+		}
+		
+		public function endExitState():void
+		{
+			
+		}
+		
+		public function endDirectedState():void
+		{
+
 		}
 		
 		public function doHeadToDoorState(deltaTime:Number):void
@@ -409,18 +495,20 @@ package rock_on
 		
 		public function startEnthralledState():void
 		{
-			state = ENTHRALLED_STATE;
+			state = ENTHRALLED_STATE;			
+			var obj:Object = standFacingObject(_stageManager.concertStage, 1);
+		}
+		
+		public function startTemporaryEnthralledState():void
+		{
+			state = TEMPORARY_ENTHRALLED_STATE;			
+			var obj:Object = standFacingObject(_stageManager.concertStage, 1);
 			
-			var frameNumber:int = 1;
-			var obj:Object = standFacingObject(_stageManager.concertStage, frameNumber);
-			
-			if (!isBitmapped && !isSuperFan)
-			{
-				enthralledTimer = new Timer(CustomerPerson.ENTHRALLED_TIME);
-				enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
-				enthralledTimer.start();
-				numEnthralledTimers++;				
-			}
+			temporaryEnthralledTimer = new Timer(CustomerPerson.TEMPORARY_ENTHRALLED_TIME);
+//			temporaryEnthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
+			temporaryEnthralledTimer.addEventListener(TimerEvent.TIMER, roam);
+			temporaryEnthralledTimer.start();
+//			numEnthralledTimers++;				
 		}
 		
 		public function startBitmappedEnthralledState():void
@@ -431,6 +519,16 @@ package rock_on
 			var obj:Object = standFacingObject(this._venue.stageManager.concertStage, frameNumber);
 			_world.removeAssetFromWorld(this);
 			_world.bitmapBlotter.addRenderedBitmap(this, obj.animation, obj.frameNumber, obj.reflection);
+		}
+		
+		private function resetEnthralledTimer():void
+		{
+			if (Math.random() < 0.5)
+				enthralledTimer = new Timer(ENTHRALLED_TIME + ENTHRALLED_TIME/2 * Math.random());
+			else
+				enthralledTimer = new Timer(ENTHRALLED_TIME - ENTHRALLED_TIME/2 * Math.random());
+			enthralledTimer.addEventListener(TimerEvent.TIMER, routeToQueue);
+			enthralledTimer.start();
 		}
 		
 		private function routeToQueue(evt:TimerEvent):void
@@ -445,11 +543,35 @@ package rock_on
 				if (state == ENTHRALLED_STATE)
 					advanceState(ROUTE_STATE);			
 			}
+			resetEnthralledTimer();
+		}
+		
+		private function roam(evt:TimerEvent):void
+		{
+			trace("roam");
+			if (Math.random() < 0.5)
+			{
+				temporaryEnthralledTimer.stop();
+				temporaryEnthralledTimer.removeEventListener(TimerEvent.TIMER, roam);
+				if (state == TEMPORARY_ENTHRALLED_STATE)
+					advanceState(ROAM_STATE);			
+			}		
 		}
 		
 		public function endEnthralledState():void
 		{
 			
+		}
+		
+		public function endTemporaryEnthralledState():void
+		{
+			if (temporaryEnthralledTimer)
+			{
+				temporaryEnthralledTimer.stop();
+//				temporaryEnthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
+				temporaryEnthralledTimer.removeEventListener(TimerEvent.TIMER, roam);
+				temporaryEnthralledTimer = null;
+			}
 		}
 		
 		public function doEnthralledState(deltaTime:Number):void
@@ -490,7 +612,7 @@ package rock_on
 			
 			for (var i:int = 0; i < Math.round(Math.random() * CustomerPerson.MAX_DROPS_END_MOOD); i++)
 			{
-				WorldBitmapInterface.doCollectibleDrop(this, _myWorld.parent as WorldView);			
+				UIBoss.doCollectibleDropByMood(this, _myWorld);
 			}
 			removeMoodClip();
 			trace("item pickup complete");
@@ -539,13 +661,14 @@ package rock_on
 				queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);
 				queuedTimer = null;			
 				
+				_venue.customerPersonManager.assignNextState(this);
 //				advanceState(HEADTOSTAGE_STATE);
-				advanceState(ROAM_STATE);
+//				advanceState(ROAM_STATE);
 			}
 			else
 			{
-				trace("Queued Timers: " + numQueuedTimers.toString());		
-				trace("Enthralled Timers: " + numEnthralledTimers.toString());				
+//				trace("Queued Timers: " + numQueuedTimers.toString());		
+//				trace("Enthralled Timers: " + numEnthralledTimers.toString());				
 				throw new Error("State is not queued state");
 				queuedTimer.stop();
 				queuedTimer.removeEventListener(TimerEvent.TIMER, exitQueue);
@@ -591,9 +714,9 @@ package rock_on
 		{
 			state = HEADTOSTAGE_STATE;
 			
-//			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
-			var destination:Point3D = _venue.assignedSeats[_venue.numAssignedSeats];
-			_venue.numAssignedSeats++;
+			var extra:ArrayCollection = new ArrayCollection();
+			extra.addItem(_venue.stageBufferRect);
+			var destination:Point3D = _venue.getOpenSeat(_venue.mainCrowdRect, extra);
 			movePerson(destination);
 		}
 		
@@ -626,11 +749,13 @@ package rock_on
 		public function startRouteState():void
 		{
 			state = ROUTE_STATE;
+			personType = Person.MOVING;
 			
 			var booth:Booth = getBoothForRouteState();
 			
 			if (booth == null)
-				advanceState(ROAM_STATE);
+//				advanceState(ROAM_STATE);
+				_venue.customerPersonManager.assignNextState(this);
 			else
 			{
 				currentBooth = booth;
@@ -670,7 +795,7 @@ package rock_on
 		
 		public function getEnthralledActivityTime():int
 		{
-			return ENTHRALLED_TIME;
+			return TEMPORARY_ENTHRALLED_TIME;
 		}
 		
 		public function pickPointNearStructure(bounds:Rectangle, avoid:Rectangle=null, worldToUpdate:World=null):Point3D
@@ -733,12 +858,12 @@ package rock_on
 				if (boothFront)
 					updateDestination(boothFront);
 				else
-					advanceState(ROAM_STATE);
+//					advanceState(ROAM_STATE);
+					_venue.customerPersonManager.assignNextState(this);
 			}
 			else if (state == QUEUED_STATE)
 			{
 				boothFront = _boothBoss.getBoothFront(currentBooth, index, false, true);
-//				movePerson(boothFront, true, true, false, null, 0, null, true);
 				movePerson(boothFront, true);
 			}
 			else
@@ -770,7 +895,6 @@ package rock_on
 			if (proxiedDestination)
 			{
 				if (worldCoords.x != proxiedDestination.x || worldCoords.y != proxiedDestination.y || worldCoords.z != proxiedDestination.z)
-//					movePerson(proxiedDestination, true, true, false, null, 0, null, true);
 					movePerson(proxiedDestination, true);
 				else
 				{

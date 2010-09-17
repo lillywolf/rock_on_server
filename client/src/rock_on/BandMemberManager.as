@@ -117,7 +117,8 @@ package rock_on
 				if (bm.creature.type == "Me")
 					return BandMember.SING_STATE;
 				else
-					return BandMember.BOB_AND_STRUM_STATE;				
+//					return BandMember.BOB_AND_STRUM_STATE;	
+					return BandMember.STOP_STATE;
 			}
 			else
 				throw new Error("Not a legitimate state");

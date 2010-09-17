@@ -190,6 +190,7 @@ package rock_on
 		private function startFanEntryState():void
 		{
 			state = FAN_ENTRY_STATE;
+			this.in_use = false;
 //			playListeningStationDestruction();
 			letInNewFans();
 		}
@@ -227,14 +228,16 @@ package rock_on
 		
 		private function letInNewFans():void
 		{
-			var fanCount:int = 0;		
+//			var fanCount:int = 0;	
+			var fans:ArrayCollection = new ArrayCollection();
 			for each (var sl:StationListener in currentListeners)
 			{
-				_venue.convertStationListenerToCustomer(sl, fanCount);
+				_venue.convertStationListenerToCustomer(sl, fans.length);
 				removeStationListener(sl);
-				fanCount++;
+				fans.addItem(sl.creature);
+//				fanCount++;
 			}
-			_venue.updateFanCount(fanCount, _venue, this);
+			_venue.updateFanCount(fans, _venue, this);
 			_venue.checkForMinimumFancount();
 		}		
 		

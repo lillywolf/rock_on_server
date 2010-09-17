@@ -48,16 +48,12 @@ package controllers
 			for each (ol in newLayerables)
 			{
 				if (!ol.in_use)
-				{
 					_serverController.sendRequest({id: ol.id}, 'owned_layerable', 'make_in_use');				
-				}
 			}
 			for each (ol in oldLayerables)
 			{
 				if (ol.in_use)
-				{
 					_serverController.sendRequest({id: ol.id}, 'owned_layerable', 'remove_from_in_use');
-				}
 			}
 		}
 		
@@ -70,9 +66,7 @@ package controllers
 					if (ol.creature_id == c.id)
 					{
 						if (!c.owned_layerables.contains(ol))
-						{
 							c.owned_layerables.addItem(ol);
-						}
 					}
 				}
 			}
@@ -86,7 +80,6 @@ package controllers
 				if (creature.type == type)
 				{
 					var layerableOrder:Array = getLayerableOrderByCreatureType(creature.type);
-//					asset = creature.getConstructedCreature(layerableOrder, 'walk_toward', size);
 					matchingCreatures.addItem(creature);
 				}
 			}
@@ -107,34 +100,18 @@ package controllers
 			return asset;		
 		}
 		
-//		public function getConstructedCreature(creature:Creature, animation:String):void
-//		{
-//			for each (var layer:String in creature.layerableOrder[animation])
-//			{
-//				creature.owned_layerables.get
-//			}
-//		}
-		
 		public function getLayerableOrderByCreatureType(creatureType:String):Array
 		{
 			var layerableOrder:Array = new Array();
 			if (creatureType == "BandMember")
-			{
-//				layerableOrder['walk_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
-//				layerableOrder['walk_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];
-//				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front", "instrument"];
-//				layerableOrder['stand_still_away'] = ["instrument", "eyes", "body", "shoes", "bottom", "top", "hair front"];				
+			{			
 				layerableOrder['walk_toward'] = ["body"];
 				layerableOrder['walk_away'] = ["body"];
 				layerableOrder['stand_still_toward'] = ["body"];
 				layerableOrder['stand_still_away'] = ["body"];				
 			}
 			else if (creatureType == "Groupie")
-			{
-//				layerableOrder['walk_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
-//				layerableOrder['walk_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];
-//				layerableOrder['stand_still_toward'] = ["body", "hair back", "eyes", "shoes", "bottom", "top", "hair front"];
-//				layerableOrder['stand_still_away'] = ["eyes", "body", "shoes", "bottom", "top", "hair front"];								
+			{							
 				layerableOrder['walk_toward'] = ["body", "hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
 				layerableOrder['walk_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
 				layerableOrder['stand_still_toward'] = ["body", "hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];
@@ -151,11 +128,11 @@ package controllers
 			}
 			else
 			{							
-				layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
-				layerableOrder['walk_away'] = ["shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
-				layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
-				layerableOrder['stand_still_away'] = ["shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];	
-				layerableOrder['head_bob_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front", "hair band"];												
+				layerableOrder['walk_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['walk_away'] = ["shoes", "bottom", "top", "hair front"];
+				layerableOrder['stand_still_toward'] = ["hair back", "shoes", "bottom", "top", "hair front"];
+				layerableOrder['stand_still_away'] = ["shoes", "bottom", "top", "hair front"];	
+				layerableOrder['head_bob_away'] = ["body", "shoes", "bottom", "top", "hair front", "hair band"];												
 			}
 			return layerableOrder;
 		}
@@ -167,10 +144,10 @@ package controllers
 			{
 				if (c.user_id == FlexGlobals.topLevelApplication.gdi.user.id && c.type == "Fan")
 				{
-					var matchId:int = int(c.additional_info.split(": ")[1]);
-					var creature:Creature = this.getCreatureById(matchId);
+//					var matchId:int = int(c.additional_info.split(": ")[1]);
+					var creature:Creature = this.getCreatureById(c.reference_id);
 					matchingCreatures.addItem(creature);
-				}
+				}				
 			}
 			return matchingCreatures;
 		}
@@ -181,9 +158,7 @@ package controllers
 			for each (var creature:Creature in _creatures)
 			{
 				if (creature.type == type)
-				{
 					matchingCreatures.addItem(creature);
-				}
 			}
 			return matchingCreatures;
 		}
@@ -194,9 +169,7 @@ package controllers
 			for each (var creature:Creature in _creatures)
 			{
 				if (creature.user_id == uid && creature.type != "Fan")
-				{
 					matchingCreatures.addItem(creature);
-				}
 			}
 			return matchingCreatures;
 		}
@@ -206,11 +179,33 @@ package controllers
 			for each (var creature:Creature in _creatures)
 			{
 				if (creature.id == id)
-				{
 					return creature;
-				}
 			}
 			return null;
+		}
+		
+		public function getGameOwnedCreatures():ArrayCollection
+		{
+			var gameOwned:ArrayCollection = new ArrayCollection();
+			for each (var c:Creature in _creatures)
+			{
+				if (c.user_id == -1 && c.type == "Fan")
+					gameOwned.addItem(c);
+			}
+			return gameOwned;
+		}
+		
+		public function getRandomGameOwnedCreature(exclude:ArrayCollection):Creature
+		{
+			var gameOwned:ArrayCollection = getGameOwnedCreatures();
+			var random:Creature = gameOwned.getItemAt(Math.floor(Math.random()*gameOwned.length)) as Creature;
+			if (exclude.length > gameOwned.length)
+				return random;
+			while (exclude.contains(random))
+			{
+				random = gameOwned.getItemAt(Math.floor(Math.random()*gameOwned.length)) as Creature;
+			}
+			return random;
 		}
 		
 		public function getRandomCreatureByType(type:String):Creature
@@ -218,9 +213,7 @@ package controllers
 			for each (var creature:Creature in _creatures)
 			{
 				if (creature.type == type)
-				{
 					return creature;
-				}
 			}
 			return null;
 		}
@@ -236,9 +229,7 @@ package controllers
 			for each (var cg:CreatureGroup in this.creature_groups)
 			{
 				if (cg.owned_dwelling_id == odId)
-				{
 					return cg;
-				}
 			}
 			return null;
 		}
@@ -256,6 +247,11 @@ package controllers
 		public function set serverController(val:ServerController):void
 		{
 			_serverController = val;
+		}
+
+		public function get serverController():ServerController
+		{
+			return _serverController;
 		}
 				
 		public function get creatures():ArrayCollection

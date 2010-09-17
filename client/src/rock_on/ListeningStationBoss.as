@@ -117,11 +117,8 @@ package rock_on
 			for each (var os:OwnedStructure in listeningStructures)
 			{
 				var listeningStation:ListeningStation = createListeningStation(os);
-				var asset:ActiveAsset = createListeningStationAsset(listeningStation);
-				listeningStation.activeAsset = asset;
-				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
-				addListeningStationToWorld(asset, addTo);
-				listeningStationAssets.addItem(asset);
+				listeningStation.activeAsset = _myWorld.addStandardStructureToWorld(listeningStation);
+				listeningStationAssets.addItem(listeningStation.activeAsset);
 				listeningStation.setInMotion();
 			}
 		}
@@ -141,13 +138,9 @@ package rock_on
 		{
 			for each (var ls:ListeningStation in this.listeningStations)
 			{
-				ls.setInMotion();
+				if (ls.in_use)
+					ls.setInMotion();
 			}			
-		}
-		
-		public function addListeningStationToWorld(asset:ActiveAsset, addTo:Point3D):void
-		{
-			_myWorld.addStaticAsset(asset, addTo);				
 		}
 		
 		public function removeListeningStations():void
@@ -163,21 +156,13 @@ package rock_on
 		public function createListeningStation(os:OwnedStructure):ListeningStation
 		{
 			var station:ListeningStation = new ListeningStation(this, _boothBoss, _venue, os);
-			station.friendMirror = friendMirror;
-			station.editMirror = editMirror;
+//			station.friendMirror = friendMirror;
+//			station.editMirror = editMirror;
 			station.createdAt = GameClock.convertStringTimeToUnixTime(os.created_at);
 			station.stationType = _structureController.getListeningStationTypeByMovieClip(os.structure.mc);			
 			listeningStations.addItem(station);
 			return station;
 		}			
-		
-		public function createListeningStationAsset(station:ListeningStation):ActiveAsset
-		{
-			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(station.structure.mc);
-			var asset:ActiveAsset = new ActiveAsset(mc, StructureController.STRUCTURE_SCALE);	
-			asset.thinger = station;	
-			return asset;		
-		}
 		
 		public function getStationFront(stationAsset:ActiveAsset):Point3D
 		{				
@@ -185,29 +170,35 @@ package rock_on
 			return stationAsset.getStructureFrontByRotation();		
 		}
 		
-		public function isAnyStationAvailable():Boolean
+		public function isAnyStationAvailable(occupiedSpaces:Array):Boolean
 		{
 			var freeStation:Boolean = false;
 			for each (var ls:ListeningStation in listeningStations)
 			{
-				if (ls.currentListeners.length != ls.structure.capacity)
-					freeStation = true;
+				var front:Point3D = ls.getStructureFrontByRotation();
+				if (ls.currentListeners.length != ls.structure.capacity && 
+					ls.in_use &&
+					!(occupiedSpaces[front.x] && occupiedSpaces[front.x][front.y] && occupiedSpaces[front.x][front.y][front.z]))
+				{
+					freeStation = true;					
+				}
 			}	
 			return freeStation;		
 		}
 		
 		public function getRandomStation(station:ListeningStation=null):ListeningStation
 		{
-			trace("get random station");
+//			This assumes one listener per station
 			var selectedStation:ListeningStation = null;
+			var occupiedSpaces:Array = _myWorld.pathFinder.updateOccupiedSpaces(true, true);
 
-			if (listeningStations.length && !(listeningStations.length == 1 && station) && isAnyStationAvailable())
+			if (listeningStations.length && !(listeningStations.length == 1 && station) && isAnyStationAvailable(occupiedSpaces))
 			{
 				do 
 				{
 					selectedStation = listeningStations.getItemAt(Math.floor(Math.random()*listeningStations.length)) as ListeningStation;			
 				}
-				while (selectedStation == station);
+				while (selectedStation == station || selectedStation.currentListeners.length > 0 || !selectedStation.in_use);
 			}
 			trace ("selected station");
 			return selectedStation;	
