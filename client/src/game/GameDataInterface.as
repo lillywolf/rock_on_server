@@ -235,7 +235,7 @@ package game
 				if (obj.created_from_client)
 				{
 					loadObject(obj, requestType);
-					dispatchServerUpdateEvent(obj.instance[obj.model], obj.model, obj.method);
+					dispatchServerUpdateEvent(obj.instance[obj.model], obj.model, obj.method, obj.key);
 				}	
 //				For items that exist on the server but were updated
 				if (obj.already_loaded)
@@ -247,9 +247,11 @@ package game
 			// Dispatch load event?
 		}	
 		
-		public function dispatchServerUpdateEvent(instance:Object, model:String, method:String):void
+		public function dispatchServerUpdateEvent(instance:Object, model:String, method:String, key:Number=0):void
 		{
 			var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.UPDATE_COMPLETE, model, instance, method);
+			if (key)
+				evt.key = key;
 			dispatchEvent(evt); 
 		}
 		

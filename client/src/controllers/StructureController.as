@@ -19,12 +19,14 @@ package controllers
 	import mx.core.INavigatorContent;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
+	import mx.utils.object_proxy;
 	
 	import rock_on.BoothBoss;
 	import rock_on.ListeningStationBoss;
 	import rock_on.Venue;
 	
 	import server.ServerController;
+	import server.ServerDataEvent;
 	
 	import stores.StoreEvent;
 	
@@ -40,6 +42,7 @@ package controllers
 		
 		[Bindable] public var structures:ArrayCollection;
 		[Bindable] public var owned_structures:ArrayCollection;
+		public var imposters:ArrayCollection;
 		
 		public var structureMovieClipsLoaded:int;
 		public var ownedStructureParentsAssigned:int;
@@ -52,6 +55,7 @@ package controllers
 		public function StructureController(essentialModelController:EssentialModelController, target:IEventDispatcher=null)
 		{
 			super(essentialModelController, target);
+			imposters = new ArrayCollection();
 			structures = essentialModelController.structures;
 			owned_structures = essentialModelController.owned_structures;
 
@@ -172,9 +176,9 @@ package controllers
 			structures.removeItemAt(i);
 		}
 		
-		public function saveNewOwnedStructure(os:OwnedStructure, od:OwnedDwelling, coords:Point3D):void
+		public function saveNewOwnedStructure(os:ImposterOwnedStructure, od:OwnedDwelling, coords:Point3D):void
 		{
-			_serverController.sendRequest({user_id: od.user_id, owned_dwelling_id: od.id, structure_id: os.structure.id, x: coords.x, y: coords.y, z: coords.z}, "owned_structure", "create_new");			
+			_serverController.sendRequest({user_id: od.user_id, owned_dwelling_id: od.id, structure_id: os.structure.id, x: coords.x, y: coords.y, z: coords.z, key: os.key}, "owned_structure", "create_new");			
 			_serverController.sendRequest({id: od.user_id, to_remove: (os as ImposterOwnedStructure).sot.price}, "user", "decrement_credits");
 		}
 
@@ -302,7 +306,25 @@ package controllers
 				putInInventory(osReference);
 			}
 			else if (method == "create_new")
-				addOwnedStructureToSystem(osReference);
+			{
+//				New instances are supposed to be added at the gdi level, not this level
+				
+				for each (var ios:ImposterOwnedStructure in imposters)
+				{
+					if (ios.key == structureObj.key)
+					{
+						ios.id = osReference.id;
+						var index:int = imposters.getItemIndex(ios);
+						imposters.removeItemAt(index);
+					}
+				}
+				
+//				Listen for this event if you have an imposter instance of the newly created object
+				var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.INSTANCE_CREATED, null, osReference);
+				evt.key = structureObj.key;
+				this.dispatchEvent(evt);
+				
+			}
 			
 			if (osReference.structure.structure_type == "Booth")
 				updateBoothOnServerResponse(osReference, method, venue.boothBoss);

@@ -11,6 +11,7 @@ package game
 	public class ImposterOwnedStructure extends OwnedStructure
 	{
 		public var _sot:StoreOwnedThinger;
+		public var key:Number;
 		
 		public function ImposterOwnedStructure(params:Object=null, target:IEventDispatcher=null)
 		{

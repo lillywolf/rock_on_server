@@ -13,9 +13,11 @@ package server
 		public static const INSTANCE_TO_CREATE:String = "Server:InstanceToCreate";	
 		public static const UPDATE_COMPLETE:String = "Server:UpdateComplete";
 		public static const FRIEND_AVATARS_LOADED:String = "Server:FriendAvatarsLoaded";		
+		public static const INSTANCE_CREATED:String = "Server:InstanceCreated";		
 		public var _model:String;
 		public var _params:Object;
 		public var _method:String;
+		public var _key:Number;
 		public var _user:User;
 		
 		public function ServerDataEvent(type:String, model:String=null, params:Object=null, method:String=null, bubbles:Boolean=false, cancelable:Boolean=false)
@@ -78,6 +80,16 @@ package server
 		public function get user():User
 		{
 			return _user;
+		}
+		
+		public function set key(val:Number):void
+		{
+			_key = val;
+		}
+		
+		public function get key():Number
+		{
+			return _key;
 		}
 	
 	}

@@ -315,6 +315,8 @@
 			private function onUpdateComplete(evt:ServerDataEvent):void
 			{
 				var instance:Object = evt.params;
+				if (evt.key)
+					instance.key = evt.key;
 				
 				if (evt.model == "owned_dwelling")
 					checkForUpdatedVenue(instance as OwnedDwelling, evt.method);				

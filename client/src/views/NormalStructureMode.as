@@ -10,6 +10,8 @@ package views
 	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 	
+	import game.ImposterOwnedStructure;
+	
 	import models.EssentialModelReference;
 	import models.OwnedSong;
 	import models.OwnedStructure;
@@ -22,6 +24,8 @@ package views
 	import mx.events.DynamicEvent;
 	
 	import rock_on.Venue;
+	
+	import server.ServerDataEvent;
 	
 	import world.ActiveAsset;
 	import world.ActiveAssetStack;
@@ -61,6 +65,7 @@ package views
 			createStructureBases();
 			createStructureToppers();
 
+			_structureController.addEventListener(ServerDataEvent.INSTANCE_CREATED, onNewInstanceCreated);
 			this.addEventListener(Event.ADDED, onAdded);
 		}
 		
@@ -576,7 +581,38 @@ package views
 			if (isOwned(asset))
 				saveOwnedStructureCoords(asset, parentAsset);
 			else if (!isOwned(asset))
-				_structureController.saveNewOwnedStructure(asset.thinger as OwnedStructure, _venue, asset.worldCoords);
+			{
+				saveNewOwnedStructureCoords(asset, parentAsset);				
+				_structureController.saveNewOwnedStructure(asset.thinger as ImposterOwnedStructure, _venue, asset.worldCoords);
+			}
+		}
+		
+		private function onNewInstanceCreated(evt:ServerDataEvent):void
+		{
+			for each (var asset:ActiveAsset in allStructures)
+			{
+				if (asset.thinger is ImposterOwnedStructure && (asset.thinger as ImposterOwnedStructure).id == evt.params.id)
+					asset.thinger = evt.params;
+			}
+		}
+		
+		private function saveNewOwnedStructureCoords(asset:ActiveAsset, parentAsset:ActiveAsset=null):void
+		{	
+//			Add to imposters array in structureController and assign a temporary id of -1 so it counts as owned, and give it a key
+			_structureController.imposters.addItem(asset.thinger as OwnedStructure);
+			(asset.thinger as ImposterOwnedStructure).key = Math.random();
+			(asset.thinger as OwnedStructure).id = -1;
+			
+			if (parentAsset)
+			{
+				var parentOs:OwnedStructure = parentAsset.thinger as OwnedStructure;				
+				(asset.thinger as OwnedStructure).x = asset.worldCoords.x + parentOs.structure.height;
+				(asset.thinger as OwnedStructure).y = parentOs.structure.height;
+				(asset.thinger as OwnedStructure).z = asset.worldCoords.z - parentOs.structure.height;				
+				doTopperRedraw(asset.thinger as OwnedStructure, parentAsset);								
+			}
+			else
+				_venue.doStructureRedraw(asset);
 		}
 		
 		private function saveOwnedStructureCoords(asset:ActiveAsset, parentAsset:ActiveAsset=null):void

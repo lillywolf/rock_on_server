@@ -9,6 +9,8 @@ package views
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	
+	import game.ImposterOwnedStructure;
+	
 	import models.EssentialModelReference;
 	import models.OwnedStructure;
 	
@@ -188,7 +190,9 @@ package views
 			}
 			else
 			{
-				_structureController.saveNewOwnedStructure(asset.thinger as OwnedStructure, _venue, asset.worldCoords);
+				_structureController.saveNewOwnedStructure(asset.thinger as ImposterOwnedStructure, _venue, asset.worldCoords);
+				if (!(asset.thinger is ImposterOwnedStructure))
+					throw new Error("Incorrect structure type; should be imposter");
 			}
 		}
 		
