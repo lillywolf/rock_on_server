@@ -18,6 +18,7 @@
 			import mx.collections.ArrayCollection;
 			import mx.collections.Sort;
 			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
 			import mx.events.DragEvent;
 			import mx.events.DynamicEvent;
 			import mx.managers.DragManager;
@@ -39,9 +40,9 @@
 			import world.WorldEvent;
 			import world.WorldGrid;
 			
-			public var stageWidth:int = 1200;
-			public var stageHeight:int = 1200;
-			public var tileSize:int = 40;
+//			public var stageWidth:int = 1200;
+//			public var stageHeight:int = 1200;
+//			public var tileSize:int = 40;
 			
 			public var myStage:World;
 			public var customerPersonManager:CustomerPersonManager;
@@ -88,7 +89,10 @@
 				mouseHandler = new StageViewClickHandler(venueManager.venue, worldView, this);
 				mouseBoss.stageMouseHandler = mouseHandler;
 				mouseHandler.mouseBoss = mouseBoss;
-				myStage = new World(stageWidth, stageHeight, tileSize, concertStage.structure.height);
+				myStage = new World((venueManager.venue.dwelling.dimension + venueManager.venue.dwelling.sidewalk_dimension) * FlexGlobals.topLevelApplication.tileSize, 
+					venueManager.venue.dwelling.dimension * FlexGlobals.topLevelApplication.tileSize, 
+					FlexGlobals.topLevelApplication.tileSize, 
+					concertStage.structure.height);
 				venueManager.venue.stageManager.drawTiles(myStage);
 				venueManager.venue.stageManager.myStage = myStage;
 				addChild(myStage);

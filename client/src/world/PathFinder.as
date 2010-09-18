@@ -849,7 +849,7 @@ package world
 			}
 		}
 		
-		public function updateStructureOccupiedSpaces(exemptStructures:ArrayCollection=null):void
+		public function updateStructureOccupiedSpaces(exemptStructures:ArrayCollection=null, extra:ArrayCollection=null):void
 		{
 			this.occupiedByStructures = getStructureOccupiedSpacesForArray(_world.assetRenderer.unsortedAssets, exemptStructures);
 		}
@@ -872,7 +872,7 @@ package world
 			}
 		}
 		
-		private function getStructureOccupiedSpacesForArray(assetSource:ArrayCollection, exemptStructures:ArrayCollection=null):Array
+		private function getStructureOccupiedSpacesForArray(assetSource:ArrayCollection, exemptStructures:ArrayCollection=null, extra:ArrayCollection=null):Array
 		{	
 			var spaces:Array = new Array();			
 			for each (var asset:ActiveAsset in assetSource)
@@ -900,6 +900,7 @@ package world
 					}		
 				}
 			}
+			addExtraOccupiedSpaces(spaces, extra);
 			return spaces;
 		}
 		

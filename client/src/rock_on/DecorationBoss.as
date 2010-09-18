@@ -20,6 +20,7 @@ package rock_on
 		public var _myWorld:World;
 		public var _venue:Venue;
 		public var decorations:ArrayCollection;
+		public var decorationAssets:ArrayCollection;
 		
 		public function DecorationBoss(structureController:StructureController, myWorld:World, venue:Venue, target:IEventDispatcher=null)
 		{
@@ -27,14 +28,58 @@ package rock_on
 			_structureController = structureController;
 			_myWorld = myWorld;
 			_venue = venue;
+			
+			decorations = new ArrayCollection();
+			decorationAssets = new ArrayCollection();
 		}
+		
+		public function initialize():void
+		{
+			decorations = _structureController.getStructuresByType("Decoration");
+			for each (var os:OwnedStructure in decorations)
+			{
+				if (os.in_use)
+				{
+					var asset:ActiveAssetStack = World.createStandardAssetStackFromStructure(os);
+					decorationAssets.addItem(asset);
+					asset.toppers = _structureController.getStructureToppers(os);
+					asset.setMovieClipsForStructure(asset.toppers);
+					asset.bitmapWithToppers();
+					_myWorld.addStandardStructureToWorld(os, asset);
+				}
+			}
+		}		
 		
 		public function updateRenderedDecorations(os:OwnedStructure, method:String):void
 		{
 			if (method == "save_placement")
 			{
-//				if (os.structure.structure_type == "StructureTopper")
-//					updateTopperPlacement(os);
+				if (os.structure.structure_type != "StructureTopper")
+				{
+					_myWorld.saveStructurePlacement(os, false, null, _venue.stageRects);
+					_venue.redrawAllMovers();
+				}
+				else
+				{
+					
+				}
+			}	
+			else if (method == "save_placement_and_rotation")
+			{
+				if (os.structure.structure_type != "StructureTopper")
+				{
+					_myWorld.saveStructurePlacement(os, true, null, _venue.stageRects);
+					_venue.redrawAllMovers();
+				}
+			}
+			else if (method == "create_new")
+			{
+				if (os.structure.structure_type != "StructureTopper")
+				{
+					_myWorld.updateUnwalkables(os, null, _venue.stageRects);					
+					_myWorld.createNewStructure(os);				
+					_venue.redrawAllMovers();
+				}
 			}
 		}
 		

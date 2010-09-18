@@ -405,7 +405,7 @@ package views
 		{
 			if (!structureRotating && asset)
 				selectStructureForRotation(asset);
-			else if (structureEditing && (currentStructure.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
+			else if (structureRotating && (currentStructure.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
 			{
 				if (isStructureInBounds(asset) && !doesStructureCollide(currentStructure))
 					placeStructureAfterRotating();

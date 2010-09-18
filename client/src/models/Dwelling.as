@@ -17,6 +17,8 @@ package models
 		public var _capacity:int;
 		public var _floor_type:String;
 		public var _floor_structure_id:int;
+		public var _dimension:int;
+		public var _sidewalk_dimension:int;
 		
 		public var _width:Number;
 		public var _height:Number;
@@ -45,6 +47,8 @@ package models
 			_dwelling_type = params['dwelling_type'];
 			_floor_type = params["floor_type"];
 			_floor_structure_id = params["floor_structure_id"];
+			_dimension = params.dimension;
+			_sidewalk_dimension = params.sidewalk_dimension;
 			
 			setExtraProperties(params);
 		}
@@ -52,21 +56,13 @@ package models
 		private function setExtraProperties(params:Object):void
 		{
 			if (params['width'])
-			{
 				_width = params['width'];
-			}
 			if (params['height'])
-			{
 				_height = params['height'];
-			}
 			if (params['depth'])
-			{
 				_depth = params['depth'];
-			}
 			if (params['capacity'])
-			{
 				_capacity = params.capacity;
-			}			
 		}
 
 		public function set id(val:int):void
@@ -97,6 +93,26 @@ package models
 		public function get symbol_name():String
 		{
 			return _symbol_name;
+		}
+		
+		public function set dimension(val:int):void
+		{
+			_dimension = val;
+		}
+		
+		public function get dimension():int
+		{
+			return _dimension;
+		}
+		
+		public function set sidewalk_dimension(val:int):void
+		{
+			_sidewalk_dimension = val;
+		}
+		
+		public function get sidewalk_dimension():int
+		{
+			return _sidewalk_dimension;
 		}
 		
 		public function set dwelling_type(val:String):void

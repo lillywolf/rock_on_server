@@ -117,7 +117,8 @@ package rock_on
 			for each (var os:OwnedStructure in listeningStructures)
 			{
 				var listeningStation:ListeningStation = createListeningStation(os);
-				listeningStation.activeAsset = _myWorld.addStandardStructureToWorld(listeningStation);
+				listeningStation.activeAsset = World.createStandardAssetFromStructure(listeningStation);
+				_myWorld.addStandardStructureToWorld(listeningStation, listeningStation.activeAsset);
 				listeningStationAssets.addItem(listeningStation.activeAsset);
 				listeningStation.setInMotion();
 			}
@@ -127,11 +128,19 @@ package rock_on
 		{
 			if (method == "save_placement")
 			{
-				_myWorld.saveStructurePlacement(os);
+				_myWorld.saveStructurePlacement(os, false, null, _venue.stageRects);
 				reInitializeListeningStations();			
 			}
+			else if (method == "save_placement_and_rotation")
+			{
+				_myWorld.saveStructurePlacement(os, true, null, _venue.stageRects);
+				reInitializeListeningStations();
+			}			
 			else if (method == "create_new")
+			{
+				_myWorld.updateUnwalkables(os, null, _venue.stageRects);				
 				_myWorld.createNewStructure(os);
+			}
 		}
 		
 		public function addStaticStationListeners():void

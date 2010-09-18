@@ -1,5 +1,7 @@
 package world
 {
+	import controllers.StructureController;
+	
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.geom.Point;
@@ -243,9 +245,9 @@ package world
 			this.addAsset(asset, asset.worldCoords);
 		}
 		
-		public function updateUnwalkables(os:OwnedStructure):void
+		public function updateUnwalkables(os:OwnedStructure, exempt:ArrayCollection=null, extra:ArrayCollection=null):void
 		{
-			this.pathFinder.updateStructureOccupiedSpaces();
+			this.pathFinder.updateStructureOccupiedSpaces(exempt, extra);
 		}
 		
 		public function createNewStructure(os:OwnedStructure):void
@@ -254,11 +256,11 @@ package world
 			addAsset(asset, new Point3D(os.x, os.y, os.z));			
 		}
 		
-		public function saveStructurePlacement(os:OwnedStructure, saveRotation:Boolean=false):void
+		public function saveStructurePlacement(os:OwnedStructure, saveRotation:Boolean=false, exempt:ArrayCollection=null, extra:ArrayCollection=null):void
 		{
 			var asset:ActiveAsset = getAssetFromOwnedStructure(os);
 			updatePlacement(asset, new Point3D(os.x, os.y, os.z));
-			updateUnwalkables(os);
+			updateUnwalkables(os, exempt, extra);
 			if (saveRotation)
 				saveStructureRotation(asset, os);
 		}
@@ -272,7 +274,7 @@ package world
 		{
 			for each (var asset:ActiveAsset in assetRenderer.unsortedAssets)
 			{
-				if (asset.thinger && asset.thinger.id == os.id)
+				if (asset.thinger && asset.thinger is OwnedStructure && asset.thinger.id == os.id)
 					return asset;
 			}			
 			return null;
@@ -308,17 +310,23 @@ package world
 			asset.thinger = os;
 			return asset;
 		}	
-		
-		public function addStandardStructureToWorld(os:OwnedStructure):ActiveAsset
+
+		public static function createStandardAssetStackFromStructure(os:OwnedStructure):ActiveAssetStack
 		{
-			var asset:ActiveAsset = createStandardAssetFromStructure(os);
-			asset.thinger = os;
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+			mc.cacheAsBitmap = true;
+			var asset:ActiveAssetStack = new ActiveAssetStack(null, mc, null, StructureController.STRUCTURE_SCALE);
+			asset.copyFromOwnedStructure(os);
+			return asset;
+		}	
+		
+		public function addStandardStructureToWorld(os:OwnedStructure, asset:ActiveAsset):void
+		{
 			if (os.in_use)
 			{
 				var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 				addStaticAsset(asset, addTo);
 			}
-			return asset;
 		}
 		
 		public function validateWorldCoords(asset:ActiveAsset):void

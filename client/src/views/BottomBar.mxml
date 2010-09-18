@@ -431,6 +431,9 @@
 				FlexGlobals.topLevelApplication.stageView.myStage.x = worldView.myWorld.x;
 				FlexGlobals.topLevelApplication.stageView.myStage.y = worldView.myWorld.y;
 
+				if (this.editView)
+					editView.clearCurrentChildren();
+				
 				FlexGlobals.topLevelApplication.currentState = "stageViewer";
 				var wvch:WorldViewClickHandler = this.worldView.mouseHandler as WorldViewClickHandler;
 				wvch.reInitialize();			

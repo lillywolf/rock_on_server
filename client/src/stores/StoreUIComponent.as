@@ -58,6 +58,12 @@ package stores
 			boothBtn.x = 80;
 			styleButton(boothBtn);
 			this.addChild(boothBtn);	
+
+			var decorationBtn:Button = new Button();
+			decorationBtn.addEventListener(MouseEvent.CLICK, onDecorationBtnClicked);
+			decorationBtn.x = 130;
+			styleButton(decorationBtn);
+			this.addChild(decorationBtn);	
 			
 			addCloseButton();			
 		}
@@ -78,6 +84,12 @@ package stores
 		private function onBoothBtnClicked(evt:MouseEvent):void
 		{
 			var store:Store = _storeController.getStoreByName("Structure Store");
+			showStore(store);
+		}	
+
+		private function onDecorationBtnClicked(evt:MouseEvent):void
+		{
+			var store:Store = _storeController.getStoreByName("Decorations");
 			showStore(store);
 		}	
 		

@@ -152,14 +152,14 @@ package rock_on
 			if (method == "save_placement")
 			{
 				_structureController.savePlacement(os, new Point3D(os.x, os.y, os.z));
-				_myWorld.saveStructurePlacement(os);
+				_myWorld.saveStructurePlacement(os, false, null, _venue.stageRects);
 				reInitializeBooths(false);
 				_venue.redrawAllMovers();
 			}
 			else if (method == "save_placement_and_rotation")
 			{
 				_structureController.savePlacementAndRotation(os, new Point3D(os.x, os.y, os.z));
-				_myWorld.saveStructurePlacement(os, true);
+				_myWorld.saveStructurePlacement(os, true, null, _venue.stageRects);
 				var asset:ActiveAsset = _myWorld.getAssetFromOwnedStructure(os);
 				
 				reInitializeBooths(false);
@@ -167,6 +167,7 @@ package rock_on
 			}
 			else if (method == "create_new")
 			{
+				_myWorld.updateUnwalkables(os, null, _venue.stageRects);
 				_myWorld.createNewStructure(os);
 			}
 		}

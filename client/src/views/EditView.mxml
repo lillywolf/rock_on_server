@@ -137,7 +137,7 @@
 				switchToInventoryMode();
 			}
 			
-			private function clearCurrentChildren():void
+			public function clearCurrentChildren():void
 			{				
 				if (normalStructureMode && this.contains(normalStructureMode))
 				{
@@ -155,7 +155,10 @@
 			private function switchToTileMode():void
 			{
 				clearCurrentChildren();
-				tileMode = new TileMode(this, FlexGlobals.topLevelApplication.worldWidth, FlexGlobals.topLevelApplication.worldHeight, FlexGlobals.topLevelApplication.tileSize);
+				tileMode = new TileMode(this, 
+					(venueManager.venue.dwelling.dimension + venueManager.venue.dwelling.sidewalk_dimension) * FlexGlobals.topLevelApplication.tileSize, 
+					venueManager.venue.dwelling.dimension * FlexGlobals.topLevelApplication.tileSize, 
+					FlexGlobals.topLevelApplication.tileSize);
 				tileMode.addEventListener("structurePlaced", onStructurePlaced);
 				tileMode.nestLevel = 1;
 				currentMode = tileMode;
@@ -165,7 +168,10 @@
 			private function switchToNormalStructureMode():void
 			{
 				clearCurrentChildren();
-				normalStructureMode = new NormalStructureMode(this, FlexGlobals.topLevelApplication.worldWidth, FlexGlobals.topLevelApplication.worldHeight, FlexGlobals.topLevelApplication.tileSize);
+				normalStructureMode = new NormalStructureMode(this, 
+					(venueManager.venue.dwelling.dimension + venueManager.venue.dwelling.sidewalk_dimension) * FlexGlobals.topLevelApplication.tileSize, 
+					venueManager.venue.dwelling.dimension * FlexGlobals.topLevelApplication.tileSize, 
+					FlexGlobals.topLevelApplication.tileSize);
 				normalStructureMode.addEventListener("structurePlaced", onStructurePlaced);
 				normalStructureMode.addEventListener("structurePlacedAndRotated", onStructurePlacedAndRotated);
 				normalStructureMode.nestLevel = 1;
@@ -248,7 +254,10 @@
 			public function initializeStage():void
 			{	
 				stageManager = venueManager.venue.stageManager;
-				myStage = new World(stageWidth, stageHeight, FlexGlobals.topLevelApplication.tileSize, stageManager.concertStage.structure.height);
+				myStage = new World(venueManager.venue.dwelling.dimension * FlexGlobals.topLevelApplication.tileSize, 
+					venueManager.venue.dwelling.dimension * FlexGlobals.topLevelApplication.tileSize, 
+					FlexGlobals.topLevelApplication.tileSize, 
+					stageManager.concertStage.structure.height);
 				stageManager.myStage = myStage;
 				addChild(myStage);
 			}			

@@ -71,7 +71,6 @@ package rock_on
 		
 		public static const BOOTH_SECTION_FRACTION:Number = 0.4;
 		public static const STAGE_BUFFER_SQUARES:int = 2;
-		public static const OUTSIDE_SQUARES:int = 10;
 		public static const CROWD_BUFFER_FRACTION:Number = 0.3;
 		
 		public var state:int;
@@ -120,6 +119,8 @@ package rock_on
 		public var numSuperCustomers:int;
 		public var numStaticCustomers:int;
 		public var numMovingCustomers:int;
+		
+		public var stageRects:ArrayCollection;
 				
 		public function Venue(venueManager:VenueManager, dwellingController:DwellingController, creatureController:CreatureController, layerableController:LayerableController, structureController:StructureController, usableController:UsableController, bandBoss:BandBoss, params:Object=null, target:IEventDispatcher=null)
 		{
@@ -194,8 +195,8 @@ package rock_on
 		
 		public function setLayout():void
 		{
-			venueRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, _myWorld.tilesDeep);
-			boothsRect = new Rectangle(0, 0, _myWorld.tilesWide - OUTSIDE_SQUARES, Math.round(_myWorld.tilesDeep * BOOTH_SECTION_FRACTION))
+			venueRect = new Rectangle(0, 0, this.dwelling.dimension, _myWorld.tilesDeep);
+			boothsRect = new Rectangle(0, 0, this.dwelling.dimension, Math.round(_myWorld.tilesDeep * BOOTH_SECTION_FRACTION))
 			stageBufferRect = new Rectangle(0, (_myWorld.tilesDeep - stageManager.concertStage.structure.depth - STAGE_BUFFER_SQUARES), stageManager.concertStage.structure.width + STAGE_BUFFER_SQUARES, stageManager.concertStage.structure.depth + STAGE_BUFFER_SQUARES);	
 			stageRect = new Rectangle(0, (_myWorld.tilesDeep - stageManager.concertStage.structure.depth), stageManager.concertStage.structure.width, stageManager.concertStage.structure.depth);	
 			audienceRect = new Rectangle(0, boothsRect.bottom, venueRect.width, venueRect.height - boothsRect.height - 1);
@@ -203,10 +204,12 @@ package rock_on
 			assignedSeats = _myWorld.pathFinder.createSeatingArrangement(audienceRect, stageBufferRect, this.dwelling.capacity);
 			
 			crowdBufferRect = new Rectangle(stageRect.width + stageBufferRect.top - audienceRect.top - 2, boothsRect.bottom, venueRect.right - (stageRect.width + stageBufferRect.top - audienceRect.top - 2), venueRect.height - boothsRect.height);
-//			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, (stageBufferRect.top - boothsRect.bottom - 1));
 			mainCrowdRect = new Rectangle(0, boothsRect.bottom, crowdBufferRect.left, venueRect.bottom - boothsRect.bottom);
 			unwalkableRect = new Rectangle(0, boothsRect.bottom, mainCrowdRect.right, (stageBufferRect.bottom - boothsRect.bottom));
-			outsideRect = new Rectangle(venueRect.right, 0, OUTSIDE_SQUARES, venueRect.height);
+			outsideRect = new Rectangle(venueRect.right, 0, this.dwelling.sidewalk_dimension, venueRect.height);
+			
+			stageRects = new ArrayCollection();
+			stageRects.addItem(stageBufferRect);
 		}
 		
 		public function clearFilters():void
@@ -266,6 +269,7 @@ package rock_on
 
 			boothBoss.initialize();
 			listeningStationBoss.initialize();
+			decorationBoss.initialize();
 			
 			_myWorld.setOccupiedSpaces();
 			
@@ -541,7 +545,12 @@ package rock_on
 			if (os.structure.structure_type == "Tile")
 				this.stageManager.updateRenderedTiles(os, method);
 			else if (os.structure.structure_type == "StructureTopper")
-				this.decorationBoss.updateRenderedDecorations(os, method);				
+				this.decorationBoss.updateRenderedDecorations(os, method);	
+			else if (os.structure.structure_type == "Decoration")
+			{
+				updateStructureDerivatives(os, decorationBoss.decorations);
+				this.decorationBoss.updateRenderedDecorations(os, method);
+			}
 			else if (os.structure.structure_type == "StageDecoration")
 			{
 				updateStructureDerivatives(os, stageManager.stageDecorations);
@@ -720,9 +729,9 @@ package rock_on
 			
 		}
 		
-		private function setEntrance(params:Object=null):void
+		private function setEntrance(params:Object):void
 		{
-			mainEntrance = new Point3D(14, 0, 20);
+			mainEntrance = new Point3D(params.dwelling.dimension, 0, params.dwelling.dimension - 10);
 		}
 		
 		public function updateFanCount(newFans:ArrayCollection, venue:Venue, station:ListeningStation):void
@@ -825,7 +834,9 @@ package rock_on
 			temp.copyFromActiveAsset(asset);
 			temp.setMovieClipsForStructure(temp.toppers);
 			temp.bitmapWithToppers();
-			parentWorld.addAsset(temp, temp.worldCoords);			
+			parentWorld.addAsset(temp, temp.worldCoords);	
+//			Assumes that the stage is unwalkable
+			parentWorld.updateUnwalkables(temp.thinger as OwnedStructure, null, this.stageRects);
 		}		
 		
 		public function startPostSongExit():void
