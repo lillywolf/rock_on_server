@@ -40,6 +40,9 @@ package models
 
 		public function set layerable(val:Layerable):void
 		{
+			if (_layerable)
+				throw new Error("Why are you changing this?");
+			
 			_layerable = val;
 			var evt:DynamicEvent = new DynamicEvent('parentLoaded', true, true);
 			evt.thinger = val;

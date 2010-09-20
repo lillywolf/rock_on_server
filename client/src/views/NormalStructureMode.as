@@ -46,7 +46,9 @@ package views
 		public var currentStructurePoints:ArrayCollection;
 		public var structureSurfaces:Array;
 		public var structureBases:Array;
+		public var structureBasesOuter:Array;
 		public var structureToppers:Array;
+		public var structureSingletons:Array;
 		public var allStructures:ArrayCollection;
 		public var normalMode:Boolean;
 		public var rotationToolEnabled:Boolean;
@@ -63,7 +65,9 @@ package views
 			currentStructurePoints = new ArrayCollection();
 			createStructureSurfaces();
 			createStructureBases();
+			createStructureBasesOuter();
 			createStructureToppers();
+			createStructureSingletons()
 
 			_structureController.addEventListener(ServerDataEvent.INSTANCE_CREATED, onNewInstanceCreated);
 			this.addEventListener(Event.ADDED, onAdded);
@@ -272,9 +276,16 @@ package views
 		
 		private function cutStructureFromCollisionArrays(asset:ActiveAsset):void
 		{
-			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if (os.structure.structure_type != "StructureTopper")
 			{
-				removeSavedPointsFromBasesArray(asset);
+				if (os.depth == 1 && os.width == 1)
+					removeSavedPointsFromSingletonsArray(asset.thinger as OwnedStructure);
+				else
+				{
+					removeSavedPointsFromBasesArray(asset);
+					removeSavedPointsFromOuterBasesArray(asset);
+				}
 				removeSavedPointsFromSurfacesArray(asset.thinger as OwnedStructure);
 				for each (var topper:OwnedStructure in asset.toppers)
 				{
@@ -287,9 +298,16 @@ package views
 		
 		private function addStructureToCollisionArrays(asset:ActiveAsset):void
 		{
-			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if (os.structure.structure_type != "StructureTopper")
 			{			
-				addCurrentPointsToBasesArray(asset);
+				if (os.depth == 1 && os.width == 1)
+					addCurrentPointsToSingletonsArray(asset);
+				else
+				{
+					addCurrentPointsToBasesArray(asset);
+					addCurrentPointsToOuterBasesArray(asset);
+				}
 				addCurrentPointsToSurfacesArray(asset);
 				for each (var topper:OwnedStructure in asset.toppers)
 				{
@@ -302,9 +320,16 @@ package views
 
 		private function addSavedStructureToCollisionArrays(asset:ActiveAsset):void
 		{
-			if ((asset.thinger as OwnedStructure).structure.structure_type != "StructureTopper")
-			{			
-				addSavedPointsToBasesArray(asset);
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			if (os.structure.structure_type != "StructureTopper")
+			{	
+				if (os.depth == 1 && os.width == 1)
+					addSavedPointsToSingletonsArray(asset);
+				else
+				{
+					addSavedPointsToBasesArray(asset);
+					addSavedPointsToOuterBasesArray(asset);
+				}
 				addSavedPointsToSurfacesArray(asset);
 				for each (var topper:OwnedStructure in asset.toppers)
 				{
@@ -941,6 +966,37 @@ package views
 				addPointTo3DArray(new Point3D(pt.x, pt.y, pt.z), asset, structureBases);
 			}
 		}
+
+		private function removeSavedPointsFromOuterBasesArray(asset:ActiveAsset):void
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			var old:ArrayCollection = getSavedStructurePoints(os, false);
+			old.addAll(getExtraBasePointsByStructureType(asset));
+			for each (var pt:Point3D in old)
+			{
+				removePointFrom3DArrayOfArrays(new Point3D(pt.x, pt.y, pt.z), asset, structureBasesOuter);
+			}
+		}
+
+		private function addSavedPointsToOuterBasesArray(asset:ActiveAsset):void
+		{
+			var newPts:ArrayCollection = getSavedStructurePoints(asset.thinger as OwnedStructure, false);
+			newPts.addAll(getExtraBasePointsByStructureType(asset));
+			for each (var pt:Point3D in newPts)
+			{
+				addPointTo3DArrayOfArrays(new Point3D(pt.x, pt.y, pt.z), asset, structureBasesOuter);
+			}
+		}
+		
+		private function addCurrentPointsToOuterBasesArray(asset:ActiveAsset):void
+		{
+			var newPts:ArrayCollection = getOccupiedOuterPoints(asset);
+			newPts.addAll(getExtraBasePointsByStructureType(asset));
+			for each (var pt:Point3D in newPts)
+			{
+				addPointTo3DArrayOfArrays(new Point3D(pt.x, pt.y, pt.z), asset, structureBasesOuter);
+			}
+		}
 		
 		private function removeSavedPointsFromStructureToppers(os:OwnedStructure):void
 		{
@@ -967,6 +1023,25 @@ package views
 			{
 				addPointTo3DArray(new Point3D(pt.x - pt.y, 0, pt.z + pt.y), asset, structureToppers);
 			}
+		}		
+
+		private function removeSavedPointsFromSingletonsArray(os:OwnedStructure):void
+		{
+			var pt:Point3D = new Point3D(os.x - 0.5, os.y, os.z - 0.5);
+			removePointFrom3DArray(pt, structureSingletons);
+		}
+		
+		private function addCurrentPointsToSingletonsArray(asset:ActiveAsset):void
+		{
+			var pt:Point3D = new Point3D(asset.worldCoords.x - 0.5, asset.worldCoords.y, asset.worldCoords.z - 0.5);
+			addPointTo3DArray(pt, asset, structureSingletons);
+		}
+		
+		private function addSavedPointsToSingletonsArray(asset:ActiveAsset):void
+		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
+			var pt:Point3D = new Point3D(os.x - 0.5, os.y, os.z - 0.5);
+			addPointTo3DArray(pt, asset, structureSingletons);
 		}
 		
 		private function createStructureSurfaces():void
@@ -1004,6 +1079,24 @@ package views
 			}
 		}		
 
+		private function createStructureBasesOuter():void
+		{
+			structureBasesOuter = new Array();
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+			{
+				var os:OwnedStructure = asset.thinger as OwnedStructure;
+				if (os.structure.structure_type != "StructureTopper" && os.structure.structure_type != "Tile" && os.structure.structure_type != "ConcertStage")
+				{
+					var pts:ArrayCollection = getOccupiedOuterPoints(asset);
+					pts.addAll(getExtraBasePointsByStructureType(asset));
+					for each (var pt:Point3D in pts)
+					{
+						addPointTo3DArrayOfArrays(new Point3D(pt.x, pt.y, pt.z), asset, structureBasesOuter);
+					}
+				}
+			}
+		}		
+
 		private function createStructureToppers():void
 		{
 			structureToppers = new Array();
@@ -1020,11 +1113,39 @@ package views
 				}
 			}
 		}		
+
+		private function createStructureSingletons():void
+		{
+			structureSingletons = new Array();
+			for each (var asset:ActiveAsset in structureWorld.assetRenderer.unsortedAssets)
+			{
+				var os:OwnedStructure = asset.thinger as OwnedStructure;
+				if (os.structure.depth == 1 && os.structure.width == 1)
+				{
+					var pt:Point3D = new Point3D(os.x - 0.5, os.y, os.z - 0.5);
+					addPointTo3DArray(pt, asset, structureSingletons);
+				}
+			}
+		}		
 		
 		private function removePointFrom3DArray(pt:Point3D, removeFrom:Array):void
 		{
 			if (removeFrom[pt.x] && removeFrom[pt.x][pt.y] && removeFrom[pt.x][pt.y][pt.z])
 				removeFrom[pt.x][pt.y][pt.z] = 0;
+		}
+
+		private function removePointFrom3DArrayOfArrays(pt:Point3D, asset:ActiveAsset, removeFrom:Array):void
+		{
+			if (removeFrom[pt.x] && removeFrom[pt.x][pt.y] && removeFrom[pt.x][pt.y][pt.z])
+			{
+				if ((removeFrom[pt.x][pt.y][pt.z] as ArrayCollection).length == 1)
+					removeFrom[pt.x][pt.y][pt.z] = 0;
+				else
+				{
+					var index:int = (removeFrom[pt.x][pt.y][pt.z] as ArrayCollection).getItemIndex(asset);
+					(removeFrom[pt.x][pt.y][pt.z] as ArrayCollection).removeItemAt(index);
+				}
+			}
 		}
 		
 		private function addPointTo3DArray(pt:Point3D, asset:ActiveAsset, addTo:Array):void
@@ -1046,17 +1167,39 @@ package views
 			}
 		}
 		
+		public function addPointTo3DArrayOfArrays(pt:Point3D, asset:ActiveAsset, addTo:Array):void
+		{
+			if (addTo[pt.x] && addTo[pt.x][pt.y] && addTo[pt.x][pt.y][pt.z])
+			{
+				(addTo[pt.x][pt.y][pt.z] as ArrayCollection).addItem(asset);
+			}
+			else if (addTo[pt.x] && addTo[pt.x][pt.y])
+			{
+				addTo[pt.x][pt.y][pt.z] = new ArrayCollection();
+				(addTo[pt.x][pt.y][pt.z] as ArrayCollection).addItem(asset);				
+			}
+			else if (addTo[pt.x])
+			{
+				addTo[pt.x][pt.y] = new Array();
+				addTo[pt.x][pt.y][pt.z] = new ArrayCollection();
+				(addTo[pt.x][pt.y][pt.z] as ArrayCollection).addItem(asset);								
+			}
+			else
+			{
+				addTo[pt.x] = new Array();
+				addTo[pt.x][pt.y] = new Array();
+				addTo[pt.x][pt.y][pt.z] = new ArrayCollection();
+				(addTo[pt.x][pt.y][pt.z] as ArrayCollection).addItem(asset);												
+			}	
+		}
+		
 		private function snapToCenterPoint(asset:ActiveAsset, dimension:Number):Number
 		{
 			var center:Number = Math.round(dimension);
 			if (center > dimension)
-			{
 				center = center - 0.5;
-			}
 			else
-			{
 				center = center + 0.5;
-			}
 			return center;
 		}
 		
@@ -1128,14 +1271,62 @@ package views
 		
 		public function doesStructureCollide(asset:ActiveAsset):Boolean
 		{
+			var os:OwnedStructure = asset.thinger as OwnedStructure;
 			currentStructurePoints = getOccupiedOuterPoints(asset);
 			currentStructurePoints.addAll(getExtraBasePointsByStructureType(asset));
+			
 			for each (var pt3D:Point3D in currentStructurePoints)
 			{
 				if (structureBases[pt3D.x] && structureBases[pt3D.x][pt3D.y] && structureBases[pt3D.x][pt3D.y][pt3D.z] &&
 					(structureBases[pt3D.x][pt3D.y][pt3D.z] as ActiveAsset).thinger.id != asset.thinger.id)
 					return true;
 			}	
+			if (os.width == 1 || os.depth == 1)
+			{
+				if (doesSingleTileStructureCollide(asset, currentStructurePoints))
+					return true;				
+			}
+			return false;
+		}
+		
+		private function doesSingleTileStructureCollide(asset:ActiveAsset, currentStructurePoints:ArrayCollection):Boolean
+		{
+//			To collide, at least two points must overlap and have a different x and y
+			var os:OwnedStructure = asset.thinger as OwnedStructure;			
+			var overlaps:ArrayCollection = new ArrayCollection();
+			
+//			Does it collide with any other single tile structures?
+			if (structureSingletons[asset.worldCoords.x - 0.5] && structureSingletons[asset.worldCoords.x - 0.5][asset.worldCoords.y] &&
+				structureSingletons[asset.worldCoords.x - 0.5][asset.worldCoords.y][asset.worldCoords.z - 0.5] &&
+				(structureSingletons[asset.worldCoords.x - 0.5][asset.worldCoords.y][asset.worldCoords.z - 0.5] as ActiveAsset).thinger.id != asset.thinger.id)
+				return true;
+			
+//			Does it collide with any larger (non single tile) structures?
+			for each (var pt3D:Point3D in currentStructurePoints)
+			{			
+				if (structureBasesOuter[pt3D.x] && structureBasesOuter[pt3D.x][pt3D.y] &&
+					structureBasesOuter[pt3D.x][pt3D.y][pt3D.z])
+				{
+					var arr:ArrayCollection = structureBasesOuter[pt3D.x][pt3D.y][pt3D.z];
+					for each (var entry:ActiveAsset in arr)
+					{
+						if (entry != asset)
+							overlaps.addItem(entry);
+					}
+				}
+			}	
+			for (var i:int = 0; i < overlaps.length; i++)
+			{
+				var totalAssets:int = 1;
+				var a1:ActiveAsset = overlaps.getItemAt(i) as ActiveAsset;
+				for (var j:int = 0; j < overlaps.length; j++)
+				{
+					if (i != j && a1 == overlaps.getItemAt(j))
+						totalAssets++;
+					if (totalAssets > 2)
+						return true;
+				}
+			}
 			return false;
 		}
 		

@@ -10,6 +10,7 @@ package rock_on
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.UIComponent;
 	
 	import world.ActiveAsset;
 	import world.Point3D;
@@ -70,10 +71,30 @@ package rock_on
 				{
 					var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);					
 					var asset:ActiveAsset = new ActiveAsset(mc);
-					asset.thinger = os;
+					asset.thinger = os;					
 					_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
 				}
+			}			
+		}
+		
+		public function drawBitmappedTiles(_world:World):void
+		{
+			var uic:UIComponent = new UIComponent();
+			for each (var os:OwnedStructure in _structureController.owned_structures)
+			{
+				if (os.structure.structure_type == "Tile")
+				{
+					var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);					
+					var asset:ActiveAsset = new ActiveAsset(mc);
+					asset.thinger = os;
+					_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
+					asset.bitmap.x += asset.realCoords.x;
+					asset.bitmap.y += asset.realCoords.y;
+					_world.removeAsset(asset);
+					uic.addChild(asset.bitmap);
+				}
 			}
+			_world.addChild(uic);
 		}		
 		
 		public function addStageDecorations(worldToUpdate:World):void

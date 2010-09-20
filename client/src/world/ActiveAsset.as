@@ -2,13 +2,16 @@ package world
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.Loader;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.utils.ByteArray;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
@@ -16,6 +19,8 @@ package world
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.graphics.codec.JPEGEncoder;
+	import mx.graphics.codec.PNGEncoder;
 	
 	import views.BouncyBitmap;
 	
@@ -106,13 +111,24 @@ package world
 			var rect:Rectangle = new Rectangle(0, 0, mc.width, mc.height + Y_BITMAP_BUFFER);
 			scaleMatrix(matrix, mc.width);
 			bitmapData.draw(mc, matrix, new ColorTransform(), null, rect);
-			bitmap = new Bitmap(bitmapData);
-			bitmap.x = -mc.width/2;
-			bitmap.y = -heightDiff * _scale;
-			bitmap.opaqueBackground = null;
-			addChild(bitmap);	
+			
+//			var pnge:PNGEncoder = new PNGEncoder();
+//			var ba:ByteArray = pnge.encode(bitmapData);
+//			ba.compress();
+//			var l:Loader = new Loader();
+//			l.contentLoaderInfo.addEventListener(Event.COMPLETE, function onBitmapLoadComplete(e:Event):void
+//			{
+//				var bd:BitmapData = Bitmap(e.target.content).bitmapData;			
+//				bd.draw(e.target as Loader);
+				bitmap = new Bitmap(bitmapData);
+				bitmap.x = -mc.width/2;
+				bitmap.y = -heightDiff * _scale;
+				bitmap.opaqueBackground = null;
+				addChild(bitmap);	
+//			});
+//			l.loadBytes(ba);
 		}
-		
+
 		public function getHeightDifferential(mcBounds:Rectangle):Number
 		{
 			var heightDiff:Number;

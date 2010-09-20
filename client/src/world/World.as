@@ -79,9 +79,12 @@ package world
 		
 		private function onAdded(evt:Event):void
 		{
-			removeEventListener(Event.ADDED, onAdded);
-			x = (parent.width)/2 - (wg.mc.width/2);
-			y = (parent.height)/2;
+			if (this.parent)
+			{
+				removeEventListener(Event.ADDED, onAdded);
+				x = (parent.width)/2 - (wg.mc.width/2);
+				y = (parent.height)/2;
+			}
 		}
 		
 		public function addAsset(activeAsset:ActiveAsset, worldCoords:Point3D):void

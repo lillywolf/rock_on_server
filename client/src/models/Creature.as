@@ -1,10 +1,15 @@
 package models
 {
 	import flash.display.MovieClip;
+	import flash.events.DataEvent;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	
+	import flashx.textLayout.events.ModelChange;
+	
 	import mx.collections.ArrayCollection;
+	import mx.events.CollectionEvent;
+	import mx.events.CollectionEventKind;
 	
 	import world.ActiveAsset;
 	import world.ActiveAssetStack;
@@ -32,25 +37,27 @@ package models
 			
 			_owned_layerables = new ArrayCollection();			
 			setPropertiesFromParams(params);
-			initializeLayerableOrder();
+			initializeLayerableOrder();					
 		}
-		
+	
 		public function setPropertiesFromParams(params:Object):void
 		{
 			_id = params.id;
 			_user_id = params.user_id;
 			
-			if (params.creature_type)
+			if (params.hasOwnProperty("creature_type") && params.creature_type)
 				_type = params.creature_type;
+			else if (params.hasOwnProperty("type") && params.type)
+				_type = params.type;
 			if (params.additional_info)
 				_additional_info = params.additional_info;		
 			if (params.reference_id)
 				_reference_id = params.reference_id;
-			if (params.x != null)
+			if (params.hasOwnProperty("x") && params.x != null)
 				location = new Point3D(params.x, 0, 0);
-			if (params.y != null)
+			if (params.hasOwnProperty("y") && params.y != null)
 				location.y = params.y;
-			if (params.z != null)
+			if (params.hasOwnProperty("z") && params.z != null)
 				location.z = params.z;
 			if (params.name)
 				_name = params.name;
@@ -64,9 +71,9 @@ package models
 		public function initializeLayerableOrder():void
 		{
 			layerableOrder = new Array();
-			layerableOrder['walk_toward'] = ["body", "hair back", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
+			layerableOrder['walk_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
 			layerableOrder['walk_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
-			layerableOrder['stand_still_toward'] = ["body", "hair back", "mouth", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
+			layerableOrder['stand_still_toward'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
 			layerableOrder['stand_still_away'] = ["body", "shoes", "bottom", "bottom custom", "top", "top custom", "hair front"];
 			layerableOrder['sing'] = ["body", "mouth", "shoes", "bottom", "top", "hair front"];
 			layerableOrder['head_bob_away'] = ["body", "shoes", "bottom", "top", "hair front"];

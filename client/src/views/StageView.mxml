@@ -93,7 +93,7 @@
 					venueManager.venue.dwelling.dimension * FlexGlobals.topLevelApplication.tileSize, 
 					FlexGlobals.topLevelApplication.tileSize, 
 					concertStage.structure.height);
-				venueManager.venue.stageManager.drawTiles(myStage);
+				venueManager.venue.stageManager.drawBitmappedTiles(myStage);
 				venueManager.venue.stageManager.myStage = myStage;
 				addChild(myStage);
 				

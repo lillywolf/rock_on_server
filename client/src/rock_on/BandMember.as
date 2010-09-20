@@ -159,7 +159,7 @@ package rock_on
 			else
 				walkWaitTime = new Timer(BandMember.WALK_WAIT_CONSTANT + Math.random()*BandMember.WALK_WAIT_MULTIPLIER);
 			walkWaitTime.addEventListener(TimerEvent.TIMER, onWalkWaitComplete);
-			walkWaitTime.start();
+//			walkWaitTime.start();
 		}
 		
 		private function stopWalkWaitTimer():void

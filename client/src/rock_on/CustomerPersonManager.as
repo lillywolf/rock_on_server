@@ -317,6 +317,10 @@ package rock_on
 				{
 					
 				}
+				else if (cp.state == CustomerPerson.TEMPORARY_ENTHRALLED_STATE)
+				{
+					
+				}
 				else if (cp.state == CustomerPerson.HEADTODOOR_STATE)
 					cp.advanceState(CustomerPerson.HEADTOSTAGE_STATE);
 				else if (cp.state == CustomerPerson.ROAM_STATE)

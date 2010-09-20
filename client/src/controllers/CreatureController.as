@@ -147,7 +147,12 @@ package controllers
 //					var matchId:int = int(c.additional_info.split(": ")[1]);
 					var creature:Creature = this.getCreatureById(c.reference_id);
 					matchingCreatures.addItem(creature);
-				}				
+				}	
+				for each (var m:Creature in _creatures)
+				{
+					if (c.reference_id == m.reference_id && c != m && c.reference_id != 0)
+						throw new Error("weird");
+				}
 			}
 			return matchingCreatures;
 		}
