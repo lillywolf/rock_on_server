@@ -49,6 +49,7 @@ package rock_on
 	
 	import world.ActiveAsset;
 	import world.ActiveAssetStack;
+	import world.AssetRenderer;
 	import world.BitmapBlotter;
 	import world.MoodEvent;
 	import world.Point3D;
@@ -141,7 +142,8 @@ package rock_on
 			setAdditionalProperties(params);		
 			
 			addEventListener(VenueEvent.BOOTH_UNSTOCKED, onBoothUnstocked);	
-			_structureController.addEventListener(InventoryEvent.ADDED_TO_INVENTORY, onAddedToInventory);			
+			_structureController.addEventListener(InventoryEvent.ADDED_TO_INVENTORY, onAddedToInventory);	
+			_structureController.addEventListener(ServerDataEvent.INSTANCE_CREATED, onNewInstanceCreated);			
 			addStageManager();	
 		}
 		
@@ -811,6 +813,25 @@ package rock_on
 		public function convertStationListenerToCustomer(sl:StationListener, fanIndex:int):void
 		{
 			customerPersonManager.addConvertedCustomer(sl.creature, sl.worldCoords, fanIndex);
+		}	
+		
+		public function redrawAllStructures():void
+		{
+			var assetTotal:int = myWorld.assetRenderer.unsortedAssets.length;
+			var toRedraw:ArrayCollection = new ArrayCollection();
+			for (var i:int = 0; i < assetTotal; i++)
+			{
+				var asset:ActiveAsset = myWorld.assetRenderer.unsortedAssets.getItemAt(i) as ActiveAsset;
+				if (asset.thinger is OwnedStructure)
+				{
+					asset.toppers = _structureController.getStructureToppers(asset.thinger as OwnedStructure);
+					toRedraw.addItem(asset);
+				}
+			}	
+			for each (var a:ActiveAsset in toRedraw)
+			{
+				doStructureRedraw(a);										
+			}
 		}		
 		
 		public function doStructureRedraw(asset:ActiveAsset):void
@@ -886,6 +907,15 @@ package rock_on
 					return pt;
 			}
 			return getOpenSpot(rect, extra);
+		}
+		
+		private function onNewInstanceCreated(evt:ServerDataEvent):void
+		{
+			if (evt.params)
+			{
+				myWorld.onNewInstanceCreated(evt.params);
+				stageManager.myStage.onNewInstanceCreated(evt.params);
+			}
 		}
 		
 		public function removeAssetFromBitmap(asset:ActiveAsset):void

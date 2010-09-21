@@ -193,8 +193,11 @@
 			
 			private function switchToInventoryMode():void
 			{
-				normalStructureMode.rotationToolEnabled = false;
-				normalStructureMode.inventoryToolEnabled = true;
+				if (normalStructureMode)
+				{
+					normalStructureMode.rotationToolEnabled = false;
+					normalStructureMode.inventoryToolEnabled = true;
+				}
 			}
 			
 			public function addTemporaryCoords(os:OwnedStructure):void

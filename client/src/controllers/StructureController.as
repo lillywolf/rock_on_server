@@ -178,7 +178,7 @@ package controllers
 		
 		public function saveNewOwnedStructure(os:ImposterOwnedStructure, od:OwnedDwelling, coords:Point3D):void
 		{
-			_serverController.sendRequest({user_id: od.user_id, owned_dwelling_id: od.id, structure_id: os.structure.id, x: coords.x, y: coords.y, z: coords.z, key: os.key}, "owned_structure", "create_new");			
+			_serverController.sendRequest({user_id: od.user_id, owned_dwelling_id: od.id, structure_id: os.structure.id, x: coords.x, y: coords.y, z: coords.z, rotation: os.rotation, key: os.key}, "owned_structure", "create_new");			
 			_serverController.sendRequest({id: od.user_id, to_remove: (os as ImposterOwnedStructure).sot.price}, "user", "decrement_credits");
 		}
 
@@ -323,7 +323,6 @@ package controllers
 				var evt:ServerDataEvent = new ServerDataEvent(ServerDataEvent.INSTANCE_CREATED, null, osReference);
 				evt.key = structureObj.key;
 				this.dispatchEvent(evt);
-				
 			}
 			
 			if (osReference.structure.structure_type == "Booth")

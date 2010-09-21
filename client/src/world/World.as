@@ -2,6 +2,7 @@ package world
 {
 	import controllers.StructureController;
 	
+	import flash.display.Bitmap;
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.geom.Point;
@@ -16,6 +17,8 @@ package world
 	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
 	import mx.events.CollectionEvent;
+	
+	import server.ServerDataEvent;
 	
 	import views.AssetBitmapData;
 	import views.WorldView;
@@ -204,11 +207,20 @@ package world
 		{
 			if (assetRenderer.unsortedAssets.contains(activeAsset))
 			{
-				var index:int = assetRenderer.unsortedAssets.getItemIndex(activeAsset);
 				pathFinder.remove(activeAsset);
+				var index:int = assetRenderer.unsortedAssets.getItemIndex(activeAsset);
 				assetRenderer.unsortedAssets.removeItemAt(index);
 			}
 		}
+		
+		public function onNewInstanceCreated(obj:Object):void
+		{
+			for each (var asset:ActiveAsset in this.assetRenderer.unsortedAssets)
+			{
+				if (asset.thinger && asset.thinger.id == obj.id)
+					asset.thinger = obj;
+			}
+		}		
 		
 		public static function worldToActualCoords(worldCoords:Point3D):Point
 		{
@@ -259,6 +271,12 @@ package world
 			addAsset(asset, new Point3D(os.x, os.y, os.z));			
 		}
 		
+		public function createNewUnaddedStructure(os:OwnedStructure):ActiveAsset
+		{
+			var asset:ActiveAsset = World.createStandardAssetFromStructure(os);
+			return asset;
+		}
+		
 		public function saveStructurePlacement(os:OwnedStructure, saveRotation:Boolean=false, exempt:ArrayCollection=null, extra:ArrayCollection=null):void
 		{
 			var asset:ActiveAsset = getAssetFromOwnedStructure(os);
@@ -267,6 +285,30 @@ package world
 			if (saveRotation)
 				saveStructureRotation(asset, os);
 		}
+		
+		public function updateBitmappedStructurePlacement(os:OwnedStructure, asset:ActiveAsset, saveRotation:Boolean=false, exempt:ArrayCollection=null, extra:ArrayCollection=null):Bitmap
+		{
+			asset.worldCoords.x = os.x;
+			asset.worldCoords.y = os.y;
+			asset.worldCoords.z = os.z;
+			var adjustX:Number = asset.bitmap.x - asset.realCoords.x;
+			var adjustY:Number = asset.bitmap.y - asset.realCoords.y;
+			asset.realCoords = worldToActualCoords(asset.worldCoords);
+			
+			asset.bitmap.x = asset.realCoords.x + adjustX;
+			asset.bitmap.y = asset.realCoords.y + adjustY;
+			if (saveRotation)
+				saveStructureRotation(asset, os);
+			return asset.bitmap;
+		}
+		
+		public function setBitmapPlacement(os:OwnedStructure, asset:ActiveAsset):void
+		{			
+			addAsset(asset, new Point3D(os.x, os.y, os.z));
+			asset.bitmap.x += asset.realCoords.x;
+			asset.bitmap.y += asset.realCoords.y;
+			removeAsset(asset);
+		}		
 		
 		public function saveStructureRotation(asset:ActiveAsset, os:OwnedStructure):void
 		{

@@ -597,8 +597,8 @@ package views
 				if (asset.toppers && asset.toppers.length > 0)
 					saveToppers(asset);	
 				
-				_venue.doStructureRedraw(asset);
-			}
+//				_venue.doStructureRedraw(asset);
+			}		
 		}
 		
 		public function saveStructureCoords(asset:ActiveAsset, parentAsset:ActiveAsset=null):void
@@ -636,8 +636,8 @@ package views
 				(asset.thinger as OwnedStructure).z = asset.worldCoords.z - parentOs.structure.height;				
 				doTopperRedraw(asset.thinger as OwnedStructure, parentAsset);								
 			}
-			else
-				_venue.doStructureRedraw(asset);
+//			else
+//				_venue.doStructureRedraw(asset);
 		}
 		
 		private function saveOwnedStructureCoords(asset:ActiveAsset, parentAsset:ActiveAsset=null):void
@@ -661,7 +661,7 @@ package views
 //				If asset has toppers then save their coords
 				if (asset.toppers && asset.toppers.length > 0)
 					saveToppers(asset);
-				_venue.doStructureRedraw(asset);
+//				_venue.doStructureRedraw(asset);
 			}
 			
 			dispatchEvent(evt);			
@@ -687,19 +687,19 @@ package views
 		
 		private function doTopperRedraw(topper:OwnedStructure, parentAsset:ActiveAsset):void
 		{
-			for each (var asset:ActiveAsset in _venue.myWorld.assetRenderer.unsortedAssets)
-			{
-				if (asset.toppers && asset.toppers.contains(topper) && 
-					asset.thinger.id != parentAsset.thinger.id)
-				{
-					var index:int = asset.toppers.getItemIndex(topper);
-					asset.toppers.removeItemAt(index);
-					_venue.doStructureRedraw(asset);					
-				}
-			}
+//			for each (var asset:ActiveAsset in _venue.myWorld.assetRenderer.unsortedAssets)
+//			{
+//				if (asset.toppers && asset.toppers.contains(topper) && 
+//					asset.thinger.id != parentAsset.thinger.id)
+//				{
+//					var index:int = asset.toppers.getItemIndex(topper);
+//					asset.toppers.removeItemAt(index);
+//					_venue.doStructureRedraw(asset);					
+//				}
+//			}
 			if (!parentAsset.toppers.contains(topper))
 				parentAsset.toppers.addItem(topper);
-			_venue.doStructureRedraw(parentAsset);
+//			_venue.doStructureRedraw(parentAsset);
 		}
 		
 		private function getMatchingAssetForOwnedStructure(os:OwnedStructure):ActiveAsset

@@ -60,9 +60,7 @@ package rock_on
 					_venue.redrawAllMovers();
 				}
 				else
-				{
-					
-				}
+					_venue.redrawAllStructures();
 			}	
 			else if (method == "save_placement_and_rotation")
 			{
@@ -80,6 +78,8 @@ package rock_on
 					_myWorld.createNewStructure(os);				
 					_venue.redrawAllMovers();
 				}
+				else
+					_venue.redrawAllStructures();
 			}
 		}
 		

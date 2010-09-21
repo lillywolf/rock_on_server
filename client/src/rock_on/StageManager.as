@@ -2,6 +2,7 @@ package rock_on
 {
 	import controllers.StructureController;
 	
+	import flash.display.Bitmap;
 	import flash.display.MovieClip;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -23,8 +24,10 @@ package rock_on
 		public var _myStage:World;
 		public var _venue:Venue;
 		public var editMirror:Boolean;
+		public var tileUIC:UIComponent;
 		public var stageAsset:ActiveAsset;
 		public var stages:ArrayCollection;
+		public var tileAssets:ArrayCollection;
 		public var concertStage:ConcertStage;
 		public var stageDecorations:ArrayCollection;
 		public var stageDecorationAssets:ArrayCollection;
@@ -38,6 +41,7 @@ package rock_on
 			_venue = venue;
 			stages = new ArrayCollection();
 			stageDecorationAssets = new ArrayCollection();
+			tileAssets = new ArrayCollection();
 		}
 		
 		public function initialize():void
@@ -71,6 +75,7 @@ package rock_on
 				{
 					var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);					
 					var asset:ActiveAsset = new ActiveAsset(mc);
+					tileAssets.addItem(asset);
 					asset.thinger = os;					
 					_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
 				}
@@ -79,23 +84,21 @@ package rock_on
 		
 		public function drawBitmappedTiles(_world:World):void
 		{
-			var uic:UIComponent = new UIComponent();
+			tileUIC = new UIComponent();
 			for each (var os:OwnedStructure in _structureController.owned_structures)
 			{
 				if (os.structure.structure_type == "Tile")
 				{
 					var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);					
 					var asset:ActiveAsset = new ActiveAsset(mc);
+					tileAssets.addItem(asset);
 					asset.thinger = os;
-					_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
-					asset.bitmap.x += asset.realCoords.x;
-					asset.bitmap.y += asset.realCoords.y;
-					_world.removeAsset(asset);
-					uic.addChild(asset.bitmap);
+					_world.setBitmapPlacement(os, asset);
+					tileUIC.addChild(asset.bitmap);
 				}
 			}
-			_world.addChild(uic);
-		}		
+			_world.addChild(tileUIC);
+		}	
 		
 		public function addStageDecorations(worldToUpdate:World):void
 		{
@@ -143,16 +146,43 @@ package rock_on
 		
 		public function updateRenderedTiles(os:OwnedStructure, method:String):void
 		{
+			var asset:ActiveAsset;
 			if (method == "save_placement")
 			{
-				_myStage.saveStructurePlacement(os);
+				asset = getTileAssetFromOwnedStructure(os);				
+				_myStage.updateBitmappedStructurePlacement(os, asset);
+				removeTileBitmap(asset.bitmap);
+				tileUIC.addChild(asset.bitmap);									
 			}
 			else if (method == "create_new")
 			{
-				_myStage.createNewStructure(os);
+				asset = _myStage.createNewUnaddedStructure(os);
+				tileAssets.addItem(asset);
+				_myStage.setBitmapPlacement(os, asset);
+				tileUIC.addChild(asset.bitmap);
+			}
+			else if (method == "take_out_of_use")
+			{
+				asset = getTileAssetFromOwnedStructure(os);
+				removeTileBitmap(asset.bitmap);
 			}
 		}
 		
+		private function removeTileBitmap(bitmap:Bitmap):void
+		{
+			tileUIC.removeChild(bitmap);
+		}
+		
+		private function getTileAssetFromOwnedStructure(os:OwnedStructure):ActiveAsset
+		{
+			for each (var asset:ActiveAsset in tileAssets)
+			{
+				if (asset.thinger.id == os.id)
+					return asset;
+			}
+			return null;
+		}
+			
 		public function addStageToWorld(asset:ActiveAsset, addTo:Point3D, myStage:World):void
 		{
 			_myStage = myStage;	
