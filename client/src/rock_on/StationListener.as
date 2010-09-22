@@ -48,7 +48,7 @@ package rock_on
 			else
 			{
 				currentStation = station;
-				currentStation.currentQueue++;
+//				currentStation.currentQueue++;
 				var destination:Point3D = setInitialDestination();
 				if (destination)
 					movePerson(destination, true);	

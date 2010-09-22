@@ -236,7 +236,7 @@ package rock_on
 			if (method == "save_placement")
 			{
 				station.updateProperties(os);
-				moveStationUIComponents(station);
+//				moveStationUIComponents(station);
 			}				
 		}
 		
@@ -245,18 +245,16 @@ package rock_on
 			for each (var station:ListeningStation in listeningStations)
 			{
 				if (station.id == id)
-				{
 					return station;
-				}
 			}
 			return null;
 		}	
 		
-		private function moveStationUIComponents(station:ListeningStation):void
-		{
-			if (station.state == ListeningStation.READY_TO_COLLECT_STATE && station.collectionButton)
-				moveStationCollectionButton(station.collectionButton, station);
-		}
+//		private function moveStationUIComponents(station:ListeningStation):void
+//		{
+//			if (station.state == ListeningStation.READY_TO_COLLECT_STATE && station.collectionButton)
+//				moveStationCollectionButton(station.collectionButton, station);
+//		}
 		
 		private function moveStationCollectionButton(btn:SpecialButton, station:ListeningStation):void
 		{

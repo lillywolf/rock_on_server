@@ -61,16 +61,15 @@ package rock_on
 				booth.inventory_count = 0;
 				
 				if (!friendMirror)
-				{
 					_structureController.validateBoothCountZero(booth.id);				
-				}
 			}			
 		}
 		
 		public function updateBoothOnServerResponse(os:OwnedStructure, method:String):void
 		{
 //			var os:OwnedStructure = _structureController.getOwnedStructureById(os.id);
-			var booth:Booth = getBoothById(os.id);
+			var booth:BoothAsset = getBoothById(os.id);
+			var boothStructure:Booth = booth.thinger as Booth;
 						
 			if (method == "update_inventory_count")
 			{
@@ -78,12 +77,12 @@ package rock_on
 			}			
 			if (method == "add_booth_credits")
 			{
-				booth.updateProperties(os);
-				booth.advanceState(Booth.STOCKED_STATE);
+				boothStructure.updateProperties(os);
+				booth.advanceState(BoothAsset.STOCKED_STATE);
 			}			
 			if (method == "save_placement")
 			{
-				booth.updateProperties(os);
+				boothStructure.updateProperties(os);
 				moveBoothUIComponents(booth);
 			}						
 			if (method == "sell")
@@ -92,49 +91,50 @@ package rock_on
 			}				
 			if (method == "create_new")
 			{
-				booth = createBooth(os);
+				boothStructure = createBooth(os);
+				booth = createBoothAsset(boothStructure);
 				booth.updateState();
 			}		
 		}
 		
-		public function removeBooth(booth:Booth):void
+		public function removeBooth(booth:BoothAsset):void
 		{
-			var index:int = booths.getItemIndex(booth);
+			var index:int;
+			var boothStructure:Booth = booth.thinger as Booth;
+			index = boothAssets.getItemIndex(booth);
+			boothAssets.removeItemAt(index);
+			index = booths.getItemIndex(boothStructure);
 			booths.removeItemAt(index);				
 		}
 		
 		public function createBooth(os:OwnedStructure):Booth
 		{
 			var booth:Booth = new Booth(this, _venue, os);
-			booth.friendMirror = friendMirror;
-			booth.editMirror = editMirror;
+//			booth.friendMirror = friendMirror;
+//			booth.editMirror = editMirror;
 			booths.addItem(booth);							
 			return booth;
 		}
 		
-		public function getBoothById(id:int):Booth
+		public function getBoothById(id:int):BoothAsset
 		{
-			for each (var booth:Booth in booths)
+			for each (var booth:BoothAsset in boothAssets)
 			{
-				if (booth.id == id)
-				{
+				if ((booth.thinger as OwnedStructure).id == id)
 					return booth;									
-				}
 			}	
 			return null;		
 		}
 		
-		private function moveBoothUIComponents(booth:Booth):void
+		private function moveBoothUIComponents(booth:BoothAsset):void
 		{
-			if (booth.state == Booth.UNSTOCKED_STATE && booth.collectionButton)
-			{
-				moveBoothCollectionButton(booth.collectionButton, booth);
-			}
+//			if (booth.state == Booth.UNSTOCKED_STATE)
+//				moveBoothCollectionButton(booth.collectionButton, booth);
 		}
 		
 		public function reInitializeBooths(bitmapped:Boolean):void
 		{
-			for each (var booth:Booth in booths)
+			for each (var booth:BoothAsset in boothAssets)
 			{
 				booth.currentQueue = 0;
 				booth.actualQueue = 0;
@@ -142,9 +142,7 @@ package rock_on
 				booth.hasCustomerEnRoute = false;
 			}
 			if (bitmapped)
-			{
 				removeRenderedBooths();
-			}
 		}
 		
 		public function updateRenderedBooths(os:OwnedStructure, method:String):void
@@ -181,14 +179,15 @@ package rock_on
 				var booth:Booth = createBooth(os);
 				if (os.in_use)
 				{
-					var asset:ActiveAssetStack = createBoothAsset(booth);
+					var asset:BoothAsset = createBoothAsset(booth);
 					asset.toppers = _structureController.getStructureToppers(os);
 					asset.setMovieClipsForStructure(asset.toppers);
 					asset.bitmapWithToppers();
 					var addTo:Point3D = new Point3D(booth.x, booth.y, booth.z);
 					addBoothsToWorld(asset, addTo);
 					boothAssets.addItem(asset);
-					booth.updateState();
+//					booth.updateState();
+					asset.updateState();
 				}
 			}
 		}
@@ -219,11 +218,12 @@ package rock_on
 			booths.removeAll();
 		}
 
-		public function createBoothAsset(booth:Booth):ActiveAssetStack
+		public function createBoothAsset(booth:Booth):BoothAsset
 		{
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(booth.structure.mc);
 			mc.cacheAsBitmap = true;
-			var asset:ActiveAssetStack = new ActiveAssetStack(null, mc, null, StructureController.STRUCTURE_SCALE);	
+//			var asset:ActiveAssetStack = new ActiveAssetStack(null, mc, null, StructureController.STRUCTURE_SCALE);	
+			var asset:BoothAsset = new BoothAsset(this, _venue, null, mc, null, StructureController.STRUCTURE_SCALE);
 			asset.copyFromOwnedStructure(booth);
 			return asset;		
 		}	
@@ -232,16 +232,16 @@ package rock_on
 		{	
 			var btn:SpecialButton = new SpecialButton();
 			btn.booth = booth;
-			booth.collectionButton = btn;
-			btn.addEventListener(MouseEvent.CLICK, onCollectionButtonClicked);
+//			booth.collectionButton = btn;
+//			btn.addEventListener(MouseEvent.CLICK, onCollectionButtonClicked);
 			addBoothCollectionButtonToUILayer(booth);
 		}
 		
 		public function addBoothCollectionButtonToUILayer(booth:Booth):void
 		{
 			var actualCoords:flash.geom.Point = World.worldToActualCoords(new Point3D(booth.x, booth.y, booth.z));
-			booth.collectionButton.x = actualCoords.x + _myWorld.x;
-			booth.collectionButton.y = actualCoords.y + _myWorld.y;
+//			booth.collectionButton.x = actualCoords.x + _myWorld.x;
+//			booth.collectionButton.y = actualCoords.y + _myWorld.y;
 			if (!friendMirror && !editMirror)
 			{
 //				_uiLayer.addChild(booth.collectionButton);
@@ -265,15 +265,15 @@ package rock_on
 			_uiLayer.removeChild(btn);
 		}
 		
-		public function getRandomBooth(booth:Booth=null):Booth
+		public function getRandomBooth(booth:BoothAsset=null):BoothAsset
 		{
-			var selectedBooth:Booth = null;			
+			var selectedBooth:BoothAsset = null;			
 			
 			if (stockedBoothExists(booth))
 			{
 				do 
 				{
-					selectedBooth = booths.getItemAt(Math.floor(Math.random()*booths.length)) as Booth;			
+					selectedBooth = boothAssets.getItemAt(Math.floor(Math.random()*boothAssets.length)) as BoothAsset;			
 				}
 				while (selectedBooth == booth || selectedBooth.state != Booth.STOCKED_STATE);
 			}
@@ -281,10 +281,10 @@ package rock_on
 			return selectedBooth;	
 		}
 		
-		private function stockedBoothExists(booth:Booth):Boolean
+		private function stockedBoothExists(booth:BoothAsset):Boolean
 		{
-			if (booths.length &&
-				!(booths.length == 1 && booth) &&
+			if (boothAssets.length &&
+				!(boothAssets.length == 1 && booth) &&
 				hasStockedBooth(getBoothsInUse(), booth))
 			{
 				return true;
@@ -292,9 +292,9 @@ package rock_on
 			return false;
 		}
 		
-		private function hasStockedBooth(inUse:ArrayCollection, discount:Booth=null):Boolean
+		private function hasStockedBooth(inUse:ArrayCollection, discount:BoothAsset=null):Boolean
 		{
-			for each (var b:Booth in inUse)
+			for each (var b:BoothAsset in inUse)
 			{
 				if (b != discount && b.state == Booth.STOCKED_STATE)
 					return true;
@@ -305,29 +305,29 @@ package rock_on
 		private function getBoothsInUse():ArrayCollection
 		{
 			var inUse:ArrayCollection = new ArrayCollection();
-			for each (var booth:Booth in booths)
+			for each (var booth:BoothAsset in boothAssets)
 			{
-				if (booth.in_use)
+				if ((booth.thinger as OwnedStructure).in_use)
 					inUse.addItem(booth);
 			}
 			return inUse;
 		}
 		
-		public function getAnyExistingBooth(type:String=null):Booth
+		public function getAnyExistingBooth(type:String=null):BoothAsset
 		{
-			var selectedBooth:Booth = null;
+			var selectedBooth:BoothAsset = null;
 			do
 			{
-				selectedBooth = booths.getItemAt(Math.floor(Math.random()*booths.length)) as Booth;			
+				selectedBooth = boothAssets.getItemAt(Math.floor(Math.random()*boothAssets.length)) as BoothAsset;			
 			}
-			while (selectedBooth.structure.booth_structure);
+			while ((selectedBooth.thinger as Booth).structure.booth_structure);
 			return selectedBooth;
 		}
 		
 		public function getUnstockedBooths():ArrayCollection
 		{
 			var unstockedBooths:ArrayCollection = new ArrayCollection();
-			for each (var booth:Booth in booths)
+			for each (var booth:BoothAsset in boothAssets)
 			{
 				if (!booth.state)
 					unstockedBooths.addItem(booth);
@@ -337,24 +337,25 @@ package rock_on
 			return unstockedBooths;		
 		}
 				
-		public function getBoothFront(booth:Booth, index:int=0, routedCustomer:Boolean=false, queuedCustomer:Boolean=false, customerless:Boolean=false):Point3D
+		public function getBoothFront(booth:BoothAsset, index:int=0, routedCustomer:Boolean=false, queuedCustomer:Boolean=false, customerless:Boolean=false):Point3D
 		{			
 			// Do not allow out of bound points, etc.
 			
 			var boothFront:Point3D = booth.getStructureFrontByRotation();
+			var boothStructure:Booth = booth.thinger as Booth;
 			if (customerless)
-				booth.addPointsByRotation(boothFront, 0);
+				boothStructure.addPointsByRotation(boothFront, 0);
 			else if (queuedCustomer)
-				booth.addPointsByRotation(boothFront, index);			
+				boothStructure.addPointsByRotation(boothFront, index);			
 			else if (routedCustomer)
-				booth.addPointsByRotation(boothFront, booth.actualQueue + index);															
+				boothStructure.addPointsByRotation(boothFront, booth.actualQueue + index);															
 			else
-				booth.addPointsByRotation(boothFront, booth.currentQueue);	
+				boothStructure.addPointsByRotation(boothFront, booth.currentQueue);	
 			
 			if ((_myWorld.pathFinder.occupiedByStructures[boothFront.x] &&
 				_myWorld.pathFinder.occupiedByStructures[boothFront.x][boothFront.y] &&
 				_myWorld.pathFinder.occupiedByStructures[boothFront.x][boothFront.y][boothFront.z] &&
-				(_myWorld.pathFinder.occupiedByStructures[boothFront.x][boothFront.y][boothFront.z] as ActiveAsset).thinger.id != booth.id) ||
+				(_myWorld.pathFinder.occupiedByStructures[boothFront.x][boothFront.y][boothFront.z] as ActiveAsset).thinger.id != boothStructure.id) ||
 				!_myWorld.pathFinder.isInBounds(boothFront))
 			{
 				return null;

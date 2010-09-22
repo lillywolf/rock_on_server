@@ -20,6 +20,7 @@ package rock_on
 	
 	import models.Creature;
 	import models.EssentialModelReference;
+	import models.OwnedStructure;
 	import models.Usable;
 	
 	import mx.collections.ArrayCollection;
@@ -76,7 +77,7 @@ package rock_on
 		public var numEnthralledTimers:int = 0;
 		
 		public var state:int;
-		public var currentBooth:Booth;
+		public var currentBooth:BoothAsset;
 		public var currentBoothPosition:int;
 		public var activityTimer:Timer;
 		public var isSuperFan:Boolean;
@@ -85,7 +86,7 @@ package rock_on
 		public var _venue:Venue;
 		
 		public var itemPickupAnimations:Array;
-		public var pickupBooth:Booth;
+		public var pickupBooth:BoothAsset;
 		public var proxiedForItemPickup:Boolean;
 		
 		private var customerAnimations:Object = {
@@ -375,12 +376,13 @@ package rock_on
 		{
 			state = ROAM_STATE;
 			personType = Person.MOVING;
+			
 			var destination:Point3D = pickPointNearStructure(_venue.boothsRect);
-			if (this.state == CustomerPerson.TEMPORARY_ENTHRALLED_STATE)
-				movePerson(destination);
-			else
-//				movePerson(destination, true, true, false, null, 0, null, true);
-				movePerson(destination);
+			
+//			Move person somewhere in valid rect space (not outside, not into stage)
+			var extra:ArrayCollection = new ArrayCollection();
+			extra.addItem(_venue.outsideRect);
+			movePerson(destination, false, true, false, null, 0, extra);
 			trace("customer person roamed");
 		}
 		
@@ -426,6 +428,7 @@ package rock_on
 			this.speed = 0.12;
 			var extra:ArrayCollection = new ArrayCollection();
 			extra.addItem(_venue.stageBufferRect);
+			extra.addItem(_venue.outsideRect);
 			movePerson(this.worldDestination, true, true, false, null, 0, extra);
 		}
 		
@@ -445,6 +448,9 @@ package rock_on
 		{
 			state = EXIT_STATE;
 			this.speed = 0.13;
+			
+			var extra:ArrayCollection = new ArrayCollection();
+			extra.addItem(_venue.outsideRect);
 			movePerson(new Point3D(_venue.mainEntrance.x, _venue.mainEntrance.y, _venue.mainEntrance.z), true);
 		}
 		
@@ -583,7 +589,7 @@ package rock_on
 		{
 			trace("start queued state");
 			state = QUEUED_STATE;
-			standFacingObject(currentBooth);
+			standFacingObject(currentBooth.thinger as OwnedStructure);
 			currentBooth.actualQueue++;			
 			checkIfFrontOfQueue();
 		}
@@ -645,7 +651,7 @@ package rock_on
 		public function moveUpInQueue():void
 		{		
 			var destination:Point3D = new Point3D(Math.floor(worldCoords.x), Math.floor(worldCoords.y), Math.floor(worldCoords.z));
-			this.currentBooth.addPointsByRotation(destination, -1);
+			(this.currentBooth.thinger as OwnedStructure).addPointsByRotation(destination, -1);
 			movePerson(destination);
 		}
 		
@@ -681,7 +687,7 @@ package rock_on
 		
 		private function decrementQueue():void
 		{
-			currentBooth.boothBoss.decreaseInventoryCount(currentBooth, 1);
+			currentBooth.boothBoss.decreaseInventoryCount(currentBooth.thinger as Booth, 1);
 			currentBooth.currentQueue--;
 			currentBooth.actualQueue--;			
 		}
@@ -716,8 +722,9 @@ package rock_on
 			
 			var extra:ArrayCollection = new ArrayCollection();
 			extra.addItem(_venue.stageBufferRect);
+			extra.addItem(_venue.outsideRect);
 			var destination:Point3D = _venue.getOpenSeat(_venue.mainCrowdRect, extra);
-			movePerson(destination);
+			movePerson(destination, true);
 		}
 		
 		public function endHeadToStageState():void
@@ -730,9 +737,9 @@ package rock_on
 			
 		}
 		
-		public function getBoothForRouteState():Booth
+		public function getBoothForRouteState():BoothAsset
 		{
-			var booth:Booth;
+			var booth:BoothAsset;
 			if (proxiedForItemPickup)
 			{
 				booth = _boothBoss.getAnyExistingBooth();
@@ -751,7 +758,7 @@ package rock_on
 			state = ROUTE_STATE;
 			personType = Person.MOVING;
 			
-			var booth:Booth = getBoothForRouteState();
+			var booth:BoothAsset = getBoothForRouteState();
 			
 			if (booth == null)
 //				advanceState(ROAM_STATE);
@@ -800,13 +807,16 @@ package rock_on
 		
 		public function pickPointNearStructure(bounds:Rectangle, avoid:Rectangle=null, worldToUpdate:World=null):Point3D
 		{
+			var extra:ArrayCollection = new ArrayCollection();
+			extra.addItem(_venue.outsideRect);
+			
 			trace("pick point near structure");
 			var stagePoint:Point3D;
 			var occupiedSpaces:Array;
 			if (worldToUpdate)
-				occupiedSpaces = worldToUpdate.pathFinder.updateOccupiedSpaces(true, true);
+				occupiedSpaces = worldToUpdate.pathFinder.updateOccupiedSpaces(true, true, null, extra);
 			else
-				occupiedSpaces = _myWorld.pathFinder.updateOccupiedSpaces(true, true);			
+				occupiedSpaces = _myWorld.pathFinder.updateOccupiedSpaces(true, true, null, extra);			
 			
 			if (availableSpaces(occupiedSpaces))
 			{
@@ -852,6 +862,9 @@ package rock_on
 		public function updateBoothFront(index:int):void
 		{
 			var boothFront:Point3D;
+			var extra:ArrayCollection = new ArrayCollection();
+			extra.addItem(_venue.outsideRect);
+			
 			if (state == ROUTE_STATE)
 			{
 				boothFront = _boothBoss.getBoothFront(currentBooth, index, true);
@@ -864,7 +877,7 @@ package rock_on
 			else if (state == QUEUED_STATE)
 			{
 				boothFront = _boothBoss.getBoothFront(currentBooth, index, false, true);
-				movePerson(boothFront, true);
+				movePerson(boothFront, true, true, false, null, 0, extra);
 			}
 			else
 				throw new Error("Should not be updating booth front when not in route state");
@@ -892,10 +905,13 @@ package rock_on
 		
 		public function isCustomerAtQueue():void
 		{
+			var extra:ArrayCollection = new ArrayCollection();
+			extra.addItem(_venue.outsideRect);
+			
 			if (proxiedDestination)
 			{
 				if (worldCoords.x != proxiedDestination.x || worldCoords.y != proxiedDestination.y || worldCoords.z != proxiedDestination.z)
-					movePerson(proxiedDestination, true);
+					movePerson(proxiedDestination, true, true, false, null, 0, extra);
 				else
 				{
 					if (state == ROUTE_STATE)

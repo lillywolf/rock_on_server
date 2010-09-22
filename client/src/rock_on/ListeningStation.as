@@ -40,6 +40,9 @@ package rock_on
 		public var stationTimer:Timer;
 		public var counter:Counter;
 		public var secondsRemaining:Number;
+		public var hasCustomerEnRoute:Boolean;
+		public var state:int;
+		public var friendMirror:Boolean;
 		
 		public var _listeningStationBoss:ListeningStationBoss;
 		
@@ -154,7 +157,7 @@ package rock_on
 			}			
 		}
 		
-		override public function advanceState(destinationState:int):void
+		public function advanceState(destinationState:int):void
 		{
 			switch (state)
 			{	

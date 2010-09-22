@@ -922,7 +922,7 @@ package rock_on
 		{
 			_bitmapBlotter.removeBitmapFromReferences(asset);
 		}
-		
+				
 		public function removeMoodClipFromBitmappedAsset(asset:ActiveAsset):BouncyBitmap
 		{
 			var clip:BouncyBitmap = _bitmapBlotter.removeMoodClipFromBitmap(asset);

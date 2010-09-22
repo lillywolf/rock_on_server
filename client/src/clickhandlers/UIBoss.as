@@ -160,7 +160,7 @@ package clickhandlers
 				createCollectible(MoodBoss.getRandomItemByMood(person.mood), person, parentWorld);
 		}
 		
-		public static function createCollectible(mc:MovieClip, asset:Person, parentWorld:World):void
+		public static function createCollectible(mc:MovieClip, asset:ActiveAsset, parentWorld:World):void
 		{
 			var radius:Point = new Point(100, 50);
 			var collectibleDrop:CollectibleDrop = new CollectibleDrop(asset, mc, radius, parentWorld, parentWorld.parent as WorldView, 0, 400, .001, null, new Point(asset.x, asset.y - 70));

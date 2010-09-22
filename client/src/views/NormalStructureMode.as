@@ -282,10 +282,8 @@ package views
 				if (os.depth == 1 && os.width == 1)
 					removeSavedPointsFromSingletonsArray(asset.thinger as OwnedStructure);
 				else
-				{
 					removeSavedPointsFromBasesArray(asset);
-					removeSavedPointsFromOuterBasesArray(asset);
-				}
+				removeSavedPointsFromOuterBasesArray(asset);
 				removeSavedPointsFromSurfacesArray(asset.thinger as OwnedStructure);
 				for each (var topper:OwnedStructure in asset.toppers)
 				{
@@ -304,10 +302,8 @@ package views
 				if (os.depth == 1 && os.width == 1)
 					addCurrentPointsToSingletonsArray(asset);
 				else
-				{
 					addCurrentPointsToBasesArray(asset);
-					addCurrentPointsToOuterBasesArray(asset);
-				}
+				addCurrentPointsToOuterBasesArray(asset);
 				addCurrentPointsToSurfacesArray(asset);
 				for each (var topper:OwnedStructure in asset.toppers)
 				{

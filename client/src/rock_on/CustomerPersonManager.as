@@ -7,6 +7,7 @@ package rock_on
 	import flash.utils.Timer;
 	
 	import models.Creature;
+	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
@@ -141,7 +142,7 @@ package rock_on
 		
 		private function decrementQueue(evt:DynamicEvent):void
 		{
-			var booth:Booth = evt.booth;
+			var booth:BoothAsset = evt.booth;
 			updateQueuedCustomers(booth, evt.person);
 			updateRoutedCustomers(booth);
 			validateBoothPositions(booth);			
@@ -161,7 +162,7 @@ package rock_on
 				customer.setQueuedPosition(index);
 		}
 		
-		private function validateBoothPositions(booth:Booth):void
+		private function validateBoothPositions(booth:BoothAsset):void
 		{
 			for each (var cp:CustomerPerson in this)
 			{
@@ -175,7 +176,7 @@ package rock_on
 			}			
 		}
 		
-		private function updateQueuedCustomers(booth:Booth, excludePerson:CustomerPerson):void
+		private function updateQueuedCustomers(booth:BoothAsset, excludePerson:CustomerPerson):void
 		{
 			var proxiedCustomers:ArrayCollection = new ArrayCollection();
 			for each (var cp:CustomerPerson in this)
@@ -190,7 +191,7 @@ package rock_on
 			updateProxiedCustomers(proxiedCustomers);			
 		}
 		
-		private function updateRoutedCustomers(booth:Booth):void
+		private function updateRoutedCustomers(booth:BoothAsset):void
 		{
 			var proxiedCustomers:ArrayCollection = new ArrayCollection();			
 			for each (var cp:CustomerPerson in this)
@@ -307,7 +308,7 @@ package rock_on
 				else if (cp.state == CustomerPerson.QUEUED_STATE)
 				{
 					cp.checkIfFrontOfQueue();	
-					cp.standFacingObject(cp.currentBooth);
+					cp.standFacingObject(cp.currentBooth.thinger as OwnedStructure);
 				}
 				else if (cp.state == CustomerPerson.HEADTOSTAGE_STATE)
 					cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
@@ -433,7 +434,7 @@ package rock_on
 			}
 		}		
 		
-		public function removeBoothFromAvailable(booth:Booth):void
+		public function removeBoothFromAvailable(booth:ActiveAsset):void
 		{
 			for each (var cp:CustomerPerson in this)
 			{
