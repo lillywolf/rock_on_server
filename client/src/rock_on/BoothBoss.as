@@ -225,6 +225,7 @@ package rock_on
 //			var asset:ActiveAssetStack = new ActiveAssetStack(null, mc, null, StructureController.STRUCTURE_SCALE);	
 			var asset:BoothAsset = new BoothAsset(this, _venue, null, mc, null, StructureController.STRUCTURE_SCALE);
 			asset.copyFromOwnedStructure(booth);
+			asset.currentFrameNumber = asset.getCurrentFrameNumber();
 			return asset;		
 		}	
 		

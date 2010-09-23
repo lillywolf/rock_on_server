@@ -124,6 +124,22 @@ package rock_on
 			
 		}		
 		
+		public function getCurrentFrameNumber():int
+		{
+			var rotated:int = 0;
+			var booth:Booth = this.thinger as Booth;
+			if (booth.rotation == 1 || booth.rotation == 2)
+				rotated = 1;
+			if (booth.inventory_count / booth.structure.booth_structure.inventory_capacity > 2/3)
+				return 7 + rotated;
+			else if (booth.inventory_count / booth.structure.booth_structure.inventory_capacity > 1/3)
+				return 5 + rotated;
+			else if (booth.inventory_count / booth.structure.booth_structure.inventory_capacity > 0)
+				return 3 + rotated;
+			else
+				return 1 + rotated;
+		}
+		
 		public function updateState():void
 		{
 			if ((this.thinger as OwnedStructure).inventory_count > 0)

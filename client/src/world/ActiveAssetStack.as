@@ -120,6 +120,9 @@ package world
 				mc.scaleY = 1;
 				mc.cacheAsBitmap = true;
 				newClip.addChild(mc);	
+				
+				if (currentFrameNumber)
+					mc.gotoAndStop(currentFrameNumber);
 			}
 			return newClip;
 		}
@@ -137,10 +140,16 @@ package world
 //				mc.scaleX = 1;
 				mc.cacheAsBitmap = true;
 				newClip.addChild(mc);	
-				if (rotated && mc.framesLoaded > 1)
-					mc.gotoAndStop(2);
+				
+				if (!currentFrameNumber)
+				{
+					if (rotated && mc.framesLoaded > 1)
+						mc.gotoAndStop(2);
+					else
+						mc.gotoAndStop(1);
+				}
 				else
-					mc.gotoAndStop(1);
+					mc.gotoAndStop(currentFrameNumber);
 			}
 			return newClip;			
 		}

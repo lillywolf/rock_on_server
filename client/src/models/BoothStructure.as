@@ -7,7 +7,8 @@ package models
 		public var _id:int;
 		public var _inventory_capacity:int;
 		public var _item_price:int;
-		public var _structure_id:int;		
+		public var _structure_id:int;	
+		public var _structure:Structure;
 		
 		public function BoothStructure(params:Object=null, target:IEventDispatcher=null)
 		{
@@ -35,6 +36,16 @@ package models
 		public function get structure_id():int
 		{
 			return _structure_id;
+		}
+		
+		public function set structure(val:Structure):void
+		{
+			_structure = val;
+		}
+		
+		public function get structure():Structure
+		{
+			return _structure;
 		}
 		
 		public function set item_price(val:int):void

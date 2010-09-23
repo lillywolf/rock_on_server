@@ -81,13 +81,9 @@ package server
 //			params = requestCache.retrieveRequest( params.hashkey );
 			
 			if (params.auth_failed)
-			{
 				mx.controls.Alert.show("Problems with your connection! Yikes!");
-			}
 			else
-			{
 				handleParams(params, requestKey);
-			}
 		}
 		
 		public function allOutoingRequestsReceived(controllerName:String):Boolean
@@ -116,7 +112,7 @@ package server
 		}
 		
 		private function handleParams(params:Object, requestKey:String):void
-		{
+		{			
 			var managerName:String = modelToManagerMap[requestKey];
 			handleParamsForModel(managerName, requestKey, params);
 		}	

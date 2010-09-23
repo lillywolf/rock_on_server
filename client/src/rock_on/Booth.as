@@ -8,6 +8,7 @@ package rock_on
 	
 	import game.GameClock;
 	
+	import models.BoothStructure;
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
@@ -46,7 +47,19 @@ package rock_on
 		public function checkForLoadedStructure(params:Object):void
 		{
 			if (params['structure'])
+			{
 				structure = params.structure;
+				setBoothStructure();				
+			}
+		}
+		
+		public function setBoothStructure():void
+		{
+			for each (var bs:BoothStructure in _venue.structureController.booth_structures)
+			{
+				if (bs.structure == this.structure)
+					structure.booth_structure = bs;
+			}
 		}
 		
 //		public function addToProxiedQueue(cp:CustomerPerson, pathLength:Number):void

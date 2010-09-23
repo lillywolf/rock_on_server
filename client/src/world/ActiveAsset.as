@@ -71,9 +71,7 @@ package world
 			_directionality = new Point3D(0, 0, 0);
 			
 			if (scale)
-			{
 				_scale = scale;
-			}
 			if (movieClip)
 			{
 				_movieClip = movieClip;
@@ -177,14 +175,19 @@ package world
 		{
 			var newClip:MovieClip = EssentialModelReference.getMovieClipCopy(_movieClip);
 			if (!newClip)
-			{
 				newClip = EssentialModelReference.getMovieClipCopyFromSystem(_movieClip);
-			}
 			newClip.scaleY = 1;
-			if (rotated && newClip.framesLoaded > 1)
-				newClip.gotoAndStop(2);
+			
+			if (!currentFrameNumber)
+			{
+				if (rotated && newClip.framesLoaded > 1)
+					newClip.gotoAndStop(2);
+				else
+					newClip.gotoAndStop(1);
+			}
 			else
-				newClip.gotoAndStop(1);
+				newClip.gotoAndStop(currentFrameNumber);
+			
 			if (flipped)
 				newClip.scaleX = -1;
 			else
@@ -238,7 +241,8 @@ package world
 		
 		public function set movieClip(val:MovieClip):void
 		{
-			_movieClip = val;					
+			_movieClip = val;	
+			_movieClip.addEventListener(MouseEvent.CLICK, onMouseClicked);			
 		}
 		
 		public function get movieClip():MovieClip

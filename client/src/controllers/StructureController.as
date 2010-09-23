@@ -42,6 +42,7 @@ package controllers
 		
 		[Bindable] public var structures:ArrayCollection;
 		[Bindable] public var owned_structures:ArrayCollection;
+		[Bindable] public var booth_structures:ArrayCollection;
 		public var imposters:ArrayCollection;
 		
 		public var structureMovieClipsLoaded:int;
@@ -58,6 +59,7 @@ package controllers
 			imposters = new ArrayCollection();
 			structures = essentialModelController.structures;
 			owned_structures = essentialModelController.owned_structures;
+			booth_structures = essentialModelController.booth_structures;
 
 			structures.addEventListener(CollectionEvent.COLLECTION_CHANGE, onStructuresCollectionChange);
 			owned_structures.addEventListener(CollectionEvent.COLLECTION_CHANGE, onOwnedStructuresCollectionChange);
