@@ -321,6 +321,7 @@ package world
 			this.rotated = asset.rotated;
 			this.flipped = asset.flipped;
 			this.speed = asset.speed;
+			this.currentFrameNumber = asset.currentFrameNumber;
 			this.worldCoords = new Point3D(asset.worldCoords.x, asset.worldCoords.y, asset.worldCoords.z);
 		}
 		

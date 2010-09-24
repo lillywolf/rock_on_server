@@ -85,6 +85,8 @@ package rock_on
 		public function drawBitmappedTiles(_world:World):void
 		{
 			tileUIC = new UIComponent();
+			var tileOccupied:Array = new Array();
+//			Add tiles saved to database first
 			for each (var os:OwnedStructure in _structureController.owned_structures)
 			{
 				if (os.structure.structure_type == "Tile")
@@ -95,10 +97,31 @@ package rock_on
 					asset.thinger = os;
 					_world.setBitmapPlacement(os, asset);
 					tileUIC.addChild(asset.bitmap);
+					World.addPointTo3DArray(new Point3D(os.x, os.y, os.z), os, tileOccupied);
 				}
 			}
-			_world.addChild(tileUIC);
+//			For any spaces left over, add the default tile
+			for (var i:int = 0; i < _venue.dwelling.dimension; i++)
+			{
+				for (var j:int = 0; j < _venue.dwelling.dimension; j++)
+				{
+					if (i%2 == 1 && j%2 == 1 && !World.isPointIn3DArray(new Point3D(i, 0, j), tileOccupied))
+						addDefaultTile(new Point3D(i, 0, j), _world);
+				}
+			}
+			_world.addChildAt(tileUIC, 0);
 		}	
+		
+		public function addDefaultTile(pt:Point3D, _world:World):void
+		{
+			var mc:MovieClip = new TileWhite();
+			var asset:ActiveAsset = new ActiveAsset(mc);
+			_world.addAsset(asset, pt);
+			asset.bitmap.x += asset.realCoords.x;
+			asset.bitmap.y += asset.realCoords.y;
+			_world.removeAsset(asset);		
+			tileUIC.addChild(asset.bitmap);
+		}
 		
 		public function addStageDecorations(worldToUpdate:World):void
 		{

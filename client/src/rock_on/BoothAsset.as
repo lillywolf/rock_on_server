@@ -88,12 +88,24 @@ package rock_on
 		public function endStockedState():void
 		{
 			
-		}	
+		}
+		
+		public function checkInventoryCount():void
+		{
+			var newFrameNumber:int = getCurrentFrameNumber();
+			if (newFrameNumber != this.currentFrameNumber)
+			{
+				this.currentFrameNumber = newFrameNumber;
+				this.bitmapWithToppers();
+			}
+		}
 		
 		public function startStockedState():void
 		{			
 			state = STOCKED_STATE;
-			(this.thinger as Booth).structure.mc.stop();
+			(this.thinger as Booth).structure.mc.stop()
+			this.currentFrameNumber = getCurrentFrameNumber();
+			this.bitmapWithToppers();
 		}
 		
 		public function startUnstockedState():void
@@ -124,10 +136,11 @@ package rock_on
 			
 		}		
 		
-		public function getCurrentFrameNumber():int
+		public function getCurrentFrameNumber(booth:Booth=null):int
 		{
 			var rotated:int = 0;
-			var booth:Booth = this.thinger as Booth;
+			if (!booth)
+				booth = this.thinger as Booth;
 			if (booth.rotation == 1 || booth.rotation == 2)
 				rotated = 1;
 			if (booth.inventory_count / booth.structure.booth_structure.inventory_capacity > 2/3)

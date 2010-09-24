@@ -8,6 +8,7 @@ package rock_on
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
+	import models.BoothStructure;
 	import models.EssentialModelReference;
 	import models.OwnedStructure;
 	
@@ -68,32 +69,38 @@ package rock_on
 		public function updateBoothOnServerResponse(os:OwnedStructure, method:String):void
 		{
 //			var os:OwnedStructure = _structureController.getOwnedStructureById(os.id);
-			var booth:BoothAsset = getBoothById(os.id);
-			var boothStructure:Booth = booth.thinger as Booth;
-						
+			var booth:BoothAsset;
+			var boothStructure:Booth;
+			
 			if (method == "update_inventory_count")
 			{
+				booth = getBoothById(os.id);
 				booth.updateState();		
 			}			
 			if (method == "add_booth_credits")
 			{
+				booth = getBoothById(os.id);
+				boothStructure = booth.thinger as Booth;
 				boothStructure.updateProperties(os);
 				booth.advanceState(BoothAsset.STOCKED_STATE);
 			}			
 			if (method == "save_placement")
 			{
+				booth = getBoothById(os.id);
+				boothStructure = booth.thinger as Booth;
 				boothStructure.updateProperties(os);
 				moveBoothUIComponents(booth);
 			}						
 			if (method == "sell")
 			{
+				booth = getBoothById(os.id);
 				removeBooth(booth);
 			}				
 			if (method == "create_new")
 			{
-				boothStructure = createBooth(os);
-				booth = createBoothAsset(boothStructure);
-				booth.updateState();
+//				boothStructure = createBooth(os);
+//				booth = createBoothAsset(boothStructure);
+//				booth.updateState();
 			}		
 		}
 		
@@ -147,6 +154,7 @@ package rock_on
 		
 		public function updateRenderedBooths(os:OwnedStructure, method:String):void
 		{
+			var asset:BoothAsset;
 			if (method == "save_placement")
 			{
 				_structureController.savePlacement(os, new Point3D(os.x, os.y, os.z));
@@ -158,15 +166,18 @@ package rock_on
 			{
 				_structureController.savePlacementAndRotation(os, new Point3D(os.x, os.y, os.z));
 				_myWorld.saveStructurePlacement(os, true, null, _venue.stageRects);
-				var asset:ActiveAsset = _myWorld.getAssetFromOwnedStructure(os);
+				asset = _myWorld.getAssetFromOwnedStructure(os) as BoothAsset;
+				asset.currentFrameNumber = asset.getCurrentFrameNumber();
 				
 				reInitializeBooths(false);
 				_venue.redrawAllMovers();
+				_venue.redrawAllStructures();
 			}
 			else if (method == "create_new")
 			{
 				_myWorld.updateUnwalkables(os, null, _venue.stageRects);
-				_myWorld.createNewStructure(os);
+				asset = createEntireBooth(os);
+				_myWorld.addStandardStructureToWorld(os, asset);
 			}
 		}
 		
@@ -176,28 +187,33 @@ package rock_on
 			var boothStructures:ArrayCollection = _structureController.getStructuresByType("Booth");
 			for each (var os:OwnedStructure in boothStructures)
 			{
-				var booth:Booth = createBooth(os);
-				if (os.in_use)
-				{
-					var asset:BoothAsset = createBoothAsset(booth);
-					asset.toppers = _structureController.getStructureToppers(os);
-					asset.setMovieClipsForStructure(asset.toppers);
-					asset.bitmapWithToppers();
-					var addTo:Point3D = new Point3D(booth.x, booth.y, booth.z);
+				var asset:BoothAsset = createEntireBooth(os);
+				if (asset)
+				{	
+					var addTo:Point3D = new Point3D(os.x, os.y, os.z);
 					addBoothsToWorld(asset, addTo);
-					boothAssets.addItem(asset);
-//					booth.updateState();
-					asset.updateState();
 				}
 			}
 		}
 		
-		public function addBoothsToWorld(asset:ActiveAsset, addTo:Point3D):void
+		public function createEntireBooth(os:OwnedStructure):BoothAsset
 		{
-			if (editMirror)
-				_myWorld.addStaticAsset(asset, addTo);
-			else
-				_myWorld.addStaticAsset(asset, addTo);
+			var booth:Booth = createBooth(os);
+			if (os.in_use)
+			{
+				var asset:BoothAsset = createBoothAsset(booth);
+				asset.toppers = _structureController.getStructureToppers(os);
+				asset.setMovieClipsForStructure(asset.toppers);
+				asset.bitmapWithToppers();
+				boothAssets.addItem(asset);				
+				asset.updateState();
+			}
+			return asset;
+		}
+		
+		public function addBoothsToWorld(asset:BoothAsset, addTo:Point3D):void
+		{
+			_myWorld.addStaticAsset(asset, addTo);
 		}
 		
 		public function removeRenderedBooths():void
@@ -222,7 +238,6 @@ package rock_on
 		{
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(booth.structure.mc);
 			mc.cacheAsBitmap = true;
-//			var asset:ActiveAssetStack = new ActiveAssetStack(null, mc, null, StructureController.STRUCTURE_SCALE);	
 			var asset:BoothAsset = new BoothAsset(this, _venue, null, mc, null, StructureController.STRUCTURE_SCALE);
 			asset.copyFromOwnedStructure(booth);
 			asset.currentFrameNumber = asset.getCurrentFrameNumber();

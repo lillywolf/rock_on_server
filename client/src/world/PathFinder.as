@@ -266,7 +266,7 @@ package world
 				}
 			}
 			else
-				neighbors.addItem({parentInfo: parentInfo, node: currentPoint, hScore: hScore, gScore: gScore});			
+				neighbors.addItem({parentInfo: parentInfo, node: currentPoint, hScore: hScore, gScore: gScore, fScore: hScore + gScore});			
 		}
 		
 		private function isIn3DArray(pt:Point3D, arr:Array, exempt:Object=0):Boolean
@@ -280,23 +280,23 @@ package world
 		{
 			var neighbors:ArrayCollection = new ArrayCollection();
 			var pt:Point3D;
-			pt = getNeighbor("top", currentObject.node);
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
+			pt = new Point3D(currentObject.node.x - 1, currentObject.node.y, currentObject.node.z);
+			if (isInBounds(pt) && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject, openList);
 			}
-			pt = getNeighbor("bottom", currentObject.node);
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
+			pt = new Point3D(currentObject.node.x + 1, currentObject.node.y, currentObject.node.z);
+			if (isInBounds(pt) && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject, openList);			
 			}
-			pt = getNeighbor("right", currentObject.node);
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
+			pt = new Point3D(currentObject.node.x, currentObject.node.y, currentObject.node.z + 1);
+			if (isInBounds(pt) && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject, openList);		
 			}
-			pt = getNeighbor("left", currentObject.node);
-			if (pt && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
+			pt = new Point3D(currentObject.node.x, currentObject.node.y, currentObject.node.z - 1);
+			if (isInBounds(pt) && (!unwalkables[pt.x] || !unwalkables[pt.x][pt.y] || !unwalkables[pt.x][pt.y][pt.z]) && (!closedList[pt.x] || !closedList[pt.x][pt.y] || !closedList[pt.x][pt.y][pt.z]))
 			{
 				addAStarNeighbor(neighbors, startingPt, destination, pt, currentObject, openList);
 			}
@@ -475,6 +475,15 @@ package world
 			return orientation;
 		}
 		
+		private function attachOpenListSort(ac:ArrayCollection):void
+		{
+			var sort:Sort = new Sort();
+			var sortField:SortField = new SortField("fScore");
+			sort.fields = [sortField];
+			sortField.numeric = true;
+			ac.sort = sort;			
+		}
+		
 		public function calculateAStarPath(startingPoint:Point3D, destination:Point3D, avoidStructures:Boolean, avoidPeople:Boolean, exempt:ArrayCollection, extra:ArrayCollection):ArrayCollection
 		{
 			var closedList:Array = new Array();
@@ -482,9 +491,10 @@ package world
 			var fauxOpenList:ArrayCollection = new ArrayCollection();
 			var unwalkables:Array = getUnwalkables(avoidPeople, avoidStructures, exempt, extra);
 			var lowestFScoreObject:Object;
-			addPointTo3DArray(startingPoint, {parentInfo: null, node: startingPoint, hScore: getHScore(startingPoint, destination), gScore: 0}, openList); //add starting point to open list
-			fauxOpenList.addItem({parentInfo: null, node: startingPoint, hScore: getHScore(startingPoint, destination), gScore: 0});
+			addPointTo3DArray(startingPoint, {parentInfo: null, node: startingPoint, hScore: getHScore(startingPoint, destination), gScore: 0, fScore: getHScore(startingPoint, destination)}, openList); //add starting point to open list
+			fauxOpenList.addItem({parentInfo: null, node: startingPoint, hScore: getHScore(startingPoint, destination), gScore: 0, fScore: getHScore(startingPoint, destination)});
 			var iteration:int;
+			attachOpenListSort(fauxOpenList);
 			while(openList.length != 0)  // quit if open list is emptied, ie. no path
 			{
 				lowestFScoreObject = getLowestFScore(fauxOpenList);	//get the last/lowest FscoreObject from the open list
@@ -566,17 +576,22 @@ package world
 		{
 			// This function finds the last node with the lowest F score in the open list
 			// returns an object corresponding to that lowest node
-			if (fauxOpenList.length > 0)
-				var lowest:Object = fauxOpenList[fauxOpenList.length-1];
-			else
-				return null;
 			
-			for (var i:int = 0; i < fauxOpenList.length; i++)
-			{
-				if (fauxOpenList[i].hScore + fauxOpenList[i].gScore <= lowest.hScore + lowest.gScore)
-					lowest = fauxOpenList[i];
-			}
-			return lowest;
+//			if (fauxOpenList.length > 0)
+//				var lowest:Object = fauxOpenList[fauxOpenList.length-1];
+//			else
+//				return null;
+//			
+//			for (var i:int = 0; i < fauxOpenList.length; i++)
+//			{
+//				if (fauxOpenList[i].fScore <= lowest.fScore)
+//					lowest = fauxOpenList[i];
+//			}
+//			return lowest;
+
+			fauxOpenList.refresh();
+			
+			return fauxOpenList[0];
 		}	
 		
 		public function calculateDepthFirstAStarPath(startingPoint:Point3D, destination:Point3D, avoidStructures:Boolean=true, avoidPeople:Boolean=false, exemptStructures:ArrayCollection=null, extraStructures:ArrayCollection=null):ArrayCollection

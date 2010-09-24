@@ -265,9 +265,9 @@ package world
 			this.pathFinder.updateStructureOccupiedSpaces(exempt, extra);
 		}
 		
-		public function createNewStructure(os:OwnedStructure):void
+		public function createNewStructure(os:OwnedStructure, frameNumber:int=0):void
 		{
-			var asset:ActiveAsset = World.createStandardAssetFromStructure(os);
+			var asset:ActiveAsset = World.createStandardAssetFromStructure(os, frameNumber);
 			addAsset(asset, new Point3D(os.x, os.y, os.z));			
 		}
 		
@@ -348,11 +348,15 @@ package world
 			this.addAsset(temp, temp.worldCoords);			
 		}		
 		
-		public static function createStandardAssetFromStructure(os:OwnedStructure):ActiveAsset
+		public static function createStandardAssetFromStructure(os:OwnedStructure, frameNumber:int=0):ActiveAsset
 		{
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
-			var asset:ActiveAsset = new ActiveAsset(mc);
+			var asset:ActiveAsset = new ActiveAsset(null);
 			asset.thinger = os;
+			asset.movieClip = mc;
+			if (frameNumber)
+				asset.currentFrameNumber = frameNumber;
+			asset.switchToBitmap();
 			return asset;
 		}	
 
@@ -529,6 +533,32 @@ package world
 			else
 				this.assetRenderer.renderFirst.addItemAt(asset, index);
 		}
+		
+		public static function isPointIn3DArray(pt:Point3D, array:Array):Boolean
+		{
+			if (array[pt.x] && array[pt.x][pt.y] && array[pt.x][pt.y][pt.z])
+				return true;
+			return false;
+		}
+		
+		public static function addPointTo3DArray(pt:Point3D, obj:Object, addTo:Array):void
+		{
+			if (addTo[pt.x] && addTo[pt.x][pt.y])
+			{	
+				addTo[pt.x][pt.y][pt.z] = obj;
+			}
+			else if (addTo[pt.x])
+			{
+				addTo[pt.x][pt.y] = new Array();
+				addTo[pt.x][pt.y][pt.z] = obj;
+			}
+			else
+			{
+				addTo[pt.x] = new Array();
+				addTo[pt.x][pt.y] = new Array();
+				addTo[pt.x][pt.y][pt.z] = obj;
+			}
+		}			
 		
 		private function onDirectionChanged(evt:WorldEvent):void
 		{

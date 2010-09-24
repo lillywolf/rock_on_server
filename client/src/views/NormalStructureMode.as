@@ -23,6 +23,8 @@ package views
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
 	
+	import rock_on.Booth;
+	import rock_on.BoothAsset;
 	import rock_on.Venue;
 	
 	import server.ServerDataEvent;
@@ -239,6 +241,8 @@ package views
 		{
 			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
 			var asset:ActiveAsset = new ActiveAsset(mc);
+			if (os.structure.structure_type == "Booth")
+				asset.currentFrameNumber = (_venue.boothBoss.getBoothById(os.id)).currentFrameNumber;
 			asset.copyFromOwnedStructure(os);
 			asset.toppers = _structureController.getStructureToppers(os);
 			asset.switchToBitmap();
@@ -248,13 +252,32 @@ package views
 				_world.addToPrioritizedRenderList(asset);
 			return asset;
 		}
+		
+		public function getNewAssetByStructureType(os:OwnedStructure):ActiveAsset
+		{
+			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
+			if (os.structure.structure_type == "Booth")
+			{
+				var booth:Booth = new Booth(_venue.boothBoss, _venue, os);
+				booth.inventory_count = booth.structure.booth_structure.inventory_capacity;
+				var ba:BoothAsset = new BoothAsset(_venue.boothBoss, _venue, null, mc);
+				ba.copyFromOwnedStructure(os);
+				ba.currentFrameNumber = ba.getCurrentFrameNumber(booth);
+				ba.setMovieClipsForStructure(new ArrayCollection());
+				ba.bitmapWithToppers();
+				return ba;
+			}
+			else
+			{
+				var asset:ActiveAsset = new ActiveAsset(mc);
+				asset.copyFromOwnedStructure(os);
+				return asset;
+			}	
+		}
 
 		public function addStructureAssetFromInventory(os:OwnedStructure, _world:World):ActiveAsset
 		{
-			var mc:MovieClip = EssentialModelReference.getMovieClipCopy(os.structure.mc);
-			var asset:ActiveAsset = new ActiveAsset(mc);
-			asset.copyFromOwnedStructure(os);
-			asset.switchToBitmap();
+			var asset:ActiveAsset = getNewAssetByStructureType(os);
 			_world.addAsset(asset, new Point3D(os.x, os.y, os.z));
 			allStructures.addItem(asset);
 			return asset;
@@ -621,6 +644,8 @@ package views
 		{	
 //			Add to imposters array in structureController and assign a temporary id of -1 so it counts as owned, and give it a key
 			_structureController.imposters.addItem(asset.thinger as OwnedStructure);
+			if (!(asset.thinger is ImposterOwnedStructure))
+				asset.thinger = new ImposterOwnedStructure(asset.thinger);
 			(asset.thinger as ImposterOwnedStructure).key = Math.random();
 			(asset.thinger as OwnedStructure).id = -1;
 			

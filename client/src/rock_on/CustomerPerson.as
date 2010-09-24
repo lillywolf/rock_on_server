@@ -709,6 +709,7 @@ package rock_on
 			evt.person = this;
 			evt.booth = currentBooth;
 			dispatchEvent(evt);
+			currentBooth.checkInventoryCount();
 		}
 		
 		public function doQueuedState(deltaTime:Number):void
@@ -742,7 +743,7 @@ package rock_on
 			var booth:BoothAsset;
 			if (proxiedForItemPickup)
 			{
-				booth = _boothBoss.getAnyExistingBooth();
+				booth = _boothBoss.getRandomBooth(currentBooth);
 				pickupBooth = booth;
 			}
 			else
@@ -890,17 +891,19 @@ package rock_on
 		
 		public function getPathToBoothLength(routedCustomer:Boolean=false, queuedCustomer:Boolean=false):int
 		{
-//			Returns 0 on failure...not sure that's ok
+//			A preliminary guess as to who will get there first
 			
 			var boothFront:Point3D = _boothBoss.getBoothFront(currentBooth, 0, routedCustomer, queuedCustomer);
-			if (boothFront)
-			{
-				var currentPoint:Point3D = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
-				var path:ArrayCollection = _myWorld.pathFinder.calculatePathGrid(this, currentPoint, boothFront, false);
-				return path.length;
-			}
-			else
-				return 0;
+//			if (boothFront)
+//			{
+//				var currentPoint:Point3D = new Point3D(Math.round(worldCoords.x), Math.round(worldCoords.y), Math.round(worldCoords.z));
+//				var path:ArrayCollection = _myWorld.pathFinder.calculatePathGrid(this, currentPoint, boothFront, false);
+//				return path.length;
+//			}
+//			else
+//				return 0;
+			return Math.abs((boothFront.x - worldCoords.x) + (boothFront.z - worldCoords.z));
+			
 		}
 		
 		public function isCustomerAtQueue():void
