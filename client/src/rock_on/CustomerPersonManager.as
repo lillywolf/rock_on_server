@@ -224,9 +224,10 @@ package rock_on
 			return cp;
 		}
 		
-		public function createStaticCustomer(c:Creature, seatNumber:int=-1):CustomerPerson
+		public function createStaticCustomer(c:Creature, match:Creature, seatNumber:int=-1):CustomerPerson
 		{
 			var cp:CustomerPerson = createCustomer(c, Person.STATIC, 0.11, 0.5);
+			cp.thinger = match;
 			add(cp, false, seatNumber);
 			return cp;
 		}

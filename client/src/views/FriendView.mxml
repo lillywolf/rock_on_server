@@ -112,7 +112,7 @@
 			
 			private function generateManagers():void
 			{
-				venueManager = new VenueManager(structureController, layerableController, dwellingController, levelController, creatureController, usableController, myWorld);
+				venueManager = new VenueManager(structureController, layerableController, dwellingController, levelController, creatureController, usableController, userController, myWorld);
 			}	
 			
 			private function killManagers():void

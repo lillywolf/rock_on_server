@@ -159,7 +159,7 @@
 			
 			public function initializeVenue():void
 			{
-				venueManager = new VenueManager(structureController, layerableController, dwellingController, levelController, creatureController, usableController, myWorld);
+				venueManager = new VenueManager(structureController, layerableController, dwellingController, levelController, creatureController, usableController, userController, myWorld);
 				venueManager.getVenue();
 				
 				mouseHandler = new WorldViewClickHandler(venueManager.venue, this);

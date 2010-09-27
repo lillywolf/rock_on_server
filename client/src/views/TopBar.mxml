@@ -140,6 +140,8 @@
 			
 			public function updateTopbarInfo(u:User):void
 			{
+				var xpEnd:String = xpBox.text.split("/")[1];
+				xpBox.text = u.xp.toString() + "/" + xpEnd;
 				creditsBox.text = u.credits.toString();
 				musicCreditsBox.text = u.music_credits.toString();
 			}

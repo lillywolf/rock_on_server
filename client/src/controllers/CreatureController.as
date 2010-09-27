@@ -157,6 +157,16 @@ package controllers
 			return matchingCreatures;
 		}
 		
+		public function getFanMatch(id:int):Creature
+		{
+			for each (var c:Creature in _creatures)
+			{
+				if (c.reference_id == id)
+					return c;
+			}
+			return null;
+		}
+		
 		public function getCreaturesByType(type:String):ArrayCollection
 		{
 			var matchingCreatures:ArrayCollection = new ArrayCollection();

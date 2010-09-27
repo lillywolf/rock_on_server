@@ -51,9 +51,7 @@ package controllers
 			for each (var lvl:Level in _levels)
 			{
 				if (lvl.rank == rank)
-				{
 					return lvl;
-				}
 			}
 			return null;
 		}

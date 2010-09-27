@@ -6,6 +6,7 @@ package views
 	import controllers.LevelController;
 	import controllers.StructureController;
 	import controllers.UsableController;
+	import controllers.UserController;
 	
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -45,6 +46,7 @@ package views
 		public var _creatureController:CreatureController;
 		public var _layerableController:LayerableController;
 		public var _usableController:UsableController;
+		public var _userController:UserController;
 		
 		public var _bitmapBlotter:BitmapBlotter;
 		public var _myWorld:World;
@@ -52,7 +54,7 @@ package views
 		
 		public var bandBoss:BandBoss;
 		
-		public function VenueManager(structureController:StructureController, layerableController:LayerableController, dwellingController:DwellingController, levelController:LevelController, creatureController:CreatureController, usableController:UsableController, target:IEventDispatcher=null)
+		public function VenueManager(structureController:StructureController, layerableController:LayerableController, dwellingController:DwellingController, levelController:LevelController, creatureController:CreatureController, usableController:UsableController, userController:UserController, target:IEventDispatcher=null)
 		{
 			super(target);
 //			_wbi = wbi;
@@ -62,12 +64,13 @@ package views
 			_structureController = structureController;
 			_creatureController = creatureController;
 			_usableController = usableController;
+			_userController = userController;
 		}
 
 		public function getVenue():void
 		{
 			var venues:ArrayCollection = _dwellingController.getDwellingsByType("Venue");
-			venue = new Venue(this, _dwellingController, _creatureController, _layerableController, _structureController, _usableController, bandBoss, venues[0] as OwnedDwelling);				
+			venue = new Venue(this, _dwellingController, _creatureController, _layerableController, _structureController, _usableController, _userController, bandBoss, venues[0] as OwnedDwelling);				
 		}
 		
 		public function update(deltaTime:Number):void

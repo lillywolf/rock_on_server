@@ -389,7 +389,7 @@ package views
 		
 		public function sortStageAssets():ArrayCollection
 		{
-			var sort:Sort = _stageView.myStage.assetRenderer.getYSort();
+			var sort:Sort = _stageView.myStage.assetRenderer.ySort;
 			var sortedArray:ArrayCollection = new ArrayCollection();
 			for each (var asset:ActiveAsset in _stageView.myStage.assetRenderer.unsortedAssets)
 			{
@@ -402,7 +402,7 @@ package views
 		
 		public function sortWorldAssets():ArrayCollection
 		{
-			var sort:Sort = _worldView.myWorld.assetRenderer.getYSort();
+			var sort:Sort = _worldView.myWorld.assetRenderer.ySort;
 			var sortedArray:ArrayCollection = new ArrayCollection();
 			for each (var asset:ActiveAsset in _worldView.myWorld.assetRenderer.unsortedAssets)
 			{

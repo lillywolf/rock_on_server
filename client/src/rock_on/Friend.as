@@ -91,7 +91,7 @@ package rock_on
 		public function startRouteState():void
 		{
 			state = ROUTE_STATE;
-			movePerson(this.currentDestination, false, true, false, null, 0, rectanglesToAvoid);
+			movePerson(this.currentDestination, true, true, false, null, 0, rectanglesToAvoid);
 		}
 		
 		public function endRouteState():void

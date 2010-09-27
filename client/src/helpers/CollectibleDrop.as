@@ -1,5 +1,7 @@
 package helpers
 {
+	import clickhandlers.UIEvent;
+	
 	import com.flashdynamix.motion.Tweensy;
 	
 	import flash.display.DisplayObject;
@@ -34,6 +36,7 @@ package helpers
 		public var dropDestination:Point;
 		public var bounds:Point;
 		public var origin:Point;
+		public var precipitatingObject:Object;
 		
 		public function CollectibleDrop(_subject:ActiveAsset, mc:MovieClip, _bounds:Point, world:World, view:WorldView, _delay:Number=0, _totalTime:Number=1000, _accelerationY:Number=.001, guidedDropDestination:Point=null, guidedDropOrigin:Point=null)
 		{
@@ -97,6 +100,8 @@ package helpers
 			Tweensy.to(this, {x: this.x, y: this.y - 500, scaleX: 0.3, scaleY: 0.3}, 0.4, null, delay, null, onTweenEnd, null);
 			this.removeEventListener(MouseEvent.CLICK, onMouseClicked);
 			this.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			var uiEvt:UIEvent = new UIEvent(UIEvent.COLLECTIBLE_DROP_CLICKED, true);
+			dispatchEvent(uiEvt);
 		}
 		
 		private function onTweenEnd():void

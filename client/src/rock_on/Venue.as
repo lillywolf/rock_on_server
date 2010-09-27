@@ -6,6 +6,7 @@ package rock_on
 	import controllers.LevelController;
 	import controllers.StructureController;
 	import controllers.UsableController;
+	import controllers.UserController;
 	
 	import flash.display.Sprite;
 	import flash.events.IEventDispatcher;
@@ -114,6 +115,7 @@ package rock_on
 		public var _creatureController:CreatureController;
 		public var _layerableController:LayerableController;
 		public var _usableController:UsableController;
+		public var _userController:UserController;
 		public var _myWorld:World;
 		public var _bitmapBlotter:BitmapBlotter;
 		
@@ -123,7 +125,7 @@ package rock_on
 		
 		public var stageRects:ArrayCollection;
 				
-		public function Venue(venueManager:VenueManager, dwellingController:DwellingController, creatureController:CreatureController, layerableController:LayerableController, structureController:StructureController, usableController:UsableController, bandBoss:BandBoss, params:Object=null, target:IEventDispatcher=null)
+		public function Venue(venueManager:VenueManager, dwellingController:DwellingController, creatureController:CreatureController, layerableController:LayerableController, structureController:StructureController, usableController:UsableController, userController:UserController, bandBoss:BandBoss, params:Object=null, target:IEventDispatcher=null)
 		{
 			super(params, target);
 			
@@ -135,6 +137,7 @@ package rock_on
 			_dwellingController = dwellingController;
 			_creatureController = creatureController;
 			_usableController = usableController;
+			_userController = userController;
 			_bandBoss = bandBoss;
 			
 			entryPoints = new ArrayCollection();
@@ -146,6 +149,40 @@ package rock_on
 			_structureController.addEventListener(ServerDataEvent.INSTANCE_CREATED, onNewInstanceCreated);			
 			addStageManager();	
 		}
+		
+//		A LIST OF SERVER REQUEST FUNCTIONS
+		
+		public function doBoothCollection(booth:Booth):void
+		{
+			
+		}
+		
+		public function doNurture(creature:Creature):void
+		{
+			
+		}
+		
+		public function doBonusClick(obj:Object):void
+		{
+			if (obj.amount)
+			{
+				if (obj.source is OwnedStructure)
+					FlexGlobals.topLevelApplication.gdi.sc.sendRequest({id: obj.source.id, user_id: this.user_id, amount: obj.amount, amount_type: obj.amountType}, "owned_structure", obj.action);
+				else if (obj.source is Creature)
+					FlexGlobals.topLevelApplication.gdi.sc.sendRequest({id: obj.source.id, user_id: this.user_id, amount: obj.amount, amount_type: obj.amountType}, "creature", obj.action);
+				_userController.addAmountToUserOnClient(_userController.user, obj.amount, obj.amountType);
+				FlexGlobals.topLevelApplication.topBarView.updateTopbarInfo(_userController.user);
+			}
+			else if (obj.collectible)
+			{
+				if (obj.source is OwnedStructure)
+					FlexGlobals.topLevelApplication.gdi.sc.sendRequest({id: obj.source.id, user_id: this.user_id, collectible: obj.collectible}, "owned_structure", obj.action);
+				else if (obj.source is Creature)
+					FlexGlobals.topLevelApplication.gdi.sc.sendRequest({id: obj.source.id, user_id: this.user_id, collectible: obj.collectible}, "creature", obj.action);
+			}
+		}
+		
+//		END LIST OF SERVER REQUEST FUNCTIONS
 		
 		public function addStageManager():void
 		{
@@ -375,7 +412,8 @@ package rock_on
 				if (c.owned_layerables.length == 0)
 					creatureGenerator.addLayersToCreatureByType(c.type, "walk_toward", c);				
 				c.has_moods = true;
-				var cp:CustomerPerson = customerPersonManager.createStaticCustomer(c, i);
+				var match:Creature = _creatureController.getFanMatch(c.id);
+				var cp:CustomerPerson = customerPersonManager.createStaticCustomer(c, match, i);
 				cp.advanceState(CustomerPerson.ENTHRALLED_STATE);
 				cp.setMood();
 			}

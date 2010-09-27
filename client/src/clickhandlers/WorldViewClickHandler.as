@@ -11,6 +11,8 @@ package clickhandlers
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.ui.Mouse;
+	import flash.ui.MouseCursor;
 	import flash.utils.Timer;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
@@ -23,6 +25,7 @@ package clickhandlers
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
+	import mx.core.FlexGlobals;
 	
 	import rock_on.Hater;
 	import rock_on.Person;
@@ -67,8 +70,21 @@ package clickhandlers
 		
 		public function onEnterFrame(evt:Event):void
 		{
+			checkMouse();
 			checkDrag();
 			handleHover();
+		}
+		
+		private function checkMouse():void
+		{
+			if (_worldView.stage.mouseX > _worldView.stage.stageWidth ||
+				_worldView.stage.mouseX < 0 ||
+				_worldView.stage.mouseY > _worldView.stage.stageHeight ||
+				_worldView.stage.mouseY < 0)
+			{
+				_worldView.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+				isDragging = false;					
+			}
 		}
 		
 		private function checkDrag():void
@@ -104,6 +120,8 @@ package clickhandlers
 		private function listenForMouseUp():void
 		{
 			_worldView.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			FlexGlobals.topLevelApplication.topBarView.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			FlexGlobals.topLevelApplication.bottomBarView.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 		}
 		
 		private function onMouseUp(evt:MouseEvent):void
@@ -114,6 +132,8 @@ package clickhandlers
 				else
 					moveMyAvatar(convertPointToWorldPoint(new Point(_worldView.mouseX, _worldView.mouseY)));
 			_worldView.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			FlexGlobals.topLevelApplication.topBarView.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			FlexGlobals.topLevelApplication.bottomBarView.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			isDragging = false;			
 		}
 		
@@ -452,7 +472,7 @@ package clickhandlers
 		
 		public function sortAssets(assets:ArrayCollection):ArrayCollection
 		{
-			var sort:Sort = _worldView.myWorld.assetRenderer.getYSort();
+			var sort:Sort = _worldView.myWorld.assetRenderer.ySort;
 			var sorted:ArrayCollection = new ArrayCollection();
 			for each (var asset:ActiveAsset in assets)
 			{

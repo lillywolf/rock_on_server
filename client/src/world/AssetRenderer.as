@@ -23,6 +23,7 @@ package world
 		public var unsortedAssets:ArrayCollection;
 		public var renderFirst:ArrayCollection;
 		public var initialDraw:Boolean;
+		public var ySort:Sort;
 		private static const DEFAULT_SPEED:Number = .02;
 
 		[Bindable] public var myMemory:Number;
@@ -39,6 +40,8 @@ package world
 			renderFirst = new ArrayCollection();
 			unsortedAssets.addEventListener(CollectionEvent.COLLECTION_CHANGE, updateUnsortedAssets);
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
+			
+			createYSort();
 		}
 		
 		private function onEnterFrame(evt:Event):void
@@ -53,7 +56,7 @@ package world
 			{
 				removeExistingAssets();
 				updateSortedAssets(lockedDelta);
-				drawAssets();
+//				drawAssets();
 			}
 			else
 			{
@@ -86,20 +89,16 @@ package world
 		
 		private function updateCoords(lockedDelta:Number):void
 		{
-			for (var i:int = 0; i<sortedAssets.length; i++)
+			for (var i:int = 0; i<unsortedAssets.length; i++)
 			{
 				var speed:Number;
-				var asset:ActiveAsset = sortedAssets[i];
+				var asset:ActiveAsset = unsortedAssets[i];
 				if (asset.isMoving == true)
 				{
 					if (asset.speed != -1)
-					{
 						speed = asset.speed;
-					}
 					else
-					{
 						speed = DEFAULT_SPEED;
-					}
 					
 					var totalXDiff:Number = asset.realDestination.x - asset.lastRealPoint.x;
 					var totalYDiff:Number = asset.realDestination.y - asset.lastRealPoint.y;
@@ -128,18 +127,14 @@ package world
 						distanceToMoveY = 0;
 						distanceToMoveX = distanceToMove;
 						if (xDiff < 0)
-						{
 							distanceToMoveX = -distanceToMoveX;
-						}
 					}
 					else if (xDiff != 0)
 					{
 						ratio = yDiff/xDiff;					
 						distanceToMoveX = Math.sqrt((distanceToMove * distanceToMove) / (1 + ratio * ratio));
 						if (xDiff < 0)
-						{
 							distanceToMoveX = -distanceToMoveX;
-						}
 						distanceToMoveY = distanceToMoveX * ratio;
 					}					
 					else
@@ -162,11 +157,6 @@ package world
 						asset.worldCoords.y = (asset.worldDestination.y.valueOf());
 						asset.worldCoords.z = (asset.worldDestination.z.valueOf());
 						
-						if (asset.worldDestination.x%1 != 0 || asset.worldDestination.y%1 != 0 || asset.worldDestination.z%1 != 0)
-						{
-//							throw new Error('destination world coords need to be whole numbers');
-						}
-						
 						var evt:WorldEvent = new WorldEvent(WorldEvent.DESTINATION_REACHED, asset);
 						dispatchEvent(evt);
 					}
@@ -187,38 +177,48 @@ package world
 		
 		private function updateSortedAssets(lockedDelta:Number):void
 		{
-			var tempArray:ArrayCollection = new ArrayCollection();
-			for each (var a:ActiveAsset in unsortedAssets)
-			{
-				var index:Number = unsortedAssets.getItemIndex(a);
-				tempArray.addItemAt(a, index);
-			}
+//			var tempArray:ArrayCollection = new ArrayCollection();
+//			for each (var a:ActiveAsset in unsortedAssets)
+//			{
+//				var index:Number = unsortedAssets.getItemIndex(a);
+//				tempArray.addItemAt(a, index);
+//			}
 			updateCoords(lockedDelta);	
-			var sort:Sort = getYSort();
-			tempArray.sort = sort;
-			tempArray.refresh();
-			sortedAssets = new ArrayCollection();
+			unsortedAssets.sort = ySort;
+			unsortedAssets.refresh();
+			var tempArray:ArrayCollection = new ArrayCollection();
+			tempArray.addAll(unsortedAssets);
+//			sortedAssets = new ArrayCollection();
 			for (var i:int = 0; i<renderFirst.length; i++)
 			{
 				var leadAsset:ActiveAsset = renderFirst.getItemAt(i) as ActiveAsset;
 				var tempIndex:int = tempArray.getItemIndex(leadAsset);
 				tempArray.removeItemAt(tempIndex);
-				sortedAssets.addItem(leadAsset);
+				addChild(leadAsset);
+//				sortedAssets.addItem(leadAsset);
 			}
 			for (var j:int = 0; j<tempArray.length; j++)
 			{
 				var asset:ActiveAsset = tempArray.getItemAt(j) as ActiveAsset;
-				sortedAssets.addItem(asset);
+				addChild(asset);
+//				sortedAssets.addItem(asset);
 			}
+			
+			if (!initialDraw)
+			{
+				initialDraw = true;
+				dispatchInitialDrawEvent();
+				trace("initial draw dispatched");
+			}			
 		}
 		
-		public function getYSort():Sort
+		public function createYSort():Sort
 		{
+			ySort = new Sort();
 			var sortField:SortField = new SortField("realCoordY");
 			sortField.numeric = true;
-			var sort:Sort = new Sort();
-			sort.fields = [sortField];	
-			return sort;
+			ySort.fields = [sortField];	
+			return ySort;
 		}
 		
 		public function swapEnterFrameHandler():void
@@ -260,8 +260,8 @@ package world
 					ordered.addItem(a);	
 			}
 			updateCoords(lockedDelta);	
-			var sort:Sort = getYSort();
-			ordered.sort = sort;
+//			var sort:Sort = getYSort();
+			ordered.sort = ySort;
 			ordered.refresh();
 			sortedAssets = new ArrayCollection();
 			for (var i:int = 0; i<renderFirst.length; i++)
@@ -278,7 +278,7 @@ package world
 				if (toppers && toppers.length > 0)
 				{	
 					var topperAssets:ArrayCollection = getAssociatedToppers(toppers);
-					topperAssets.sort = sort;
+					topperAssets.sort = ySort;
 					topperAssets.refresh();
 					for each (var t:ActiveAsset in topperAssets)
 					{
@@ -337,17 +337,22 @@ package world
 		
 		private function removeExistingAssets():void
 		{
-			for (var i:int = 0; i<sortedAssets.length; i++)
+//			for (var i:int = 0; i<sortedAssets.length; i++)
+//			{
+//				var asset:ActiveAsset = sortedAssets[i];
+//				if (sortedAssets.contains(asset))
+//				{
+//					if (this.contains(asset))
+//					{
+//						removeChild(asset);														
+//					}
+//				}
+//			}			
+			var kids:int = this.numChildren;
+			for (var i:int = 0; i < kids; i++)
 			{
-				var asset:ActiveAsset = sortedAssets[i];
-				if (sortedAssets.contains(asset))
-				{
-					if (this.contains(asset))
-					{
-						removeChild(asset);														
-					}
-				}
-			}			
+				this.removeChildAt(0);
+			}
 		}
 		
 	}

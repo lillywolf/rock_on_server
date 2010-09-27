@@ -345,7 +345,8 @@ package world
 			temp.copyFromActiveAsset(asset);
 			temp.setMovieClipsForStructure(temp.toppers);
 			temp.bitmapWithToppers();
-			this.addAsset(temp, temp.worldCoords);			
+			this.pathFinder.addStructureUnwalkables(asset);
+			this.addAsset(temp, temp.worldCoords);	
 		}		
 		
 		public static function createStandardAssetFromStructure(os:OwnedStructure, frameNumber:int=0):ActiveAsset

@@ -49,7 +49,8 @@ package rock_on
 			{
 				currentStation = station;
 //				currentStation.currentQueue++;
-				var destination:Point3D = setInitialDestination();
+//				var destination:Point3D = setInitialDestination();
+				var destination:Point3D = station.getStructureFrontByRotation();
 				if (destination)
 					movePerson(destination, true);	
 				else

@@ -21,6 +21,7 @@ package game
 	import helpers.UnprocessedModel;
 	
 	import models.EssentialModelReference;
+	import models.Level;
 	import models.OwnedDwelling;
 	import models.User;
 	
@@ -457,6 +458,18 @@ package game
 				evt.gdi = this;
 				dispatchEvent(evt);
 			}
+		}
+		
+		public function updateLocalUserProperties(xp:Number=0, credits:Number=0, pcredits:Number=0, mcredits:Number=0, fcredits:Number=0):void
+		{
+			this.user.xp += xp;
+			this.user.credits += credits;
+			this.user.premium_credits += pcredits;
+			this.user.music_credits += mcredits;
+			this.user.fan_hearts += fcredits;
+			var lvl:Level = levelController.getLevelByXp(this.user.xp);
+			this.user.level = lvl;
+			this.user.level_id = lvl.rank;
 		}
 
 	}

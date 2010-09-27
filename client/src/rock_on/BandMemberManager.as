@@ -223,9 +223,7 @@ package rock_on
 		{
 			myAvatar.itemDropRecipient = {recipient: recipient, view: view};
 			if (myAvatar.goToStage())
-			{
 				myAvatar.tossItem(recipient, view);
-			}
 		}
 		
 		public function updateRenderedBandMembers(ol:OwnedLayerable, creature:Creature, method:String):void

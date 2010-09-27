@@ -11,6 +11,7 @@ package rock_on
 	import models.OwnedStructure;
 	
 	import mx.collections.ArrayCollection;
+	import mx.core.FlexGlobals;
 	
 	import views.WorldView;
 	
@@ -96,7 +97,7 @@ package rock_on
 			if (newFrameNumber != this.currentFrameNumber)
 			{
 				this.currentFrameNumber = newFrameNumber;
-				this.bitmapWithToppers();
+				_venue.myWorld.doAssetRedraw(this);
 			}
 		}
 		
@@ -105,7 +106,12 @@ package rock_on
 			state = STOCKED_STATE;
 			(this.thinger as Booth).structure.mc.stop()
 			this.currentFrameNumber = getCurrentFrameNumber();
-			this.bitmapWithToppers();
+			
+//			If it's already in the world, redraw it, otherwise do the initial draw
+			if (this.worldCoords)
+				_venue.myWorld.doAssetRedraw(this);
+			else
+				this.bitmapWithToppers();
 		}
 		
 		public function startUnstockedState():void
@@ -128,7 +134,8 @@ package rock_on
 		{
 			this.removeEventListener(MouseEvent.CLICK, onCollectionClick);
 			_venue.structureController.serverController.sendRequest({id: this.thinger.id}, "owned_structure", "add_booth_credits");
-			UIBoss.createCollectible(new CoinsLeftover(), _venue.myWorld.getAssetFromOwnedStructure(this.thinger as OwnedStructure), _venue.myWorld);
+			var eventData:Object = UIBoss.formatCollectibleEventData("booth_collection_bonus", this.thinger, 10, "xp");
+			FlexGlobals.topLevelApplication.uiBoss.createCollectible(new CoinsLeftover(), _venue.myWorld.getAssetFromOwnedStructure(this.thinger as OwnedStructure), _venue.myWorld, eventData);
 		}
 		
 		public function endUnstockedState():void

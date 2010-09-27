@@ -382,7 +382,7 @@ package rock_on
 //			Move person somewhere in valid rect space (not outside, not into stage)
 			var extra:ArrayCollection = new ArrayCollection();
 			extra.addItem(_venue.outsideRect);
-			movePerson(destination, false, true, false, null, 0, extra);
+			movePerson(destination, true, true, false, null, 0, extra);
 			trace("customer person roamed");
 		}
 		
@@ -546,7 +546,7 @@ package rock_on
 				enthralledTimer.stop();
 				enthralledTimer.removeEventListener(TimerEvent.TIMER, routeToQueue);
 				numEnthralledTimers--;
-				if (state == ENTHRALLED_STATE)
+				if (state == ENTHRALLED_STATE || state == TEMPORARY_ENTHRALLED_STATE)
 					advanceState(ROUTE_STATE);			
 			}
 			resetEnthralledTimer();
@@ -618,7 +618,7 @@ package rock_on
 			
 			for (var i:int = 0; i < Math.round(Math.random() * CustomerPerson.MAX_DROPS_END_MOOD); i++)
 			{
-				UIBoss.doCollectibleDropByMood(this, _myWorld);
+				FlexGlobals.topLevelApplication.uiBoss.doCollectibleDropByMood(this, _myWorld);
 			}
 			removeMoodClip();
 			trace("item pickup complete");
@@ -902,7 +902,7 @@ package rock_on
 //			}
 //			else
 //				return 0;
-			return Math.abs((boothFront.x - worldCoords.x) + (boothFront.z - worldCoords.z));
+			return Math.abs(boothFront.x - worldCoords.x) + Math.abs(boothFront.z - worldCoords.z);
 			
 		}
 		

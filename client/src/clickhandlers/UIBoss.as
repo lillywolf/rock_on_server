@@ -12,6 +12,7 @@ package clickhandlers
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	import flash.utils.getDefinitionByName;
+	import flash.utils.getQualifiedClassName;
 	
 	import game.MoodBoss;
 	
@@ -19,6 +20,7 @@ package clickhandlers
 	
 	import mx.controls.Button;
 	import mx.controls.Image;
+	import mx.core.FlexGlobals;
 	import mx.events.FlexEvent;
 	
 	import org.osmf.events.TimeEvent;
@@ -31,6 +33,7 @@ package clickhandlers
 	import views.BottomBar;
 	import views.CustomizableProgressBar;
 	import views.StageView;
+	import views.TopBar;
 	import views.WorldView;
 	
 	import world.ActiveAsset;
@@ -46,6 +49,7 @@ package clickhandlers
 		public var _stageViewMouseHandler:StageViewClickHandler;
 		public var _venue:Venue;
 		public var _bottomBar:BottomBar;
+		public var _topBar:TopBar;
 		
 		public static const MAX_FILLERS:int = 6;	
 		[Embed(source="../libs/icons/hearts_chain_6.png")]
@@ -106,25 +110,33 @@ package clickhandlers
 			_stageViewMouseHandler.addEventListener(UIEvent.REPLACE_BOTTOMBAR, onReplaceBottomBar);			
 		}
 		
-		private function doCollectibleDrop(person:Person):void
+		private function doCollectibleDrop(person:Person, action:String):void
 		{
+			var eventData:Object;
 			for each (var reward:Object in person.mood.rewards)
 			{
 				if (reward.mc)
 				{	
+					eventData = formatCollectibleEventData(action + "_bonus", person.thinger, reward.total + Math.round(Math.random() * reward.max_bonus), reward.type);
 					var klass:Class = getDefinitionByName(reward.mc) as Class;
 					var mc:MovieClip = new klass() as MovieClip;
-					addCollectible(mc, person);
+					addCollectible(mc, person, eventData);
 				}
 			}
 			if ((person.mood.possible_rewards as Array).length > 0)
-				addCollectible(MoodBoss.getRandomItemByMood(person.mood), person);			
+			{
+				var collectibleMC:MovieClip = MoodBoss.getRandomItemByMood(person.mood);
+				eventData = formatCollectibleEventData(action + "_collection", person.thinger, 0, null, getQualifiedClassName(collectibleMC));
+				addCollectible(collectibleMC, person, eventData);			
+			}
 		}
 		
-		private function addCollectible(mc:MovieClip, person:Person):void
+		private function addCollectible(mc:MovieClip, person:Person, precipitatingObject:Object):void
 		{
 			var radius:Point = new Point(100, 50);
 			var collectibleDrop:CollectibleDrop = new CollectibleDrop(person, mc, radius, _worldView.myWorld, _worldView, 0, 400, .001, null, new Point(person.x, person.y - 70));
+			collectibleDrop.precipitatingObject = precipitatingObject;
+			collectibleDrop.addEventListener(UIEvent.COLLECTIBLE_DROP_CLICKED, onCollectibleDropClicked);
 			collectibleDrop.addEventListener("removeCollectible", function onRemoveCollectible():void
 			{
 				_worldView.myWorld.removeChild(collectibleDrop);
@@ -144,26 +156,45 @@ package clickhandlers
 			});				
 		}
 		
-		public static function doCollectibleDropByMood(person:Person, parentWorld:World):void
+		public function doCollectibleDropByMood(person:Person, parentWorld:World):void
 		{
 			person.removeMoodClip();
+			var eventData:Object;
 			for each (var reward:Object in person.mood.rewards)
 			{
 				if (reward.mc)
-				{
+				{					
+					eventData = formatCollectibleEventData("creature_nurture_bonus", person.thinger, reward.total + Math.round(Math.random() * reward.max_bonus), reward.type);
 					var klass:Class = getDefinitionByName(reward.mc) as Class;
 					var mc:MovieClip = new klass() as MovieClip;
-					createCollectible(mc, person, parentWorld);
+					createCollectible(mc, person, parentWorld, eventData);
 				}
 			}
 			if ((person.mood.possible_rewards as Array).length > 0)
-				createCollectible(MoodBoss.getRandomItemByMood(person.mood), person, parentWorld);
+			{	
+				var collectibleMC:MovieClip = MoodBoss.getRandomItemByMood(person.mood);
+				eventData = formatCollectibleEventData("creature_nurture_collection", person.thinger, 0, null, getQualifiedClassName(collectibleMC));
+				createCollectible(collectibleMC, person, parentWorld, eventData);
+			}	
 		}
 		
-		public static function createCollectible(mc:MovieClip, asset:ActiveAsset, parentWorld:World):void
+		public static function formatCollectibleEventData(action:String, instance:Object, amount:Number=0, amountType:String=null, collectibleClass:String=null):Object
+		{
+			var eventData:Object = new Object();
+			eventData.action = action;
+			eventData.source = instance;
+			eventData.amount = amount;
+			eventData.amountType = amountType;
+			eventData.collectible = collectibleClass;
+			return eventData;
+		}
+		
+		public function createCollectible(mc:MovieClip, asset:ActiveAsset, parentWorld:World, precipitatingObject:Object):void
 		{
 			var radius:Point = new Point(100, 50);
 			var collectibleDrop:CollectibleDrop = new CollectibleDrop(asset, mc, radius, parentWorld, parentWorld.parent as WorldView, 0, 400, .001, null, new Point(asset.x, asset.y - 70));
+			collectibleDrop.precipitatingObject = precipitatingObject;
+			collectibleDrop.addEventListener(UIEvent.COLLECTIBLE_DROP_CLICKED, onCollectibleDropClicked);
 			collectibleDrop.addEventListener("removeCollectible", function onRemoveCollectible():void
 			{
 				parentWorld.removeChild(collectibleDrop);
@@ -191,7 +222,7 @@ package clickhandlers
 				customizableBar.removeEventListener(WorldEvent.PROGRESS_BAR_COMPLETE, onProgressBarComplete);
 				person.doNotClearFilters = false;
 				_worldView.removeChild(customizableBar);
-				doCollectibleDrop(person);				
+				doCollectibleDrop(person, "creature_nurture");				
 			});
 			customizableBar.x = customizableBar.x + (person.width - customizableBar.width)/2 - 35;
 			addFilterForHeartProgressBar(person, customizableBar);
@@ -231,6 +262,12 @@ package clickhandlers
 			_worldView.bitmapBlotter.bitmapReferences.removeItemAt(index);
 			_worldView.bitmapBlotter.clearBitmaps();
 			_worldView.bitmapBlotter.renderInitialBitmap();
+		}
+		
+		public function onCollectibleDropClicked(evt:UIEvent):void
+		{
+			var drop:CollectibleDrop = evt.currentTarget as CollectibleDrop;
+			_venue.doBonusClick(drop.precipitatingObject);
 		}
 		
 		private function clearBitmap():void

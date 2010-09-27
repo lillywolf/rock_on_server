@@ -11,6 +11,7 @@ package clickhandlers
 		public static const COLLECTIBLE_DROP:String = "UIEvent:CollectibleDrop";
 		public static const COLLECTIBLE_DROP_BY_MOOD:String = "UIEvent:CollectibleDropByMood";
 		public static const COLLECTIBLE_DROP_FROM_STAGE:String = "UIEvent:CollectibleDropFromStage";
+		public static const COLLECTIBLE_DROP_CLICKED:String = "UIEvent:CollectibleDropClicked";
 		public static const REPLACE_BOTTOMBAR:String = "UIEvent:ReplaceBottomBar";
 		
 		public var xCoord:Number;

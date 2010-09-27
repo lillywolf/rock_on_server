@@ -374,8 +374,10 @@ package rock_on
 				(_myWorld.pathFinder.occupiedByStructures[boothFront.x][boothFront.y][boothFront.z] as ActiveAsset).thinger.id != boothStructure.id) ||
 				!_myWorld.pathFinder.isInBounds(boothFront))
 			{
+				trace ("booth front is null");
 				return null;
 			}
+			trace ("booth front: " + boothFront.x.toString() + "," + boothFront.y.toString() + "," + boothFront.z.toString());
 			return boothFront;
 		}
 		

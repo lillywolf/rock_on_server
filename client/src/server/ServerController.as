@@ -3,10 +3,13 @@ package server
 	import com.adobe.serialization.json.JSON;
 	
 	import flash.events.EventDispatcher;
+	import flash.events.TimerEvent;
 	import flash.utils.Dictionary;
+	import flash.utils.Timer;
 	
 	import game.GameDataInterface;
 	
+	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.events.DynamicEvent;
 	import mx.rpc.AsyncToken;
@@ -25,6 +28,8 @@ package server
 		public var httpService:HTTPService;
 		public var httpServiceRequests:Dictionary;
 		public var modelToManagerMap:Dictionary;
+		protected var proxiedRequestChain:ArrayCollection;
+		protected static const PROXIED_REQUEST_TIME:int = 60000;
 		
 		public static var NETWORK_ERROR:String = 'network_error';
 		
@@ -149,6 +154,32 @@ package server
 			{
 				throw new Error("Your HTTPService URL was more than 2000 characters! This breaks in IE."); 
 			}			
-		}	
+		}
+		
+		public function addProxiedRequest(newRequest:Object):void
+		{
+			proxiedRequestChain.addItem(newRequest);
+		}
+		
+		public function sendProxiedRequests():void
+		{
+			for each (var obj:Object in proxiedRequestChain)
+			{
+				sendRequest(obj.params, obj.controller, obj.action);
+			}
+			proxiedRequestChain.removeAll();
+		}
+		
+		private function createProxiedRequestTimer():void
+		{
+			var proxiedRequestTimer:Timer = new Timer(PROXIED_REQUEST_TIME);
+			proxiedRequestTimer.addEventListener(TimerEvent.TIMER, onProxiedRequestTime);
+			proxiedRequestTimer.start();
+		}
+		
+		private function onProxiedRequestTime(evt:TimerEvent):void
+		{
+			sendProxiedRequests();
+		}
 	}
 }

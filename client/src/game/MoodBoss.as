@@ -67,10 +67,10 @@ package game
 		public static const SUPER:int = 1;
 		public static const MOVING:int = 2;
 		
-		public static const XP:String = "XP";
-		public static const COINS:String = "COINS";
-		public static const MUSIC_CREDITS:String = "MUSIC_CREDITS";
-		public static const FAN_CREDITS:String = "FAN_CREDITS";
+		public static const XP:String = "xp";
+		public static const COINS:String = "credits";
+		public static const MUSIC_CREDITS:String = "music_credits";
+		public static const FAN_CREDITS:String = "fan_hearts";
 		public static const RANDOM_ITEM:String = "RANDOM_ITEM";
 		
 		public static const HAMBURGER:String = "Hamburger";
@@ -167,7 +167,7 @@ package game
 				min_level: 1,
 				move_to: true,
 				animation: null,
-				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
+				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4, mc: HAMBURGER}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2, group: BASIC}]
 			},
 			WANTS_PINK_HEADPHONES: {
@@ -182,7 +182,7 @@ package game
 				min_level: 1,
 				move_to: true,
 				animation: null,
-				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
+				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4, mc: HAMBURGER}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.2, group: BASIC}]
 			},
 			WANTS_RED_HEADPHONES: {
@@ -197,7 +197,7 @@ package game
 				min_level: 1, 
 				move_to: true,
 				animation: null,
-				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
+				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 4, mc: HAMBURGER}, {type: FAN_CREDITS, total: 3, min_bonus: 1, max_bonus: 3, mc: FAN_CREDITS_ICON}, {type: COINS, total: 6, min_bonus: 1, max_bonus: 4, mc: CREDITS_ICON}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.3, group: BASIC}]
 			},
 			IS_HEARTBROKEN:	{
@@ -212,13 +212,13 @@ package game
 				min_level: 10,
 				move_to: false,
 				animation: null,
-				rewards: [{type: XP, total: 10, min_bonus: 4, max_bonus: 8}, {type: MUSIC_CREDITS, total: 4, min_bonus: 2, max_bonus: 6, mc: MUSIC_CREDITS_ICON}],
+				rewards: [{type: XP, total: 10, min_bonus: 4, max_bonus: 8, mc: HAMBURGER}, {type: MUSIC_CREDITS, total: 4, min_bonus: 2, max_bonus: 6, mc: MUSIC_CREDITS_ICON}],
 				possible_rewards: [{type: RANDOM_ITEM, probability: 0.5, group: BASIC}]
 			},
 			FEELS_HOT: {
 				creature_types:[GROUPIE, CONCERT_GOER, FAN],
 				person_types:[MOVING],
-				symbol_name: null,
+				symbol_name: HAMBURGER,
 				message: "It's too warm in here",
 				music_credits: 0,  
 				fan_credits: 0,  
@@ -227,7 +227,7 @@ package game
 				min_level: 3,
 				move_to: true,
 				animation: null,
-				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
+				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3, mc: HAMBURGER}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1}], 
 				possible_rewards: []
 			},
 			FEELS_COLD:	{
@@ -242,7 +242,7 @@ package game
 				min_level: 3,
 				move_to: true,
 				animation: null,
-				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1, mc: FAN_CREDITS_ICON}], 
+				rewards: [{type: XP, total: 2, min_bonus: 1, max_bonus: 3, mc: HAMBURGER}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 1, mc: FAN_CREDITS_ICON}], 
 				possible_rewards: []
 			},
 			WANTS_AUTOGRAPH: {
@@ -257,7 +257,7 @@ package game
 				min_level: 1,
 				move_to: true,
 				animation: null,
-				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 3}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 5, mc: FAN_CREDITS_ICON}], 
+				rewards: [{type: XP, total: 3, min_bonus: 1, max_bonus: 3, mc: HAMBURGER}, {type: FAN_CREDITS, total: 2, min_bonus: 1, max_bonus: 5, mc: FAN_CREDITS_ICON}], 
 				possible_rewards: []				
 			},
 			IS_SLEEPY: {
@@ -272,7 +272,7 @@ package game
 				min_level: 4,
 				move_to: true,
 				animation: null,
-				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 1, mc: MUSIC_CREDITS_ICON}], 
+				rewards: [{type: XP, total: 1, min_bonus: 1, max_bonus: 2, mc: HAMBURGER}, {type: MUSIC_CREDITS, total: 2, min_bonus: 1, max_bonus: 1, mc: MUSIC_CREDITS_ICON}], 
 				possible_rewards: []				
 			}
 		}
