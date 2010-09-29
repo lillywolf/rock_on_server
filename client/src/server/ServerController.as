@@ -23,6 +23,7 @@ package server
 		
 //		public static const BASE_URL:String = "http://vivid-samurai-39.heroku.com/";
 		public static const BASE_URL:String = "http://localhost:3000/";
+		public static const BASE_MP3_URL:String = "https://s3.amazonaws.com/lilly_lightweight_bucket1/";
 		
 		public var _gdi:GameDataInterface;
 		public var httpService:HTTPService;

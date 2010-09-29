@@ -1,6 +1,11 @@
 package controllers
 {
+	import com.facebook.data.stream.StreamFilterCollection;
+	
+	import flash.events.Event;
 	import flash.events.IEventDispatcher;
+	import flash.media.Sound;
+	import flash.net.URLRequest;
 	
 	import models.EssentialModelReference;
 	import models.OwnedSong;
@@ -9,8 +14,11 @@ package controllers
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	
+	import server.ServerController;
+	
 	public class SongController extends Controller
 	{
+		public var _serverController:ServerController;
 		public var _songs:ArrayCollection;
 		public var _owned_songs:ArrayCollection;
 		
@@ -61,6 +69,30 @@ package controllers
 				return true;
 			}
 			return false;
+		}
+		
+		public function getSong(s:Song):void
+		{
+//			_serverController.sendRequest({id: s.id}, "song", "get_song");
+			var folder:String = s.url.split("/")[0];
+			var songNamePieces:Array = (s.url.split("/")[1] as String).split(" ");
+			var songName:String = songNamePieces[0];
+			for (var i:int = 1; i < songNamePieces.length; i++)
+			{
+				var toAdd:String = "+" + songNamePieces[i];
+				songName = songName.concat(toAdd);
+			}
+			var url:String = ServerController.BASE_MP3_URL + folder + "/" + songName;
+			var req:URLRequest = new URLRequest(url);
+			var snd:Sound = new Sound();
+			snd.addEventListener(Event.COMPLETE, onSoundLoaded);
+			snd.load(req);
+		}
+		
+		private function onSoundLoaded(evt:Event):void
+		{
+			var localSound:Sound = evt.target as Sound;
+			localSound.play();
 		}
 		
 		private function checkIfAllSongsAdded():Boolean
@@ -135,6 +167,11 @@ package controllers
 //				essentialModelController.checkIfLoadingAndInstantiationComplete();
 //			}
 //		}
+		
+		public function set serverController(val:ServerController):void
+		{
+			_serverController = val;
+		}
 		
 		public function add(song:Song):void
 		{

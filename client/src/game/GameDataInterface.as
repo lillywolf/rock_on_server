@@ -106,6 +106,7 @@ package game
 			levelController.serverController = sc;
 			dwellingController.serverController = sc;
 			storeController.serverController = sc;
+			songController.serverController = sc;
 			
 			storeController.gdi = this;
 		}

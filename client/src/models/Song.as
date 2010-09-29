@@ -11,6 +11,8 @@ package models
 		public var _genre:String;
 		public var _artist_id:int;
 		public var _points:int;
+		public var _url:String;
+		public var _data:String;
 		
 		public function Song(params:Object=null, target:IEventDispatcher=null)
 		{
@@ -27,6 +29,7 @@ package models
 			_genre = params.genre;
 			_artist_id = params.artist_id;
 			_points = params.points;
+			_url = params.url;
 		}
 		
 		public function set title(val:String):void
@@ -91,6 +94,26 @@ package models
 		public function get id():int
 		{
 			return _id;
+		}
+		
+		public function set url(val:String):void
+		{
+			_url = val;
+		}
+		
+		public function get url():String
+		{
+			return _url;
+		}
+		
+		public function set data(val:String):void
+		{
+			_data = val;
+		}
+		
+		public function get data():String
+		{
+			return _data;
 		}
 	}
 }
