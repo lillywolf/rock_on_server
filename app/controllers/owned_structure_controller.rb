@@ -19,8 +19,29 @@ class OwnedStructureController < ApplicationController
     array = Array.new
     owned_structure = OwnedStructure.find(params[:id])
     owned_structure.save_new_placement(params[:x], params[:y], params[:z])
+    owned_structure.in_use = true
     owned_structure.save
     owned_structure.add_hash(array, "save_placement", true)
+    render :json => array.to_json
+  end  
+  
+  def save_placement_and_rotation
+    array = Array.new
+    owned_structure = OwnedStructure.find(params[:id])
+    owned_structure.save_new_placement(params[:x], params[:y], params[:z])
+    owned_structure.save_rotation(params[:rotation])
+    owned_structure.in_use = true
+    owned_structure.save
+    owned_structure.add_hash(array, "save_placement_and_rotation", true)
+    render :json => array.to_json
+  end  
+  
+  def take_out_of_use
+    array = Array.new
+    owned_structure = OwnedStructure.find(params[:id])
+    owned_structure.in_use = false
+    owned_structure.save
+    owned_structure.add_hash(array, "take_out_of_use", true)
     render :json => array.to_json
   end  
   
@@ -38,7 +59,7 @@ class OwnedStructureController < ApplicationController
     hash["instance"] = os
     hash["belongs_to"] = ["user", "structure"]
     hash["belongs_to_id"] = [os.user_id, os.structure_id]
-    hash["already_loaded"] = true
+    hash["key"] = params[:key]
     hash["created_from_client"] = true
     hash["method"] = "create_new"
     hash["model"] = "owned_structure"
@@ -100,6 +121,20 @@ class OwnedStructureController < ApplicationController
     end
     render :json => array.to_json    
   end 
+  
+  def booth_collection_bonus
+    array = Array.new
+    owned_structure = OwnedStructure.find(params[:id])
+    structure = Structure.find(owned_structure.structure_id)
+    booth_structure = BoothStructure.find_each(:conditions => ["structure_id = ?", structure.id]) do |booth_structure|
+      if owned_structure.inventory_count > booth_structure.inventory_capacity - 10
+        user = User.find(owned_structure.user_id)            
+        user.add_bonus(params[:amount].to_i, params[:amount_type])
+        user.add_hash(array, "booth_collection_bonus", true)          
+      end  
+    end
+    render :json => array.to_json
+  end  
   
   def add_station_credits
     array = Array.new

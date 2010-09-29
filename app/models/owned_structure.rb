@@ -58,7 +58,12 @@ class OwnedStructure < ActiveRecord::Base
     self.y = y.to_f
     self.z = z.to_f
     self.save
-  end    
+  end 
+  
+  def save_rotation(rotation)
+    self.rotation = rotation.to_i
+    self.save
+  end     
   
   def do_type_specific_updates
     structure = Structure.find(self.structure_id)

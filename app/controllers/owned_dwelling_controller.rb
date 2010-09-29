@@ -38,8 +38,8 @@ class OwnedDwellingController < ApplicationController
     owned_structure = OwnedStructure.find(params[:owned_structure_id])
 
     if owned_structure.validate_usage_complete(array)
-      owned_dwelling.update_boothcount(params[:to_add].to_i, array)
-      owned_dwelling.update_fancount(params[:to_add].to_i)
+      # owned_dwelling.update_boothcount(params[:to_add].to_i, array)
+      # owned_dwelling.update_fancount(params[:to_add].to_i)
       owned_dwelling.validate_state_change(nil, false)
     end  
     owned_dwelling.save

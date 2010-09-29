@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100707072543) do
+ActiveRecord::Schema.define(:version => 20100928212654) do
 
   create_table "backup", :force => true do |t|
     t.string   "storage"
@@ -48,8 +48,9 @@ ActiveRecord::Schema.define(:version => 20100707072543) do
     t.integer  "y"
     t.integer  "z"
     t.string   "name"
-    t.datetime "last_fed"
+    t.datetime "last_nurture"
     t.integer  "creature_group_id"
+    t.integer  "reference_id"
   end
 
   create_table "dwellings", :force => true do |t|
@@ -61,6 +62,10 @@ ActiveRecord::Schema.define(:version => 20100707072543) do
     t.string   "dwelling_type"
     t.integer  "capacity"
     t.integer  "unlocks_at"
+    t.string   "floor_type"
+    t.integer  "floor_structure_id"
+    t.integer  "dimension"
+    t.integer  "sidewalk_dimension"
   end
 
   create_table "layerables", :force => true do |t|
@@ -131,6 +136,7 @@ ActiveRecord::Schema.define(:version => 20100707072543) do
     t.integer  "owned_dwelling_id"
     t.integer  "inventory_count"
     t.datetime "inventory_updated_at"
+    t.integer  "rotation"
   end
 
   create_table "owned_thingers", :force => true do |t|
@@ -168,7 +174,8 @@ ActiveRecord::Schema.define(:version => 20100707072543) do
     t.string   "title"
     t.string   "genre"
     t.integer  "points"
-    t.integer  "user_id"
+    t.integer  "artist_id"
+    t.string   "url"
   end
 
   create_table "store_owned_thingers", :force => true do |t|

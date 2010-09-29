@@ -17,6 +17,7 @@ class UserController < ApplicationController
     array = Array.new    
     hash = Hash.new    
     user = User.first(:conditions => ["snid = ?", params[:snid]]) 
+    user.update_level        
     level_reference = user.level_id   
     hash["instance"] = user
     hash["has_many"] = ["owned_structure", "owned_layerable", "creature_group", "creature", "owned_dwelling", "owned_song", "owned_usable"]
@@ -44,6 +45,20 @@ class UserController < ApplicationController
     user = User.find(params[:id])
     
     user.add_credits((params[:to_add]).to_i)
+    
+    hash["instance"] = user
+    hash["already_loaded"] = true
+    hash["model"] = "user"
+    array.push hash
+    render :json => array.to_json
+  end  
+  
+  def decrement_credits
+    array = Array.new
+    hash = Hash.new
+    user = User.find(params[:id])
+    
+    user.decrement_credits((params[:to_remove]).to_i)
     
     hash["instance"] = user
     hash["already_loaded"] = true
